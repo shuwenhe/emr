@@ -1,0 +1,17 @@
+{
+  "device_model": "IR-Thermal-320",
+  "resolution": [
+    320,
+    240
+  ],
+  "frame_rate_hz": 9,
+  "emissivity": 0.98,
+  "ambient_temperature_c": 24.5,
+  "distance_m": 1.2,
+  "capture_time": "2026-01-06T14:22:30",
+  "subject": {
+    "gender": "female",
+    "age": 28,
+    "body_part": "face"
+  }
+}

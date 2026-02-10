@@ -35,3 +35,11 @@ class IngestMetadata(BaseModel):
     environment: Optional[EnvironmentParams] = None
     patient: Optional[PatientInfo] = None
     tags: Optional[list[str]] = None
+
+
+class AnalyzeRequest(BaseModel):
+    record_id: str
+
+
+class DispatchRequest(BaseModel):
+    record_id: str

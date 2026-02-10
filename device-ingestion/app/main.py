@@ -4,7 +4,9 @@ from pathlib import Path
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 
 from .config import ALLOWED_EXTENSIONS, MAX_FILE_MB
-from .models import IngestMetadata
+from .analysis import analyze_record
+from .dispatch import dispatch_record
+from .models import AnalyzeRequest, DispatchRequest, IngestMetadata
 from .qc import run_qc
 from .storage import save_payload
 
@@ -29,7 +31,7 @@ async def ingest(file: UploadFile = File(...), metadata: str = Form(...)):
 
     try:
         metadata_json = json.loads(metadata)
-        parsed = IngestMetadata.parse_obj(metadata_json)
+        parsed = IngestMetadata.model_validate(metadata_json)
     except Exception as exc:
         raise HTTPException(status_code=400, detail="invalid_metadata") from exc
 
@@ -37,9 +39,27 @@ async def ingest(file: UploadFile = File(...), metadata: str = Form(...)):
     _validate_size(file_bytes)
 
     qc_issues = run_qc(parsed)
-    result = save_payload(file.filename, file_bytes, parsed.dict())
+    result = save_payload(file.filename, file_bytes, parsed.model_dump())
 
     return {
         **result,
         "qc_issues": qc_issues,
     }
+
+
+@app.post("/analyze")
+def analyze(request: AnalyzeRequest):
+    try:
+        return analyze_record(request.record_id)
+    except FileNotFoundError as exc:
+        detail = exc.args[0] if exc.args else "record_not_found"
+        raise HTTPException(status_code=404, detail=detail) from exc
+
+
+@app.post("/dispatch")
+def dispatch(request: DispatchRequest):
+    try:
+        return dispatch_record(request.record_id)
+    except FileNotFoundError as exc:
+        detail = exc.args[0] if exc.args else "dispatch_not_found"
+        raise HTTPException(status_code=404, detail=detail) from exc

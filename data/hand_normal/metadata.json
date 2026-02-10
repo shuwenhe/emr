@@ -1,0 +1,17 @@
+{
+  "device_model": "IR-Thermal-320",
+  "resolution": [
+    320,
+    240
+  ],
+  "frame_rate_hz": 9,
+  "emissivity": 0.98,
+  "ambient_temperature_c": 23.0,
+  "distance_m": 0.8,
+  "capture_time": "2026-01-07T10:15:20",
+  "subject": {
+    "gender": "male",
+    "age": 35,
+    "body_part": "hand"
+  }
+}

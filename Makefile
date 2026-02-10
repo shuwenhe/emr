@@ -1,9 +1,9 @@
 SERVICE_DIR := device-ingestion
-PYTHON ?= python3
+PYTHON ?= python3.12
 VENV_DIR := .venv
 VENV_PY := $(VENV_DIR)/bin/python
 
-.PHONY: help venv install run clean
+.PHONY: help venv install run report clean
 
 help:
 	@echo "Available targets:"
@@ -11,6 +11,7 @@ help:
 	@echo "  make venv     # create local virtual environment"
 	@echo "  make install  # install dependencies for device-ingestion"
 	@echo "  make run      # run device-ingestion service"
+	@echo "  make report   # generate docx reports"
 	@echo "  make clean    # remove generated files"
 
 venv:
@@ -22,6 +23,10 @@ install: venv
 
 run: venv
 	$(VENV_PY) -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --app-dir $(SERVICE_DIR)
+
+report: venv
+	$(VENV_PY) -m pip install -q python-docx
+	$(VENV_PY) scripts/generate_reports.py --name "张三" --datasets normal_face fever_face hand_normal low_temp
 
 clean:
 	@rm -rf $(VENV_DIR)
