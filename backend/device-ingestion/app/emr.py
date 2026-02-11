@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional
 
 from .data_platform import get_emr_by_record_id, save_emr
 from .config import DATA_DIR, EMR_DIR
+from .report_docx import generate_docx_report
 
 
 class EmrNotFoundError(FileNotFoundError):
@@ -82,6 +83,9 @@ def generate_emr(record_id: str) -> Dict[str, Any]:
         json.dump(emr, handle, ensure_ascii=False, indent=2)
 
     save_emr(emr)
+
+    if report:
+        generate_docx_report(report, emr)
 
     return emr
 

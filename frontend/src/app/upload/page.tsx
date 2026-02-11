@@ -31,6 +31,12 @@ export default function UploadPage() {
     if (bodyPartParam) setBodyPart(bodyPartParam);
   }, [searchParams]);
 
+  useEffect(() => {
+    if (result?.record_id) {
+      router.push(`/emr?record_id=${result.record_id}`);
+    }
+  }, [result, router]);
+
   async function handleUpload() {
     if (!file || !deviceId || !captureTime) {
       setResult({ error: "请填写必填字段并选择文件" });
@@ -81,12 +87,6 @@ export default function UploadPage() {
       setResult({ error: `上传失败: ${String(error)}` });
     } finally {
       setUploading(false);
-    }
-  }
-
-  function handleGenerateEmr() {
-    if (result?.record_id) {
-      router.push(`/emr?record_id=${result.record_id}`);
     }
   }
 
@@ -218,12 +218,7 @@ export default function UploadPage() {
                   <p className="mt-1 font-mono text-xs text-green-700">
                     Record ID: {result.record_id}
                   </p>
-                  <button
-                    className="mt-3 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
-                    onClick={handleGenerateEmr}
-                  >
-                    生成病历
-                  </button>
+                  <p className="mt-2 text-xs text-green-700">正在跳转到诊断分析...</p>
                 </div>
               )}
             </div>

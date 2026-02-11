@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import mammoth from "mammoth";
 
 type EmrResponse = Record<string, unknown> | Array<Record<string, unknown>>;
@@ -16,6 +17,7 @@ type ReportFile = {
 const API_BASE = "http://localhost:8000";
 
 export default function EmrPage() {
+  const searchParams = useSearchParams();
   const [recordId, setRecordId] = useState("");
   const [emrId, setEmrId] = useState("");
   const [patientId, setPatientId] = useState("");
@@ -32,19 +34,26 @@ export default function EmrPage() {
 
   const outputText = useMemo(() => JSON.stringify(output, null, 2), [output]);
 
-  useEffect(() => {
-    async function fetchReports() {
-      try {
-        const response = await fetch(`${API_BASE}/reports`);
-        const data = (await response.json()) as ReportFile[];
-        setReportFiles(Array.isArray(data) ? data : []);
-      } catch {
-        setReportFiles([]);
-      }
+  const fetchReports = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_BASE}/reports`);
+      const data = (await response.json()) as ReportFile[];
+      setReportFiles(Array.isArray(data) ? data : []);
+    } catch {
+      setReportFiles([]);
     }
-
-    fetchReports();
   }, []);
+
+  useEffect(() => {
+    fetchReports();
+  }, [fetchReports]);
+
+  useEffect(() => {
+    const recordIdParam = searchParams.get("record_id") || "";
+    if (recordIdParam) {
+      setRecordId(recordIdParam);
+    }
+  }, [searchParams]);
 
   function extractReport(data: EmrResponse): ReportPayload {
     if (Array.isArray(data)) {
@@ -100,6 +109,7 @@ export default function EmrPage() {
     setOutput(data as EmrResponse);
     syncEmrFields(data as EmrResponse);
     setReport(extractReport(data as EmrResponse));
+    fetchReports();
   }
 
   async function handleFetch() {
@@ -271,6 +281,41 @@ export default function EmrPage() {
     }
   }
 
+  async function handlePrintDocx(url: string) {
+    try {
+      const response = await fetch(`${API_BASE}${url}`);
+      const arrayBuffer = await response.arrayBuffer();
+      const result = await mammoth.convertToHtml({ arrayBuffer });
+      const printWindow = window.open("", "_blank", "width=900,height=1000");
+      if (!printWindow) {
+        setOutput({ error: "无法打开打印窗口" });
+        return;
+      }
+      printWindow.document.open();
+      printWindow.document.write(`
+        <!doctype html>
+        <html lang="zh-CN">
+        <head>
+          <meta charset="utf-8" />
+          <title>打印报告</title>
+          <style>
+            body { font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif; margin: 24px; }
+            .prose { max-width: 100%; }
+          </style>
+        </head>
+        <body>
+          <div class="prose">${result.value}</div>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+    } catch (error) {
+      setOutput({ error: `打印失败: ${String(error)}` });
+    }
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <main className="flex min-h-screen w-full flex-col gap-8 px-10 py-12">
@@ -283,7 +328,7 @@ export default function EmrPage() {
 
         <section className="grid gap-6 lg:grid-cols-3">
           <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-            <h2 className="text-lg font-semibold text-slate-900">生成病历</h2>
+            <h2 className="text-lg font-semibold text-slate-900">生成诊断报告</h2>
             <label className="mt-4 block text-sm font-medium text-slate-700">
               记录 ID (record_id)
             </label>
@@ -297,10 +342,10 @@ export default function EmrPage() {
               className="mt-4 w-full rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
               onClick={handleGenerate}
             >
-              生成电子病历
+              生成诊断报告
             </button>
             <p className="mt-3 text-xs text-slate-500">
-              将基于报告与方案自动生成 EMR
+              将基于采集数据自动生成诊断报告
             </p>
           </div>
 
@@ -493,6 +538,12 @@ export default function EmrPage() {
                           >
                             下载
                           </a>
+                          <button
+                            className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                            onClick={() => handlePrintDocx(file.url)}
+                          >
+                            打印
+                          </button>
                         </div>
                       </td>
                     </tr>
