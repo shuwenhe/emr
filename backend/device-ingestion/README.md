@@ -25,6 +25,10 @@
 - GET /emr/{emr_id}
 - GET /emr?patient_id=<patient_id>
 
+- GET /platform/summary
+- GET /platform/records?patient_id=<patient_id>&limit=50
+- GET /platform/emrs?patient_id=<patient_id>&limit=50
+
 ## 设备直连（本地落盘模拟）
 - 设备将一次采集写入 device-drop/子目录
 - 子目录至少包含：metadata.json 与一个数据文件（.csv/.bin/.dat/.npy/.zip）

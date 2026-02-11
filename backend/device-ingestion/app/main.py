@@ -13,6 +13,7 @@ from .device_connector import (
     move_capture_dir,
     poll_device_drop,
 )
+from .data_platform import init_db, list_emrs as list_platform_emrs, list_records, summary
 from .dispatch import dispatch_record
 from .emr import EmrNotFoundError, generate_emr, get_emr, list_emrs
 from .models import (
@@ -131,9 +132,25 @@ def list_emr_endpoint(patient_id: str | None = None):
     return list_emrs(patient_id=patient_id)
 
 
+@app.get("/platform/summary")
+def platform_summary():
+    return summary()
+
+
+@app.get("/platform/records")
+def platform_records(patient_id: str | None = None, limit: int = 50):
+    return list_records(patient_id=patient_id, limit=limit)
+
+
+@app.get("/platform/emrs")
+def platform_emrs(patient_id: str | None = None, limit: int = 50):
+    return list_platform_emrs(patient_id=patient_id, limit=limit)
+
+
 @app.on_event("startup")
 async def start_device_polling():
     global _device_stop_event
+    init_db()
     _device_stop_event = asyncio.Event()
     asyncio.create_task(poll_device_drop(_device_stop_event))
 

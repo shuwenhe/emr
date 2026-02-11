@@ -1,9 +1,10 @@
 import json
 import uuid
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List
 
 from .config import DATA_DIR
+from .data_platform import save_record
 
 
 def _record_dir(record_id: str) -> Path:
@@ -12,7 +13,12 @@ def _record_dir(record_id: str) -> Path:
     return record_path
 
 
-def save_payload(file_name: str, file_bytes: bytes, metadata: Dict) -> Dict:
+def save_payload(
+    file_name: str,
+    file_bytes: bytes,
+    metadata: Dict,
+    image_paths: List[str] | None = None,
+) -> Dict:
     record_id = str(uuid.uuid4())
     record_path = _record_dir(record_id)
 
@@ -23,6 +29,8 @@ def save_payload(file_name: str, file_bytes: bytes, metadata: Dict) -> Dict:
     meta_path = record_path / "metadata.json"
     with open(meta_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f, ensure_ascii=False, indent=2)
+
+    save_record(record_id, metadata, str(data_path), image_paths)
 
     return {
         "record_id": record_id,

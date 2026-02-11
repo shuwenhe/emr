@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .analysis import analyze_record
+from .data_platform import save_emr
 from .config import DATA_DIR, EMR_DIR
 
 
@@ -77,6 +78,8 @@ def generate_emr(record_id: str) -> Dict[str, Any]:
 
     with open(_emr_path(emr_id), "w", encoding="utf-8") as handle:
         json.dump(emr, handle, ensure_ascii=False, indent=2)
+
+    save_emr(emr)
 
     return emr
 

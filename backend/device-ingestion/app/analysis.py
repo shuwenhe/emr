@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .config import DATA_DIR
+from .data_platform import save_plan, save_report
 
 
 def _parse_iso_datetime(value: str) -> datetime:
@@ -221,6 +222,9 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
     ):
         with open(record_dir / name, "w", encoding="utf-8") as handle:
             json.dump(payload, handle, indent=2, ensure_ascii=False)
+
+    save_report(record_id, report)
+    save_plan(record_id, plan)
 
     return {
         "report": report,

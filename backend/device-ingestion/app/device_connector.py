@@ -13,6 +13,7 @@ from .config import (
 )
 from .models import IngestMetadata
 from .qc import run_qc
+from .data_platform import update_record_images
 from .storage import save_payload
 
 
@@ -85,6 +86,9 @@ def ingest_capture_dir(capture_dir: Path) -> Dict:
         target = record_dir / image_file.name
         shutil.copy2(image_file, target)
         image_paths.append(str(target))
+
+    if image_paths:
+        update_record_images(result["record_id"], image_paths)
 
     return {
         **result,
