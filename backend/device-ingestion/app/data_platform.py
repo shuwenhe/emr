@@ -1,67 +1,95 @@
 import json
-import sqlite3
 from datetime import datetime
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from .config import PLATFORM_DB_PATH
+import pymysql
+
+from .config import MYSQL_DB, MYSQL_HOST, MYSQL_PASSWORD, MYSQL_PORT, MYSQL_USER
 
 
-def _connect() -> sqlite3.Connection:
-    conn = sqlite3.connect(PLATFORM_DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+def _connect() -> pymysql.connections.Connection:
+    return pymysql.connect(
+        host=MYSQL_HOST,
+        port=MYSQL_PORT,
+        user=MYSQL_USER,
+        password=MYSQL_PASSWORD,
+        database=MYSQL_DB,
+        cursorclass=pymysql.cursors.DictCursor,
+        autocommit=True,
+    )
 
 
 def init_db() -> None:
-    PLATFORM_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     with _connect() as conn:
-        conn.executescript(
-            """
-            CREATE TABLE IF NOT EXISTS patients (
-                patient_id TEXT PRIMARY KEY,
-                name TEXT,
-                gender TEXT,
-                age INTEGER,
-                payload_json TEXT,
-                updated_at TEXT
-            );
-
-            CREATE TABLE IF NOT EXISTS records (
-                record_id TEXT PRIMARY KEY,
-                patient_id TEXT,
-                created_at TEXT,
-                data_path TEXT,
-                metadata_json TEXT,
-                image_paths_json TEXT,
-                FOREIGN KEY (patient_id) REFERENCES patients(patient_id)
-            );
-
-            CREATE TABLE IF NOT EXISTS reports (
-                record_id TEXT PRIMARY KEY,
-                report_json TEXT,
-                created_at TEXT
-            );
-
-            CREATE TABLE IF NOT EXISTS plans (
-                record_id TEXT PRIMARY KEY,
-                plan_json TEXT,
-                created_at TEXT
-            );
-
-            CREATE TABLE IF NOT EXISTS emrs (
-                emr_id TEXT PRIMARY KEY,
-                record_id TEXT,
-                patient_id TEXT,
-                created_at TEXT,
-                emr_json TEXT
-            );
-            """
-        )
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS patients (
+                    patient_id VARCHAR(64) PRIMARY KEY,
+                    name VARCHAR(128),
+                    gender VARCHAR(32),
+                    age INT,
+                    payload_json JSON,
+                    updated_at DATETIME
+                )
+                """
+            )
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS records (
+                    record_id VARCHAR(64) PRIMARY KEY,
+                    patient_id VARCHAR(64),
+                    created_at DATETIME,
+                    data_path TEXT,
+                    metadata_json JSON,
+                    image_paths_json JSON,
+                    INDEX idx_records_patient (patient_id),
+                    CONSTRAINT fk_records_patient
+                        FOREIGN KEY (patient_id)
+                        REFERENCES patients(patient_id)
+                        ON DELETE SET NULL
+                )
+                """
+            )
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS reports (
+                    record_id VARCHAR(64) PRIMARY KEY,
+                    report_json JSON,
+                    created_at DATETIME
+                )
+                """
+            )
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS plans (
+                    record_id VARCHAR(64) PRIMARY KEY,
+                    plan_json JSON,
+                    created_at DATETIME
+                )
+                """
+            )
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS emrs (
+                    emr_id VARCHAR(64) PRIMARY KEY,
+                    record_id VARCHAR(64),
+                    patient_id VARCHAR(64),
+                    created_at DATETIME,
+                    archived TINYINT DEFAULT 0,
+                    emr_json JSON,
+                    INDEX idx_emrs_patient (patient_id)
+                )
+                """
+            )
+            try:
+                cursor.execute("ALTER TABLE emrs ADD COLUMN archived TINYINT DEFAULT 0")
+            except Exception:
+                pass
 
 
 def _now() -> str:
-    return datetime.now().isoformat(timespec="seconds")
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 def upsert_patient(patient: Dict[str, Any]) -> Optional[str]:
@@ -69,16 +97,17 @@ def upsert_patient(patient: Dict[str, Any]) -> Optional[str]:
     if not patient_id:
         return None
     with _connect() as conn:
-        conn.execute(
+        with conn.cursor() as cursor:
+            cursor.execute(
             """
             INSERT INTO patients (patient_id, name, gender, age, payload_json, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-            ON CONFLICT(patient_id) DO UPDATE SET
-                name=excluded.name,
-                gender=excluded.gender,
-                age=excluded.age,
-                payload_json=excluded.payload_json,
-                updated_at=excluded.updated_at
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                name=VALUES(name),
+                gender=VALUES(gender),
+                age=VALUES(age),
+                payload_json=VALUES(payload_json),
+                updated_at=VALUES(updated_at)
             """,
             (
                 patient_id,
@@ -88,7 +117,7 @@ def upsert_patient(patient: Dict[str, Any]) -> Optional[str]:
                 json.dumps(patient, ensure_ascii=False),
                 _now(),
             ),
-        )
+            )
     return patient_id
 
 
@@ -103,16 +132,17 @@ def save_record(
     created_at = (metadata.get("capture") or {}).get("capture_time") or _now()
 
     with _connect() as conn:
-        conn.execute(
+        with conn.cursor() as cursor:
+            cursor.execute(
             """
             INSERT INTO records (record_id, patient_id, created_at, data_path, metadata_json, image_paths_json)
-            VALUES (?, ?, ?, ?, ?, ?)
-            ON CONFLICT(record_id) DO UPDATE SET
-                patient_id=excluded.patient_id,
-                created_at=excluded.created_at,
-                data_path=excluded.data_path,
-                metadata_json=excluded.metadata_json,
-                image_paths_json=excluded.image_paths_json
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                patient_id=VALUES(patient_id),
+                created_at=VALUES(created_at),
+                data_path=VALUES(data_path),
+                metadata_json=VALUES(metadata_json),
+                image_paths_json=VALUES(image_paths_json)
             """,
             (
                 record_id,
@@ -122,115 +152,194 @@ def save_record(
                 json.dumps(metadata, ensure_ascii=False),
                 json.dumps(image_paths or [], ensure_ascii=False),
             ),
-        )
+            )
 
 
 def update_record_images(record_id: str, image_paths: List[str]) -> None:
     with _connect() as conn:
-        conn.execute(
+        with conn.cursor() as cursor:
+            cursor.execute(
             """
-            UPDATE records SET image_paths_json = ? WHERE record_id = ?
+            UPDATE records SET image_paths_json = %s WHERE record_id = %s
             """,
             (json.dumps(image_paths, ensure_ascii=False), record_id),
-        )
+            )
 
 
 def save_report(record_id: str, report: Dict[str, Any]) -> None:
     with _connect() as conn:
-        conn.execute(
+        with conn.cursor() as cursor:
+            cursor.execute(
             """
             INSERT INTO reports (record_id, report_json, created_at)
-            VALUES (?, ?, ?)
-            ON CONFLICT(record_id) DO UPDATE SET
-                report_json=excluded.report_json,
-                created_at=excluded.created_at
+            VALUES (%s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                report_json=VALUES(report_json),
+                created_at=VALUES(created_at)
             """,
             (record_id, json.dumps(report, ensure_ascii=False), _now()),
-        )
+            )
 
 
 def save_plan(record_id: str, plan: Dict[str, Any]) -> None:
     with _connect() as conn:
-        conn.execute(
+        with conn.cursor() as cursor:
+            cursor.execute(
             """
             INSERT INTO plans (record_id, plan_json, created_at)
-            VALUES (?, ?, ?)
-            ON CONFLICT(record_id) DO UPDATE SET
-                plan_json=excluded.plan_json,
-                created_at=excluded.created_at
+            VALUES (%s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                plan_json=VALUES(plan_json),
+                created_at=VALUES(created_at)
             """,
             (record_id, json.dumps(plan, ensure_ascii=False), _now()),
-        )
+            )
 
 
 def save_emr(emr: Dict[str, Any]) -> None:
     patient = emr.get("patient") or {}
     patient_id = upsert_patient(patient) if patient else None
 
+    archived = 1 if emr.get("archived") else 0
+
     with _connect() as conn:
-        conn.execute(
+        with conn.cursor() as cursor:
+            cursor.execute(
             """
-            INSERT INTO emrs (emr_id, record_id, patient_id, created_at, emr_json)
-            VALUES (?, ?, ?, ?, ?)
-            ON CONFLICT(emr_id) DO UPDATE SET
-                record_id=excluded.record_id,
-                patient_id=excluded.patient_id,
-                created_at=excluded.created_at,
-                emr_json=excluded.emr_json
+            INSERT INTO emrs (emr_id, record_id, patient_id, created_at, archived, emr_json)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                record_id=VALUES(record_id),
+                patient_id=VALUES(patient_id),
+                created_at=VALUES(created_at),
+                archived=VALUES(archived),
+                emr_json=VALUES(emr_json)
             """,
             (
                 emr.get("emr_id"),
                 emr.get("record_id"),
                 patient_id,
                 emr.get("created_at") or _now(),
+                archived,
                 json.dumps(emr, ensure_ascii=False),
             ),
-        )
+            )
 
 
 def list_records(patient_id: Optional[str] = None, limit: int = 50) -> List[Dict[str, Any]]:
     query = "SELECT * FROM records"
     params: List[Any] = []
     if patient_id:
-        query += " WHERE patient_id = ?"
+        query += " WHERE patient_id = %s"
         params.append(patient_id)
-    query += " ORDER BY created_at DESC LIMIT ?"
+    query += " ORDER BY created_at DESC LIMIT %s"
     params.append(limit)
 
     with _connect() as conn:
-        rows = conn.execute(query, params).fetchall()
+        with conn.cursor() as cursor:
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
     return [dict(row) for row in rows]
 
 
-def list_emrs(patient_id: Optional[str] = None, limit: int = 50) -> List[Dict[str, Any]]:
+def list_emrs(
+    patient_id: Optional[str] = None,
+    limit: int = 50,
+    include_archived: bool = False,
+) -> List[Dict[str, Any]]:
     query = "SELECT * FROM emrs"
     params: List[Any] = []
+    where = []
     if patient_id:
-        query += " WHERE patient_id = ?"
+        where.append("patient_id = %s")
         params.append(patient_id)
-    query += " ORDER BY created_at DESC LIMIT ?"
+    if not include_archived:
+        where.append("archived = 0")
+    if where:
+        query += " WHERE " + " AND ".join(where)
+    query += " ORDER BY created_at DESC LIMIT %s"
     params.append(limit)
     with _connect() as conn:
-        rows = conn.execute(query, params).fetchall()
+        with conn.cursor() as cursor:
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
     return [dict(row) for row in rows]
+
+
+def get_emr_by_record_id(record_id: str) -> Optional[Dict[str, Any]]:
+    with _connect() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT emr_json FROM emrs WHERE record_id = %s", (record_id,)
+            )
+            row = cursor.fetchone()
+    if not row:
+        return None
+    return json.loads(row["emr_json"])
 
 
 def get_report(record_id: str) -> Optional[Dict[str, Any]]:
     with _connect() as conn:
-        row = conn.execute(
-            "SELECT report_json FROM reports WHERE record_id = ?", (record_id,)
-        ).fetchone()
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT report_json FROM reports WHERE record_id = %s", (record_id,)
+            )
+            row = cursor.fetchone()
     if not row:
         return None
     return json.loads(row["report_json"])
 
 
+def get_patient_history(
+    patient_id: str,
+    exclude_record_id: Optional[str] = None,
+    limit: int = 10,
+) -> List[Dict[str, Any]]:
+    query = (
+        "SELECT r.record_id, r.created_at, r.data_path, r.image_paths_json, rep.report_json "
+        "FROM records r "
+        "LEFT JOIN reports rep ON rep.record_id = r.record_id "
+        "WHERE r.patient_id = %s "
+    )
+    params: List[Any] = [patient_id]
+    if exclude_record_id:
+        query += "AND r.record_id <> %s "
+        params.append(exclude_record_id)
+    query += "ORDER BY r.created_at DESC LIMIT %s"
+    params.append(limit)
+
+    with _connect() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
+
+    history: List[Dict[str, Any]] = []
+    for row in rows:
+        report_json = row.get("report_json")
+        history.append(
+            {
+                "record_id": row.get("record_id"),
+                "created_at": row.get("created_at"),
+                "data_path": row.get("data_path"),
+                "image_paths": json.loads(row.get("image_paths_json") or "[]"),
+                "report": json.loads(report_json) if report_json else None,
+            }
+        )
+
+    return history
+
+
 def summary() -> Dict[str, Any]:
     with _connect() as conn:
-        patients = conn.execute("SELECT COUNT(*) AS cnt FROM patients").fetchone()[0]
-        records = conn.execute("SELECT COUNT(*) AS cnt FROM records").fetchone()[0]
-        reports = conn.execute("SELECT COUNT(*) AS cnt FROM reports").fetchone()[0]
-        emrs = conn.execute("SELECT COUNT(*) AS cnt FROM emrs").fetchone()[0]
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) AS cnt FROM patients")
+            patients = cursor.fetchone()["cnt"]
+            cursor.execute("SELECT COUNT(*) AS cnt FROM records")
+            records = cursor.fetchone()["cnt"]
+            cursor.execute("SELECT COUNT(*) AS cnt FROM reports")
+            reports = cursor.fetchone()["cnt"]
+            cursor.execute("SELECT COUNT(*) AS cnt FROM emrs")
+            emrs = cursor.fetchone()["cnt"]
     return {
         "patients": patients,
         "records": records,

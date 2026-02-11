@@ -70,3 +70,20 @@ class DeviceIngestRequest(BaseModel):
 
 class EmrGenerateRequest(BaseModel):
     record_id: str = Field(..., description="采集记录 ID")
+
+
+class HistoryImportRequest(BaseModel):
+    root_path: str = Field(..., description="历史数据根目录（子目录包含 metadata.json 与数据文件）")
+    analyze: bool = Field(True, description="是否自动生成报告与病历")
+
+
+class EmrUpdateRequest(BaseModel):
+    diagnosis: Optional[str] = Field(None, description="初步诊断")
+    doctor_opinion: Optional[str] = Field(None, description="医生诊断意见")
+    clinical: Optional[dict] = Field(None, description="病史信息")
+    treatment_plan: Optional[dict] = Field(None, description="治疗方案")
+    report: Optional[dict] = Field(None, description="诊断报告")
+
+
+class EmrArchiveRequest(BaseModel):
+    archived: bool = Field(True, description="是否归档")

@@ -10,17 +10,21 @@ from .analysis import analyze_record
 from .device_connector import (
     ingest_capture_dir,
     ingest_pending_captures,
+    import_history_dir,
     move_capture_dir,
     poll_device_drop,
 )
 from .data_platform import init_db, list_emrs as list_platform_emrs, list_records, summary
 from .dispatch import dispatch_record
-from .emr import EmrNotFoundError, generate_emr, get_emr, list_emrs
+from .emr import EmrNotFoundError, archive_emr, generate_emr, get_emr, list_emrs, update_emr
 from .models import (
     AnalyzeRequest,
     DeviceIngestRequest,
     DispatchRequest,
     EmrGenerateRequest,
+    EmrUpdateRequest,
+    EmrArchiveRequest,
+    HistoryImportRequest,
     IngestMetadata,
 )
 from .qc import run_qc
@@ -128,8 +132,40 @@ def get_emr_endpoint(emr_id: str):
 
 
 @app.get("/emr")
-def list_emr_endpoint(patient_id: str | None = None):
-    return list_emrs(patient_id=patient_id)
+def list_emr_endpoint(patient_id: str | None = None, include_archived: bool = False):
+    return list_emrs(patient_id=patient_id, include_archived=include_archived)
+
+
+@app.put("/emr/{emr_id}")
+def update_emr_endpoint(emr_id: str, request: EmrUpdateRequest):
+    try:
+        return update_emr(emr_id, request.model_dump(exclude_none=True))
+    except EmrNotFoundError as exc:
+        detail = exc.args[0] if exc.args else "emr_not_found"
+        raise HTTPException(status_code=404, detail=detail) from exc
+
+
+@app.post("/emr/{emr_id}/archive")
+def archive_emr_endpoint(emr_id: str, request: EmrArchiveRequest):
+    try:
+        return archive_emr(emr_id, request.archived)
+    except EmrNotFoundError as exc:
+        detail = exc.args[0] if exc.args else "emr_not_found"
+        raise HTTPException(status_code=404, detail=detail) from exc
+
+
+@app.post("/import/history")
+def import_history(request: HistoryImportRequest):
+    root_dir = Path(request.root_path)
+    result = import_history_dir(root_dir)
+    if request.analyze:
+        analyzed = []
+        for item in result["ingested"]:
+            record_id = item.get("record_id")
+            if record_id:
+                analyzed.append(analyze_record(record_id))
+        result["analyzed"] = analyzed
+    return result
 
 
 @app.get("/platform/summary")
@@ -143,8 +179,8 @@ def platform_records(patient_id: str | None = None, limit: int = 50):
 
 
 @app.get("/platform/emrs")
-def platform_emrs(patient_id: str | None = None, limit: int = 50):
-    return list_platform_emrs(patient_id=patient_id, limit=limit)
+def platform_emrs(patient_id: str | None = None, limit: int = 50, include_archived: bool = False):
+    return list_platform_emrs(patient_id=patient_id, limit=limit, include_archived=include_archived)
 
 
 @app.on_event("startup")

@@ -134,6 +134,30 @@ def ingest_pending_captures(move_to_processed: bool = True) -> Dict:
     }
 
 
+def import_history_dir(root_dir: Path) -> Dict:
+    if not root_dir.exists() or not root_dir.is_dir():
+        raise DeviceCaptureError("history_root_not_found")
+
+    ingested = []
+    skipped: List[str] = []
+
+    for item in root_dir.iterdir():
+        if not item.is_dir():
+            continue
+        if (item / "metadata.json").exists() and _find_data_file(item):
+            try:
+                ingested.append(ingest_capture_dir(item))
+            except DeviceCaptureError:
+                skipped.append(str(item))
+        else:
+            skipped.append(str(item))
+
+    return {
+        "ingested": ingested,
+        "skipped": skipped,
+    }
+
+
 async def poll_device_drop(stop_event: asyncio.Event) -> None:
     while not stop_event.is_set():
         ingest_pending_captures()

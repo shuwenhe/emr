@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { jsPDF } from "jspdf";
 
 type EmrResponse = Record<string, unknown> | Array<Record<string, unknown>>;
 
@@ -10,15 +11,41 @@ export default function EmrPage() {
   const [recordId, setRecordId] = useState("");
   const [emrId, setEmrId] = useState("");
   const [patientId, setPatientId] = useState("");
+  const [diagnosis, setDiagnosis] = useState("");
+  const [doctorOpinion, setDoctorOpinion] = useState("");
+  const [archived, setArchived] = useState(false);
   const [output, setOutput] = useState<EmrResponse | { error: string }>({
     error: "请先执行操作",
   });
 
   const outputText = useMemo(() => JSON.stringify(output, null, 2), [output]);
 
+  function syncEmrFields(data: EmrResponse) {
+    if (Array.isArray(data)) {
+      return;
+    }
+    const emr = data as Record<string, unknown>;
+    if (!emr.emr_id) {
+      return;
+    }
+    setEmrId(String(emr.emr_id));
+    setDiagnosis(String(emr.diagnosis ?? ""));
+    setDoctorOpinion(String(emr.doctor_opinion ?? ""));
+    setArchived(Boolean(emr.archived));
+  }
+
   async function postJson<T>(url: string, payload: Record<string, unknown>): Promise<T> {
     const response = await fetch(url, {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    return response.json();
+  }
+
+  async function putJson<T>(url: string, payload: Record<string, unknown>): Promise<T> {
+    const response = await fetch(url, {
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
@@ -34,6 +61,7 @@ export default function EmrPage() {
       record_id: recordId.trim(),
     });
     setOutput(data as EmrResponse);
+    syncEmrFields(data as EmrResponse);
   }
 
   async function handleFetch() {
@@ -42,7 +70,9 @@ export default function EmrPage() {
       return;
     }
     const response = await fetch(`${API_BASE}/emr/${emrId.trim()}`);
-    setOutput((await response.json()) as EmrResponse);
+    const data = (await response.json()) as EmrResponse;
+    setOutput(data);
+    syncEmrFields(data);
   }
 
   async function handleList() {
@@ -51,6 +81,45 @@ export default function EmrPage() {
       : "";
     const response = await fetch(`${API_BASE}/emr${query}`);
     setOutput((await response.json()) as EmrResponse);
+  }
+
+  async function handleSave() {
+    if (!emrId.trim()) {
+      setOutput({ error: "请先获取病历" });
+      return;
+    }
+    const data = await putJson(`${API_BASE}/emr/${emrId.trim()}`, {
+      diagnosis,
+      doctor_opinion: doctorOpinion,
+    });
+    setOutput(data as EmrResponse);
+    syncEmrFields(data as EmrResponse);
+  }
+
+  async function handleArchive(nextArchived: boolean) {
+    if (!emrId.trim()) {
+      setOutput({ error: "请先获取病历" });
+      return;
+    }
+    const data = await postJson(`${API_BASE}/emr/${emrId.trim()}/archive`, {
+      archived: nextArchived,
+    });
+    setOutput(data as EmrResponse);
+    syncEmrFields(data as EmrResponse);
+  }
+
+  function handleExportPdf() {
+    const doc = new jsPDF();
+    doc.setFontSize(14);
+    doc.text("电子病历", 10, 14);
+    doc.setFontSize(10);
+    const lines = doc.splitTextToSize(outputText, 180);
+    doc.text(lines, 10, 24);
+    doc.save(`emr-${emrId || "export"}.pdf`);
+  }
+
+  function handlePrint() {
+    window.print();
   }
 
   return (
@@ -130,6 +199,56 @@ export default function EmrPage() {
           <pre className="mt-4 min-h-[240px] whitespace-pre-wrap rounded-xl bg-slate-950 p-4 text-xs text-slate-100">
             {outputText}
           </pre>
+        </section>
+
+        <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+          <h2 className="text-lg font-semibold text-slate-900">编辑 / 导出 / 存档</h2>
+          <div className="mt-4 grid gap-4 lg:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium text-slate-700">初步诊断</label>
+              <textarea
+                className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                rows={3}
+                value={diagnosis}
+                onChange={(event) => setDiagnosis(event.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700">医生意见</label>
+              <textarea
+                className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                rows={3}
+                value={doctorOpinion}
+                onChange={(event) => setDoctorOpinion(event.target.value)}
+              />
+            </div>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button
+              className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              onClick={handleSave}
+            >
+              保存修改
+            </button>
+            <button
+              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              onClick={handleExportPdf}
+            >
+              导出 PDF
+            </button>
+            <button
+              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              onClick={handlePrint}
+            >
+              打印
+            </button>
+            <button
+              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              onClick={() => handleArchive(!archived)}
+            >
+              {archived ? "取消存档" : "存档"}
+            </button>
+          </div>
         </section>
       </main>
     </div>

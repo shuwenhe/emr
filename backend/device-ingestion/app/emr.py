@@ -4,8 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from .analysis import analyze_record
-from .data_platform import save_emr
+from .data_platform import get_emr_by_record_id, save_emr
 from .config import DATA_DIR, EMR_DIR
 
 
@@ -33,6 +32,7 @@ def _safe_load(path: Path) -> Optional[Dict[str, Any]]:
 
 
 def generate_emr(record_id: str) -> Dict[str, Any]:
+    from .analysis import analyze_record
     record_dir = _record_dir(record_id)
     if not record_dir.exists():
         raise FileNotFoundError("record_not_found")
@@ -47,13 +47,15 @@ def generate_emr(record_id: str) -> Dict[str, Any]:
     patient = metadata.get("patient") or {}
     clinical = metadata.get("clinical") or {}
 
-    emr_id = f"EMR-{uuid.uuid4()}"
+    existing = get_emr_by_record_id(record_id)
+    emr_id = existing.get("emr_id") if existing else f"EMR-{uuid.uuid4()}"
     created_at = datetime.now().isoformat(timespec="seconds")
 
     emr = {
         "emr_id": emr_id,
         "record_id": record_id,
         "created_at": created_at,
+        "archived": False,
         "patient": {
             "patient_id": patient.get("patient_id"),
             "name": patient.get("name"),
@@ -84,6 +86,53 @@ def generate_emr(record_id: str) -> Dict[str, Any]:
     return emr
 
 
+def upsert_emr_from_analysis(
+    record_id: str,
+    report: Dict[str, Any],
+    plan: Dict[str, Any],
+    metadata: Dict[str, Any],
+) -> Dict[str, Any]:
+    existing = get_emr_by_record_id(record_id)
+    emr_id = existing.get("emr_id") if existing else f"EMR-{uuid.uuid4()}"
+    created_at = existing.get("created_at") if existing else datetime.now().isoformat(timespec="seconds")
+
+    patient = metadata.get("patient") or {}
+    clinical = metadata.get("clinical") or {}
+
+    emr = {
+        "emr_id": emr_id,
+        "record_id": record_id,
+        "created_at": created_at,
+        "archived": existing.get("archived") if existing else False,
+        "patient": {
+            "patient_id": patient.get("patient_id"),
+            "name": patient.get("name"),
+            "gender": patient.get("gender"),
+            "age": patient.get("age"),
+            "body_part": patient.get("body_part"),
+            "posture": patient.get("posture"),
+        },
+        "clinical": {
+            "chief_complaint": clinical.get("chief_complaint"),
+            "past_history": clinical.get("past_history") or [],
+            "family_history": clinical.get("family_history") or [],
+            "allergies": clinical.get("allergies") or [],
+            "medications": clinical.get("medications") or [],
+        },
+        "diagnosis": report.get("diagnosis"),
+        "doctor_opinion": report.get("doctor_opinion"),
+        "thermal_images": report.get("thermal_images") or [],
+        "report": report,
+        "treatment_plan": plan,
+    }
+
+    with open(_emr_path(emr_id), "w", encoding="utf-8") as handle:
+        json.dump(emr, handle, ensure_ascii=False, indent=2)
+
+    save_emr(emr)
+    return emr
+
+
 def get_emr(emr_id: str) -> Dict[str, Any]:
     path = _emr_path(emr_id)
     if not path.exists():
@@ -91,7 +140,41 @@ def get_emr(emr_id: str) -> Dict[str, Any]:
     return _load_json(path)
 
 
-def list_emrs(patient_id: Optional[str] = None) -> List[Dict[str, Any]]:
+def update_emr(emr_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
+    emr = get_emr(emr_id)
+
+    for key in ("diagnosis", "doctor_opinion", "treatment_plan"):
+        if key in updates and updates[key] is not None:
+            emr[key] = updates[key]
+
+    if "clinical" in updates and isinstance(updates["clinical"], dict):
+        emr.setdefault("clinical", {})
+        for c_key, c_value in updates["clinical"].items():
+            if c_value is not None:
+                emr["clinical"][c_key] = c_value
+
+    if "report" in updates and isinstance(updates["report"], dict):
+        emr["report"] = updates["report"]
+
+    with open(_emr_path(emr_id), "w", encoding="utf-8") as handle:
+        json.dump(emr, handle, ensure_ascii=False, indent=2)
+
+    save_emr(emr)
+    return emr
+
+
+def archive_emr(emr_id: str, archived: bool = True) -> Dict[str, Any]:
+    emr = get_emr(emr_id)
+    emr["archived"] = archived
+
+    with open(_emr_path(emr_id), "w", encoding="utf-8") as handle:
+        json.dump(emr, handle, ensure_ascii=False, indent=2)
+
+    save_emr(emr)
+    return emr
+
+
+def list_emrs(patient_id: Optional[str] = None, include_archived: bool = False) -> List[Dict[str, Any]]:
     emrs: List[Dict[str, Any]] = []
     for item in EMR_DIR.glob("EMR-*.json"):
         data = _safe_load(item)
@@ -101,6 +184,8 @@ def list_emrs(patient_id: Optional[str] = None) -> List[Dict[str, Any]]:
             emr_patient_id = (data.get("patient") or {}).get("patient_id")
             if emr_patient_id != patient_id:
                 continue
+        if not include_archived and data.get("archived"):
+            continue
         emrs.append(data)
 
     emrs.sort(key=lambda item: item.get("created_at") or "")

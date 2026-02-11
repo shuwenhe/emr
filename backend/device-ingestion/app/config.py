@@ -6,7 +6,11 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 EMR_DIR = DATA_DIR / "emr"
 EMR_DIR.mkdir(parents=True, exist_ok=True)
 
-PLATFORM_DB_PATH = DATA_DIR / "platform.db"
+MYSQL_HOST = "127.0.0.1"
+MYSQL_PORT = 3306
+MYSQL_DB = "hospital"
+MYSQL_USER = "hospital"
+MYSQL_PASSWORD = "hospital"
 
 MAX_FILE_MB = 200
 ALLOWED_EXTENSIONS = {".bin", ".dat", ".npy", ".zip", ".csv", ".png", ".jpg", ".jpeg"}
