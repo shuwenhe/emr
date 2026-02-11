@@ -44,19 +44,31 @@ export default function RootLayout({
                 href="/patients"
                 className="text-sm font-medium text-slate-700 hover:text-blue-600"
               >
-                患者管理
+                患者登记
               </Link>
               <Link
                 href="/upload"
                 className="text-sm font-medium text-slate-700 hover:text-blue-600"
               >
-                数据上传
+                数据采集
               </Link>
               <Link
                 href="/emr"
                 className="text-sm font-medium text-slate-700 hover:text-blue-600"
               >
-                电子病历
+                诊断分析
+              </Link>
+              <Link
+                href="/treatment"
+                className="text-sm font-medium text-slate-700 hover:text-blue-600"
+              >
+                治疗方案
+              </Link>
+              <Link
+                href="/comparison"
+                className="text-sm font-medium text-slate-700 hover:text-blue-600"
+              >
+                疗效对比
               </Link>
             </div>
           </div>

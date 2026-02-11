@@ -121,6 +121,34 @@ def upsert_patient(patient: Dict[str, Any]) -> Optional[str]:
     return patient_id
 
 
+def list_patients(limit: int = 100) -> List[Dict[str, Any]]:
+    """Get all registered patients"""
+    with _connect() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT patient_id, name, gender, age, payload_json, updated_at
+                FROM patients
+                ORDER BY updated_at DESC
+                LIMIT %s
+                """,
+                (limit,)
+            )
+            rows = cursor.fetchall()
+            patients = []
+            for row in rows:
+                patient = json.loads(row["payload_json"]) if row.get("payload_json") else {}
+                patient.update({
+                    "patient_id": row["patient_id"],
+                    "name": row["name"],
+                    "gender": row["gender"],
+                    "age": row["age"],
+                    "updated_at": row["updated_at"].isoformat() if row.get("updated_at") else None
+                })
+                patients.append(patient)
+            return patients
+
+
 def save_record(
     record_id: str,
     metadata: Dict[str, Any],

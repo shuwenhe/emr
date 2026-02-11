@@ -16,7 +16,7 @@ from .device_connector import (
     move_capture_dir,
     poll_device_drop,
 )
-from .data_platform import init_db, list_emrs as list_platform_emrs, list_records, summary
+from .data_platform import init_db, list_emrs as list_platform_emrs, list_records, summary, upsert_patient, list_patients
 from .dispatch import dispatch_record
 from .emr import EmrNotFoundError, archive_emr, generate_emr, get_emr, list_emrs, update_emr
 from .models import (
@@ -204,6 +204,36 @@ def import_history(request: HistoryImportRequest):
 @app.get("/platform/summary")
 def platform_summary():
     return summary()
+
+
+@app.post("/patients")
+async def register_patient(patient: dict):
+    """Register a new patient"""
+    import uuid
+    from datetime import datetime
+    
+    # Generate patient_id if not provided
+    if not patient.get("patient_id"):
+        patient["patient_id"] = f"P{uuid.uuid4().hex[:12].upper()}"
+    
+    # Calculate age from birth_date if provided
+    if patient.get("birth_date") and not patient.get("age"):
+        birth_date = datetime.fromisoformat(patient["birth_date"].replace("Z", "+00:00"))
+        patient["age"] = datetime.now().year - birth_date.year
+    
+    # Upsert patient to database
+    patient_id = upsert_patient(patient)
+    
+    if not patient_id:
+        raise HTTPException(status_code=400, detail="patient_registration_failed")
+    
+    return {"patient_id": patient_id, "message": "patient_registered_successfully"}
+
+
+@app.get("/patients")
+def get_patients(limit: int = 100):
+    """Get all registered patients"""
+    return list_patients(limit=limit)
 
 
 @app.get("/platform/records")

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { jsPDF } from "jspdf";
 import mammoth from "mammoth";
 
 type EmrResponse = Record<string, unknown> | Array<Record<string, unknown>>;
@@ -170,85 +169,90 @@ export default function EmrPage() {
   }
 
   function handleExportPdf() {
-    const doc = new jsPDF();
-    
-    // Title
-    doc.setFontSize(18);
-    doc.text("红外热成像诊断报告", 105, 20, { align: "center" });
-    
-    let yPos = 35;
-    
-    // Report Info
-    if (report) {
-      doc.setFontSize(12);
-      doc.text(`报告ID: ${String(report.report_id || "-")}`, 20, yPos);
-      yPos += 8;
-      doc.text(`采集时间: ${String(report.created_at || "-")}`, 20, yPos);
-      yPos += 12;
-      
-      // Patient Info
-      if (report.patient && typeof report.patient === "object") {
-        const patient = report.patient as Record<string, unknown>;
-        doc.setFontSize(14);
-        doc.text("患者信息", 20, yPos);
-        yPos += 8;
-        doc.setFontSize(11);
-        doc.text(`姓名: ${String(patient.name || "-")}`, 25, yPos);
-        yPos += 6;
-        doc.text(`性别: ${String(patient.gender || "-")}  年龄: ${String(patient.age || "-")}`, 25, yPos);
-        yPos += 6;
-        doc.text(`采集部位: ${String(patient.body_part || "-")}`, 25, yPos);
-        yPos += 12;
-      }
-      
-      // Temperature Metrics
-      if (report.analysis && typeof report.analysis === "object" && (report.analysis as Record<string, unknown>).temperature_metrics) {
-        const metrics = (report.analysis as Record<string, unknown>).temperature_metrics as Record<string, unknown>;
-        doc.setFontSize(14);
-        doc.text("温度指标", 20, yPos);
-        yPos += 8;
-        doc.setFontSize(11);
-        doc.text(`最低温度: ${String(metrics.min_c)}°C`, 25, yPos);
-        yPos += 6;
-        doc.text(`最高温度: ${String(metrics.max_c)}°C`, 25, yPos);
-        yPos += 6;
-        doc.text(`平均温度: ${String(metrics.avg_c)}°C`, 25, yPos);
-        yPos += 12;
-      }
-      
-      // Risk Level
-      if (report.analysis && typeof report.analysis === "object" && (report.analysis as Record<string, unknown>).risk_level) {
-        doc.setFontSize(14);
-        doc.text("风险等级", 20, yPos);
-        yPos += 8;
-        doc.setFontSize(12);
-        doc.text(String((report.analysis as Record<string, unknown>).risk_level).toUpperCase(), 25, yPos);
-        yPos += 12;
-      }
-      
-      // Diagnosis
-      if (report.diagnosis) {
-        doc.setFontSize(14);
-        doc.text("诊断结论", 20, yPos);
-        yPos += 8;
-        doc.setFontSize(11);
-        const diagnosisLines = doc.splitTextToSize(String(report.diagnosis), 170);
-        doc.text(diagnosisLines, 25, yPos);
-        yPos += diagnosisLines.length * 6 + 6;
-      }
-      
-      // Doctor Opinion
-      if (report.doctor_opinion) {
-        doc.setFontSize(14);
-        doc.text("医生意见", 20, yPos);
-        yPos += 8;
-        doc.setFontSize(11);
-        const opinionLines = doc.splitTextToSize(String(report.doctor_opinion), 170);
-        doc.text(opinionLines, 25, yPos);
-      }
+    if (!report) {
+      setOutput({ error: "暂无可导出的报告" });
+      return;
     }
-    
-    doc.save(`report-${emrId || recordId || "export"}.pdf`);
+
+    const patient = report.patient && typeof report.patient === "object"
+      ? (report.patient as Record<string, unknown>)
+      : {};
+    const analysis = report.analysis && typeof report.analysis === "object"
+      ? (report.analysis as Record<string, unknown>)
+      : {};
+    const metrics = analysis.temperature_metrics && typeof analysis.temperature_metrics === "object"
+      ? (analysis.temperature_metrics as Record<string, unknown>)
+      : {};
+
+    const html = `
+      <!doctype html>
+      <html lang="zh-CN">
+      <head>
+        <meta charset="utf-8" />
+        <title>红外热成像诊断报告</title>
+        <style>
+          body { font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif; margin: 32px; color: #0f172a; }
+          h1 { text-align: center; margin-bottom: 24px; }
+          h2 { margin: 24px 0 12px; font-size: 16px; }
+          .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+          .card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; background: #f8fafc; }
+          .label { color: #64748b; font-size: 12px; }
+          .value { font-weight: 600; margin-top: 4px; }
+          .section { margin-top: 16px; }
+          .text { line-height: 1.6; white-space: pre-wrap; }
+          .risk { font-weight: 700; text-transform: uppercase; }
+          @media print { body { margin: 18mm; } }
+        </style>
+      </head>
+      <body>
+        <h1>红外热成像诊断报告</h1>
+        <div class="grid">
+          <div class="card"><div class="label">报告ID</div><div class="value">${String(report.report_id || "-")}</div></div>
+          <div class="card"><div class="label">采集时间</div><div class="value">${String(report.created_at || "-")}</div></div>
+        </div>
+
+        <div class="section">
+          <h2>患者信息</h2>
+          <div class="grid">
+            <div class="card"><div class="label">姓名</div><div class="value">${String(patient.name || "-")}</div></div>
+            <div class="card"><div class="label">性别/年龄</div><div class="value">${String(patient.gender || "-")} / ${String(patient.age || "-")}</div></div>
+            <div class="card"><div class="label">采集部位</div><div class="value">${String(patient.body_part || "-")}</div></div>
+            <div class="card"><div class="label">风险等级</div><div class="value risk">${String(analysis.risk_level || "-")}</div></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>温度指标</h2>
+          <div class="grid">
+            <div class="card"><div class="label">最低温度</div><div class="value">${String(metrics.min_c ?? "-")}°C</div></div>
+            <div class="card"><div class="label">最高温度</div><div class="value">${String(metrics.max_c ?? "-")}°C</div></div>
+            <div class="card"><div class="label">平均温度</div><div class="value">${String(metrics.avg_c ?? "-")}°C</div></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>诊断结论</h2>
+          <div class="text">${String(report.diagnosis || "-")}</div>
+        </div>
+
+        <div class="section">
+          <h2>医生意见</h2>
+          <div class="text">${String(report.doctor_opinion || "-")}</div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const printWindow = window.open("", "_blank", "width=800,height=900");
+    if (!printWindow) {
+      setOutput({ error: "无法打开打印窗口" });
+      return;
+    }
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
   }
 
   function handlePrint() {
@@ -341,7 +345,7 @@ export default function EmrPage() {
 
         <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
           <h2 className="text-lg font-semibold text-slate-900">结果</h2>
-          <pre className="mt-4 min-h-[240px] whitespace-pre-wrap rounded-xl bg-slate-950 p-4 text-xs text-slate-100">
+          <pre className="mt-4 max-h-[220px] overflow-y-auto whitespace-pre-wrap rounded-xl bg-slate-950 p-4 text-xs text-slate-100">
             {outputText}
           </pre>
         </section>

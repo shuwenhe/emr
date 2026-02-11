@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const API_BASE = "http://localhost:8000";
 
 export default function UploadPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [file, setFile] = useState<File | null>(null);
   const [deviceId, setDeviceId] = useState("");
   const [deviceModel, setDeviceModel] = useState("IR-Thermal-320");
@@ -14,9 +15,21 @@ export default function UploadPage() {
   const [patientName, setPatientName] = useState("");
   const [gender, setGender] = useState("");
   const [age, setAge] = useState("");
-  const [bodyPart, setBodyPart] = useState("");
+  const [bodyPart, setBodyPart] = useState("全身");
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState<{ record_id?: string; error?: string } | null>(null);
+
+  useEffect(() => {
+    const name = searchParams.get("name") || "";
+    const genderParam = searchParams.get("gender") || "";
+    const ageParam = searchParams.get("age") || "";
+    const bodyPartParam = searchParams.get("body_part") || "全身";
+
+    if (name) setPatientName(name);
+    if (genderParam) setGender(genderParam === "男" ? "male" : genderParam === "女" ? "female" : genderParam);
+    if (ageParam) setAge(ageParam);
+    if (bodyPartParam) setBodyPart(bodyPartParam);
+  }, [searchParams]);
 
   async function handleUpload() {
     if (!file || !deviceId || !captureTime) {
