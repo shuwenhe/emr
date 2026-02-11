@@ -33,6 +33,20 @@ export default function EmrPage() {
   });
 
   const outputText = useMemo(() => JSON.stringify(output, null, 2), [output]);
+  const currentPatientName = useMemo(() => {
+    if (report && typeof report.patient === "object") {
+      const patient = report.patient as Record<string, unknown>;
+      return String(patient.name || "").trim();
+    }
+    return "";
+  }, [report]);
+  const visibleReportFiles = useMemo(() => {
+    if (!currentPatientName) {
+      return [] as ReportFile[];
+    }
+    const prefix = `${currentPatientName}_`;
+    return reportFiles.filter((file) => file.name.startsWith(prefix));
+  }, [currentPatientName, reportFiles]);
 
   const fetchReports = useCallback(async () => {
     try {
@@ -503,7 +517,8 @@ export default function EmrPage() {
 
         <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
           <h2 className="text-lg font-semibold text-slate-900">历史报告文件</h2>
-          {reportFiles.length ? (
+          {currentPatientName ? (
+            visibleReportFiles.length ? (
             <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
               <table className="min-w-full text-left text-sm">
                 <thead className="bg-slate-50 text-slate-600">
@@ -515,7 +530,7 @@ export default function EmrPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  {reportFiles.map((file) => (
+                  {visibleReportFiles.map((file) => (
                     <tr key={`${file.date}-${file.name}`}>
                       <td className="px-4 py-2 text-slate-700">{file.date}</td>
                       <td className="px-4 py-2 text-slate-900">{file.name}</td>
@@ -552,7 +567,10 @@ export default function EmrPage() {
               </table>
             </div>
           ) : (
-            <p className="mt-4 text-sm text-slate-500">暂无报告文件</p>
+            <p className="mt-4 text-sm text-slate-500">该患者暂无报告文件</p>
+          )
+          ) : (
+            <p className="mt-4 text-sm text-slate-500">请先生成诊断报告以查看患者历史报告</p>
           )}
         </section>
 

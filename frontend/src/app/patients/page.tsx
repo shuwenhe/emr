@@ -309,6 +309,12 @@ export default function PatientsPage() {
                           >
                             病历
                           </button>
+                          <button
+                            className="rounded-full border border-green-200 px-3 py-1 text-xs font-semibold text-green-600 hover:bg-green-50"
+                            onClick={() => router.push(`/emr?patient=${encodeURIComponent(patient.name)}`)}
+                          >
+                            报告
+                          </button>
                         </div>
                       </td>
                     </tr>
