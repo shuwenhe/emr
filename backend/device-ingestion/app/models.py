@@ -25,8 +25,21 @@ class EnvironmentParams(BaseModel):
 
 class PatientInfo(BaseModel):
     patient_id: Optional[str] = Field(None, description="脱敏患者ID")
+    name: Optional[str] = Field(None, description="患者姓名")
+    gender: Optional[str] = Field(None, description="性别")
+    age: Optional[int] = Field(None, description="年龄")
     body_part: Optional[str] = Field(None, description="采集部位")
     posture: Optional[str] = Field(None, description="姿态")
+
+
+class ClinicalInfo(BaseModel):
+    chief_complaint: Optional[str] = Field(None, description="主诉")
+    past_history: Optional[list[str]] = Field(None, description="既往病史")
+    family_history: Optional[list[str]] = Field(None, description="家族史")
+    allergies: Optional[list[str]] = Field(None, description="过敏史")
+    medications: Optional[list[str]] = Field(None, description="用药史")
+    diagnosis: Optional[str] = Field(None, description="初步诊断")
+    doctor_opinion: Optional[str] = Field(None, description="医生诊断意见")
 
 
 class IngestMetadata(BaseModel):
@@ -34,6 +47,7 @@ class IngestMetadata(BaseModel):
     capture: CaptureParams
     environment: Optional[EnvironmentParams] = None
     patient: Optional[PatientInfo] = None
+    clinical: Optional[ClinicalInfo] = None
     tags: Optional[list[str]] = None
 
 
@@ -43,3 +57,16 @@ class AnalyzeRequest(BaseModel):
 
 class DispatchRequest(BaseModel):
     record_id: str
+
+
+class DeviceIngestRequest(BaseModel):
+    capture_path: Optional[str] = Field(
+        None, description="设备落盘目录（可选，缺省扫描 device-drop）"
+    )
+    move_to_processed: bool = Field(
+        True, description="入库后是否移动到 device-processed"
+    )
+
+
+class EmrGenerateRequest(BaseModel):
+    record_id: str = Field(..., description="采集记录 ID")

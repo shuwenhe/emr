@@ -6,9 +6,10 @@ import csv
 import json
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from docx import Document
+from docx.shared import Inches
 
 
 def _load_metadata(path: Path) -> Dict:
@@ -26,12 +27,13 @@ def _parse_resolution(value) -> Optional[str]:
     return None
 
 
-def _normalize_metadata(metadata: Dict) -> Dict[str, Optional[str]]:
+def _normalize_metadata(metadata: Dict) -> Dict[str, Any]:
     if "device" in metadata:
         device = metadata.get("device") or {}
         capture = metadata.get("capture") or {}
         env = metadata.get("environment") or {}
         patient = metadata.get("patient") or {}
+        clinical = metadata.get("clinical") or {}
         return {
             "device_id": device.get("device_id"),
             "device_model": device.get("model"),
@@ -46,10 +48,15 @@ def _normalize_metadata(metadata: Dict) -> Dict[str, Optional[str]]:
             "humidity_percent": env.get("humidity_percent"),
             "airflow": env.get("airflow"),
             "patient_id": patient.get("patient_id"),
+            "patient_name": patient.get("name"),
             "body_part": patient.get("body_part"),
             "posture": patient.get("posture"),
-            "gender": None,
-            "age": None,
+            "gender": patient.get("gender"),
+            "age": patient.get("age"),
+            "chief_complaint": clinical.get("chief_complaint"),
+            "past_history": clinical.get("past_history") or [],
+            "diagnosis": clinical.get("diagnosis"),
+            "doctor_opinion": clinical.get("doctor_opinion"),
         }
 
     subject = metadata.get("subject") or {}
@@ -67,11 +74,32 @@ def _normalize_metadata(metadata: Dict) -> Dict[str, Optional[str]]:
         "humidity_percent": metadata.get("humidity_percent"),
         "airflow": metadata.get("airflow"),
         "patient_id": None,
+        "patient_name": None,
         "body_part": subject.get("body_part"),
         "posture": subject.get("posture"),
         "gender": subject.get("gender"),
         "age": subject.get("age"),
+        "chief_complaint": metadata.get("chief_complaint"),
+        "past_history": metadata.get("past_history") or [],
+        "diagnosis": metadata.get("diagnosis"),
+        "doctor_opinion": metadata.get("doctor_opinion"),
     }
+
+
+def _load_json_if_exists(path: Path) -> Optional[Dict[str, Any]]:
+    if not path.exists():
+        return None
+    with open(path, "r", encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def _collect_images(dataset_dir: Path) -> List[Path]:
+    image_exts = {".png", ".jpg", ".jpeg"}
+    return [
+        item
+        for item in dataset_dir.iterdir()
+        if item.is_file() and item.suffix.lower() in image_exts
+    ]
 
 
 def _load_temperatures(path: Path) -> List[float]:
@@ -130,6 +158,17 @@ def _risk_label(score: int) -> str:
     if score >= 12:
         return "低风险"
     return "低风险"
+
+
+def _format_gender(value: Optional[str]) -> Optional[str]:
+    if not value:
+        return None
+    normalized = str(value).strip().lower()
+    if normalized in {"male", "m", "man", "boy"}:
+        return "男"
+    if normalized in {"female", "f", "woman", "girl"}:
+        return "女"
+    return value
 
 
 def _build_findings(body_part: Optional[str], score: int) -> List[str]:
@@ -227,8 +266,11 @@ def _objective_table(temps: Dict[str, Optional[float]]) -> Tuple[List[Tuple[str,
 def _build_report(
     dataset_id: str,
     patient_name: str,
-    metadata: Dict[str, Optional[str]],
+    metadata: Dict[str, Any],
     metrics: Dict[str, Optional[float]],
+    report_data: Optional[Dict[str, Any]],
+    plan_data: Optional[Dict[str, Any]],
+    images: List[Path],
 ) -> Document:
     doc = Document()
 
@@ -239,15 +281,20 @@ def _build_report(
     doc.add_heading("红外热成像评估报告", level=0)
 
     doc.add_heading("一、基本信息", level=1)
-    doc.add_paragraph(f"姓名：{patient_name}")
-    if metadata.get("gender"):
-        doc.add_paragraph(f"性别：{metadata['gender']}")
+    display_name = metadata.get("patient_name") or patient_name
+    doc.add_paragraph(f"姓名：{display_name}")
+    gender = _format_gender(metadata.get("gender"))
+    if gender:
+        doc.add_paragraph(f"性别：{gender}")
     if metadata.get("age"):
         doc.add_paragraph(f"年龄：{metadata['age']}")
+    if metadata.get("patient_id"):
+        doc.add_paragraph(f"患者ID：{metadata['patient_id']}")
+    if metadata.get("body_part"):
+        doc.add_paragraph(f"采集部位：{metadata['body_part']}")
     doc.add_paragraph(f"评估日期：{datetime.now().strftime('%Y-%m-%d')}")
     doc.add_paragraph("报告名称：红外热成像评估报告")
-    doc.add_paragraph("英文名称：INFRARED THERMAL IMAGEING HEALTH REPORT")
-    doc.add_paragraph("机构：亘颐（上海）科技有限公司")
+    doc.add_paragraph("机构：张氏疼痛外治中心")
     doc.add_paragraph("系统：红外影像云平台-红外影像热层析系统")
 
     doc.add_heading("二、机体功能状态实时热像", level=1)
@@ -259,6 +306,13 @@ def _build_report(
         doc.add_paragraph("最大温度：N/A")
         doc.add_paragraph("最小温度：N/A")
         doc.add_paragraph("平均温度：N/A")
+
+    doc.add_paragraph("热成像图片：")
+    if images:
+        for image_path in images[:4]:
+            doc.add_picture(str(image_path), width=Inches(5.6))
+    else:
+        doc.add_paragraph("未提供热成像图片")
 
     doc.add_paragraph("提示说明：")
     doc.add_paragraph("红外热成像技术是一种功能影像学技术，被动接收人体红外热信号，对人体无任何辐射和伤害。")
@@ -290,7 +344,6 @@ def _build_report(
     doc.add_paragraph(f"- 右腹部（{score * 4 + 90}）")
     doc.add_paragraph(f"- 右后颈部（{score * 5 + 160}）")
     doc.add_paragraph(f"- 右后肩（{score * 15 + 700}）")
-    doc.add_paragraph("说明：[xxx] 表示异常区域面积")
 
     doc.add_heading("五、客观热源数据表（节选）", level=1)
     front, back = _objective_table(metrics)
@@ -316,6 +369,42 @@ def _build_report(
         doc.add_heading(section, level=2)
         for idx, item in enumerate(items, start=1):
             doc.add_paragraph(f"{idx}. {item}")
+
+    doc.add_heading("八、病史与医生诊断意见", level=1)
+    chief_complaint = metadata.get("chief_complaint")
+    if chief_complaint:
+        doc.add_paragraph(f"主诉：{chief_complaint}")
+    past_history = metadata.get("past_history") or []
+    if past_history:
+        doc.add_paragraph("既往病史：")
+        for item in past_history:
+            doc.add_paragraph(f"- {item}")
+    diagnosis = metadata.get("diagnosis") or (report_data or {}).get("diagnosis")
+    if diagnosis:
+        doc.add_paragraph(f"初步诊断：{diagnosis}")
+    doctor_opinion = metadata.get("doctor_opinion") or (report_data or {}).get("doctor_opinion")
+    if doctor_opinion:
+        doc.add_paragraph(f"医生诊断意见：{doctor_opinion}")
+
+    doc.add_heading("九、针对性治疗方案", level=1)
+    if plan_data:
+        doc.add_paragraph(f"治疗类型：{plan_data.get('therapy_type')}")
+        doc.add_paragraph(f"强度等级：{plan_data.get('intensity_level')}")
+        doc.add_paragraph(f"疗程次数：{plan_data.get('sessions')}")
+        doc.add_paragraph(f"频次：{plan_data.get('frequency')}")
+        targets = plan_data.get("target_regions") or []
+        if targets:
+            doc.add_paragraph("作用部位：")
+            for region in targets:
+                doc.add_paragraph(
+                    f"- {region.get('region')}：{region.get('duration_min')} 分钟，"
+                    f"目标温度 {region.get('target_temp_c')} ℃，距离 {region.get('distance_cm')} cm"
+                )
+        notes = plan_data.get("notes")
+        if notes:
+            doc.add_paragraph(f"备注：{notes}")
+    else:
+        doc.add_paragraph("未提供治疗方案")
 
     doc.add_paragraph("")
     doc.add_paragraph(f"评估日期：{datetime.now().strftime('%Y-%m-%d')}")
@@ -347,8 +436,11 @@ def generate_reports(
         metadata = _normalize_metadata(_load_metadata(metadata_path))
         temps = _load_temperatures(payload_path)
         metrics = _summarize_temps(temps)
+        report_data = _load_json_if_exists(dataset_dir / "report.json")
+        plan_data = _load_json_if_exists(dataset_dir / "plan.json")
+        images = _collect_images(dataset_dir)
 
-        doc = _build_report(dataset_id, patient_name, metadata, metrics)
+        doc = _build_report(dataset_id, patient_name, metadata, metrics, report_data, plan_data, images)
 
         timestamp = (base_time + timedelta(seconds=index)).strftime("%Y%m%d_%H%M%S")
         file_name = f"{patient_name}_{timestamp}.docx"
@@ -370,12 +462,12 @@ def main() -> None:
     )
     parser.add_argument(
         "--output-root",
-        default=str(Path(__file__).resolve().parents[1] / "reports"),
+        default=str(Path(__file__).resolve().parents[2] / "reports"),
         help="Reports root folder",
     )
     parser.add_argument(
         "--data-root",
-        default=str(Path(__file__).resolve().parents[1] / "data"),
+        default=str(Path(__file__).resolve().parents[2] / "data"),
         help="Root folder containing test datasets",
     )
     args = parser.parse_args()

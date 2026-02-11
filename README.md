@@ -11,7 +11,10 @@ Infrared thermal imaging ingestion, analysis, and report generation workflow.
 	- `make report`
 
 ## Services
-The FastAPI service lives under [device-ingestion](device-ingestion).
+The FastAPI service lives under [backend/device-ingestion](backend/device-ingestion).
+
+## Frontend
+Next.js app lives under [frontend](frontend). EMR page route: /emr
 
 ### Endpoints
 - `POST /ingest` upload a data file and metadata JSON
