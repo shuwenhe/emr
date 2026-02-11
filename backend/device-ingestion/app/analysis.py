@@ -228,6 +228,11 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
     if payload_path.suffix.lower() == ".csv":
         temps = _load_csv_temperatures(payload_path)
 
+    metrics = _summarize_temperatures(temps)
+    avg_temp = metrics["avg_c"]
+    risk_level = _risk_level(avg_temp)
+    body_avg_temp_c = avg_temp
+
     marked_image_path = None
     temperature_labels = {"text": None, "values": []}
     region_comparison: List[Dict[str, Any]] = []
@@ -254,11 +259,6 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
             if marked_image_path:
                 image_paths.append(marked_image_path)
                 temperature_labels = _extract_temperature_labels(marked_image_path)
-
-    metrics = _summarize_temperatures(temps)
-    avg_temp = metrics["avg_c"]
-    risk_level = _risk_level(avg_temp)
-    body_avg_temp_c = avg_temp
 
     capture_time = (metadata.get("capture") or {}).get("capture_time") or datetime.now().isoformat()
     device = metadata.get("device") or {}

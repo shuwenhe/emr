@@ -2,6 +2,7 @@
 /backend/device-ingestion/data/
 /backend/device-ingestion/device-drop/
 /backend/device-ingestion/device-processed/
+/data/
 /reports/
 /frontend/node_modules/
 /frontend/.next/

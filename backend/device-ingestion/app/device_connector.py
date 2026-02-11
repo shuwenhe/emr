@@ -1,6 +1,7 @@
 import asyncio
 import json
 import shutil
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -50,6 +51,76 @@ def _load_metadata(capture_dir: Path) -> Dict:
         return json.load(f)
 
 
+def _compact_dict(data: Dict) -> Dict:
+    return {key: value for key, value in data.items() if value is not None}
+
+
+def _normalize_legacy_metadata(raw: Dict, capture_dir: Path) -> Dict:
+    if "device" in raw and "capture" in raw:
+        return raw
+
+    resolution = raw.get("resolution")
+    if isinstance(resolution, (list, tuple)) and len(resolution) == 2:
+        resolution_value = f"{resolution[0]}x{resolution[1]}"
+    else:
+        resolution_value = resolution
+
+    device_id = raw.get("device_id") or raw.get("device") or f"legacy-{capture_dir.name}"
+
+    device = _compact_dict(
+        {
+            "device_id": str(device_id),
+            "model": raw.get("device_model") or raw.get("model"),
+            "firmware": raw.get("firmware"),
+        }
+    )
+
+    capture_time = raw.get("capture_time")
+    if not capture_time:
+        capture_time = datetime.now().isoformat(timespec="seconds")
+
+    capture = _compact_dict(
+        {
+            "capture_time": capture_time,
+            "frame_rate_hz": raw.get("frame_rate_hz"),
+            "resolution": resolution_value,
+            "spectral_range": raw.get("spectral_range"),
+            "distance_m": raw.get("distance_m"),
+            "emissivity": raw.get("emissivity"),
+        }
+    )
+
+    environment = _compact_dict(
+        {
+            "ambient_temp_c": raw.get("ambient_temperature_c") or raw.get("ambient_temp_c"),
+            "humidity_percent": raw.get("humidity_percent"),
+            "airflow": raw.get("airflow"),
+        }
+    )
+
+    subject = raw.get("subject") or {}
+    patient = raw.get("patient") or {}
+    if not patient and subject:
+        patient = _compact_dict(
+            {
+                "gender": subject.get("gender"),
+                "age": subject.get("age"),
+                "body_part": subject.get("body_part"),
+                "posture": subject.get("posture"),
+            }
+        )
+
+    normalized = {
+        "device": device,
+        "capture": capture,
+        "environment": environment or None,
+        "patient": patient or None,
+        "clinical": raw.get("clinical"),
+        "tags": raw.get("tags"),
+    }
+    return normalized
+
+
 def _unique_processed_path(capture_dir: Path) -> Path:
     candidate = DEVICE_PROCESSED_DIR / capture_dir.name
     if not candidate.exists():
@@ -70,7 +141,8 @@ def move_capture_dir(capture_dir: Path) -> Path:
 
 def ingest_capture_dir(capture_dir: Path) -> Dict:
     metadata = _load_metadata(capture_dir)
-    parsed = IngestMetadata.model_validate(metadata)
+    normalized = _normalize_legacy_metadata(metadata, capture_dir)
+    parsed = IngestMetadata.model_validate(normalized)
 
     data_file = _find_data_file(capture_dir)
     if not data_file:

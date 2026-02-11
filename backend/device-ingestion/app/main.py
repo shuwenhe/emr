@@ -1,11 +1,13 @@
 import asyncio
 import json
+from urllib.parse import quote
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from .config import ALLOWED_EXTENSIONS, MAX_FILE_MB
+from .config import ALLOWED_EXTENSIONS, MAX_FILE_MB, REPORTS_DIR
 from .analysis import analyze_record
 from .device_connector import (
     ingest_capture_dir,
@@ -39,6 +41,37 @@ app.add_middleware(
     allow_headers=["*"],
 )
 _device_stop_event: asyncio.Event | None = None
+
+
+def _list_reports(date: str | None = None):
+    reports = []
+    root = REPORTS_DIR
+    if date:
+        root = REPORTS_DIR / date
+        if not root.exists() or not root.is_dir():
+            return []
+
+    for day_dir in sorted(root.iterdir() if root.is_dir() else [], reverse=True):
+        if date and day_dir != root:
+            continue
+        if not day_dir.is_dir():
+            continue
+        day = day_dir.name
+        for item in day_dir.iterdir():
+            if not item.is_file():
+                continue
+            reports.append(
+                {
+                    "date": day,
+                    "name": item.name,
+                    "size_bytes": item.stat().st_size,
+                    "url": f"/reports/{day}/{item.name}",
+                    "updated_at": item.stat().st_mtime,
+                }
+            )
+
+    reports.sort(key=lambda r: r["updated_at"], reverse=True)
+    return reports
 
 
 def _validate_file(file: UploadFile) -> None:
@@ -181,6 +214,28 @@ def platform_records(patient_id: str | None = None, limit: int = 50):
 @app.get("/platform/emrs")
 def platform_emrs(patient_id: str | None = None, limit: int = 50, include_archived: bool = False):
     return list_platform_emrs(patient_id=patient_id, limit=limit, include_archived=include_archived)
+
+
+@app.get("/reports")
+def list_reports(date: str | None = None):
+    return _list_reports(date=date)
+
+
+@app.get("/reports/{date}/{filename}")
+def download_report(date: str, filename: str, inline: bool = False):
+    candidate = (REPORTS_DIR / date / filename).resolve()
+    if not candidate.exists() or not candidate.is_file():
+        raise HTTPException(status_code=404, detail="report_not_found")
+    if not candidate.is_relative_to(REPORTS_DIR.resolve()):
+        raise HTTPException(status_code=400, detail="invalid_report_path")
+    disposition = "inline" if inline else "attachment"
+    ascii_name = "report" + candidate.suffix
+    quoted_name = quote(candidate.name)
+    content_disposition = (
+        f"{disposition}; filename=\"{ascii_name}\"; filename*=UTF-8''{quoted_name}"
+    )
+    headers = {"Content-Disposition": content_disposition}
+    return FileResponse(candidate, headers=headers)
 
 
 @app.on_event("startup")

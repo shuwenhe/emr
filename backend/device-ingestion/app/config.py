@@ -6,6 +6,9 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 EMR_DIR = DATA_DIR / "emr"
 EMR_DIR.mkdir(parents=True, exist_ok=True)
 
+REPORTS_DIR = Path("./reports")
+REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
 MYSQL_HOST = "127.0.0.1"
 MYSQL_PORT = 3306
 MYSQL_DB = "hospital"
