@@ -171,13 +171,24 @@ graph LR
     D4 --> D4_2[SSR渲染]
     D4 --> D4_3[客户端交互]
     
-    style Root fill:#f96,stroke:#333,stroke-width:4px
-    style Frontend fill:#9cf,stroke:#333,stroke-width:2px
-    style Backend fill:#fc9,stroke:#333,stroke-width:2px
-    style Core fill:#fcf,stroke:#333,stroke-width:2px
-    style Flow fill:#cfc,stroke:#333,stroke-width:2px
-    style Tech fill:#fcc,stroke:#333,stroke-width:2px
-    style Deploy fill:#ccf,stroke:#333,stroke-width:2px
+    style Root fill:#e74c3c,stroke:#fff,stroke-width:4px,color:#fff
+    style Frontend fill:#3498db,stroke:#fff,stroke-width:2px,color:#fff
+    style Backend fill:#f39c12,stroke:#fff,stroke-width:2px,color:#fff
+    style Core fill:#9b59b6,stroke:#fff,stroke-width:2px,color:#fff
+    style Flow fill:#27ae60,stroke:#fff,stroke-width:2px,color:#fff
+    style Tech fill:#e67e22,stroke:#fff,stroke-width:2px,color:#fff
+    style Deploy fill:#5dade2,stroke:#fff,stroke-width:2px,color:#fff
+    
+    classDef defaultStyle fill:#34495e,stroke:#ecf0f1,stroke-width:2px,color:#ecf0f1
+    class F1,F2,F3,F4,F5,F6,B1,B2,B3,B4,B5,B6,C1,C2,C3,C4,FL1,FL2,T1,T2,T3,D1,D2,D3,D4 defaultStyle
+    
+    classDef leafStyle fill:#2c3e50,stroke:#95a5a6,stroke-width:1px,color:#ecf0f1
+    class F1_1,F1_2,F1_3,F1_4,F1_5,F2_1,F2_2,F2_3,F2_4,F3_1,F3_2,F3_3,F3_4,F3_5,F3_6,F3_7,F4_1,F4_2,F4_3,F4_4,F4_5,F5_1,F5_2,F5_3,F6_1,F6_2,F6_3,F6_4 leafStyle
+    class B1_1,B1_2,B1_3,B1_4,B1_5,B2_1,B2_2,B2_3,B2_4,B3_1,B3_2,B3_3,B3_4,B4_1,B4_2,B4_3,B4_4,B5_1,B5_2,B5_3,B5_4,B5_5,B6_1,B6_2,B6_3,B6_4,B6_5 leafStyle
+    class C1_1,C1_2,C1_3,C1_4,C1_5,C2_1,C2_2,C2_3,C2_4,C3_1,C3_2,C3_3,C3_4,C4_1,C4_2,C4_3,C4_4,C4_5 leafStyle
+    class FL1_1,FL1_2,FL1_3,FL1_4,FL1_5,FL2_1,FL2_2,FL2_3,FL2_4 leafStyle
+    class T1_1,T1_2,T1_3,T1_4,T1_5,T2_1,T2_2,T2_3,T2_4,T2_5,T2_6,T3_1,T3_2,T3_3,T3_4 leafStyle
+    class D1_1,D1_2,D1_3,D2_1,D2_2,D2_3,D2_4,D3_1,D3_2,D3_3,D4_1,D4_2,D4_3 leafStyle
 ```
 
 ## 系统架构概览
