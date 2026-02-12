@@ -45,7 +45,7 @@ mindmap
         新增患者清空
     后端服务
       数据接入
-        POST /ingest
+        文件上传接口
           文件上传
           元数据验证
           质量检查QC
@@ -54,7 +54,7 @@ mindmap
           自动采集
           批量导入
       数据分析
-        POST /analyze
+        分析接口
           温度指标计算
           区域对比分析
           风险等级评估
@@ -70,17 +70,17 @@ mindmap
         归档管理
           归档病历
       患者管理
-        POST /patients
+        患者注册
           患者注册
           信息去重
-        GET /patients
+        患者查询
           患者列表
           分页查询
       报告管理
-        GET /reports
+        报告查询
           报告列表
           按日期筛选
-        GET /reports/preview
+        报告预览
           在线预览
           文件下载
         DOCX生成
