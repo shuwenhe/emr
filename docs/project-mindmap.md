@@ -61,14 +61,14 @@ mindmap
           热成像图生成
       病历管理
         EMR生成
-          POST /emr/generate
+          生成新病历
         EMR查询
-          GET /emr/{emr_id}
-          GET /emr?patient_id=xxx
+          按ID查询
+          按患者查询
         EMR更新
-          PUT /emr/{emr_id}
+          更新病历
         归档管理
-          POST /emr/{emr_id}/archive
+          归档病历
       患者管理
         POST /patients
           患者注册
