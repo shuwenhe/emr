@@ -1,0 +1,16 @@
+# MySQL connection configuration
+# Update values for your environment
+mysql:
+  host: "127.0.0.1"
+  port: 3306
+  database: "hospital"
+  user: "hospital"
+  password: "hospital"
+  charset: "utf8mb4"
+  connect_timeout: 10
+  read_timeout: 30
+  write_timeout: 30
+  pool:
+    size: 5
+    max_overflow: 10
+    recycle: 1800

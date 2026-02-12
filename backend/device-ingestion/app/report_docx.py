@@ -45,7 +45,15 @@ def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
 
     doc.add_heading("患者信息", level=2)
     doc.add_paragraph(f"姓名: {patient.get('name', '-')}")
-    doc.add_paragraph(f"性别: {patient.get('gender', '-')}  年龄: {patient.get('age', '-')}")
+    
+    # 性别转换为中文
+    gender = patient.get('gender', '-')
+    if gender in ['male', 'Male', 'MALE', 'm', 'M']:
+        gender = '男'
+    elif gender in ['female', 'Female', 'FEMALE', 'f', 'F']:
+        gender = '女'
+    
+    doc.add_paragraph(f"性别: {gender}  年龄: {patient.get('age', '-')}")
     doc.add_paragraph(f"采集部位: {patient.get('body_part', '-')}")
 
     doc.add_heading("温度指标", level=2)
