@@ -83,21 +83,20 @@ def _build_treatment_plan(
     risk_level: str,
     abnormal_regions: List[Dict[str, Any]],
 ) -> Dict[str, Any]:
-    intensity = 2
-    if risk_level == "high":
-        intensity = 1
-    elif risk_level == "low":
-        intensity = 3
+    params = _TREATMENT_RULES.get("parameters", {})
+    risk_params = params.get("risk_levels", {})
+    risk_cfg = risk_params.get(risk_level, risk_params.get("unknown", {}))
 
-    sessions = 8 if risk_level == "medium" else 6
-    if risk_level == "high":
-        sessions = 10
+    intensity = int(risk_cfg.get("intensity_level", 2))
+    sessions = int(risk_cfg.get("sessions", 6))
+    frequency = str(risk_cfg.get("frequency", "every_2_days"))
 
-    frequency = "every_2_days"
-    if risk_level == "high":
-        frequency = "daily"
-    elif risk_level == "low":
-        frequency = "every_3_days"
+    target_cfg = params.get("target_region", {})
+    base_duration = int(target_cfg.get("base_duration_min", 8))
+    duration_step = int(target_cfg.get("duration_per_intensity", 1))
+    base_temp = float(target_cfg.get("base_target_temp_c", 42))
+    temp_step = float(target_cfg.get("temp_per_intensity", 1.0))
+    distance_cm = float(target_cfg.get("distance_cm", 3.0))
 
     target_regions: List[Dict[str, Any]] = []
     used_regions: set[str] = set()
@@ -109,9 +108,9 @@ def _build_treatment_plan(
         target_regions.append(
             {
                 "region": region,
-                "duration_min": 8 + intensity,
-                "target_temp_c": round(42 + intensity, 1),
-                "distance_cm": 3.0,
+                "duration_min": base_duration + intensity * duration_step,
+                "target_temp_c": round(base_temp + intensity * temp_step, 1),
+                "distance_cm": distance_cm,
             }
         )
 
@@ -119,17 +118,28 @@ def _build_treatment_plan(
         target_regions.append(
             {
                 "region": body_part,
-                "duration_min": 8 + intensity,
-                "target_temp_c": round(42 + intensity, 1),
-                "distance_cm": 3.0,
+                "duration_min": base_duration + intensity * duration_step,
+                "target_temp_c": round(base_temp + intensity * temp_step, 1),
+                "distance_cm": distance_cm,
             }
         )
 
     acupoints = _select_acupoints(diagnosis, body_part, abnormal_regions)
-    course_recommendation = (
-        f"建议 {sessions} 次为一疗程，频次 {frequency}，"
-        "根据反应调整强度与时间。"
+    course_template = str(
+        params.get(
+            "course_template",
+            "建议 {sessions} 次为一疗程，频次 {frequency}，根据反应调整强度与时间。",
+        )
     )
+    course_recommendation = course_template.format(
+        sessions=sessions,
+        frequency=frequency,
+        intensity=intensity,
+    )
+
+    safety_cfg = params.get("safety_limits", {})
+    max_temp_c = float(safety_cfg.get("max_temp_c", 49.0))
+    max_duration_min = int(safety_cfg.get("max_duration_min", 20))
 
     return {
         "plan_id": plan_id,
@@ -143,8 +153,8 @@ def _build_treatment_plan(
         "acupoints": acupoints,
         "course_recommendation": course_recommendation,
         "safety_limits": {
-            "max_temp_c": 49.0,
-            "max_duration_min": 20,
+            "max_temp_c": max_temp_c,
+            "max_duration_min": max_duration_min,
         },
         "notes": "根据诊断结果自动生成",
     }

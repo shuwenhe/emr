@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from .data_platform import get_emr_by_record_id, save_emr
+from .data_platform import get_emr_by_record_id, save_emr, save_report
 from .config import DATA_DIR, EMR_DIR
 from .report_docx import generate_docx_report
 
@@ -30,6 +30,10 @@ def _safe_load(path: Path) -> Optional[Dict[str, Any]]:
     if not path.exists():
         return None
     return _load_json(path)
+
+
+def _report_path(record_id: str) -> Path:
+    return _record_dir(record_id) / "report.json"
 
 
 def generate_emr(record_id: str) -> Dict[str, Any]:
@@ -146,10 +150,19 @@ def get_emr(emr_id: str) -> Dict[str, Any]:
 
 def update_emr(emr_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
     emr = get_emr(emr_id)
+    record_id = emr.get("record_id")
+    report_updated = False
+
+    report = emr.get("report") or {}
+    if not report and record_id:
+        report = _safe_load(_report_path(record_id)) or {}
 
     for key in ("diagnosis", "doctor_opinion", "treatment_plan"):
         if key in updates and updates[key] is not None:
             emr[key] = updates[key]
+            if key in {"diagnosis", "doctor_opinion"}:
+                report[key] = updates[key]
+                report_updated = True
 
     if "clinical" in updates and isinstance(updates["clinical"], dict):
         emr.setdefault("clinical", {})
@@ -159,6 +172,17 @@ def update_emr(emr_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
 
     if "report" in updates and isinstance(updates["report"], dict):
         emr["report"] = updates["report"]
+        report = updates["report"]
+        report_updated = True
+
+    if report_updated and record_id:
+        emr["report"] = report
+        report_path = _report_path(record_id)
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(report_path, "w", encoding="utf-8") as handle:
+            json.dump(report, handle, ensure_ascii=False, indent=2)
+        save_report(record_id, report)
+        generate_docx_report(report, emr)
 
     with open(_emr_path(emr_id), "w", encoding="utf-8") as handle:
         json.dump(emr, handle, ensure_ascii=False, indent=2)

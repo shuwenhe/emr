@@ -22,6 +22,7 @@ Next.js app lives under [frontend](frontend). EMR page route: /emr
 - `POST /dispatch` send therapy plan to device (simulated)
 
 API details and examples are in [docs/设备接入接口.md](docs/设备接入接口.md).
+Treatment plan rules are documented in [docs/TREATMENT_RULES.md](docs/TREATMENT_RULES.md).
 
 ## Test Data
 Test datasets are in [data](data):
