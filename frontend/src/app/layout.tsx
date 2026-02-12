@@ -70,6 +70,12 @@ export default function RootLayout({
               >
                 疗效对比
               </Link>
+              <Link
+                href="/archives"
+                className="text-sm font-medium text-slate-700 hover:text-blue-600"
+              >
+                归档管理
+              </Link>
             </div>
           </div>
         </nav>

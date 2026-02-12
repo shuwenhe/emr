@@ -1,13 +1,15 @@
 import asyncio
 import json
+import shutil
 from urllib.parse import quote
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
-from .config import ALLOWED_EXTENSIONS, MAX_FILE_MB, REPORTS_DIR
+from .config import ALLOWED_EXTENSIONS, MAX_FILE_MB, REPORTS_DIR, DATA_DIR
 from .analysis import analyze_record
 from .device_connector import (
     ingest_capture_dir,
@@ -16,7 +18,17 @@ from .device_connector import (
     move_capture_dir,
     poll_device_drop,
 )
-from .data_platform import init_db, list_emrs as list_platform_emrs, list_records, summary, upsert_patient, list_patients
+from .data_platform import (
+    init_db,
+    list_emrs as list_platform_emrs,
+    list_records,
+    summary,
+    upsert_patient,
+    list_patients,
+    get_patient,
+    update_patient,
+    archive_patient,
+)
 from .dispatch import dispatch_record
 from .emr import EmrNotFoundError, archive_emr, generate_emr, get_emr, list_emrs, update_emr
 from .models import (
@@ -28,6 +40,9 @@ from .models import (
     EmrArchiveRequest,
     HistoryImportRequest,
     IngestMetadata,
+    PatientUpsertRequest,
+    PatientArchiveRequest,
+    ReportArchiveRequest,
 )
 from .qc import run_qc
 from .storage import save_payload
@@ -40,6 +55,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.mount("/data", StaticFiles(directory=str(DATA_DIR)), name="data")
 _device_stop_event: asyncio.Event | None = None
 
 
@@ -50,11 +66,15 @@ def _list_reports(date: str | None = None):
         root = REPORTS_DIR / date
         if not root.exists() or not root.is_dir():
             return []
+        if root.name.startswith("."):
+            return []
 
     for day_dir in sorted(root.iterdir() if root.is_dir() else [], reverse=True):
         if date and day_dir != root:
             continue
         if not day_dir.is_dir():
+            continue
+        if day_dir.name.startswith("."):
             continue
         day = day_dir.name
         for item in day_dir.iterdir():
@@ -84,6 +104,27 @@ def _validate_size(file_bytes: bytes) -> None:
     max_bytes = MAX_FILE_MB * 1024 * 1024
     if len(file_bytes) > max_bytes:
         raise HTTPException(status_code=400, detail="file_too_large")
+
+
+def _reports_trash_dir() -> Path:
+    trash_dir = REPORTS_DIR / ".trash"
+    trash_dir.mkdir(parents=True, exist_ok=True)
+    return trash_dir
+
+
+def _resolve_report_path(date: str, filename: str) -> Path:
+    candidate = (REPORTS_DIR / date / filename).resolve()
+    if not candidate.is_relative_to(REPORTS_DIR.resolve()):
+        raise HTTPException(status_code=400, detail="invalid_report_path")
+    return candidate
+
+
+def _resolve_trash_path(date: str, filename: str) -> Path:
+    trash_dir = _reports_trash_dir()
+    candidate = (trash_dir / date / filename).resolve()
+    if not candidate.is_relative_to(trash_dir.resolve()):
+        raise HTTPException(status_code=400, detail="invalid_report_path")
+    return candidate
 
 
 @app.post("/ingest")
@@ -207,22 +248,23 @@ def platform_summary():
 
 
 @app.post("/patients")
-async def register_patient(patient: dict):
+async def register_patient(patient: PatientUpsertRequest):
     """Register a new patient"""
     import uuid
     from datetime import datetime
-    
+    payload = patient.model_dump(exclude_none=True)
+
     # Generate patient_id if not provided
-    if not patient.get("patient_id"):
-        patient["patient_id"] = f"P{uuid.uuid4().hex[:12].upper()}"
+    if not payload.get("patient_id"):
+        payload["patient_id"] = f"P{uuid.uuid4().hex[:12].upper()}"
     
     # Calculate age from birth_date if provided
-    if patient.get("birth_date") and not patient.get("age"):
-        birth_date = datetime.fromisoformat(patient["birth_date"].replace("Z", "+00:00"))
-        patient["age"] = datetime.now().year - birth_date.year
+    if payload.get("birth_date") and not payload.get("age"):
+        birth_date = datetime.fromisoformat(payload["birth_date"].replace("Z", "+00:00"))
+        payload["age"] = datetime.now().year - birth_date.year
     
     # Upsert patient to database
-    patient_id = upsert_patient(patient)
+    patient_id = upsert_patient(payload)
     
     if not patient_id:
         raise HTTPException(status_code=400, detail="patient_registration_failed")
@@ -231,10 +273,35 @@ async def register_patient(patient: dict):
 
 
 @app.get("/patients")
-def get_patients(page: int = 1, limit: int = 20):
+def get_patients(page: int = 1, limit: int = 20, include_archived: bool = False):
     """Get all registered patients with pagination"""
     offset = (page - 1) * limit
-    return list_patients(limit=limit, offset=offset)
+    return list_patients(limit=limit, offset=offset, include_archived=include_archived)
+
+
+@app.get("/patients/{patient_id}")
+def get_patient_endpoint(patient_id: str):
+    patient = get_patient(patient_id)
+    if not patient:
+        raise HTTPException(status_code=404, detail="patient_not_found")
+    return patient
+
+
+@app.put("/patients/{patient_id}")
+def update_patient_endpoint(patient_id: str, request: PatientUpsertRequest):
+    payload = request.model_dump(exclude_none=True)
+    updated = update_patient(patient_id, payload)
+    if not updated:
+        raise HTTPException(status_code=404, detail="patient_not_found")
+    return updated
+
+
+@app.post("/patients/{patient_id}/archive")
+def archive_patient_endpoint(patient_id: str, request: PatientArchiveRequest):
+    updated = archive_patient(patient_id, request.archived)
+    if not updated:
+        raise HTTPException(status_code=404, detail="patient_not_found")
+    return updated
 
 
 @app.get("/platform/records")
@@ -250,6 +317,70 @@ def platform_emrs(patient_id: str | None = None, limit: int = 50, include_archiv
 @app.get("/reports")
 def list_reports(date: str | None = None):
     return _list_reports(date=date)
+
+
+@app.get("/reports/.trash")
+def list_trash_reports():
+    """列出回收站中的归档报告"""
+    trash_dir = _reports_trash_dir()
+    reports = []
+    
+    for day_dir in sorted(trash_dir.iterdir() if trash_dir.is_dir() else [], reverse=True):
+        if not day_dir.is_dir():
+            continue
+        day = day_dir.name
+        for item in day_dir.iterdir():
+            if not item.is_file():
+                continue
+            reports.append(
+                {
+                    "date": day,
+                    "name": item.name,
+                    "size_bytes": item.stat().st_size,
+                    "url": f"/reports/.trash/{day}/{item.name}",
+                    "updated_at": item.stat().st_mtime,
+                }
+            )
+    
+    reports.sort(key=lambda r: r["updated_at"], reverse=True)
+    return reports
+
+
+@app.get("/reports/.trash/{date}/{filename}")
+def download_trash_report(date: str, filename: str):
+    """从回收站下载/预览归档报告"""
+    trash_path = _resolve_trash_path(date, filename)
+    if not trash_path.exists() or not trash_path.is_file():
+        raise HTTPException(status_code=404, detail="report_not_found")
+    
+    ascii_name = "report" + trash_path.suffix
+    quoted_name = quote(trash_path.name)
+    content_disposition = (
+        f"inline; filename=\"{ascii_name}\"; filename*=UTF-8''{quoted_name}"
+    )
+    headers = {"Content-Disposition": content_disposition}
+    return FileResponse(trash_path, headers=headers)
+
+
+@app.post("/reports/archive")
+def archive_report(request: ReportArchiveRequest):
+    report_path = _resolve_report_path(request.date, request.filename)
+    trash_path = _resolve_trash_path(request.date, request.filename)
+
+    if request.archived:
+        if not report_path.exists() or not report_path.is_file():
+            raise HTTPException(status_code=404, detail="report_not_found")
+        trash_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(report_path), str(trash_path))
+        return {"status": "archived", "date": request.date, "filename": request.filename}
+
+    if not trash_path.exists() or not trash_path.is_file():
+        raise HTTPException(status_code=404, detail="report_not_archived")
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    if report_path.exists():
+        raise HTTPException(status_code=409, detail="report_already_exists")
+    shutil.move(str(trash_path), str(report_path))
+    return {"status": "restored", "date": request.date, "filename": request.filename}
 
 
 @app.get("/reports/{date}/{filename}")

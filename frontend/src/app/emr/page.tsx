@@ -579,7 +579,7 @@ export default function EmrPage() {
             <h2 className="text-lg font-semibold text-slate-900">热成像图</h2>
             <div className="mt-4">
               <img
-                src={`${API_BASE}/${String(report.thermal_marked_image)}`}
+                src={`${API_BASE}/data/${String(report.thermal_marked_image)}`}
                 alt="Thermal Marked Image"
                 className="w-full max-w-2xl rounded-xl border border-slate-200"
               />

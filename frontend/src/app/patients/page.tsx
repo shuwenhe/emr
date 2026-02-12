@@ -452,6 +452,53 @@ export default function PatientsPage() {
     }
   }
 
+  async function handleArchiveReport(file: ReportFile) {
+    const confirmed = window.confirm(`确认将报告“${file.name}”移入回收站吗？`);
+    if (!confirmed) return;
+    setReportError(null);
+    try {
+      const response = await fetch(`${API_BASE}/reports/archive`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date: file.date, filename: file.name, archived: true }),
+      });
+      if (!response.ok) {
+        throw new Error("报告归档失败");
+      }
+      if (reportPatient) {
+        const refresh = await fetch(`${API_BASE}/reports`).then((r) => r.json());
+        const files = Array.isArray(refresh) ? (refresh as ReportFile[]) : [];
+        setReportFiles(filterReportsForPatient(files, reportPatient));
+      } else {
+        setReportFiles((prev) => prev.filter((item) => item !== file));
+      }
+    } catch (error) {
+      setReportError(`归档失败: ${String(error)}`);
+    }
+  }
+
+  async function handleArchivePatient(patient: Patient) {
+    const confirmed = window.confirm(`确认归档患者“${patient.name || patient.patient_id}”吗？`);
+    if (!confirmed) return;
+    try {
+      const response = await fetch(`${API_BASE}/patients/${encodeURIComponent(patient.patient_id)}/archive`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ archived: true }),
+      });
+      if (!response.ok) {
+        throw new Error("归档失败");
+      }
+      setPatients((prev) => prev.filter((item) => item.patient_id !== patient.patient_id));
+      if (selectedPatient?.patient_id === patient.patient_id) {
+        setSelectedPatient(null);
+        setShowDetailModal(false);
+      }
+    } catch (error) {
+      alert(`归档失败: ${error instanceof Error ? error.message : "未知错误"}`);
+    }
+  }
+
   async function handleRegisterPatient(e: React.FormEvent) {
     e.preventDefault();
     
@@ -618,6 +665,12 @@ export default function PatientsPage() {
                             }}
                           >
                             报告
+                          </button>
+                          <button
+                            className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                            onClick={() => handleArchivePatient(patient)}
+                          >
+                            归档
                           </button>
                         </div>
                       </td>
@@ -1128,6 +1181,12 @@ export default function PatientsPage() {
                               >
                                 下载
                               </a>
+                              <button
+                                className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                                onClick={() => handleArchiveReport(file)}
+                              >
+                                归档
+                              </button>
                             </div>
                           </td>
                         </tr>

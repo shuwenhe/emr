@@ -29,6 +29,7 @@ def init_db() -> None:
                     name VARCHAR(128),
                     gender VARCHAR(32),
                     age INT,
+                    archived TINYINT DEFAULT 0,
                     payload_json JSON,
                     updated_at DATETIME
                 )
@@ -86,6 +87,10 @@ def init_db() -> None:
                 cursor.execute("ALTER TABLE emrs ADD COLUMN archived TINYINT DEFAULT 0")
             except Exception:
                 pass
+            try:
+                cursor.execute("ALTER TABLE patients ADD COLUMN archived TINYINT DEFAULT 0")
+            except Exception:
+                pass
 
 
 def _now() -> str:
@@ -100,8 +105,8 @@ def upsert_patient(patient: Dict[str, Any]) -> Optional[str]:
         with conn.cursor() as cursor:
             cursor.execute(
             """
-            INSERT INTO patients (patient_id, name, gender, age, payload_json, updated_at)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO patients (patient_id, name, gender, age, archived, payload_json, updated_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE
                 name=VALUES(name),
                 gender=VALUES(gender),
@@ -114,6 +119,7 @@ def upsert_patient(patient: Dict[str, Any]) -> Optional[str]:
                 patient.get("name"),
                 patient.get("gender"),
                 patient.get("age"),
+                0,
                 json.dumps(patient, ensure_ascii=False),
                 _now(),
             ),
@@ -121,18 +127,23 @@ def upsert_patient(patient: Dict[str, Any]) -> Optional[str]:
     return patient_id
 
 
-def list_patients(limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
+def list_patients(
+    limit: int = 100,
+    offset: int = 0,
+    include_archived: bool = False,
+) -> List[Dict[str, Any]]:
     """Get all registered patients with pagination"""
     with _connect() as conn:
         with conn.cursor() as cursor:
             cursor.execute(
                 """
-                SELECT patient_id, name, gender, age, payload_json, updated_at
+                SELECT patient_id, name, gender, age, archived, payload_json, updated_at
                 FROM patients
+                WHERE (%s = 1 OR archived = 0)
                 ORDER BY updated_at DESC
                 LIMIT %s OFFSET %s
                 """,
-                (limit, offset)
+                (1 if include_archived else 0, limit, offset)
             )
             rows = cursor.fetchall()
             patients = []
@@ -143,10 +154,64 @@ def list_patients(limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
                     "name": row["name"],
                     "gender": row["gender"],
                     "age": row["age"],
+                    "archived": bool(row.get("archived")),
                     "updated_at": row["updated_at"].isoformat() if row.get("updated_at") else None
                 })
                 patients.append(patient)
             return patients
+
+
+def get_patient(patient_id: str) -> Optional[Dict[str, Any]]:
+    with _connect() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT patient_id, name, gender, age, archived, payload_json, updated_at
+                FROM patients
+                WHERE patient_id = %s
+                """,
+                (patient_id,)
+            )
+            row = cursor.fetchone()
+    if not row:
+        return None
+    patient = json.loads(row.get("payload_json") or "{}")
+    patient.update({
+        "patient_id": row.get("patient_id"),
+        "name": row.get("name"),
+        "gender": row.get("gender"),
+        "age": row.get("age"),
+        "archived": bool(row.get("archived")),
+        "updated_at": row.get("updated_at").isoformat() if row.get("updated_at") else None,
+    })
+    return patient
+
+
+def update_patient(patient_id: str, updates: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    current = get_patient(patient_id)
+    if not current:
+        return None
+    merged = dict(current)
+    for key, value in updates.items():
+        if value is not None:
+            merged[key] = value
+    merged["patient_id"] = patient_id
+    upsert_patient(merged)
+    return get_patient(patient_id)
+
+
+def archive_patient(patient_id: str, archived: bool = True) -> Optional[Dict[str, Any]]:
+    with _connect() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE patients
+                SET archived = %s, updated_at = %s
+                WHERE patient_id = %s
+                """,
+                (1 if archived else 0, _now(), patient_id),
+            )
+    return get_patient(patient_id)
 
 
 def save_record(

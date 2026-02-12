@@ -257,7 +257,9 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
                 grid, record_dir / "thermal_marked.png"
             )
             if marked_image_path:
-                image_paths.append(marked_image_path)
+                # 转换为相对于DATA_DIR的路径用于API访问
+                relative_path = Path(marked_image_path).relative_to(DATA_DIR)
+                image_paths.append(str(relative_path))
                 temperature_labels = _extract_temperature_labels(marked_image_path)
 
     capture_time = (metadata.get("capture") or {}).get("capture_time") or datetime.now().isoformat()
@@ -322,7 +324,7 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
         "capture": metadata.get("capture"),
         "environment": metadata.get("environment"),
         "thermal_images": image_paths,
-        "thermal_marked_image": marked_image_path,
+        "thermal_marked_image": str(Path(marked_image_path).relative_to(DATA_DIR)) if marked_image_path else None,
         "thermal_marked_labels": temperature_labels,
         "diagnosis": diagnosis,
         "doctor_opinion": doctor_opinion,

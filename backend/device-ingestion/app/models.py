@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class DeviceInfo(BaseModel):
@@ -30,6 +30,25 @@ class PatientInfo(BaseModel):
     age: Optional[int] = Field(None, description="年龄")
     body_part: Optional[str] = Field(None, description="采集部位")
     posture: Optional[str] = Field(None, description="姿态")
+
+
+class PatientUpsertRequest(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    patient_id: Optional[str] = Field(None, description="患者ID")
+    name: Optional[str] = Field(None, description="患者姓名")
+    gender: Optional[str] = Field(None, description="性别")
+    age: Optional[int] = Field(None, description="年龄")
+    birth_date: Optional[str] = Field(None, description="出生日期")
+    id_card: Optional[str] = Field(None, description="身份证号")
+    phone: Optional[str] = Field(None, description="联系电话")
+    address: Optional[str] = Field(None, description="联系地址")
+    emergency_contact: Optional[str] = Field(None, description="紧急联系人")
+    emergency_phone: Optional[str] = Field(None, description="紧急联系人电话")
+    allergies: Optional[str] = Field(None, description="过敏史")
+    medical_history: Optional[str] = Field(None, description="既往病史")
+    department: Optional[str] = Field(None, description="就诊科室")
+    chief_complaint: Optional[str] = Field(None, description="主诉")
 
 
 class ClinicalInfo(BaseModel):
@@ -87,3 +106,13 @@ class EmrUpdateRequest(BaseModel):
 
 class EmrArchiveRequest(BaseModel):
     archived: bool = Field(True, description="是否归档")
+
+
+class PatientArchiveRequest(BaseModel):
+    archived: bool = Field(True, description="是否归档")
+
+
+class ReportArchiveRequest(BaseModel):
+    date: str = Field(..., description="报告日期目录，格式 YYYYMMDD")
+    filename: str = Field(..., description="报告文件名")
+    archived: bool = Field(True, description="是否归档（软删除）")
