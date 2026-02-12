@@ -182,7 +182,7 @@ graph LR
     classDef defaultStyle fill:#34495e,stroke:#ecf0f1,stroke-width:2px,color:#ecf0f1
     class F1,F2,F3,F4,F5,F6,B1,B2,B3,B4,B5,B6,C1,C2,C3,C4,FL1,FL2,T1,T2,T3,D1,D2,D3,D4 defaultStyle
     
-    classDef leafStyle fill:#2c3e50,stroke:#95a5a6,stroke-width:1px,color:#fff,font-weight:bold
+    classDef leafStyle fill:#16a085,stroke:#1abc9c,stroke-width:2px,color:#fff,font-weight:bold
     class F1_1,F1_2,F1_3,F1_4,F1_5,F2_1,F2_2,F2_3,F2_4,F3_1,F3_2,F3_3,F3_4,F3_5,F3_6,F3_7,F4_1,F4_2,F4_3,F4_4,F4_5,F5_1,F5_2,F5_3,F6_1,F6_2,F6_3,F6_4 leafStyle
     class B1_1,B1_2,B1_3,B1_4,B1_5,B2_1,B2_2,B2_3,B2_4,B3_1,B3_2,B3_3,B3_4,B4_1,B4_2,B4_3,B4_4,B5_1,B5_2,B5_3,B5_4,B5_5,B6_1,B6_2,B6_3,B6_4,B6_5 leafStyle
     class C1_1,C1_2,C1_3,C1_4,C1_5,C2_1,C2_2,C2_3,C2_4,C3_1,C3_2,C3_3,C3_4,C4_1,C4_2,C4_3,C4_4,C4_5 leafStyle
