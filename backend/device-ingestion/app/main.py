@@ -268,6 +268,22 @@ def download_report(date: str, filename: str, inline: bool = False):
     return FileResponse(candidate, headers=headers)
 
 
+@app.get("/reports/preview")
+def preview_report(date: str, filename: str):
+    candidate = (REPORTS_DIR / date / filename).resolve()
+    if not candidate.exists() or not candidate.is_file():
+        raise HTTPException(status_code=404, detail="report_not_found")
+    if not candidate.is_relative_to(REPORTS_DIR.resolve()):
+        raise HTTPException(status_code=400, detail="invalid_report_path")
+    ascii_name = "report" + candidate.suffix
+    quoted_name = quote(candidate.name)
+    content_disposition = (
+        f"inline; filename=\"{ascii_name}\"; filename*=UTF-8''{quoted_name}"
+    )
+    headers = {"Content-Disposition": content_disposition}
+    return FileResponse(candidate, headers=headers)
+
+
 @app.on_event("startup")
 async def start_device_polling():
     global _device_stop_event

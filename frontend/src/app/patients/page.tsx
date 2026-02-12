@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import mammoth from "mammoth";
 
 type Patient = {
   patient_id: string;
@@ -29,6 +30,14 @@ type EmrRecord = {
   archived: boolean;
 };
 
+type ReportFile = {
+  date: string;
+  name: string;
+  size_bytes: number;
+  url: string;
+  updated_at: number;
+};
+
 type NewPatient = {
   name: string;
   gender: string;
@@ -51,9 +60,17 @@ export default function PatientsPage() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [emrs, setEmrs] = useState<EmrRecord[]>([]);
+  const [reportFiles, setReportFiles] = useState<ReportFile[]>([]);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportError, setReportError] = useState<string | null>(null);
+  const [reportPatient, setReportPatient] = useState<Patient | null>(null);
+  const [reportPreviewHtml, setReportPreviewHtml] = useState("");
+  const [reportPreviewTitle, setReportPreviewTitle] = useState("");
+  const [showReportPreview, setShowReportPreview] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showRegisterForm, setShowRegisterForm] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const [formData, setFormData] = useState<NewPatient>({
     name: "",
     gender: "男",
@@ -146,6 +163,123 @@ export default function PatientsPage() {
       setShowDetailModal(true);
     } catch {
       setEmrs([]);
+    }
+  }
+
+  function formatFileSize(bytes: number) {
+    if (!bytes || Number.isNaN(bytes)) return "-";
+    const units = ["B", "KB", "MB", "GB"];
+    let value = bytes;
+    let unitIndex = 0;
+    while (value >= 1024 && unitIndex < units.length - 1) {
+      value /= 1024;
+      unitIndex += 1;
+    }
+    return `${value.toFixed(value >= 10 || unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+  }
+
+  function filterReportsForPatient(files: ReportFile[], patient: Patient | null) {
+    if (!patient) return [] as ReportFile[];
+    const name = patient.name?.trim();
+    const id = patient.patient_id?.trim();
+    return files.filter((file) => {
+      if (!file.name) return false;
+      const lower = file.name.toLowerCase();
+      if (name && file.name.startsWith(`${name}_`)) return true;
+      if (name && lower.includes(name.toLowerCase())) return true;
+      if (id && lower.includes(id.toLowerCase())) return true;
+      return false;
+    });
+  }
+
+  function buildReportFileUrl(file: ReportFile) {
+    const encodedDate = encodeURIComponent(file.date);
+    const encodedName = encodeURIComponent(file.name);
+    return `${API_BASE}/reports/preview?date=${encodedDate}&filename=${encodedName}`;
+  }
+
+  function buildReportDownloadUrl(file: ReportFile) {
+    const encodedDate = encodeURIComponent(file.date);
+    const encodedName = encodeURIComponent(file.name);
+    return `${API_BASE}/reports/${encodedDate}/${encodedName}`;
+  }
+
+  async function handleOpenReportHistory(patient: Patient) {
+    setReportLoading(true);
+    setReportError(null);
+    setReportPatient(patient);
+    setShowReportModal(true);
+    try {
+      const response = await fetch(`${API_BASE}/reports`);
+      const data = await response.json();
+      const files = Array.isArray(data) ? (data as ReportFile[]) : [];
+      setReportFiles(filterReportsForPatient(files, patient));
+    } catch {
+      setReportFiles([]);
+      setReportError("获取报告列表失败");
+    } finally {
+      setReportLoading(false);
+    }
+  }
+
+  async function handlePreviewReport(file: ReportFile) {
+    setReportError(null);
+    const url = buildReportFileUrl(file);
+    if (!file.name.toLowerCase().endsWith(".docx")) {
+      window.open(url, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    try {
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+      const result = await mammoth.convertToHtml({ arrayBuffer });
+      setReportPreviewHtml(result.value);
+      setReportPreviewTitle(file.name);
+      setShowReportPreview(true);
+    } catch (error) {
+      setReportError(`预览失败: ${String(error)}`);
+    }
+  }
+
+  async function handlePrintReport(file: ReportFile) {
+    setReportError(null);
+    const url = buildReportFileUrl(file);
+    if (!file.name.toLowerCase().endsWith(".docx")) {
+      window.open(url, "_blank", "noopener,noreferrer");
+      return;
+    }
+    try {
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+      const result = await mammoth.convertToHtml({ arrayBuffer });
+      const printWindow = window.open("", "_blank", "width=900,height=1000");
+      if (!printWindow) {
+        setReportError("无法打开打印窗口");
+        return;
+      }
+      printWindow.document.open();
+      printWindow.document.write(`
+        <!doctype html>
+        <html lang="zh-CN">
+        <head>
+          <meta charset="utf-8" />
+          <title>打印报告</title>
+          <style>
+            body { font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif; margin: 24px; }
+            .prose { max-width: 100%; }
+          </style>
+        </head>
+        <body>
+          <div class="prose">${result.value}</div>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+    } catch (error) {
+      setReportError(`打印失败: ${String(error)}`);
     }
   }
 
@@ -295,15 +429,6 @@ export default function PatientsPage() {
                       <td className="px-4 py-3">
                         <div className="flex gap-2">
                           <button
-                            className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                            onClick={() => {
-                              setSelectedPatient(patient);
-                              setShowDetailModal(true);
-                            }}
-                          >
-                            详情
-                          </button>
-                          <button
                             className="rounded-full border border-blue-200 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50"
                             onClick={() => fetchPatientEmrs(patient)}
                           >
@@ -311,7 +436,7 @@ export default function PatientsPage() {
                           </button>
                           <button
                             className="rounded-full border border-green-200 px-3 py-1 text-xs font-semibold text-green-600 hover:bg-green-50"
-                            onClick={() => router.push(`/emr?patient=${encodeURIComponent(patient.name)}`)}
+                            onClick={() => handleOpenReportHistory(patient)}
                           >
                             报告
                           </button>
@@ -668,6 +793,114 @@ export default function PatientsPage() {
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+        )}
+
+        {showReportModal && reportPatient && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="relative max-h-[90vh] w-full max-w-3xl overflow-auto rounded-2xl bg-white p-8 shadow-xl">
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-semibold text-slate-900">历史报告文件</h2>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {reportPatient.name || reportPatient.patient_id}
+                  </p>
+                </div>
+                <button
+                  className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200"
+                  onClick={() => setShowReportModal(false)}
+                >
+                  关闭
+                </button>
+              </div>
+
+              {reportLoading && (
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                  正在加载报告文件...
+                </div>
+              )}
+
+              {!reportLoading && reportError && (
+                <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+                  {reportError}
+                </div>
+              )}
+
+              {!reportLoading && !reportError && reportFiles.length === 0 && (
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                  暂无匹配的历史报告文件
+                </div>
+              )}
+
+              {!reportLoading && !reportError && reportFiles.length > 0 && (
+                <div className="overflow-hidden rounded-xl border border-slate-200">
+                  <table className="min-w-full text-left text-sm">
+                    <thead className="bg-slate-50 text-slate-600">
+                      <tr>
+                        <th className="px-4 py-3 font-medium">文件名</th>
+                        <th className="px-4 py-3 font-medium">日期</th>
+                        <th className="px-4 py-3 font-medium">大小</th>
+                        <th className="px-4 py-3 font-medium">操作</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200">
+                      {reportFiles.map((file) => (
+                        <tr key={`${file.date}-${file.name}`} className="hover:bg-slate-50">
+                          <td className="px-4 py-3 font-medium text-slate-900">{file.name}</td>
+                          <td className="px-4 py-3 text-slate-700">{file.date}</td>
+                          <td className="px-4 py-3 text-slate-700">{formatFileSize(file.size_bytes)}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-wrap gap-2">
+                              <button
+                                className="rounded-full border border-blue-200 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50"
+                                onClick={() => handlePreviewReport(file)}
+                              >
+                                查看
+                              </button>
+                              <button
+                                className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                                onClick={() => handlePrintReport(file)}
+                              >
+                                打印
+                              </button>
+                              <a
+                                className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
+                                href={buildReportDownloadUrl(file)}
+                                download
+                              >
+                                下载
+                              </a>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {showReportPreview && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4">
+            <div className="relative max-h-[90vh] w-full max-w-4xl overflow-auto rounded-2xl bg-white p-8 shadow-xl">
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-semibold text-slate-900">报告预览</h2>
+                  {reportPreviewTitle && (
+                    <p className="mt-1 text-sm text-slate-500">{reportPreviewTitle}</p>
+                  )}
+                </div>
+                <button
+                  className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200"
+                  onClick={() => setShowReportPreview(false)}
+                >
+                  关闭
+                </button>
+              </div>
+              <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: reportPreviewHtml }} />
             </div>
           </div>
         )}
