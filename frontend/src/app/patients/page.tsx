@@ -79,6 +79,8 @@ export default function PatientsPage() {
   const [showRegisterForm, setShowRegisterForm] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [reportDateFrom, setReportDateFrom] = useState("");
+  const [reportDateTo, setReportDateTo] = useState("");
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -320,13 +322,33 @@ export default function PatientsPage() {
     if (!patient) return [] as ReportFile[];
     const name = patient.name?.trim();
     const id = patient.patient_id?.trim();
+    
     return files.filter((file) => {
       if (!file.name) return false;
       const lower = file.name.toLowerCase();
-      if (name && file.name.startsWith(`${name}_`)) return true;
-      if (name && lower.includes(name.toLowerCase())) return true;
-      if (id && lower.includes(id.toLowerCase())) return true;
-      return false;
+      
+      // 按患者名字或ID过滤
+      const matchPatient = (name && file.name.startsWith(`${name}_`)) ||
+                          (name && lower.includes(name.toLowerCase())) ||
+                          (id && lower.includes(id.toLowerCase()));
+      if (!matchPatient) return false;
+      
+      // 按日期范围过滤
+      if (reportDateFrom || reportDateTo) {
+        const fileDate = new Date(file.date);
+        if (reportDateFrom) {
+          const fromDate = new Date(reportDateFrom);
+          if (fileDate < fromDate) return false;
+        }
+        if (reportDateTo) {
+          const toDate = new Date(reportDateTo);
+          // 包含结束日期的整个一天
+          toDate.setDate(toDate.getDate() + 1);
+          if (fileDate >= toDate) return false;
+        }
+      }
+      
+      return true;
     });
   }
 
@@ -347,6 +369,9 @@ export default function PatientsPage() {
     setReportError(null);
     setReportPatient(patient);
     setShowReportModal(true);
+    // 重置日期范围
+    setReportDateFrom("");
+    setReportDateTo("");
     try {
       const response = await fetch(`${API_BASE}/reports`);
       const data = await response.json();
@@ -357,6 +382,12 @@ export default function PatientsPage() {
       setReportError("获取报告列表失败");
     } finally {
       setReportLoading(false);
+    }
+  }
+
+  function handleReportDateFilterChange() {
+    if (reportPatient) {
+      setReportFiles(filterReportsForPatient(reportFiles, reportPatient));
     }
   }
 
@@ -970,7 +1001,7 @@ export default function PatientsPage() {
 
         {showReportModal && reportPatient && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="relative max-h-[90vh] w-full max-w-3xl overflow-auto rounded-2xl bg-white p-8 shadow-xl">
+            <div className="relative max-h-[90vh] w-full max-w-4xl overflow-auto rounded-2xl bg-white p-8 shadow-xl">
               <div className="mb-6 flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-semibold text-slate-900">历史报告文件</h2>
@@ -984,6 +1015,55 @@ export default function PatientsPage() {
                 >
                   关闭
                 </button>
+              </div>
+
+              {/* 日期范围过滤器 */}
+              <div className="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <h3 className="mb-3 text-sm font-semibold text-slate-900">按日期搜索</h3>
+                <div className="flex flex-wrap gap-3">
+                  <div className="flex-1 min-w-[150px]">
+                    <label className="block text-xs font-medium text-slate-700 mb-1">
+                      起始日期
+                    </label>
+                    <input
+                      type="date"
+                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                      value={reportDateFrom}
+                      onChange={(e) => {
+                        setReportDateFrom(e.target.value);
+                        handleReportDateFilterChange();
+                      }}
+                    />
+                  </div>
+                  <div className="flex-1 min-w-[150px]">
+                    <label className="block text-xs font-medium text-slate-700 mb-1">
+                      结束日期
+                    </label>
+                    <input
+                      type="date"
+                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                      value={reportDateTo}
+                      onChange={(e) => {
+                        setReportDateTo(e.target.value);
+                        handleReportDateFilterChange();
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <button
+                      className="rounded-lg bg-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-300"
+                      onClick={() => {
+                        setReportDateFrom("");
+                        setReportDateTo("");
+                        if (reportPatient) {
+                          setReportFiles(filterReportsForPatient(reportFiles, reportPatient));
+                        }
+                      }}
+                    >
+                      重置过滤
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {reportLoading && (
@@ -1001,6 +1081,12 @@ export default function PatientsPage() {
               {!reportLoading && !reportError && reportFiles.length === 0 && (
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
                   暂无匹配的历史报告文件
+                </div>
+              )}
+
+              {!reportLoading && !reportError && reportFiles.length > 0 && (
+                <div className="mb-3 text-xs text-slate-500">
+                  共找到 {reportFiles.length} 个匹配的报告文件
                 </div>
               )}
 

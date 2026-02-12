@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日期范围搜索报告 - 交互演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .demo-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .demo-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 10px;
+        }
+        
+        .patient-list {
+            margin-bottom: 20px;
+        }
+        
+        .patient-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            background: #f9fafb;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .patient-row:hover {
+            background: #f3f4f6;
+        }
+        
+        .patient-info {
+            flex: 1;
+        }
+        
+        .patient-name {
+            font-weight: bold;
+            color: #111;
+            margin-bottom: 5px;
+        }
+        
+        .patient-meta {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .patient-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #111;
+        }
+        
+        .modal-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .filter-section {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #111;
+        }
+        
+        .filter-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        
+        .date-input-group {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .date-input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 5px;
+        }
+        
+        .date-input-group input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .date-input-group input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        .report-table thead {
+            background: #f3f4f6;
+        }
+        
+        .report-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #4b5563;
+            font-size: 14px;
+        }
+        
+        .report-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+        
+        .report-table tr:hover {
+            background: #f9fafb;
+        }
+        
+        .report-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .report-actions .btn {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .status-msg {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .status-loading {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-info {
+            background: #dcfce7;
+            color: #15803d;
+        }
+        
+        .status-warning {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .result-count {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .close-btn:hover {
+            color: #111;
+        }
+        
+        .demo-controls {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .demo-step {
+            background: #eff6ff;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border-left: 4px solid #2563eb;
+        }
+        
+        .demo-step-title {
+            font-weight: bold;
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+        
+        .demo-step-content {
+            color: #1e3a8a;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📅 日期范围搜索报告 - 交互演示</h1>
+            <p class="subtitle">这是一个交互式演示页面，帮助您了解如何使用日期范围功能查询报告</p>
+        </div>
+        
+        <!-- 患者列表演示 -->
+        <div class="demo-section">
+            <div class="demo-title">📋 第一步：患者列表</div>
+            <p style="margin-bottom: 15px; color: #666;">点击任意患者的"报告"按钮打开报告历史</p>
+            
+            <div class="patient-list">
+                <div class="patient-row">
+                    <div class="patient-info">
+                        <div class="patient-name">张三</div>
+                        <div class="patient-meta">性别: 男 | 年龄: 34 | 最后更新: 2026-02-12</div>
+                    </div>
+                    <div class="patient-actions">
+                        <button class="btn btn-primary" onclick="openReportModal(this)">报告</button>
+                    </div>
+                </div>
+                
+                <div class="patient-row">
+                    <div class="patient-info">
+                        <div class="patient-name">李四</div>
+                        <div class="patient-meta">性别: 女 | 年龄: 28 | 最后更新: 2026-02-11</div>
+                    </div>
+                    <div class="patient-actions">
+                        <button class="btn btn-primary" onclick="openReportModal(this)">报告</button>
+                    </div>
+                </div>
+                
+                <div class="patient-row">
+                    <div class="patient-info">
+                        <div class="patient-name">高兴兴</div>
+                        <div class="patient-meta">性别: 男 | 年龄: 35 | 最后更新: 2026-02-10</div>
+                    </div>
+                    <div class="patient-actions">
+                        <button class="btn btn-primary" onclick="openReportModal(this)">报告</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 使用说明 -->
+        <div class="demo-section">
+            <div class="demo-title">🎯 使用步骤</div>
+            
+            <div class="demo-step">
+                <div class="demo-step-title">第1步: 点击患者的"报告"按钮</div>
+                <div class="demo-step-content">
+                    在上方患者列表中，找到要查询的患者，点击其右侧的绿色"报告"按钮。
+                    此时会打开一个模态框，显示该患者的所有历史报告。
+                </div>
+            </div>
+            
+            <div class="demo-step">
+                <div class="demo-step-title">第2步: 设置日期范围</div>
+                <div class="demo-step-content">
+                    在"按日期搜索"区域，您可以：<br>
+                    • 只选择起始日期 → 显示该日期及以后的报告<br>
+                    • 只选择结束日期 → 显示该日期及以前的报告<br>
+                    • 同时选择两个日期 → 显示该范围内的报告<br>
+                    <strong>注意：改变日期时，列表会实时过滤，无需点击搜索按钮</strong>
+                </div>
+            </div>
+            
+            <div class="demo-step">
+                <div class="demo-step-title">第3步: 查看过滤结果</div>
+                <div class="demo-step-content">
+                    列表会自动显示符合日期条件的报告。每个报告可以执行以下操作：<br>
+                    • <strong style="color: #2563eb;">预览</strong> - 在浏览器内打开预览<br>
+                    • <strong style="color: #10b981;">打印</strong> - 打开浏览器打印对话框<br>
+                    • <strong style="color: #6b7280;">下载</strong> - 下载文件到本地
+                </div>
+            </div>
+            
+            <div class="demo-step">
+                <div class="demo-step-title">第4步: 清空过滤 (可选)</div>
+                <div class="demo-step-content">
+                    点击"重置过滤"按钮可以清空所有日期过滤条件，恢复显示该患者的所有报告。
+                </div>
+            </div>
+        </div>
+        
+        <!-- 常见场景 -->
+        <div class="demo-section">
+            <div class="demo-title">💡 常见使用场景</div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+                <div style="background: #f0fdf4; padding: 15px; border-radius: 6px; border-left: 4px solid #10b981;">
+                    <div style="font-weight: bold; color: #15803d; margin-bottom: 10px;">📅 查看某一天的报告</div>
+                    <div style="font-size: 14px; color: #166534;">
+                        起始日期 = 结束日期 = 2026-02-11<br>
+                        → 只显示2月11日的报告
+                    </div>
+                </div>
+                
+                <div style="background: #fef3c7; padding: 15px; border-radius: 6px; border-left: 4px solid #f59e0b;">
+                    <div style="font-weight: bold; color: #92400e; margin-bottom: 10px;">📊 查看近期报告</div>
+                    <div style="font-size: 14px; color: #78350f;">
+                        起始日期 = 2026-02-05<br>
+                        (不选结束日期)<br>
+                        → 显示2月5日及以后的报告
+                    </div>
+                </div>
+                
+                <div style="background: #fecaca; padding: 15px; border-radius: 6px; border-left: 4px solid #ef4444;">
+                    <div style="font-weight: bold; color: #991b1b; margin-bottom: 10px;">📈 查看整个月份</div>
+                    <div style="font-size: 14px; color: #7c2d12;">
+                        起始日期 = 2026-02-01<br>
+                        结束日期 = 2026-02-29<br>
+                        → 显示2月份所有报告
+                    </div>
+                </div>
+                
+                <div style="background: #e0e7ff; padding: 15px; border-radius: 6px; border-left: 4px solid #6366f1;">
+                    <div style="font-weight: bold; color: #3730a3; margin-bottom: 10px;">🔄 重置过滤</div>
+                    <div style="font-size: 14px; color: #1e1b4b;">
+                        点击"重置过滤"按钮<br>
+                        → 显示该患者的所有报告
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 快速参考 -->
+        <div class="demo-section">
+            <div class="demo-title">⚡ 快速参考</div>
+            
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f3f4f6;">
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e5e7eb;">操作</th>
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e5e7eb;">步骤</th>
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e5e7eb;">结果</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>打开报告</strong></td>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;">点击患者行的[报告]按钮</td>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;">打开报告历史模态框</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>选择日期</strong></td>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;">点击日期输入框选日期</td>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;">列表自动过滤</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>预览报告</strong></td>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;">点击报告行的[预览]按钮</td>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;">在浏览器打开预览</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>打印报告</strong></td>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;">点击报告行的[打印]按钮</td>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;">打开打印对话框</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>下载报告</strong></td>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;">点击报告行的[下载]按钮</td>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;">下载到本地</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;"><strong>重置过滤</strong></td>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;">点击[重置过滤]按钮</td>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;">清空日期，显示所有</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- 说明文档 -->
+        <div class="demo-section">
+            <div class="demo-title">📚 详细文档</div>
+            <div style="color: #666; line-height: 1.8;">
+                <p style="margin-bottom: 10px;"><strong>如需了解更多，请查看以下文档：</strong></p>
+                <ul style="margin-left: 20px;">
+                    <li><code>docs/USER_GUIDE_DATE_FILTER.md</code> - 详细使用指南</li>
+                    <li><code>docs/UI_VISUAL_GUIDE.md</code> - 界面可视化说明</li>
+                    <li><code>docs/QUICK_REFERENCE.md</code> - 快速参考卡</li>
+                    <li><code>docs/FEATURE_DATE_FILTER.md</code> - 功能技术细节</li>
+                    <li><code>docs/API_SPECIFICATION.md</code> - API规范文档</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 报告历史模态框 -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">历史报告文件</div>
+                    <div class="modal-subtitle" id="patientName"></div>
+                </div>
+                <button class="close-btn" onclick="closeReportModal()">×</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="filter-section">
+                    <div class="filter-title">📅 按日期搜索</div>
+                    <div class="filter-controls">
+                        <div class="date-input-group">
+                            <label>起始日期</label>
+                            <input type="date" id="dateFrom" onchange="filterReports()">
+                        </div>
+                        <div class="date-input-group">
+                            <label>结束日期</label>
+                            <input type="date" id="dateTo" onchange="filterReports()">
+                        </div>
+                        <button class="btn btn-secondary" onclick="resetFilter()">重置过滤</button>
+                    </div>
+                </div>
+                
+                <div id="resultInfo"></div>
+                
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>文件名</th>
+                            <th>日期</th>
+                            <th>大小</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportList"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const allReports = {
+            '张三': [
+                { name: '张三_20260212_093000.docx', date: '2026-02-12', size: '198KB' },
+                { name: '张三_20260211_170700.docx', date: '2026-02-11', size: '204KB' },
+                { name: '张三_20260210_090000.docx', date: '2026-02-10', size: '205KB' },
+                { name: '张三_20260209_145800.docx', date: '2026-02-09', size: '201KB' },
+                { name: '张三_20260208_101530.docx', date: '2026-02-08', size: '210KB' }
+            ],
+            '李四': [
+                { name: '李四_20260211_110000.docx', date: '2026-02-11', size: '195KB' },
+                { name: '李四_20260208_140000.docx', date: '2026-02-08', size: '200KB' }
+            ],
+            '高兴兴': [
+                { name: '高兴兴_20260210_150000.docx', date: '2026-02-10', size: '202KB' },
+                { name: '高兴兴_20260207_100000.docx', date: '2026-02-07', size: '207KB' }
+            ]
+        };
+        
+        let currentPatient = '';
+        let filteredReports = [];
+        
+        function openReportModal(btn) {
+            const patientName = btn.closest('.patient-row').querySelector('.patient-name').textContent;
+            currentPatient = patientName;
+            document.getElementById('patientName').textContent = patientName;
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            
+            filteredReports = [...allReports[patientName]];
+            renderReports();
+            document.getElementById('reportModal').classList.add('active');
+        }
+        
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.remove('active');
+        }
+        
+        function filterReports() {
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            
+            filteredReports = allReports[currentPatient].filter(report => {
+                const reportDate = report.date;
+                
+                if (dateFrom && reportDate < dateFrom) return false;
+                if (dateTo && reportDate > dateTo) return false;
+                
+                return true;
+            });
+            
+            renderReports();
+        }
+        
+        function resetFilter() {
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            filteredReports = [...allReports[currentPatient]];
+            renderReports();
+        }
+        
+        function renderReports() {
+            const tbody = document.getElementById('reportList');
+            const resultInfo = document.getElementById('resultInfo');
+            
+            tbody.innerHTML = '';
+            
+            if (filteredReports.length === 0) {
+                resultInfo.innerHTML = '<div class="status-msg status-warning">暂无匹配的历史报告文件</div>';
+                return;
+            }
+            
+            resultInfo.innerHTML = `<div class="result-count">共找到 ${filteredReports.length} 个匹配的报告文件</div>`;
+            
+            filteredReports.forEach(report => {
+                const row = `
+                    <tr>
+                        <td>${report.name}</td>
+                        <td>${report.date}</td>
+                        <td>${report.size}</td>
+                        <td>
+                            <div class="report-actions">
+                                <button class="btn btn-primary" onclick="alert('预览报告: ' + '${report.name}')">预览</button>
+                                <button class="btn btn-success" onclick="alert('打印报告: ' + '${report.name}')">打印</button>
+                                <button class="btn btn-secondary" onclick="alert('下载报告: ' + '${report.name}')">下载</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+        
+        // 点击模态框外部关闭
+        document.getElementById('reportModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeReportModal();
+            }
+        });
+    </script>
+</body>
+</html>
