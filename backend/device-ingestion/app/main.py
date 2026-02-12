@@ -231,9 +231,10 @@ async def register_patient(patient: dict):
 
 
 @app.get("/patients")
-def get_patients(limit: int = 100):
-    """Get all registered patients"""
-    return list_patients(limit=limit)
+def get_patients(page: int = 1, limit: int = 20):
+    """Get all registered patients with pagination"""
+    offset = (page - 1) * limit
+    return list_patients(limit=limit, offset=offset)
 
 
 @app.get("/platform/records")

@@ -121,8 +121,8 @@ def upsert_patient(patient: Dict[str, Any]) -> Optional[str]:
     return patient_id
 
 
-def list_patients(limit: int = 100) -> List[Dict[str, Any]]:
-    """Get all registered patients"""
+def list_patients(limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
+    """Get all registered patients with pagination"""
     with _connect() as conn:
         with conn.cursor() as cursor:
             cursor.execute(
@@ -130,9 +130,9 @@ def list_patients(limit: int = 100) -> List[Dict[str, Any]]:
                 SELECT patient_id, name, gender, age, payload_json, updated_at
                 FROM patients
                 ORDER BY updated_at DESC
-                LIMIT %s
+                LIMIT %s OFFSET %s
                 """,
-                (limit,)
+                (limit, offset)
             )
             rows = cursor.fetchall()
             patients = []

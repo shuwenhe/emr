@@ -79,6 +79,9 @@ export default function PatientsPage() {
   const [showRegisterForm, setShowRegisterForm] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<NewPatient>({
     name: "",
     gender: "男",
@@ -115,8 +118,27 @@ export default function PatientsPage() {
   };
 
   useEffect(() => {
-    fetchPatients();
+    fetchPatients(1, true);
   }, []);
+
+  // 无限滚动监听
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loading || !hasMore) return;
+      
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight;
+      const clientHeight = document.documentElement.clientHeight;
+      
+      // 当滚动到距离底部200px时触发加载
+      if (scrollTop + clientHeight >= scrollHeight - 200) {
+        loadMore();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [loading, hasMore, page]);
 
   function savePatientsState(partial: Record<string, unknown>) {
     try {
@@ -152,11 +174,14 @@ export default function PatientsPage() {
   }, []);
 
   useEffect(() => {
-    try {
-      savePatientsState({ searchQuery });
-    } catch {
-      // ignore storage errors
-    }
+    const timeoutId = setTimeout(() => {
+      try {
+        savePatientsState({ searchQuery });
+      } catch {
+        // ignore storage errors
+      }
+    }, 500);
+    return () => clearTimeout(timeoutId);
   }, [searchQuery]);
 
   function clearPatientFlowState() {
@@ -167,10 +192,32 @@ export default function PatientsPage() {
     }
   }
 
-  async function fetchPatients() {
+  function normalizeGender(gender: string | null | undefined): string {
+    if (!gender) return "";
+    const g = String(gender).toLowerCase().trim();
+    if (g === "male" || g === "男" || g === "m") return "male";
+    if (g === "female" || g === "女" || g === "f") return "female";
+    return g;
+  }
+
+  function createPatientSignature(name: string | null | undefined, gender: string | null | undefined, age: number | null | undefined): string {
+    const normalizedGender = normalizeGender(gender);
+    return `${String(name ?? "").trim()}|${normalizedGender}|${age ?? ""}`.toLowerCase();
+  }
+
+  async function loadMore() {
+    if (loading || !hasMore) return;
+    const nextPage = page + 1;
+    await fetchPatients(nextPage, false);
+  }
+
+  async function fetchPatients(pageNum: number = 1, reset: boolean = false) {
+    if (loading) return;
+    setLoading(true);
     try {
-      // 首先获取已注册的患者
-      const patientsResponse = await fetch(`${API_BASE}/patients`);
+      const pageSize = 20;
+      // 首先获取已注册的患者（带分页）
+      const patientsResponse = await fetch(`${API_BASE}/patients?page=${pageNum}&limit=${pageSize}`);
       const registeredPatients = await patientsResponse.json();
       
       // 然后从EMR记录中提取患者信息（用于补充未注册的患者）
@@ -184,7 +231,7 @@ export default function PatientsPage() {
       if (Array.isArray(registeredPatients)) {
         registeredPatients.forEach((patient: Patient) => {
           patientsMap.set(patient.patient_id, patient);
-          const signature = `${patient.name ?? ""}|${patient.gender ?? ""}|${patient.age ?? ""}`.toLowerCase();
+          const signature = createPatientSignature(patient.name, patient.gender, patient.age);
           if (signature.trim()) {
             signatureMap.set(signature, patient.patient_id);
           }
@@ -196,7 +243,7 @@ export default function PatientsPage() {
         emrData.forEach((emr: any) => {
           if (emr.patient) {
             const emrPatient = emr.patient as Patient;
-            const signature = `${emrPatient.name ?? ""}|${emrPatient.gender ?? ""}|${emrPatient.age ?? ""}`.toLowerCase();
+            const signature = createPatientSignature(emrPatient.name, emrPatient.gender, emrPatient.age);
             const patientId = emrPatient.patient_id || emr.patient.patient_id || "";
             if (patientId && patientsMap.has(patientId)) {
               return;
@@ -221,10 +268,27 @@ export default function PatientsPage() {
         });
       }
       
-      setPatients(Array.from(patientsMap.values()));
+      const newPatients = Array.from(patientsMap.values());
+      
+      if (reset) {
+        setPatients(newPatients);
+        setPage(1);
+      } else {
+        setPatients(prev => [...prev, ...newPatients]);
+        setPage(pageNum);
+      }
+      
+      // 如果返回的数据少于pageSize，说明没有更多数据了
+      if (newPatients.length < 20) {
+        setHasMore(false);
+      }
     } catch (error) {
       console.error("获取患者列表失败:", error);
-      setPatients([]);
+      if (reset) {
+        setPatients([]);
+      }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -392,7 +456,8 @@ export default function PatientsPage() {
       
       // 关闭表单并刷新患者列表
       setShowRegisterForm(false);
-      await fetchPatients();
+      setHasMore(true);
+      await fetchPatients(1, true);
       
       // 重置表单
       setFormData({
@@ -542,6 +607,26 @@ export default function PatientsPage() {
               >
                 立即登记患者
               </button>
+            </div>
+          )}
+          
+          {/* 加载更多指示器 */}
+          {loading && (
+            <div className="py-8 text-center">
+              <div className="inline-flex items-center space-x-2 text-sm text-slate-500">
+                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>加载中...</span>
+              </div>
+            </div>
+          )}
+          
+          {/* 已加载全部数据提示 */}
+          {!hasMore && patients.length > 0 && (
+            <div className="py-8 text-center text-sm text-slate-400">
+              已显示全部患者数据
             </div>
           )}
         </section>
