@@ -35,6 +35,7 @@ export default function EmrPage() {
   const [output, setOutput] = useState<EmrResponse | { error: string }>({
     error: "请先执行操作",
   });
+  const [showAllReports, setShowAllReports] = useState(false);
 
   useEffect(() => {
     try {
@@ -103,12 +104,21 @@ export default function EmrPage() {
     return "";
   }, [report]);
   const visibleReportFiles = useMemo(() => {
-    if (!currentPatientName) {
+    if (reportFiles.length === 0) {
       return [] as ReportFile[];
     }
+    if (showAllReports) {
+      return reportFiles;
+    }
+    if (!currentPatientName) {
+      return reportFiles;
+    }
     const prefix = `${currentPatientName}_`;
-    return reportFiles.filter((file) => file.name.startsWith(prefix));
-  }, [currentPatientName, reportFiles]);
+    const normalized = currentPatientName.toLowerCase();
+    return reportFiles.filter((file) =>
+      file.name.startsWith(prefix) || file.name.toLowerCase().includes(normalized)
+    );
+  }, [currentPatientName, reportFiles, showAllReports]);
 
   const fetchReports = useCallback(async () => {
     try {
@@ -199,6 +209,14 @@ export default function EmrPage() {
       count: "样本数量",
     };
     return mapping[normalized] || key;
+  }
+
+  function formatGender(value?: string) {
+    if (!value) return "-";
+    const normalized = String(value).toLowerCase();
+    if (normalized === "male" || normalized === "m" || value === "男") return "男";
+    if (normalized === "female" || normalized === "f" || value === "女") return "女";
+    return String(value);
   }
 
   function syncEmrFields(data: EmrResponse) {
@@ -387,7 +405,7 @@ export default function EmrPage() {
           <h2>患者信息</h2>
           <div class="grid">
             <div class="card"><div class="label">姓名</div><div class="value">${String(patient.name || "-")}</div></div>
-            <div class="card"><div class="label">性别/年龄</div><div class="value">${String(patient.gender || "-")} / ${String(patient.age || "-")}</div></div>
+            <div class="card"><div class="label">性别/年龄</div><div class="value">${formatGender(String(patient.gender || "-"))} / ${String(patient.age || "-")}</div></div>
             <div class="card"><div class="label">采集部位</div><div class="value">${String(patient.body_part || "-")}</div></div>
             <div class="card"><div class="label">风险等级</div><div class="value risk">${String(analysis.risk_level || "-")}</div></div>
           </div>
@@ -563,21 +581,8 @@ export default function EmrPage() {
         </section>
 
         <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-          <h2 className="text-lg font-semibold text-slate-900">结果</h2>
-          <pre className="mt-4 max-h-[220px] overflow-y-auto whitespace-pre-wrap rounded-xl bg-slate-950 p-4 text-xs text-slate-100">
-            {outputText}
-          </pre>
-        </section>
-
-        <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-lg font-semibold text-slate-900">诊断报告</h2>
-            <button
-              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-              onClick={handleExportReportJson}
-            >
-              导出报告（JSON）
-            </button>
           </div>
           {report ? (
             <div className="mt-4 space-y-6">
@@ -676,61 +681,77 @@ export default function EmrPage() {
         )}
 
         <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-          <h2 className="text-lg font-semibold text-slate-900">历史报告文件</h2>
-          {currentPatientName ? (
-            visibleReportFiles.length ? (
-            <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
-              <table className="min-w-full text-left text-sm">
-                <thead className="bg-slate-50 text-slate-600">
-                  <tr>
-                    <th className="px-4 py-2 font-medium">日期</th>
-                    <th className="px-4 py-2 font-medium">文件名</th>
-                    <th className="px-4 py-2 font-medium">大小</th>
-                    <th className="px-4 py-2 font-medium">操作</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200">
-                  {visibleReportFiles.map((file) => (
-                    <tr key={`${file.date}-${file.name}`}>
-                      <td className="px-4 py-2 text-slate-700">{file.date}</td>
-                      <td className="px-4 py-2 text-slate-900">{file.name}</td>
-                      <td className="px-4 py-2 text-slate-700">
-                        {(file.size_bytes / 1024).toFixed(1)} KB
-                      </td>
-                      <td className="px-4 py-2">
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                            onClick={() => handleViewDocx(file.url)}
-                          >
-                            查看
-                          </button>
-                          <a
-                            className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                            href={`${API_BASE}${file.url}`}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            下载
-                          </a>
-                          <button
-                            className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                            onClick={() => handlePrintDocx(file.url)}
-                          >
-                            打印
-                          </button>
-                        </div>
-                      </td>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-slate-900">历史报告文件</h2>
+            <button
+              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              onClick={() => setShowAllReports((prev) => !prev)}
+            >
+              {showAllReports ? "仅看当前患者" : "显示全部"}
+            </button>
+          </div>
+          {reportFiles.length === 0 ? (
+            <p className="mt-4 text-sm text-slate-500">暂无报告文件</p>
+          ) : (
+            <>
+              {!currentPatientName && (
+                <p className="mt-3 text-sm text-amber-600">
+                  未识别患者姓名，已显示全部历史报告。
+                </p>
+              )}
+              {currentPatientName && visibleReportFiles.length === 0 && (
+                <p className="mt-3 text-sm text-amber-600">
+                  未匹配到患者“{currentPatientName}”的报告文件，已显示全部历史报告。
+                </p>
+              )}
+              <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
+                <table className="min-w-full text-left text-sm">
+                  <thead className="bg-slate-50 text-slate-600">
+                    <tr>
+                      <th className="px-4 py-2 font-medium">日期</th>
+                      <th className="px-4 py-2 font-medium">文件名</th>
+                      <th className="px-4 py-2 font-medium">大小</th>
+                      <th className="px-4 py-2 font-medium">操作</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="mt-4 text-sm text-slate-500">该患者暂无报告文件</p>
-          )
-          ) : (
-            <p className="mt-4 text-sm text-slate-500">请先生成诊断报告以查看患者历史报告</p>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {(visibleReportFiles.length ? visibleReportFiles : reportFiles).map((file) => (
+                      <tr key={`${file.date}-${file.name}`}>
+                        <td className="px-4 py-2 text-slate-700">{file.date}</td>
+                        <td className="px-4 py-2 text-slate-900">{file.name}</td>
+                        <td className="px-4 py-2 text-slate-700">
+                          {(file.size_bytes / 1024).toFixed(1)} KB
+                        </td>
+                        <td className="px-4 py-2">
+                          <div className="flex flex-wrap gap-2">
+                            <button
+                              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                              onClick={() => handleViewDocx(file.url)}
+                            >
+                              查看
+                            </button>
+                            <a
+                              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                              href={`${API_BASE}${file.url}`}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              下载
+                            </a>
+                            <button
+                              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                              onClick={() => handlePrintDocx(file.url)}
+                            >
+                              打印
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </section>
 

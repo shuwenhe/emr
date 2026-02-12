@@ -284,7 +284,7 @@ def save_report(record_id: str, report: Dict[str, Any]) -> None:
                 report_json=VALUES(report_json),
                 created_at=VALUES(created_at)
             """,
-            (record_id, json.dumps(report, ensure_ascii=False), _now()),
+            (record_id, json.dumps(report, ensure_ascii=False, default=str), _now()),
             )
 
 
@@ -328,7 +328,7 @@ def save_emr(emr: Dict[str, Any]) -> None:
                 patient_id,
                 emr.get("created_at") or _now(),
                 archived,
-                json.dumps(emr, ensure_ascii=False),
+                json.dumps(emr, ensure_ascii=False, default=str),
             ),
             )
 

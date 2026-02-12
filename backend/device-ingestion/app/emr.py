@@ -29,7 +29,10 @@ def _load_json(path: Path) -> Dict[str, Any]:
 def _safe_load(path: Path) -> Optional[Dict[str, Any]]:
     if not path.exists():
         return None
-    return _load_json(path)
+    try:
+        return _load_json(path)
+    except Exception:
+        return None
 
 
 def _report_path(record_id: str) -> Path:
@@ -84,7 +87,7 @@ def generate_emr(record_id: str) -> Dict[str, Any]:
     }
 
     with open(_emr_path(emr_id), "w", encoding="utf-8") as handle:
-        json.dump(emr, handle, ensure_ascii=False, indent=2)
+        json.dump(emr, handle, ensure_ascii=False, indent=2, default=str)
 
     save_emr(emr)
 
@@ -135,7 +138,7 @@ def upsert_emr_from_analysis(
     }
 
     with open(_emr_path(emr_id), "w", encoding="utf-8") as handle:
-        json.dump(emr, handle, ensure_ascii=False, indent=2)
+        json.dump(emr, handle, ensure_ascii=False, indent=2, default=str)
 
     save_emr(emr)
     return emr

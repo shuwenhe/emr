@@ -524,7 +524,7 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
         ("dispatch.json", dispatch),
     ):
         with open(record_dir / name, "w", encoding="utf-8") as handle:
-            json.dump(payload, handle, indent=2, ensure_ascii=False)
+            json.dump(payload, handle, indent=2, ensure_ascii=False, default=str)
 
     save_report(record_id, report)
     save_plan(record_id, plan)

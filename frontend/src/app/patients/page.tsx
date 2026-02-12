@@ -203,6 +203,13 @@ export default function PatientsPage() {
     return g;
   }
 
+  function formatGenderDisplay(gender: string | null | undefined): string {
+    const normalized = normalizeGender(gender);
+    if (normalized === "male") return "男";
+    if (normalized === "female") return "女";
+    return gender ? String(gender) : "-";
+  }
+
   function createPatientSignature(name: string | null | undefined, gender: string | null | undefined, age: number | null | undefined): string {
     const normalizedGender = normalizeGender(gender);
     return `${String(name ?? "").trim()}|${normalizedGender}|${age ?? ""}`.toLowerCase();
@@ -599,7 +606,7 @@ export default function PatientsPage() {
                         {patient.name || "-"}
                       </td>
                       <td className="px-4 py-3 text-slate-700">
-                        {patient.gender || "-"}
+                        {formatGenderDisplay(patient.gender)}
                       </td>
                       <td className="px-4 py-3 text-slate-700">
                         {patient.age ? `${patient.age}岁` : "-"}
@@ -945,7 +952,7 @@ export default function PatientsPage() {
                   </div>
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                     <p className="text-xs font-medium uppercase tracking-wide text-slate-500">性别</p>
-                    <p className="mt-1 text-sm text-slate-900">{selectedPatient.gender || "-"}</p>
+                    <p className="mt-1 text-sm text-slate-900">{formatGenderDisplay(selectedPatient.gender)}</p>
                   </div>
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                     <p className="text-xs font-medium uppercase tracking-wide text-slate-500">年龄</p>

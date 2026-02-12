@@ -209,7 +209,18 @@ def get_emr_endpoint(emr_id: str):
 
 @app.get("/emr")
 def list_emr_endpoint(patient_id: str | None = None, include_archived: bool = False):
-    return list_emrs(patient_id=patient_id, include_archived=include_archived)
+    emrs = list_emrs(patient_id=patient_id, include_archived=include_archived)
+    if patient_id and not emrs:
+        patient = get_patient(patient_id)
+        patient_name = patient.get("name") if patient else None
+        if patient_name:
+            fallback = list_emrs(patient_id=None, include_archived=include_archived)
+            emrs = [
+                item
+                for item in fallback
+                if (item.get("patient") or {}).get("name") == patient_name
+            ]
+    return emrs
 
 
 @app.put("/emr/{emr_id}")

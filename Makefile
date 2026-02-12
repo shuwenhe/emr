@@ -18,14 +18,14 @@ install:
 	$(PYTHON) -m venv $(VENV_DIR)
 	$(VENV_PY) -m pip install -U pip
 	$(VENV_PY) -m pip install -r $(SERVICE_DIR)/requirements.txt
-	@cd frontend && npm install
+	@bash -c 'cd "$(CURDIR)/frontend"; if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" && nvm install 20 && nvm use 20; fi; npm install'
 
 
 run-backend: install
 	$(VENV_PY) -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --app-dir $(SERVICE_DIR)
 
 run-frontend:
-	@cd frontend && npm run dev
+	@bash -c 'cd "$(CURDIR)/frontend"; if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" && nvm use 20; fi; npm run dev'
 
 report: install
 	$(VENV_PY) -m pip install -q python-docx

@@ -4,6 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { flashSuccessButton } from "../lib/flash";
 
+type Patient = {
+  patient_id: string;
+  name: string;
+  gender: string;
+  age: number;
+};
+
 const API_BASE = "http://localhost:8000";
 const UPLOAD_STATE_KEY = "patient_flow_state_upload";
 
@@ -20,6 +27,43 @@ export default function UploadPage() {
   const [bodyPart, setBodyPart] = useState("全身");
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState<{ record_id?: string; error?: string } | null>(null);
+  const [patientMode, setPatientMode] = useState<"new" | "existing">("new");
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [selectedPatientId, setSelectedPatientId] = useState("");
+
+  function formatGender(value?: string) {
+    if (!value) return "-";
+    const normalized = String(value).toLowerCase();
+    if (normalized === "male" || normalized === "m" || value === "男") return "男";
+    if (normalized === "female" || normalized === "f" || value === "女") return "女";
+    return String(value);
+  }
+  const [patientsLoading, setPatientsLoading] = useState(true);
+  const [patientsError, setPatientsError] = useState("");
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  async function fetchPatients() {
+    setPatientsLoading(true);
+    setPatientsError("");
+    try {
+      const response = await fetch(`${API_BASE}/patients`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Fetched patients:", data);
+      setPatients(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Failed to fetch patients:", error);
+      setPatientsError(String(error));
+      setPatients([]);
+    } finally {
+      setPatientsLoading(false);
+    }
+  }
 
   useEffect(() => {
     const name = searchParams.get("name") || "";
@@ -75,9 +119,36 @@ export default function UploadPage() {
     }
   }, [result, router]);
 
+  function handlePatientModeChange(mode: "new" | "existing") {
+    setPatientMode(mode);
+    if (mode === "new") {
+      setSelectedPatientId("");
+      setPatientName("");
+      setGender("");
+      setAge("");
+    }
+  }
+
+  function handleExistingPatientChange(patientId: string) {
+    setSelectedPatientId(patientId);
+    const patient = patients.find(p => p.patient_id === patientId);
+    if (patient) {
+      setPatientName(patient.name);
+      // 统一转换为 male/female 格式
+      const genderValue = patient.gender === "男" ? "male" : patient.gender === "女" ? "female" : patient.gender;
+      setGender(genderValue);
+      setAge(String(patient.age));
+    }
+  }
+
   async function handleUpload() {
     if (!file || !deviceId || !captureTime) {
       setResult({ error: "请填写必填字段并选择文件" });
+      return;
+    }
+
+    if (patientMode === "existing" && !selectedPatientId) {
+      setResult({ error: "请选择一个已登记的患者" });
       return;
     }
 
@@ -96,7 +167,8 @@ export default function UploadPage() {
         distance_m: 1.2,
         emissivity: 0.98,
       },
-      patient: patientName || gender || age || bodyPart ? {
+      patient: patientName || gender || age || bodyPart || selectedPatientId ? {
+        patient_id: selectedPatientId || undefined,
         name: patientName || undefined,
         gender: gender || undefined,
         age: age ? parseInt(age) : undefined,
@@ -192,22 +264,97 @@ export default function UploadPage() {
         </section>
 
         <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-          <h2 className="text-lg font-semibold text-slate-900">患者信息（可选）</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-slate-900">患者信息</h2>
+            <div className="flex rounded-lg border border-slate-200 p-1">
+              <button
+                className={`rounded-md px-3 py-1 text-sm font-medium transition-colors ${
+                  patientMode === "new"
+                    ? "bg-blue-600 text-white"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+                onClick={() => handlePatientModeChange("new")}
+              >
+                新患者
+              </button>
+              <button
+                className={`rounded-md px-3 py-1 text-sm font-medium transition-colors ${
+                  patientMode === "existing"
+                    ? "bg-blue-600 text-white"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+                onClick={() => handlePatientModeChange("existing")}
+              >
+                已有患者
+              </button>
+            </div>
+          </div>
+
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
+            {patientMode === "existing" && (
+              <div className="lg:col-span-2">
+                <label className="block text-sm font-medium text-slate-700">
+                  选择患者 <span className="text-red-500">*</span>
+                  {patients.length > 0 && (
+                    <span className="ml-2 text-xs text-slate-500">
+                      （共 {patients.length} 名已登记患者）
+                    </span>
+                  )}
+                </label>
+                {patientsLoading ? (
+                  <div className="mt-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
+                    正在加载患者列表...
+                  </div>
+                ) : patientsError ? (
+                  <div className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                    加载失败：{patientsError}
+                    <button
+                      className="ml-2 text-xs underline"
+                      onClick={() => fetchPatients()}
+                    >
+                      重试
+                    </button>
+                  </div>
+                ) : patients.length === 0 ? (
+                  <div className="mt-2 rounded-lg border border-yellow-200 bg-yellow-50 px-3 py-2 text-sm text-yellow-700">
+                    暂无已登记的患者，请切换到"新患者"模式进行登记
+                  </div>
+                ) : (
+                  <select
+                    className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                    value={selectedPatientId}
+                    onChange={(e) => handleExistingPatientChange(e.target.value)}
+                  >
+                    <option value="">请选择已登记的患者</option>
+                    {patients.map((patient) => (
+                      <option key={patient.patient_id} value={patient.patient_id}>
+                        {patient.name} - {formatGender(patient.gender)} - {patient.age}岁
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            )}
             <div>
-              <label className="block text-sm font-medium text-slate-700">姓名</label>
+              <label className="block text-sm font-medium text-slate-700">
+                姓名 {patientMode === "new" && <span className="text-slate-400">(可选)</span>}
+              </label>
               <input
-                className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:bg-slate-100"
                 value={patientName}
                 onChange={(e) => setPatientName(e.target.value)}
+                disabled={patientMode === "existing"}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700">性别</label>
+              <label className="block text-sm font-medium text-slate-700">
+                性别 {patientMode === "new" && <span className="text-slate-400">(可选)</span>}
+              </label>
               <select
-                className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:bg-slate-100"
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
+                disabled={patientMode === "existing"}
               >
                 <option value="">请选择</option>
                 <option value="male">男</option>
@@ -215,24 +362,41 @@ export default function UploadPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700">年龄</label>
+              <label className="block text-sm font-medium text-slate-700">
+                年龄 {patientMode === "new" && <span className="text-slate-400">(可选)</span>}
+              </label>
               <input
                 type="number"
-                className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:bg-slate-100"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
+                disabled={patientMode === "existing"}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700">采集部位</label>
+              <label className="block text-sm font-medium text-slate-700">
+                采集部位 <span className="text-slate-400">(可选)</span>
+              </label>
               <input
                 className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
                 value={bodyPart}
                 onChange={(e) => setBodyPart(e.target.value)}
-                placeholder="face / hand / body"
+                placeholder="全身 / 头部 / 颈部 / 肩部"
               />
             </div>
           </div>
+
+          {patientMode === "existing" && selectedPatientId && (
+            <div className="mt-4 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+              已选择患者：{patientName}，将为该患者进行第N次数据采集
+            </div>
+          )}
+
+          {patientMode === "new" && (
+            <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
+              新患者模式：填写患者信息后系统将自动登记
+            </div>
+          )}
         </section>
 
         <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">

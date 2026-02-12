@@ -69,6 +69,14 @@ export default function TreatmentPage() {
   const lockedToLastContext = Boolean(lastContext?.emr_id);
   const shouldAutoGenerate = lockedToLastContext || autoSelected;
 
+  function formatGender(value?: string) {
+    if (!value) return "-";
+    const normalized = String(value).toLowerCase();
+    if (normalized === "male" || normalized === "m" || value === "男") return "男";
+    if (normalized === "female" || normalized === "f" || value === "女") return "女";
+    return String(value);
+  }
+
   useEffect(() => {
     fetchPatients();
   }, []);
@@ -146,7 +154,7 @@ export default function TreatmentPage() {
 
   async function fetchPatients() {
     try {
-      const response = await fetch(`${API_BASE}/platform/summary`);
+      const response = await fetch(`${API_BASE}/patients`);
       const data = await response.json();
       setPatients(Array.isArray(data) ? data : []);
     } catch {
@@ -358,6 +366,72 @@ export default function TreatmentPage() {
     flashSuccessButton();
   }
 
+  function handlePrintPlan() {
+    if (!treatmentPlan) return;
+
+    const printWindow = window.open("", "_blank", "width=900,height=700");
+    if (!printWindow) return;
+
+    const acupointsHtml = treatmentPlan.acupoints
+      .map(
+        (point) => `
+          <li>
+            <strong>${point.name}</strong><br />
+            位置：${point.location}<br />
+            功效：${point.reason}
+          </li>
+        `
+      )
+      .join("");
+
+    const html = `
+      <!DOCTYPE html>
+      <html lang="zh-CN">
+        <head>
+          <meta charset="UTF-8" />
+          <title>治疗方案打印</title>
+          <style>
+            @page { margin: 0; }
+            @media print {
+              body { margin: 1.6cm; }
+            }
+            body { font-family: "PingFang SC", "Helvetica Neue", Arial, sans-serif; padding: 24px; color: #0f172a; }
+            h1 { font-size: 20px; margin-bottom: 12px; }
+            h2 { font-size: 16px; margin: 16px 0 8px; }
+            .meta { color: #475569; font-size: 12px; margin-bottom: 16px; }
+            .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+            .card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; }
+            ul { padding-left: 18px; }
+            li { margin-bottom: 10px; }
+            .notes { background: #eff6ff; border: 1px solid #bfdbfe; padding: 12px; border-radius: 8px; }
+          </style>
+        </head>
+        <body>
+          <h1>治疗方案</h1>
+          <div class="meta">方案编号：${treatmentPlan.plan_id}</div>
+          <h2>治疗参数</h2>
+          <div class="grid">
+            <div class="card">温度：${treatmentPlan.temperature}°C</div>
+            <div class="card">单次时长：${treatmentPlan.duration}分钟</div>
+            <div class="card">频率：${treatmentPlan.frequency}</div>
+            <div class="card">疗程：${treatmentPlan.course}次</div>
+          </div>
+          <h2>注意事项</h2>
+          <div class="notes">${treatmentPlan.notes}</div>
+          <h2>推荐穴位</h2>
+          <ul>${acupointsHtml}</ul>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <main className="mx-auto max-w-7xl px-6 py-12">
@@ -389,7 +463,7 @@ export default function TreatmentPage() {
                       <option value="">请选择患者</option>
                       {patients.map((patient) => (
                         <option key={patient.patient_id} value={patient.patient_id}>
-                          {patient.name} - {patient.gender} - {patient.age}岁
+                          {patient.name} - {formatGender(patient.gender)} - {patient.age}岁
                         </option>
                       ))}
                     </select>
@@ -434,12 +508,20 @@ export default function TreatmentPage() {
             <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-slate-900">治疗方案</h2>
-                <button
-                  className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                  onClick={handleExportPlan}
-                >
-                  导出方案
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    onClick={handleExportPlan}
+                  >
+                    导出
+                  </button>
+                  <button
+                    className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    onClick={handlePrintPlan}
+                  >
+                    打印
+                  </button>
+                </div>
               </div>
 
               <div className="mt-4 space-y-4">
