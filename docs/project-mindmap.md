@@ -179,7 +179,7 @@ graph LR
     style Tech fill:#e67e22,stroke:#fff,stroke-width:2px,color:#fff
     style Deploy fill:#5dade2,stroke:#fff,stroke-width:2px,color:#fff
     
-    classDef defaultStyle fill:#34495e,stroke:#ecf0f1,stroke-width:2px,color:#ecf0f1
+    classDef defaultStyle fill:#2980b9,stroke:#3498db,stroke-width:2px,color:#fff,font-weight:bold
     class F1,F2,F3,F4,F5,F6,B1,B2,B3,B4,B5,B6,C1,C2,C3,C4,FL1,FL2,T1,T2,T3,D1,D2,D3,D4 defaultStyle
     
     classDef leafStyle fill:#16a085,stroke:#1abc9c,stroke-width:2px,color:#fff,font-weight:bold
