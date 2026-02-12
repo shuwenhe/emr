@@ -1,0 +1,79 @@
+version: 1
+
+keywords:
+  - keyword: "颈"
+    points:
+      - name: "风池"
+        reason: "缓解颈项紧张"
+      - name: "大椎"
+        reason: "改善颈肩热区"
+      - name: "肩井"
+        reason: "放松肩背"
+  - keyword: "肩"
+    points:
+      - name: "肩井"
+        reason: "缓解肩背僵硬"
+      - name: "风池"
+        reason: "改善局部循环"
+  - keyword: "腰"
+    points:
+      - name: "肾俞"
+        reason: "温补腰背"
+      - name: "命门"
+        reason: "改善腰背冷痛"
+      - name: "腰阳关"
+        reason: "放松腰骶"
+  - keyword: "背"
+    points:
+      - name: "肺俞"
+        reason: "调理上背"
+      - name: "心俞"
+        reason: "改善背部循环"
+      - name: "肝俞"
+        reason: "舒缓背部紧张"
+  - keyword: "腹"
+    points:
+      - name: "中脘"
+        reason: "调理脾胃"
+      - name: "关元"
+        reason: "温补元气"
+      - name: "气海"
+        reason: "提升气机"
+  - keyword: "膝"
+    points:
+      - name: "犊鼻"
+        reason: "改善膝部疼痛"
+      - name: "足三里"
+        reason: "增强下肢循环"
+  - keyword: "睡眠"
+    points:
+      - name: "神阙"
+        reason: "安神助眠"
+      - name: "百会"
+        reason: "改善睡眠质量"
+
+region_rules:
+  - match: ["shoulder", "neck", "颈", "肩"]
+    points:
+      - name: "肩井"
+        reason: "对应异常热区"
+      - name: "风池"
+        reason: "改善局部循环"
+  - match: ["back", "spine", "背", "脊"]
+    points:
+      - name: "肺俞"
+        reason: "调理背部热区"
+      - name: "肝俞"
+        reason: "舒缓背部紧张"
+  - match: ["waist", "lumbar", "腰"]
+    points:
+      - name: "肾俞"
+        reason: "改善腰背热区"
+      - name: "命门"
+        reason: "温补腰背"
+
+defaults:
+  - name: "足三里"
+    reason: "提升整体循环"
+  - name: "关元"
+    reason: "增强体质"

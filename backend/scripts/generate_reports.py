@@ -392,6 +392,9 @@ def _build_report(
         doc.add_paragraph(f"强度等级：{plan_data.get('intensity_level')}")
         doc.add_paragraph(f"疗程次数：{plan_data.get('sessions')}")
         doc.add_paragraph(f"频次：{plan_data.get('frequency')}")
+        course = plan_data.get("course_recommendation")
+        if course:
+            doc.add_paragraph(f"疗程建议：{course}")
         targets = plan_data.get("target_regions") or []
         if targets:
             doc.add_paragraph("作用部位：")
@@ -400,6 +403,16 @@ def _build_report(
                     f"- {region.get('region')}：{region.get('duration_min')} 分钟，"
                     f"目标温度 {region.get('target_temp_c')} ℃，距离 {region.get('distance_cm')} cm"
                 )
+        acupoints = plan_data.get("acupoints") or []
+        if acupoints:
+            doc.add_paragraph("穴位选择：")
+            for item in acupoints:
+                name = item.get("name")
+                reason = item.get("reason")
+                if reason:
+                    doc.add_paragraph(f"- {name}：{reason}")
+                else:
+                    doc.add_paragraph(f"- {name}")
         notes = plan_data.get("notes")
         if notes:
             doc.add_paragraph(f"备注：{notes}")

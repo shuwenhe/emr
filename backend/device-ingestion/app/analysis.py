@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import re
+import yaml
 
 import matplotlib
 import numpy as np
@@ -16,11 +17,137 @@ from .config import DATA_DIR
 from .data_platform import get_patient_history, save_plan, save_report
 from .emr import upsert_emr_from_analysis
 
+BASE_DIR = Path(__file__).resolve().parents[3]
+TREATMENT_RULES_PATH = BASE_DIR / "config" / "treatment_rules.yaml"
+
+
+def _load_treatment_rules() -> dict:
+    if not TREATMENT_RULES_PATH.exists():
+        raise FileNotFoundError(f"Treatment rules not found: {TREATMENT_RULES_PATH}")
+    with TREATMENT_RULES_PATH.open("r", encoding="utf-8") as f:
+        payload = yaml.safe_load(f) or {}
+    return payload
+
+
+_TREATMENT_RULES = _load_treatment_rules()
+
 
 def _parse_iso_datetime(value: str) -> datetime:
     if value.endswith("Z"):
         value = value.replace("Z", "+00:00")
     return datetime.fromisoformat(value)
+
+
+def _select_acupoints(
+    diagnosis: str,
+    body_part: str,
+    abnormal_regions: List[Dict[str, Any]],
+) -> List[Dict[str, str]]:
+    text = f"{diagnosis} {body_part}".lower()
+    points: List[Dict[str, str]] = []
+
+    def add_point(name: str, reason: str) -> None:
+        if any(item["name"] == name for item in points):
+            return
+        points.append({"name": name, "reason": reason})
+
+    for rule in _TREATMENT_RULES.get("keywords", []):
+        keyword = str(rule.get("keyword", "")).lower()
+        if keyword and keyword in text:
+            for item in rule.get("points", []):
+                add_point(str(item.get("name", "")), str(item.get("reason", "")))
+
+    if not points:
+        region_rules = _TREATMENT_RULES.get("region_rules", [])
+        for region_item in abnormal_regions:
+            region = str(region_item.get("region") or "").lower()
+            for rule in region_rules:
+                matches = [str(item).lower() for item in rule.get("match", [])]
+                if any(match and match in region for match in matches):
+                    for item in rule.get("points", []):
+                        add_point(str(item.get("name", "")), str(item.get("reason", "")))
+
+    if not points:
+        for item in _TREATMENT_RULES.get("defaults", []):
+            add_point(str(item.get("name", "")), str(item.get("reason", "")))
+
+    return points
+
+
+def _build_treatment_plan(
+    record_id: str,
+    plan_id: str,
+    capture_time: str,
+    diagnosis: str,
+    body_part: str,
+    risk_level: str,
+    abnormal_regions: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    intensity = 2
+    if risk_level == "high":
+        intensity = 1
+    elif risk_level == "low":
+        intensity = 3
+
+    sessions = 8 if risk_level == "medium" else 6
+    if risk_level == "high":
+        sessions = 10
+
+    frequency = "every_2_days"
+    if risk_level == "high":
+        frequency = "daily"
+    elif risk_level == "low":
+        frequency = "every_3_days"
+
+    target_regions: List[Dict[str, Any]] = []
+    used_regions: set[str] = set()
+    for item in abnormal_regions:
+        region = str(item.get("region") or "").strip()
+        if not region or region in used_regions:
+            continue
+        used_regions.add(region)
+        target_regions.append(
+            {
+                "region": region,
+                "duration_min": 8 + intensity,
+                "target_temp_c": round(42 + intensity, 1),
+                "distance_cm": 3.0,
+            }
+        )
+
+    if not target_regions:
+        target_regions.append(
+            {
+                "region": body_part,
+                "duration_min": 8 + intensity,
+                "target_temp_c": round(42 + intensity, 1),
+                "distance_cm": 3.0,
+            }
+        )
+
+    acupoints = _select_acupoints(diagnosis, body_part, abnormal_regions)
+    course_recommendation = (
+        f"建议 {sessions} 次为一疗程，频次 {frequency}，"
+        "根据反应调整强度与时间。"
+    )
+
+    return {
+        "plan_id": plan_id,
+        "record_id": record_id,
+        "created_at": capture_time,
+        "therapy_type": "moxibustion",
+        "intensity_level": intensity,
+        "sessions": sessions,
+        "frequency": frequency,
+        "target_regions": target_regions,
+        "acupoints": acupoints,
+        "course_recommendation": course_recommendation,
+        "safety_limits": {
+            "max_temp_c": 49.0,
+            "max_duration_min": 20,
+        },
+        "notes": "根据诊断结果自动生成",
+    }
 
 
 def _find_payload_file(record_dir: Path) -> Path:
@@ -348,37 +475,19 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
         },
     }
 
-    intensity = 2
-    if risk_level == "high":
-        intensity = 1
-    elif risk_level == "low":
-        intensity = 3
-
-    plan = {
-        "plan_id": plan_id,
-        "record_id": record_id,
-        "created_at": capture_time,
-        "therapy_type": "moxibustion",
-        "intensity_level": intensity,
-        "sessions": 6,
-        "frequency": "every_2_days",
-        "target_regions": [
-            {
-                "region": body_part,
-                "duration_min": 8 + intensity,
-                "target_temp_c": round(42 + intensity, 1),
-                "distance_cm": 3.0,
-            }
-        ],
-        "safety_limits": {
-            "max_temp_c": 49.0,
-            "max_duration_min": 20,
-        },
-        "notes": "test plan generated by analysis stub",
-    }
+    plan = _build_treatment_plan(
+        record_id,
+        plan_id,
+        capture_time,
+        diagnosis,
+        body_part,
+        risk_level,
+        abnormal_regions,
+    )
 
     report["treatment_plan"] = plan
 
+    intensity = plan["intensity_level"]
     dispatch = {
         "dispatch_id": f"DISPATCH-{record_id}",
         "plan_id": plan_id,
