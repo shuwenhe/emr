@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Patient = {
   patient_id: string;
@@ -30,7 +30,26 @@ type TreatmentPlan = {
   notes: string;
 };
 
+type LastEmrContext = {
+  emr_id?: string;
+  patient_id?: string;
+  name?: string;
+  gender?: string;
+  age?: number;
+};
+
+type PatientFlowState = {
+  currentPatientId?: string;
+  currentPatient?: {
+    patient_id?: string;
+    name?: string;
+    gender?: string;
+    age?: number | null;
+  };
+};
+
 const API_BASE = "http://localhost:8000";
+const TREATMENT_STATE_KEY = "patient_flow_state_treatment";
 
 export default function TreatmentPage() {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -39,9 +58,60 @@ export default function TreatmentPage() {
   const [selectedEmrId, setSelectedEmrId] = useState("");
   const [treatmentPlan, setTreatmentPlan] = useState<TreatmentPlan | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [lastContext, setLastContext] = useState<LastEmrContext | null>(null);
+  const [patientFlowState, setPatientFlowState] = useState<PatientFlowState | null>(null);
+  const prefilledRef = useRef(false);
 
   useEffect(() => {
     fetchPatients();
+  }, []);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(TREATMENT_STATE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw) as Record<string, string>;
+      if (data.selectedPatientId) setSelectedPatientId(data.selectedPatientId);
+      if (data.selectedEmrId) setSelectedEmrId(data.selectedEmrId);
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        TREATMENT_STATE_KEY,
+        JSON.stringify({
+          selectedPatientId,
+          selectedEmrId,
+        })
+      );
+    } catch {
+      // ignore storage errors
+    }
+  }, [selectedPatientId, selectedEmrId]);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("last_emr_context");
+      if (raw) {
+        setLastContext(JSON.parse(raw) as LastEmrContext);
+      }
+    } catch {
+      setLastContext(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("patient_flow_state_patients");
+      if (raw) {
+        setPatientFlowState(JSON.parse(raw) as PatientFlowState);
+      }
+    } catch {
+      setPatientFlowState(null);
+    }
   }, []);
 
   async function fetchPatients() {
@@ -58,7 +128,14 @@ export default function TreatmentPage() {
     try {
       const response = await fetch(`${API_BASE}/emr?patient_id=${encodeURIComponent(patientId)}`);
       const data = await response.json();
-      setEmrRecords(Array.isArray(data) ? data : []);
+      const records = Array.isArray(data) ? data : [];
+      setEmrRecords(records);
+      if (lastContext?.emr_id) {
+        const found = records.find((item: EmrRecord) => item.emr_id === lastContext.emr_id);
+        if (found) {
+          setSelectedEmrId(lastContext.emr_id || "");
+        }
+      }
     } catch {
       setEmrRecords([]);
     }
@@ -173,6 +250,38 @@ export default function TreatmentPage() {
     setSelectedEmrId(emrId);
     setTreatmentPlan(null);
   }
+
+  useEffect(() => {
+    if (selectedPatientId && emrRecords.length === 0) {
+      fetchEmrRecords(selectedPatientId);
+    }
+  }, [selectedPatientId, emrRecords.length]);
+
+  useEffect(() => {
+    if (prefilledRef.current) {
+      return;
+    }
+    if (patients.length === 0) {
+      return;
+    }
+    let patientId = lastContext?.patient_id || patientFlowState?.currentPatientId || "";
+    if (!patientId) {
+      const fallback = patientFlowState?.currentPatient;
+      const match = patients.find((p) => {
+        if (!fallback?.name) return false;
+        const nameMatch = p.name === fallback.name;
+        const genderMatch = fallback.gender ? p.gender === fallback.gender : true;
+        const ageMatch = typeof fallback.age === "number" ? p.age === fallback.age : true;
+        return nameMatch && genderMatch && ageMatch;
+      });
+      patientId = match?.patient_id || "";
+    }
+    if (patientId) {
+      prefilledRef.current = true;
+      setSelectedPatientId(patientId);
+      fetchEmrRecords(patientId);
+    }
+  }, [lastContext, patientFlowState, patients]);
 
   function handleGenerate() {
     if (selectedEmrId) {

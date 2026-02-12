@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const API_BASE = "http://localhost:8000";
+const UPLOAD_STATE_KEY = "patient_flow_state_upload";
 
 export default function UploadPage() {
   const router = useRouter();
@@ -30,6 +31,42 @@ export default function UploadPage() {
     if (ageParam) setAge(ageParam);
     if (bodyPartParam) setBodyPart(bodyPartParam);
   }, [searchParams]);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(UPLOAD_STATE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw) as Record<string, string>;
+      if (data.deviceId) setDeviceId(data.deviceId);
+      if (data.deviceModel) setDeviceModel(data.deviceModel);
+      if (data.captureTime) setCaptureTime(data.captureTime);
+      if (data.patientName) setPatientName(data.patientName);
+      if (data.gender) setGender(data.gender);
+      if (data.age) setAge(data.age);
+      if (data.bodyPart) setBodyPart(data.bodyPart);
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        UPLOAD_STATE_KEY,
+        JSON.stringify({
+          deviceId,
+          deviceModel,
+          captureTime,
+          patientName,
+          gender,
+          age,
+          bodyPart,
+        })
+      );
+    } catch {
+      // ignore storage errors
+    }
+  }, [deviceId, deviceModel, captureTime, patientName, gender, age, bodyPart]);
 
   useEffect(() => {
     if (result?.record_id) {

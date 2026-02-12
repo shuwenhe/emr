@@ -54,6 +54,14 @@ type NewPatient = {
 };
 
 const API_BASE = "http://localhost:8000";
+const PATIENTS_STATE_KEY = "patient_flow_state_patients";
+const PATIENT_FLOW_KEYS = [
+  "patient_flow_state_patients",
+  "patient_flow_state_upload",
+  "patient_flow_state_emr",
+  "patient_flow_state_treatment",
+  "last_emr_context",
+];
 
 export default function PatientsPage() {
   const router = useRouter();
@@ -110,6 +118,55 @@ export default function PatientsPage() {
     fetchPatients();
   }, []);
 
+  function savePatientsState(partial: Record<string, unknown>) {
+    try {
+      const raw = localStorage.getItem(PATIENTS_STATE_KEY);
+      const data = raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
+      localStorage.setItem(PATIENTS_STATE_KEY, JSON.stringify({ ...data, ...partial }));
+    } catch {
+      // ignore storage errors
+    }
+  }
+
+  function persistCurrentPatient(patient: Patient) {
+    savePatientsState({
+      currentPatientId: patient.patient_id,
+      currentPatient: {
+        patient_id: patient.patient_id,
+        name: patient.name ?? "",
+        gender: patient.gender ?? "",
+        age: patient.age ?? null,
+      },
+    });
+  }
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(PATIENTS_STATE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw) as Record<string, string>;
+      if (data.searchQuery) setSearchQuery(data.searchQuery);
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      savePatientsState({ searchQuery });
+    } catch {
+      // ignore storage errors
+    }
+  }, [searchQuery]);
+
+  function clearPatientFlowState() {
+    try {
+      PATIENT_FLOW_KEYS.forEach((key) => localStorage.removeItem(key));
+    } catch {
+      // ignore storage errors
+    }
+  }
+
   async function fetchPatients() {
     try {
       // 首先获取已注册的患者
@@ -121,11 +178,16 @@ export default function PatientsPage() {
       const emrData = await emrResponse.json();
       
       const patientsMap = new Map<string, Patient>();
+      const signatureMap = new Map<string, string>();
       
       // 先添加已注册的患者
       if (Array.isArray(registeredPatients)) {
         registeredPatients.forEach((patient: Patient) => {
           patientsMap.set(patient.patient_id, patient);
+          const signature = `${patient.name ?? ""}|${patient.gender ?? ""}|${patient.age ?? ""}`.toLowerCase();
+          if (signature.trim()) {
+            signatureMap.set(signature, patient.patient_id);
+          }
         });
       }
       
@@ -133,15 +195,27 @@ export default function PatientsPage() {
       if (Array.isArray(emrData)) {
         emrData.forEach((emr: any) => {
           if (emr.patient) {
-            const patientId = emr.patient.patient_id || emr.record_id;
-            if (!patientsMap.has(patientId)) {
-              patientsMap.set(patientId, {
-                patient_id: patientId,
-                name: emr.patient.name,
-                gender: emr.patient.gender,
-                age: emr.patient.age,
+            const emrPatient = emr.patient as Patient;
+            const signature = `${emrPatient.name ?? ""}|${emrPatient.gender ?? ""}|${emrPatient.age ?? ""}`.toLowerCase();
+            const patientId = emrPatient.patient_id || emr.patient.patient_id || "";
+            if (patientId && patientsMap.has(patientId)) {
+              return;
+            }
+            if (signature.trim() && signatureMap.has(signature)) {
+              return;
+            }
+            const fallbackId = patientId || emr.record_id;
+            if (!patientsMap.has(fallbackId)) {
+              patientsMap.set(fallbackId, {
+                patient_id: fallbackId,
+                name: emrPatient.name,
+                gender: emrPatient.gender,
+                age: emrPatient.age,
                 updated_at: emr.created_at
               });
+              if (signature.trim()) {
+                signatureMap.set(signature, fallbackId);
+              }
             }
           }
         });
@@ -379,7 +453,10 @@ export default function PatientsPage() {
           </div>
           <button
             className="rounded-full bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
-            onClick={() => setShowRegisterForm(true)}
+            onClick={() => {
+              clearPatientFlowState();
+              setShowRegisterForm(true);
+            }}
           >
             + 新增患者
           </button>
@@ -430,13 +507,19 @@ export default function PatientsPage() {
                         <div className="flex gap-2">
                           <button
                             className="rounded-full border border-blue-200 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50"
-                            onClick={() => fetchPatientEmrs(patient)}
+                            onClick={() => {
+                              persistCurrentPatient(patient);
+                              fetchPatientEmrs(patient);
+                            }}
                           >
                             病历
                           </button>
                           <button
                             className="rounded-full border border-green-200 px-3 py-1 text-xs font-semibold text-green-600 hover:bg-green-50"
-                            onClick={() => handleOpenReportHistory(patient)}
+                            onClick={() => {
+                              persistCurrentPatient(patient);
+                              handleOpenReportHistory(patient);
+                            }}
                           >
                             报告
                           </button>
@@ -452,7 +535,10 @@ export default function PatientsPage() {
               <p className="text-slate-500">暂无患者数据</p>
               <button
                 className="mt-4 text-sm text-blue-600 hover:text-blue-700"
-                onClick={() => setShowRegisterForm(true)}
+                onClick={() => {
+                  clearPatientFlowState();
+                  setShowRegisterForm(true);
+                }}
               >
                 立即登记患者
               </button>

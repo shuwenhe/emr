@@ -15,6 +15,7 @@ type ReportFile = {
 };
 
 const API_BASE = "http://localhost:8000";
+const EMR_STATE_KEY = "patient_flow_state_emr";
 
 export default function EmrPage() {
   const searchParams = useSearchParams();
@@ -31,6 +32,64 @@ export default function EmrPage() {
   const [output, setOutput] = useState<EmrResponse | { error: string }>({
     error: "请先执行操作",
   });
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(EMR_STATE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw) as Record<string, string>;
+      if (data.recordId) setRecordId(data.recordId);
+      if (data.emrId) setEmrId(data.emrId);
+      if (data.patientId) setPatientId(data.patientId);
+      if (data.diagnosis) setDiagnosis(data.diagnosis);
+      if (data.doctorOpinion) setDoctorOpinion(data.doctorOpinion);
+      if (typeof data.archived === "string") {
+        setArchived(data.archived === "true");
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        EMR_STATE_KEY,
+        JSON.stringify({
+          recordId,
+          emrId,
+          patientId,
+          diagnosis,
+          doctorOpinion,
+          archived: String(archived),
+        })
+      );
+    } catch {
+      // ignore storage errors
+    }
+  }, [recordId, emrId, patientId, diagnosis, doctorOpinion, archived]);
+
+  useEffect(() => {
+    if (!report || typeof report !== "object") {
+      return;
+    }
+    const patient = (report as Record<string, unknown>).patient as Record<string, unknown> | undefined;
+    if (!patient) {
+      return;
+    }
+    const context = {
+      emr_id: emrId || "",
+      patient_id: String(patient.patient_id || ""),
+      name: String(patient.name || ""),
+      gender: String(patient.gender || ""),
+      age: patient.age !== undefined && patient.age !== null ? Number(patient.age) : undefined,
+    };
+    try {
+      localStorage.setItem("last_emr_context", JSON.stringify(context));
+    } catch {
+      // ignore storage errors
+    }
+  }, [report, emrId]);
 
   const outputText = useMemo(() => JSON.stringify(output, null, 2), [output]);
   const currentPatientName = useMemo(() => {
@@ -78,6 +137,19 @@ export default function EmrPage() {
       return emr.report as Record<string, unknown>;
     }
     return null;
+  }
+
+  function formatTemperatureMetricLabel(key: string) {
+    const normalized = key.replace(/\s+/g, "_").toLowerCase();
+    const mapping: Record<string, string> = {
+      min_c: "最低温度",
+      max_c: "最高温度",
+      avg_c: "平均温度",
+      body_avg_temp_c: "身体平均温度",
+      temperature_range: "温度范围",
+      count: "样本数量",
+    };
+    return mapping[normalized] || key;
   }
 
   function syncEmrFields(data: EmrResponse) {
@@ -450,7 +522,7 @@ export default function EmrPage() {
                   <div className="mt-3 grid gap-3 sm:grid-cols-4">
                     {Object.entries((report.analysis as Record<string, unknown>).temperature_metrics as Record<string, unknown>).map(([key, value]) => (
                       <div key={key} className="rounded-lg bg-slate-50 p-3">
-                        <p className="text-xs text-slate-500">{key}</p>
+                        <p className="text-xs text-slate-500">{formatTemperatureMetricLabel(key)}</p>
                         <p className="mt-1 text-base font-semibold text-slate-900">{String(value)}</p>
                       </div>
                     ))}
