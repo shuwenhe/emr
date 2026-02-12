@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import mammoth from "mammoth";
+import { flashSuccessButton } from "../lib/flash";
 
 type EmrResponse = Record<string, unknown> | Array<Record<string, unknown>>;
 type ReportPayload = Record<string, unknown> | null;
@@ -18,6 +19,7 @@ const API_BASE = "http://localhost:8000";
 const EMR_STATE_KEY = "patient_flow_state_emr";
 
 export default function EmrPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [recordId, setRecordId] = useState("");
   const [emrId, setEmrId] = useState("");
@@ -29,6 +31,7 @@ export default function EmrPage() {
   const [reportFiles, setReportFiles] = useState<ReportFile[]>([]);
   const [previewHtml, setPreviewHtml] = useState<string>("");
   const [showPreview, setShowPreview] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
   const [output, setOutput] = useState<EmrResponse | { error: string }>({
     error: "请先执行操作",
   });
@@ -139,6 +142,52 @@ export default function EmrPage() {
     return null;
   }
 
+  function persistContextFromEmr(data: EmrResponse): boolean {
+    if (Array.isArray(data)) {
+      return false;
+    }
+    const emr = data as Record<string, unknown>;
+    const report = emr.report as Record<string, unknown> | undefined;
+    const patient = report?.patient as Record<string, unknown> | undefined;
+    const resolvedEmrId = String(emr.emr_id ?? emrId ?? "");
+    const resolvedPatientId = String(
+      patient?.patient_id ?? emr.patient_id ?? (emr as Record<string, unknown>).patientId ?? ""
+    );
+    if (!resolvedEmrId) {
+      return false;
+    }
+    const context = {
+      emr_id: resolvedEmrId,
+      patient_id: resolvedPatientId,
+      name: String(patient?.name ?? emr.patient_name ?? emr.name ?? ""),
+      gender: String(patient?.gender ?? emr.gender ?? ""),
+      age:
+        patient?.age !== undefined && patient?.age !== null
+          ? Number(patient.age)
+          : emr.age !== undefined && emr.age !== null
+            ? Number(emr.age)
+            : undefined,
+    };
+    try {
+      localStorage.setItem("last_emr_context", JSON.stringify(context));
+      localStorage.setItem(
+        "patient_flow_state_patients",
+        JSON.stringify({
+          currentPatientId: context.patient_id,
+          currentPatient: {
+            patient_id: context.patient_id,
+            name: context.name,
+            gender: context.gender,
+            age: context.age ?? null,
+          },
+        })
+      );
+    } catch {
+      // ignore storage errors
+    }
+    return true;
+  }
+
   function formatTemperatureMetricLabel(key: string) {
     const normalized = key.replace(/\s+/g, "_").toLowerCase();
     const mapping: Record<string, string> = {
@@ -196,6 +245,9 @@ export default function EmrPage() {
     syncEmrFields(data as EmrResponse);
     setReport(extractReport(data as EmrResponse));
     fetchReports();
+    flashSuccessButton();
+    persistContextFromEmr(data as EmrResponse);
+    setRedirecting(false);
   }
 
   async function handleFetch() {
@@ -208,6 +260,9 @@ export default function EmrPage() {
     setOutput(data);
     syncEmrFields(data);
     setReport(extractReport(data));
+    if (response.ok) {
+      flashSuccessButton();
+    }
   }
 
   async function handleList() {
@@ -218,6 +273,9 @@ export default function EmrPage() {
     const data = (await response.json()) as EmrResponse;
     setOutput(data);
     setReport(extractReport(data));
+    if (response.ok) {
+      flashSuccessButton();
+    }
   }
 
   async function handleSave() {
@@ -225,13 +283,29 @@ export default function EmrPage() {
       setOutput({ error: "请先获取病历" });
       return;
     }
-    const data = await putJson(`${API_BASE}/emr/${emrId.trim()}`, {
-      diagnosis,
-      doctor_opinion: doctorOpinion,
-    });
-    setOutput(data as EmrResponse);
-    syncEmrFields(data as EmrResponse);
-    setReport(extractReport(data as EmrResponse));
+    try {
+      const response = await fetch(`${API_BASE}/emr/${emrId.trim()}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          diagnosis,
+          doctor_opinion: doctorOpinion,
+        }),
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        setOutput({ error: `保存失败: ${response.status} ${text || response.statusText}` });
+        return;
+      }
+      const data = (await response.json()) as EmrResponse;
+      setOutput(data);
+      syncEmrFields(data);
+      setReport(extractReport(data));
+      fetchReports();
+      flashSuccessButton();
+    } catch (error) {
+      setOutput({ error: `保存失败: ${String(error)}` });
+    }
   }
 
   async function handleArchive(nextArchived: boolean) {
@@ -245,6 +319,7 @@ export default function EmrPage() {
     setOutput(data as EmrResponse);
     syncEmrFields(data as EmrResponse);
     setReport(extractReport(data as EmrResponse));
+    flashSuccessButton();
   }
 
   function handleExportReportJson() {
@@ -262,6 +337,7 @@ export default function EmrPage() {
     link.click();
     link.remove();
     URL.revokeObjectURL(link.href);
+    flashSuccessButton();
   }
 
   function handleExportPdf() {
@@ -349,10 +425,12 @@ export default function EmrPage() {
     printWindow.document.close();
     printWindow.focus();
     printWindow.print();
+    flashSuccessButton();
   }
 
   function handlePrint() {
     window.print();
+    flashSuccessButton();
   }
 
   async function handleViewDocx(url: string) {
@@ -362,6 +440,7 @@ export default function EmrPage() {
       const result = await mammoth.convertToHtml({ arrayBuffer });
       setPreviewHtml(result.value);
       setShowPreview(true);
+      flashSuccessButton();
     } catch (error) {
       setOutput({ error: `预览失败: ${String(error)}` });
     }
@@ -397,6 +476,7 @@ export default function EmrPage() {
       printWindow.document.close();
       printWindow.focus();
       printWindow.print();
+      flashSuccessButton();
     } catch (error) {
       setOutput({ error: `打印失败: ${String(error)}` });
     }
@@ -430,6 +510,14 @@ export default function EmrPage() {
             >
               生成诊断报告
             </button>
+            {report && (
+              <button
+                className="mt-3 w-full rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                onClick={() => router.push("/treatment")}
+              >
+                前往生成治疗方案
+              </button>
+            )}
             <p className="mt-3 text-xs text-slate-500">
               将基于采集数据自动生成诊断报告
             </p>
@@ -707,7 +795,10 @@ export default function EmrPage() {
             >
               <button
                 className="absolute right-4 top-4 rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-200"
-                onClick={() => setShowPreview(false)}
+                onClick={() => {
+                  setShowPreview(false);
+                  flashSuccessButton();
+                }}
               >
                 关闭
               </button>

@@ -181,8 +181,14 @@ def update_emr(emr_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
         report_path.parent.mkdir(parents=True, exist_ok=True)
         with open(report_path, "w", encoding="utf-8") as handle:
             json.dump(report, handle, ensure_ascii=False, indent=2)
-        save_report(record_id, report)
-        generate_docx_report(report, emr)
+        try:
+            save_report(record_id, report)
+        except Exception:
+            emr.setdefault("warnings", []).append("report_db_save_failed")
+        try:
+            generate_docx_report(report, emr)
+        except Exception:
+            emr.setdefault("warnings", []).append("report_docx_generate_failed")
 
     with open(_emr_path(emr_id), "w", encoding="utf-8") as handle:
         json.dump(emr, handle, ensure_ascii=False, indent=2)

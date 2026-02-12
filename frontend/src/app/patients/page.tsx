@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import mammoth from "mammoth";
+import { flashSuccessButton } from "../lib/flash";
 
 type Patient = {
   patient_id: string;
@@ -248,6 +249,9 @@ export default function PatientsPage() {
       setEmrs(Array.isArray(data) ? data : []);
       setSelectedPatient(patient);
       setShowDetailModal(true);
+      if (response.ok) {
+        flashSuccessButton();
+      }
     } catch {
       setEmrs([]);
     }
@@ -324,6 +328,9 @@ export default function PatientsPage() {
       const data = await response.json();
       const files = Array.isArray(data) ? (data as ReportFile[]) : [];
       setReportFiles(filterReportsForPatient(files, patient));
+      if (response.ok) {
+        flashSuccessButton();
+      }
     } catch {
       setReportFiles([]);
       setReportError("获取报告列表失败");
@@ -335,6 +342,7 @@ export default function PatientsPage() {
   function handleReportDateFilterChange() {
     if (reportPatient) {
       setReportFiles(filterReportsForPatient(reportFiles, reportPatient));
+      flashSuccessButton();
     }
   }
 
@@ -353,6 +361,7 @@ export default function PatientsPage() {
       setReportPreviewHtml(result.value);
       setReportPreviewTitle(file.name);
       setShowReportPreview(true);
+      flashSuccessButton();
     } catch (error) {
       setReportError(`预览失败: ${String(error)}`);
     }
@@ -394,6 +403,7 @@ export default function PatientsPage() {
       printWindow.document.close();
       printWindow.focus();
       printWindow.print();
+      flashSuccessButton();
     } catch (error) {
       setReportError(`打印失败: ${String(error)}`);
     }
@@ -419,6 +429,7 @@ export default function PatientsPage() {
       } else {
         setReportFiles((prev) => prev.filter((item) => item !== file));
       }
+      flashSuccessButton();
     } catch (error) {
       setReportError(`归档失败: ${String(error)}`);
     }
@@ -441,6 +452,7 @@ export default function PatientsPage() {
         setSelectedPatient(null);
         setShowDetailModal(false);
       }
+      flashSuccessButton();
     } catch (error) {
       alert(`归档失败: ${error instanceof Error ? error.message : "未知错误"}`);
     }
@@ -504,6 +516,7 @@ export default function PatientsPage() {
       setBirthDay("");
       
       alert(`患者注册成功！患者ID: ${result.patient_id}`);
+      flashSuccessButton();
       const params = new URLSearchParams({
         name: formData.name,
         gender: formData.gender,
@@ -546,6 +559,7 @@ export default function PatientsPage() {
             onClick={() => {
               clearPatientFlowState();
               setShowRegisterForm(true);
+              flashSuccessButton();
             }}
           >
             + 新增患者
@@ -634,6 +648,7 @@ export default function PatientsPage() {
                 onClick={() => {
                   clearPatientFlowState();
                   setShowRegisterForm(true);
+                  flashSuccessButton();
                 }}
               >
                 立即登记患者
@@ -670,7 +685,10 @@ export default function PatientsPage() {
                 <h2 className="text-2xl font-semibold text-slate-900">患者信息登记</h2>
                 <button
                   className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200"
-                  onClick={() => setShowRegisterForm(false)}
+                  onClick={() => {
+                    setShowRegisterForm(false);
+                    flashSuccessButton();
+                  }}
                 >
                   取消
                 </button>
@@ -879,7 +897,10 @@ export default function PatientsPage() {
                   <button
                     type="button"
                     className="rounded-full border border-slate-200 px-6 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                    onClick={() => setShowRegisterForm(false)}
+                    onClick={() => {
+                      setShowRegisterForm(false);
+                      flashSuccessButton();
+                    }}
                   >
                     取消
                   </button>
@@ -903,7 +924,10 @@ export default function PatientsPage() {
                 <h2 className="text-2xl font-semibold text-slate-900">患者详细信息</h2>
                 <button
                   className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200"
-                  onClick={() => setShowDetailModal(false)}
+                  onClick={() => {
+                    setShowDetailModal(false);
+                    flashSuccessButton();
+                  }}
                 >
                   关闭
                 </button>
@@ -1011,7 +1035,10 @@ export default function PatientsPage() {
                 </div>
                 <button
                   className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200"
-                  onClick={() => setShowReportModal(false)}
+                  onClick={() => {
+                    setShowReportModal(false);
+                    flashSuccessButton();
+                  }}
                 >
                   关闭
                 </button>
@@ -1058,6 +1085,7 @@ export default function PatientsPage() {
                         if (reportPatient) {
                           setReportFiles(filterReportsForPatient(reportFiles, reportPatient));
                         }
+                        flashSuccessButton();
                       }}
                     >
                       重置过滤
@@ -1158,7 +1186,10 @@ export default function PatientsPage() {
                 </div>
                 <button
                   className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200"
-                  onClick={() => setShowReportPreview(false)}
+                  onClick={() => {
+                    setShowReportPreview(false);
+                    flashSuccessButton();
+                  }}
                 >
                   关闭
                 </button>

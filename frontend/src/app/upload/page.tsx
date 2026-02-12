@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { flashSuccessButton } from "../lib/flash";
 
 const API_BASE = "http://localhost:8000";
 const UPLOAD_STATE_KEY = "patient_flow_state_upload";
@@ -117,6 +118,7 @@ export default function UploadPage() {
       
       if (response.ok) {
         setResult({ record_id: data.record_id });
+        flashSuccessButton();
       } else {
         setResult({ error: data.detail || "上传失败" });
       }
