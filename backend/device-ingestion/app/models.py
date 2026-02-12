@@ -112,6 +112,10 @@ class PatientArchiveRequest(BaseModel):
     archived: bool = Field(True, description="是否归档")
 
 
+class PatientDeleteRequest(BaseModel):
+    patient_ids: list[str] = Field(..., description="要删除的患者ID列表")
+
+
 class ReportArchiveRequest(BaseModel):
     date: str = Field(..., description="报告日期目录，格式 YYYYMMDD")
     filename: str = Field(..., description="报告文件名")

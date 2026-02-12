@@ -28,6 +28,7 @@ from .data_platform import (
     get_patient,
     update_patient,
     archive_patient,
+    delete_patient,
 )
 from .dispatch import dispatch_record
 from .emr import EmrNotFoundError, archive_emr, generate_emr, get_emr, list_emrs, update_emr
@@ -42,6 +43,7 @@ from .models import (
     IngestMetadata,
     PatientUpsertRequest,
     PatientArchiveRequest,
+    PatientDeleteRequest,
     ReportArchiveRequest,
 )
 from .qc import run_qc
@@ -226,6 +228,25 @@ def archive_emr_endpoint(emr_id: str, request: EmrArchiveRequest):
     except EmrNotFoundError as exc:
         detail = exc.args[0] if exc.args else "emr_not_found"
         raise HTTPException(status_code=404, detail=detail) from exc
+
+
+@app.delete("/patients/{patient_id}")
+def delete_patient_endpoint(patient_id: str):
+    """永久删除患者及其所有相关记录"""
+    success = delete_patient(patient_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="patient_not_found")
+    return {"message": "patient_deleted", "patient_id": patient_id}
+
+
+@app.post("/patients/batch-delete")
+def batch_delete_patients_endpoint(request: PatientDeleteRequest):
+    """批量删除患者"""
+    results = []
+    for patient_id in request.patient_ids:
+        success = delete_patient(patient_id)
+        results.append({"patient_id": patient_id, "deleted": success})
+    return {"results": results}
 
 
 @app.post("/import/history")

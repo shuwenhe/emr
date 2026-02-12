@@ -129,7 +129,7 @@ export default function UploadPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <main className="flex min-h-screen w-full flex-col gap-8 px-10 py-12">
+      <main className="mx-auto flex min-h-screen max-w-7xl flex-col gap-8 px-6 py-12">
         <header className="space-y-2">
           <h1 className="text-3xl font-semibold text-slate-900">数据上传</h1>
           <p className="text-slate-600">上传红外热成像数据并生成诊断报告</p>

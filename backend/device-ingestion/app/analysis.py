@@ -269,13 +269,13 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
     body_part = patient.get("body_part") or "unknown"
     patient_id = patient.get("patient_id")
 
-    summary = "temperature metrics unavailable"
+    summary = "温度指标不可用"
     key_findings = [summary]
     if metrics["count"]:
-        summary = f"temperature range {metrics['min_c']}C - {metrics['max_c']}C"
+        summary = f"温度范围 {metrics['min_c']}C - {metrics['max_c']}C"
         key_findings = [
             summary,
-            f"average temperature {metrics['avg_c']}C",
+            f"平均温度 {metrics['avg_c']}C",
         ]
 
     score = None

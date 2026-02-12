@@ -217,71 +217,18 @@ export default function PatientsPage() {
     if (loading) return;
     setLoading(true);
     try {
-      const pageSize = 20;
-      // 首先获取已注册的患者（带分页）
-      const patientsResponse = await fetch(`${API_BASE}/patients?page=${pageNum}&limit=${pageSize}`);
-      const registeredPatients = await patientsResponse.json();
-      
-      // 然后从EMR记录中提取患者信息（用于补充未注册的患者）
-      const emrResponse = await fetch(`${API_BASE}/emr`);
-      const emrData = await emrResponse.json();
-      
-      const patientsMap = new Map<string, Patient>();
-      const signatureMap = new Map<string, string>();
-      
-      // 先添加已注册的患者
-      if (Array.isArray(registeredPatients)) {
-        registeredPatients.forEach((patient: Patient) => {
-          patientsMap.set(patient.patient_id, patient);
-          const signature = createPatientSignature(patient.name, patient.gender, patient.age);
-          if (signature.trim()) {
-            signatureMap.set(signature, patient.patient_id);
-          }
-        });
-      }
-      
-      // 再从EMR记录补充未注册的患者
-      if (Array.isArray(emrData)) {
-        emrData.forEach((emr: any) => {
-          if (emr.patient) {
-            const emrPatient = emr.patient as Patient;
-            const signature = createPatientSignature(emrPatient.name, emrPatient.gender, emrPatient.age);
-            const patientId = emrPatient.patient_id || emr.patient.patient_id || "";
-            if (patientId && patientsMap.has(patientId)) {
-              return;
-            }
-            if (signature.trim() && signatureMap.has(signature)) {
-              return;
-            }
-            const fallbackId = patientId || emr.record_id;
-            if (!patientsMap.has(fallbackId)) {
-              patientsMap.set(fallbackId, {
-                patient_id: fallbackId,
-                name: emrPatient.name,
-                gender: emrPatient.gender,
-                age: emrPatient.age,
-                updated_at: emr.created_at
-              });
-              if (signature.trim()) {
-                signatureMap.set(signature, fallbackId);
-              }
-            }
-          }
-        });
-      }
-      
-      const newPatients = Array.from(patientsMap.values());
-      
-      if (reset) {
-        setPatients(newPatients);
+      if (reset || pageNum === 1) {
+        // 只获取已注册的患者，不从EMR补充
+        const allPatientsResponse = await fetch(`${API_BASE}/patients?page=1&limit=10000`);
+        const allRegisteredPatients = await allPatientsResponse.json();
+        
+        if (Array.isArray(allRegisteredPatients)) {
+          setPatients(allRegisteredPatients);
+        } else {
+          setPatients([]);
+        }
+        
         setPage(1);
-      } else {
-        setPatients(prev => [...prev, ...newPatients]);
-        setPage(pageNum);
-      }
-      
-      // 如果返回的数据少于pageSize，说明没有更多数据了
-      if (newPatients.length < 20) {
         setHasMore(false);
       }
     } catch (error) {

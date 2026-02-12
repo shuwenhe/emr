@@ -214,6 +214,20 @@ def archive_patient(patient_id: str, archived: bool = True) -> Optional[Dict[str
     return get_patient(patient_id)
 
 
+def delete_patient(patient_id: str) -> bool:
+    """永久删除患者及其相关数据"""
+    with _connect() as conn:
+        with conn.cursor() as cursor:
+            # 删除患者关联的EMR记录
+            cursor.execute("DELETE FROM emrs WHERE patient_id = %s", (patient_id,))
+            # 删除患者关联的采集记录
+            cursor.execute("DELETE FROM records WHERE patient_id = %s", (patient_id,))
+            # 删除患者
+            cursor.execute("DELETE FROM patients WHERE patient_id = %s", (patient_id,))
+            return cursor.rowcount > 0
+    return False
+
+
 def save_record(
     record_id: str,
     metadata: Dict[str, Any],
