@@ -1,10 +1,12 @@
 import json
+import logging
 import uuid
 from pathlib import Path
 from typing import Dict, List
 
 from .config import DATA_DIR
 from .data_platform import save_record
+from .clickhouse_store import insert_thermal_csv
 
 
 def _record_dir(record_id: str) -> Path:
@@ -31,6 +33,17 @@ def save_payload(
         json.dump(metadata, f, ensure_ascii=False, indent=2)
 
     save_record(record_id, metadata, str(data_path), image_paths)
+
+    if data_path.suffix.lower() == ".csv":
+        try:
+            insert_thermal_csv(
+                record_id=record_id,
+                metadata=metadata,
+                data_path=str(data_path),
+                frame_id=data_path.stem,
+            )
+        except Exception as exc:
+            logging.warning("ClickHouse ingest skipped: %s", exc)
 
     return {
         "record_id": record_id,
