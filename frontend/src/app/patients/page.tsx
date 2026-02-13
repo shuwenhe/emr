@@ -385,13 +385,7 @@ export default function PatientsPage() {
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
       const result = await mammoth.convertToHtml({ arrayBuffer });
-      const printWindow = window.open("", "_blank", "width=900,height=1000");
-      if (!printWindow) {
-        setReportError("无法打开打印窗口");
-        return;
-      }
-      printWindow.document.open();
-      printWindow.document.write(`
+      printHtmlInIframe(`
         <!doctype html>
         <html lang="zh-CN">
         <head>
@@ -407,13 +401,46 @@ export default function PatientsPage() {
         </body>
         </html>
       `);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
       flashSuccessButton();
     } catch (error) {
       setReportError(`打印失败: ${String(error)}`);
     }
+  }
+
+  function printHtmlInIframe(html: string) {
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    iframe.setAttribute("aria-hidden", "true");
+    document.body.appendChild(iframe);
+
+    const cleanup = () => {
+      iframe.remove();
+    };
+
+    const frameDoc = iframe.contentWindow?.document;
+    if (!frameDoc) {
+      cleanup();
+      setReportError("无法打开打印窗口");
+      return;
+    }
+
+    frameDoc.open();
+    frameDoc.write(html);
+    frameDoc.close();
+
+    iframe.onload = () => {
+      try {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+      } finally {
+        setTimeout(cleanup, 0);
+      }
+    };
   }
 
   async function handleArchiveReport(file: ReportFile) {

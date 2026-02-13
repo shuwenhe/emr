@@ -14,6 +14,14 @@ type ReportFile = {
   url: string;
   updated_at: number;
 };
+type PatientSearchResult = {
+  patient_id: string;
+  name?: string | null;
+  gender?: string | null;
+  age?: number | null;
+  phone?: string | null;
+  id_card?: string | null;
+};
 
 const API_BASE = "http://localhost:8000";
 const EMR_STATE_KEY = "patient_flow_state_emr";
@@ -36,6 +44,12 @@ export default function EmrPage() {
     error: "请先执行操作",
   });
   const [showAllReports, setShowAllReports] = useState(false);
+  const [globalQuery, setGlobalQuery] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<PatientSearchResult[]>([]);
+  const [searchMessage, setSearchMessage] = useState("");
+  const [currentSearchPatient, setCurrentSearchPatient] = useState<PatientSearchResult | null>(null);
+  const [showAbnormalDetails, setShowAbnormalDetails] = useState(false);
 
   useEffect(() => {
     try {
@@ -101,8 +115,22 @@ export default function EmrPage() {
       const patient = report.patient as Record<string, unknown>;
       return String(patient.name || "").trim();
     }
+    if (currentSearchPatient?.name) {
+      return String(currentSearchPatient.name || "").trim();
+    }
     return "";
-  }, [report]);
+  }, [currentSearchPatient, report]);
+  const currentPatientIdForFilter = useMemo(() => {
+    if (report && typeof report.patient === "object") {
+      const patient = report.patient as Record<string, unknown>;
+      const idValue = String(patient.patient_id || "").trim();
+      return idValue || patientId.trim();
+    }
+    if (currentSearchPatient?.patient_id) {
+      return String(currentSearchPatient.patient_id || "").trim();
+    }
+    return patientId.trim();
+  }, [currentSearchPatient, patientId, report]);
   const visibleReportFiles = useMemo(() => {
     if (reportFiles.length === 0) {
       return [] as ReportFile[];
@@ -110,15 +138,101 @@ export default function EmrPage() {
     if (showAllReports) {
       return reportFiles;
     }
-    if (!currentPatientName) {
+    const normalizedName = currentPatientName.trim();
+    const normalizedId = currentPatientIdForFilter.trim();
+    if (!normalizedName && !normalizedId) {
       return reportFiles;
     }
-    const prefix = `${currentPatientName}_`;
-    const normalized = currentPatientName.toLowerCase();
-    return reportFiles.filter((file) =>
-      file.name.startsWith(prefix) || file.name.toLowerCase().includes(normalized)
-    );
-  }, [currentPatientName, reportFiles, showAllReports]);
+    const prefix = normalizedName ? `${normalizedName}_` : "";
+    const nameKey = normalizedName.toLowerCase();
+    const idKey = normalizedId.toLowerCase();
+    return reportFiles.filter((file) => {
+      const fileName = file.name.toLowerCase();
+      const matchName =
+        !!normalizedName && (file.name.startsWith(prefix) || fileName.includes(nameKey));
+      const matchId = !!normalizedId && fileName.includes(idKey);
+      return matchName || matchId;
+    });
+  }, [currentPatientIdForFilter, currentPatientName, reportFiles, showAllReports]);
+
+  const overview = useMemo(() => {
+    const analysis = report && typeof report.analysis === "object"
+      ? (report.analysis as Record<string, unknown>)
+      : undefined;
+    const metrics = analysis?.temperature_metrics && typeof analysis.temperature_metrics === "object"
+      ? (analysis.temperature_metrics as Record<string, unknown>)
+      : undefined;
+    const abnormalRegions = analysis?.regional_comparison &&
+      typeof analysis.regional_comparison === "object" &&
+      (analysis.regional_comparison as Record<string, unknown>).abnormal_regions &&
+      Array.isArray((analysis.regional_comparison as Record<string, unknown>).abnormal_regions)
+      ? ((analysis.regional_comparison as Record<string, unknown>).abnormal_regions as unknown[])
+      : [];
+
+    const minC = toNumber(metrics?.min_c);
+    const maxC = toNumber(metrics?.max_c);
+    const tempRange =
+      minC !== null && maxC !== null
+        ? `${(maxC - minC).toFixed(1)}°C`
+        : "-";
+
+    const latestReport = reportFiles.length
+      ? reportFiles.reduce((latest, file) =>
+          file.updated_at > latest.updated_at ? file : latest
+        )
+      : undefined;
+
+    return {
+      riskLevel: String(analysis?.risk_level ?? "-").toUpperCase(),
+      abnormalCount: abnormalRegions.length,
+      tempRange,
+      reportCount: showAllReports ? reportFiles.length : visibleReportFiles.length,
+      latestReportLabel: latestReport?.date || latestReport?.name || "-",
+    };
+  }, [report, reportFiles, showAllReports, visibleReportFiles.length]);
+
+  const abnormalRegionList = useMemo(() => {
+    const analysis = report && typeof report.analysis === "object"
+      ? (report.analysis as Record<string, unknown>)
+      : undefined;
+    const comparison = analysis?.regional_comparison && typeof analysis.regional_comparison === "object"
+      ? (analysis.regional_comparison as Record<string, unknown>)
+      : undefined;
+    const regions = comparison?.abnormal_regions;
+    if (!Array.isArray(regions)) {
+      return [] as Record<string, unknown>[];
+    }
+    return regions as Record<string, unknown>[];
+  }, [report]);
+
+  const patientSummary = useMemo(() => {
+    if (report && typeof report.patient === "object") {
+      const patient = report.patient as Record<string, unknown>;
+      return {
+        name: String(patient.name || "-").trim() || "-",
+        gender: formatGender(String(patient.gender || "-")),
+        age: patient.age !== undefined && patient.age !== null ? String(patient.age) : "-",
+        bodyPart: String(patient.body_part || "-").trim() || "-",
+      };
+    }
+    if (currentSearchPatient) {
+      return {
+        name: String(currentSearchPatient.name || "-").trim() || "-",
+        gender: formatGender(String(currentSearchPatient.gender || "-")),
+        age:
+          currentSearchPatient.age !== undefined && currentSearchPatient.age !== null
+            ? String(currentSearchPatient.age)
+            : "-",
+        bodyPart: "-",
+      };
+    }
+    return {
+      name: "-",
+      gender: "-",
+      age: "-",
+      bodyPart: "-",
+    };
+  }, [currentSearchPatient, report]);
 
   const fetchReports = useCallback(async () => {
     try {
@@ -140,6 +254,13 @@ export default function EmrPage() {
       setRecordId(recordIdParam);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (!globalQuery.trim()) {
+      setSearchResults([]);
+      setSearchMessage("");
+    }
+  }, [globalQuery]);
 
   function extractReport(data: EmrResponse): ReportPayload {
     if (Array.isArray(data)) {
@@ -211,12 +332,41 @@ export default function EmrPage() {
     return mapping[normalized] || key;
   }
 
+  function formatRegionLabel(value: unknown) {
+    const key = String(value || "").trim().toLowerCase();
+    if (!key) return "-";
+    const mapping: Record<string, string> = {
+      r1_c1: "左肩",
+      r1_c2: "颈部",
+      r1_c3: "右肩",
+      r2_c1: "左背",
+      r2_c2: "脊柱",
+      r2_c3: "右背",
+      r3_c1: "左腰",
+      r3_c2: "腰部",
+      r3_c3: "右腰",
+      r4_c1: "左髋",
+      r4_c2: "骨盆",
+      r4_c3: "右髋",
+      r5_c1: "左膝",
+      r5_c2: "膝部",
+      r5_c3: "右膝",
+    };
+    return mapping[key] || String(value);
+  }
+
   function formatGender(value?: string) {
     if (!value) return "-";
     const normalized = String(value).toLowerCase();
     if (normalized === "male" || normalized === "m" || value === "男") return "男";
     if (normalized === "female" || normalized === "f" || value === "女") return "女";
     return String(value);
+  }
+
+  function toNumber(value: unknown): number | null {
+    if (value === null || value === undefined) return null;
+    const num = Number(value);
+    return Number.isFinite(num) ? num : null;
   }
 
   function syncEmrFields(data: EmrResponse) {
@@ -251,13 +401,31 @@ export default function EmrPage() {
     return response.json();
   }
 
-  async function handleGenerate() {
-    if (!recordId.trim()) {
-      setOutput({ error: "record_id 不能为空" });
-      return;
+  function resolveLatestEmrId(data: EmrResponse): string | null {
+    if (!Array.isArray(data) || data.length === 0) return null;
+    let latestItem: Record<string, unknown> | null = null;
+    let latestTimestamp = Number.NEGATIVE_INFINITY;
+
+    data.forEach((item) => {
+      const createdAt = typeof item.created_at === "string"
+        ? Date.parse(item.created_at)
+        : Number.NaN;
+      if (!Number.isNaN(createdAt) && createdAt >= latestTimestamp) {
+        latestTimestamp = createdAt;
+        latestItem = item;
+      }
+    });
+
+    if (!latestItem) {
+      latestItem = data[data.length - 1] as Record<string, unknown>;
     }
+    const emrIdValue = latestItem?.emr_id ?? latestItem?.emrId;
+    return emrIdValue ? String(emrIdValue) : null;
+  }
+
+  async function generateEmrByRecordId(nextRecordId: string) {
     const data = await postJson(`${API_BASE}/emr/generate`, {
-      record_id: recordId.trim(),
+      record_id: nextRecordId.trim(),
     });
     setOutput(data as EmrResponse);
     syncEmrFields(data as EmrResponse);
@@ -268,12 +436,8 @@ export default function EmrPage() {
     setRedirecting(false);
   }
 
-  async function handleFetch() {
-    if (!emrId.trim()) {
-      setOutput({ error: "emr_id 不能为空" });
-      return;
-    }
-    const response = await fetch(`${API_BASE}/emr/${emrId.trim()}`);
+  async function fetchEmrById(nextEmrId: string) {
+    const response = await fetch(`${API_BASE}/emr/${nextEmrId.trim()}`);
     const data = (await response.json()) as EmrResponse;
     setOutput(data);
     syncEmrFields(data);
@@ -283,9 +447,9 @@ export default function EmrPage() {
     }
   }
 
-  async function handleList() {
-    const query = patientId.trim()
-      ? `?patient_id=${encodeURIComponent(patientId.trim())}`
+  async function listEmrsByPatientId(nextPatientId: string): Promise<EmrResponse> {
+    const query = nextPatientId.trim()
+      ? `?patient_id=${encodeURIComponent(nextPatientId.trim())}`
       : "";
     const response = await fetch(`${API_BASE}/emr${query}`);
     const data = (await response.json()) as EmrResponse;
@@ -294,6 +458,136 @@ export default function EmrPage() {
     if (response.ok) {
       flashSuccessButton();
     }
+    return data;
+  }
+
+  async function fetchLatestEmrForPatient(nextPatientId: string) {
+    const data = await listEmrsByPatientId(nextPatientId);
+    const latestEmrId = resolveLatestEmrId(data);
+    if (!latestEmrId) {
+      setSearchMessage("未找到该患者的病历记录");
+      return false;
+    }
+    setEmrId(latestEmrId);
+    await fetchEmrById(latestEmrId);
+    return true;
+  }
+
+  async function handleGenerate() {
+    if (!recordId.trim()) {
+      setOutput({ error: "record_id 不能为空" });
+      return;
+    }
+    setCurrentSearchPatient(null);
+    await generateEmrByRecordId(recordId.trim());
+  }
+
+  async function handleFetch() {
+    if (!emrId.trim()) {
+      setOutput({ error: "emr_id 不能为空" });
+      return;
+    }
+    setCurrentSearchPatient(null);
+    await fetchEmrById(emrId.trim());
+  }
+
+  async function handleList() {
+    setCurrentSearchPatient(null);
+    await listEmrsByPatientId(patientId.trim());
+  }
+
+  async function handleGlobalSearch() {
+    const query = globalQuery.trim();
+    if (!query) {
+      setSearchMessage("请输入姓名 / 手机号 / 病历号 / 患者ID");
+      return;
+    }
+    setSearching(true);
+    setSearchResults([]);
+    setSearchMessage("");
+
+    const isEmrId = /^emr[-_]/i.test(query);
+    const isPatientId = /^p[a-z0-9]{6,}$/i.test(query);
+    const isRecordId = /^(rec|record)[-_]?/i.test(query);
+
+    try {
+      if (isEmrId) {
+        setEmrId(query);
+        await fetchEmrById(query);
+        setSearchMessage("已按病历 ID 查询");
+        return;
+      }
+
+      if (isPatientId) {
+        setPatientId(query);
+        const ok = await fetchLatestEmrForPatient(query);
+        setSearchMessage(ok ? "已读取患者最近病例" : "未找到该患者的病历记录");
+        return;
+      }
+
+      if (isRecordId) {
+        setRecordId(query);
+        await generateEmrByRecordId(query);
+        setSearchMessage("已按采集记录 ID 生成报告");
+        return;
+      }
+
+      const response = await fetch(`${API_BASE}/patients?page=1&limit=10000&include_archived=true`);
+      const data = (await response.json()) as PatientSearchResult[];
+      const candidates = Array.isArray(data) ? data : [];
+      const keyword = query.toLowerCase();
+      const matches = candidates.filter((patient) => {
+        const fields = [
+          patient.patient_id,
+          patient.name,
+          patient.phone,
+          patient.id_card,
+        ]
+          .filter(Boolean)
+          .map((value) => String(value).toLowerCase());
+        return fields.some((value) => value.includes(keyword));
+      });
+
+      if (matches.length === 1) {
+        const target = matches[0];
+        setCurrentSearchPatient(target);
+        setPatientId(target.patient_id);
+        const ok = await fetchLatestEmrForPatient(target.patient_id);
+        setSearchMessage(
+          ok
+            ? `已定位患者：${target.name || target.patient_id}，并读取最近病例`
+            : `已定位患者：${target.name || target.patient_id}，但未找到病例`
+        );
+        return;
+      }
+
+      if (matches.length > 1) {
+        setSearchResults(matches.slice(0, 8));
+        setCurrentSearchPatient(null);
+        setSearchMessage(`找到 ${matches.length} 位患者，请从下方选择`);
+        return;
+      }
+
+      setSearchMessage("未找到匹配患者，请确认输入信息");
+    } catch (error) {
+      setSearchMessage(`搜索失败: ${String(error)}`);
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  async function handleSelectSearchResult(patient: PatientSearchResult) {
+    if (!patient.patient_id) return;
+    setCurrentSearchPatient(patient);
+    setPatientId(patient.patient_id);
+    const ok = await fetchLatestEmrForPatient(patient.patient_id);
+    setSearchResults([]);
+    setSearchMessage(
+      ok
+        ? `已定位患者：${patient.name || patient.patient_id}，并读取最近病例`
+        : `已定位患者：${patient.name || patient.patient_id}，但未找到病例`
+    );
+    flashSuccessButton();
   }
 
   async function handleSave() {
@@ -433,22 +727,49 @@ export default function EmrPage() {
       </html>
     `;
 
-    const printWindow = window.open("", "_blank", "width=800,height=900");
-    if (!printWindow) {
-      setOutput({ error: "无法打开打印窗口" });
-      return;
-    }
-    printWindow.document.open();
-    printWindow.document.write(html);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
+    printHtmlInIframe(html);
     flashSuccessButton();
   }
 
   function handlePrint() {
     window.print();
     flashSuccessButton();
+  }
+
+  function printHtmlInIframe(html: string) {
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    iframe.setAttribute("aria-hidden", "true");
+    document.body.appendChild(iframe);
+
+    const cleanup = () => {
+      iframe.remove();
+    };
+
+    const frameDoc = iframe.contentWindow?.document;
+    if (!frameDoc) {
+      cleanup();
+      setOutput({ error: "无法打开打印窗口" });
+      return;
+    }
+
+    frameDoc.open();
+    frameDoc.write(html);
+    frameDoc.close();
+
+    iframe.onload = () => {
+      try {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+      } finally {
+        setTimeout(cleanup, 0);
+      }
+    };
   }
 
   async function handleViewDocx(url: string) {
@@ -469,13 +790,7 @@ export default function EmrPage() {
       const response = await fetch(`${API_BASE}${url}`);
       const arrayBuffer = await response.arrayBuffer();
       const result = await mammoth.convertToHtml({ arrayBuffer });
-      const printWindow = window.open("", "_blank", "width=900,height=1000");
-      if (!printWindow) {
-        setOutput({ error: "无法打开打印窗口" });
-        return;
-      }
-      printWindow.document.open();
-      printWindow.document.write(`
+      printHtmlInIframe(`
         <!doctype html>
         <html lang="zh-CN">
         <head>
@@ -491,9 +806,6 @@ export default function EmrPage() {
         </body>
         </html>
       `);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
       flashSuccessButton();
     } catch (error) {
       setOutput({ error: `打印失败: ${String(error)}` });
@@ -501,17 +813,181 @@ export default function EmrPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <main className="mx-auto flex min-h-screen max-w-7xl flex-col gap-8 px-6 py-12">
-        <header className="space-y-2">
-          <h1 className="text-3xl font-semibold text-slate-900">电子病历管理</h1>
-          <p className="text-slate-600">
-            自动生成、存储与调取病历，并与诊断报告联动。
-          </p>
+    <div className="relative min-h-screen overflow-hidden bg-[#f4f1ea]">
+      <div className="pointer-events-none absolute -top-32 right-[-10%] h-80 w-80 rounded-full bg-amber-200/50 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-40 left-[-10%] h-96 w-96 rounded-full bg-sky-200/50 blur-3xl" />
+      <main
+        className="relative mx-auto flex min-h-screen max-w-7xl flex-col gap-10 px-6 py-12"
+        style={{ fontFamily: '"Avenir Next", "PingFang SC", "Microsoft YaHei", sans-serif' }}
+      >
+        <header className="grid items-end gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="space-y-4 hero-fade">
+            <p className="text-xs uppercase tracking-[0.35em] text-amber-700">Clinical Intelligence</p>
+            <h1 className="text-4xl font-semibold text-slate-900 sm:text-5xl">
+              患者数据分析与统计中心
+            </h1>
+            <p className="max-w-2xl text-base text-slate-700">
+              医生可在此完成病历生成、趋势分析、诊断报告管理，并快速定位异常区域与风险等级。
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <button
+                className="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                onClick={handleFetch}
+              >
+                一键读取患者最近病例
+              </button>
+              <button
+                className="rounded-full border border-slate-300 bg-white/80 px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-white"
+                onClick={handleExportReportJson}
+              >
+                导出报告 JSON
+              </button>
+              {report && (
+                <button
+                  className="rounded-full border border-slate-300 bg-white/80 px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-white"
+                  onClick={() => router.push("/treatment")}
+                >
+                  生成治疗方案
+                </button>
+              )}
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-slate-900">统一搜索</p>
+                <span className="text-xs text-slate-500">姓名 / 手机号 / 病历号 / 患者ID</span>
+              </div>
+              <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+                <input
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  placeholder="例如：张三 / 13800000000 / EMR-xxxx / Pxxxx"
+                  value={globalQuery}
+                  onChange={(event) => setGlobalQuery(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      handleGlobalSearch();
+                    }
+                  }}
+                />
+                <button
+                  className="rounded-full bg-amber-600 px-5 py-2 text-sm font-semibold text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:bg-amber-300"
+                  onClick={handleGlobalSearch}
+                  disabled={searching}
+                >
+                  {searching ? "搜索中..." : "搜索"}
+                </button>
+              </div>
+              {searchMessage && (
+                <p className="mt-2 text-xs text-slate-600">{searchMessage}</p>
+              )}
+              {searchResults.length > 0 && (
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  {searchResults.map((patient) => (
+                    <button
+                      key={patient.patient_id}
+                      className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2 text-left hover:bg-slate-50"
+                      onClick={() => handleSelectSearchResult(patient)}
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">
+                          {patient.name || "未命名患者"}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          患者ID：{patient.patient_id}
+                          {patient.phone ? ` · ${patient.phone}` : ""}
+                        </p>
+                      </div>
+                      <span className="text-xs font-semibold text-amber-700">打开 →</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-3xl bg-white/90 p-5 shadow-sm ring-1 ring-amber-200/60 backdrop-blur hero-fade">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-slate-900">当前患者概览</p>
+              <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
+                {archived ? "已存档" : "活跃"}
+              </span>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-xl border border-slate-200/80 bg-white px-3 py-2">
+                <p className="text-xs uppercase tracking-wide text-slate-400">姓名</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">{patientSummary.name}</p>
+              </div>
+              <div className="rounded-xl border border-slate-200/80 bg-white px-3 py-2">
+                <p className="text-xs uppercase tracking-wide text-slate-400">性别 / 年龄</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">
+                  {patientSummary.gender} / {patientSummary.age}
+                </p>
+              </div>
+              <div className="rounded-xl border border-slate-200/80 bg-white px-3 py-2">
+                <p className="text-xs uppercase tracking-wide text-slate-400">病历 ID</p>
+                <p className="mt-1 truncate text-sm font-semibold text-slate-900">{emrId || "-"}</p>
+              </div>
+              <div className="rounded-xl border border-slate-200/80 bg-white px-3 py-2">
+                <p className="text-xs uppercase tracking-wide text-slate-400">采集部位</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">{patientSummary.bodyPart}</p>
+              </div>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-600">
+              <span className="rounded-full bg-slate-100 px-3 py-1">患者 ID：{patientId || "-"}</span>
+              <span className="rounded-full bg-slate-100 px-3 py-1">最近报告：{overview.latestReportLabel}</span>
+            </div>
+          </div>
         </header>
 
-        <section className="grid gap-6 lg:grid-cols-3">
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <section className="grid gap-4 lg:grid-cols-4">
+          <div className="rounded-2xl bg-white/90 p-5 shadow-sm ring-1 ring-slate-200/80 lift-1">
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">风险等级</p>
+            <p className="mt-2 text-2xl font-semibold text-slate-900">{overview.riskLevel}</p>
+            <p className="mt-1 text-xs text-slate-500">高风险患者自动标记</p>
+          </div>
+          <div className="rounded-2xl bg-white/90 p-5 shadow-sm ring-1 ring-slate-200/80 lift-1">
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">异常区域</p>
+            <button
+              className="mt-2 inline-flex items-center gap-2 text-2xl font-semibold text-slate-900"
+              onClick={() => {
+                if (overview.abnormalCount > 0) {
+                  setShowAbnormalDetails(true);
+                }
+              }}
+              disabled={overview.abnormalCount === 0}
+            >
+              {overview.abnormalCount}
+              <span className="text-xs font-semibold text-amber-700">
+                {overview.abnormalCount > 0 ? "查看" : ""}
+              </span>
+            </button>
+            <p className="mt-1 text-xs text-slate-500">可用于后续复诊追踪</p>
+          </div>
+          <div className="rounded-2xl bg-white/90 p-5 shadow-sm ring-1 ring-slate-200/80 lift-2">
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">温度范围</p>
+            <p className="mt-2 text-2xl font-semibold text-slate-900">{overview.tempRange}</p>
+            <p className="mt-1 text-xs text-slate-500">基于热成像采样</p>
+          </div>
+          <div className="rounded-2xl bg-white/90 p-5 shadow-sm ring-1 ring-slate-200/80 lift-2">
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">报告总数</p>
+            <button
+              className="mt-2 inline-flex items-center gap-2 text-2xl font-semibold text-slate-900"
+              onClick={() => {
+                const target = document.getElementById("report-history");
+                if (target) {
+                  target.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+              }}
+            >
+              {overview.reportCount}
+              <span className="text-xs font-semibold text-amber-700">查看</span>
+            </button>
+            <p className="mt-1 text-xs text-slate-500">覆盖历史诊断数据</p>
+          </div>
+        </section>
+
+        <section className="grid gap-6 lg:grid-cols-12">
+          <div className="rounded-3xl bg-white/90 p-6 shadow-sm ring-1 ring-slate-200/80 lg:col-span-5">
             <h2 className="text-lg font-semibold text-slate-900">生成诊断报告</h2>
             <label className="mt-4 block text-sm font-medium text-slate-700">
               记录 ID (record_id)
@@ -523,64 +999,61 @@ export default function EmrPage() {
               onChange={(event) => setRecordId(event.target.value)}
             />
             <button
-              className="mt-4 w-full rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              className="mt-4 w-full rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
               onClick={handleGenerate}
             >
               生成诊断报告
             </button>
-            {report && (
-              <button
-                className="mt-3 w-full rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                onClick={() => router.push("/treatment")}
-              >
-                前往生成治疗方案
-              </button>
-            )}
             <p className="mt-3 text-xs text-slate-500">
-              将基于采集数据自动生成诊断报告
+              将基于采集数据自动生成诊断报告，并同步分析指标。
             </p>
           </div>
 
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-            <h2 className="text-lg font-semibold text-slate-900">查询病历</h2>
-            <label className="mt-4 block text-sm font-medium text-slate-700">
-              病历 ID (emr_id)
-            </label>
-            <input
-              className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              placeholder="请输入 emr_id"
-              value={emrId}
-              onChange={(event) => setEmrId(event.target.value)}
-            />
-            <button
-              className="mt-4 w-full rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-              onClick={handleFetch}
-            >
-              获取病历
-            </button>
-          </div>
+          <div className="grid gap-6 lg:col-span-7 sm:grid-cols-2">
+            <div className="rounded-3xl bg-white/90 p-6 shadow-sm ring-1 ring-slate-200/80">
+              <h2 className="text-lg font-semibold text-slate-900">查询病历</h2>
+              <label className="mt-4 block text-sm font-medium text-slate-700">
+                病历 ID (emr_id)
+              </label>
+              <input
+                className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                placeholder="请输入 emr_id"
+                value={emrId}
+                onChange={(event) => setEmrId(event.target.value)}
+              />
+              <button
+                className="mt-4 w-full rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                onClick={handleFetch}
+              >
+                获取病历
+              </button>
+            </div>
 
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-            <h2 className="text-lg font-semibold text-slate-900">按患者查询</h2>
-            <label className="mt-4 block text-sm font-medium text-slate-700">
-              患者 ID (patient_id)
-            </label>
-            <input
-              className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              placeholder="请输入 patient_id"
-              value={patientId}
-              onChange={(event) => setPatientId(event.target.value)}
-            />
-            <button
-              className="mt-4 w-full rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-              onClick={handleList}
-            >
-              查询
-            </button>
+            <div className="rounded-3xl bg-white/90 p-6 shadow-sm ring-1 ring-slate-200/80">
+              <h2 className="text-lg font-semibold text-slate-900">按患者查询</h2>
+              <label className="mt-4 block text-sm font-medium text-slate-700">
+                患者 ID (patient_id)
+              </label>
+              <input
+                className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                placeholder="请输入 patient_id"
+                value={patientId}
+                onChange={(event) => setPatientId(event.target.value)}
+              />
+              <button
+                className="mt-4 w-full rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                onClick={handleList}
+              >
+                查询
+              </button>
+            </div>
           </div>
         </section>
 
-        <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <section
+          id="report-history"
+          className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200"
+        >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-lg font-semibold text-slate-900">诊断报告</h2>
           </div>
@@ -648,7 +1121,9 @@ export default function EmrPage() {
                   <div className="mt-3 space-y-2">
                     {(((report.analysis as Record<string, unknown>).regional_comparison as Record<string, unknown>).abnormal_regions as Record<string, unknown>[]).map((region, idx) => (
                       <div key={idx} className="flex items-center justify-between rounded-lg bg-white p-3">
-                        <span className="font-mono text-sm text-slate-700">{String(region.region)}</span>
+                        <span className="font-mono text-sm text-slate-700">
+                          {formatRegionLabel(region.region)}
+                        </span>
                         <span className={`text-xs font-semibold uppercase ${
                           region.status === "high" ? "text-red-600" : "text-blue-600"
                         }`}>
@@ -830,6 +1305,87 @@ export default function EmrPage() {
             </div>
           </div>
         )}
+        {showAbnormalDetails && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            onClick={() => setShowAbnormalDetails(false)}
+          >
+            <div
+              className="relative max-h-[90vh] w-full max-w-3xl overflow-auto rounded-2xl bg-white p-6 shadow-xl"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-slate-900">异常区域明细</h3>
+                <button
+                  className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-200"
+                  onClick={() => setShowAbnormalDetails(false)}
+                >
+                  关闭
+                </button>
+              </div>
+              {abnormalRegionList.length === 0 ? (
+                <p className="mt-4 text-sm text-slate-500">暂无异常区域数据</p>
+              ) : (
+                <div className="mt-4 space-y-2">
+                  {abnormalRegionList.map((region, index) => (
+                    <div
+                      key={`${String(region.region || "region")}-${index}`}
+                      className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">
+                          {formatRegionLabel(region.region || "未命名区域")}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          平均温度 {String(region.avg_c ?? "-")}°C · Δ {String(region.delta_c ?? "-")}°C
+                        </p>
+                      </div>
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-semibold uppercase ${
+                          region.status === "high"
+                            ? "bg-rose-100 text-rose-700"
+                            : "bg-blue-100 text-blue-700"
+                        }`}
+                      >
+                        {String(region.status || "normal")}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        <style jsx>{`
+          @keyframes fadeUp {
+            from {
+              opacity: 0;
+              transform: translateY(16px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          .hero-fade {
+            animation: fadeUp 0.8s ease both;
+          }
+          .lift-1 {
+            animation: fadeUp 0.9s ease both;
+            animation-delay: 0.08s;
+          }
+          .lift-2 {
+            animation: fadeUp 0.9s ease both;
+            animation-delay: 0.16s;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .hero-fade,
+            .lift-1,
+            .lift-2 {
+              animation: none;
+            }
+          }
+        `}</style>
       </main>
     </div>
   );
