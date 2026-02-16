@@ -1,13 +1,17 @@
 import asyncio
 import json
 import shutil
+import logging
 from urllib.parse import quote
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Request
+from fastapi.responses import JSONResponse
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from pymysql.err import OperationalError
 
 from .config import ALLOWED_EXTENSIONS, MAX_FILE_MB, REPORTS_DIR, DATA_DIR
 from .analysis import analyze_record
@@ -59,6 +63,16 @@ app.add_middleware(
 )
 app.mount("/data", StaticFiles(directory=str(DATA_DIR)), name="data")
 _device_stop_event: asyncio.Event | None = None
+logger = logging.getLogger(__name__)
+
+
+@app.exception_handler(OperationalError)
+async def handle_mysql_operational_error(request: Request, exc: OperationalError):
+    logger.error("MySQL operational error on %s %s: %s", request.method, request.url.path, exc)
+    return JSONResponse(
+        status_code=503,
+        content={"detail": "database_unavailable"},
+    )
 
 
 def _list_reports(date: str | None = None):
@@ -451,8 +465,16 @@ def preview_report(date: str, filename: str):
 @app.on_event("startup")
 async def start_device_polling():
     global _device_stop_event
-    init_db()
     _device_stop_event = asyncio.Event()
+    try:
+        init_db()
+    except Exception as exc:
+        logger.error(
+            "MySQL init failed, service starts in degraded mode (device polling disabled). "
+            "Check config/mysql.yaml credentials and run database/init_mysql.sql. error=%s",
+            exc,
+        )
+        return
     asyncio.create_task(poll_device_drop(_device_stop_event))
 
 

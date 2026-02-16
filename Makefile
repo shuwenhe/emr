@@ -3,7 +3,7 @@ PYTHON ?= python3.12
 VENV_DIR := .venv
 VENV_PY := $(VENV_DIR)/bin/python
 
-.PHONY: help install run-backend run-frontend report clean
+.PHONY: help install run-backend run-frontend db-check report clean
 
 help:
 	@echo "Available targets:"
@@ -11,6 +11,7 @@ help:
 	@echo "  make install  # install dependencies for device-ingestion"
 	@echo "  make run-backend   # run device-ingestion service"
 	@echo "  make run-frontend  # run Next.js frontend (dev)"
+	@echo "  make db-check # verify MySQL connectivity and privileges"
 	@echo "  make report   # generate docx reports"
 	@echo "  make clean    # remove generated files"
 
@@ -26,6 +27,9 @@ run-backend: install
 
 run-frontend:
 	@bash -c 'cd "$(CURDIR)/frontend"; if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" && nvm use 20; fi; npm run dev'
+
+db-check:
+	$(VENV_PY) backend/scripts/db_check.py
 
 report: install
 	$(VENV_PY) -m pip install -q python-docx
