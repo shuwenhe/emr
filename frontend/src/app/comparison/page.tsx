@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 type Patient = {
   patient_id: string;
@@ -34,6 +35,7 @@ type LastEmrContext = {
 const API_BASE = "http://localhost:8000";
 
 export default function ComparisonPage() {
+  const searchParams = useSearchParams();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [selectedPatientId, setSelectedPatientId] = useState("");
   const [emrRecords, setEmrRecords] = useState<EmrRecord[]>([]);
@@ -43,6 +45,16 @@ export default function ComparisonPage() {
   const [lastContext, setLastContext] = useState<LastEmrContext | null>(null);
   const [autoCompared, setAutoCompared] = useState(false);
   const [autoLoadComplete, setAutoLoadComplete] = useState(false);
+  const [recordIdFromUrl, setRecordIdFromUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    // 获取 URL 参数中的 record_id
+    const recordIdParam = searchParams.get("record_id");
+    if (recordIdParam) {
+      setRecordIdFromUrl(recordIdParam);
+      console.log("Found record_id in URL:", recordIdParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     // 读取所有可能包含患者信息的 localStorage keys

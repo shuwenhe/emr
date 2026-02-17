@@ -70,6 +70,49 @@ export default function EmrPage() {
   }, []);
 
   useEffect(() => {
+    if (globalQuery.trim()) return;
+    try {
+      const rawPatients = localStorage.getItem("patient_flow_state_patients");
+      const rawLastEmr = localStorage.getItem("last_emr_context");
+      const patientsState = rawPatients
+        ? (JSON.parse(rawPatients) as Record<string, unknown>)
+        : null;
+      const lastEmrContext = rawLastEmr
+        ? (JSON.parse(rawLastEmr) as Record<string, unknown>)
+        : null;
+      const currentPatient = patientsState && typeof patientsState === "object"
+        ? (patientsState as Record<string, unknown>).currentPatient
+        : null;
+      const candidate = (currentPatient && typeof currentPatient === "object")
+        ? (currentPatient as Record<string, unknown>)
+        : (lastEmrContext && typeof lastEmrContext === "object")
+          ? lastEmrContext as Record<string, unknown>
+          : null;
+
+      if (!candidate) return;
+
+      const candidateName = String(candidate.name ?? "").trim();
+      const candidateId = String(candidate.patient_id ?? "").trim();
+      if (candidateName || candidateId) {
+        setGlobalQuery(candidateName || candidateId);
+      }
+      if (!patientId && candidateId) {
+        setPatientId(candidateId);
+      }
+      if (!currentSearchPatient && (candidateName || candidateId)) {
+        setCurrentSearchPatient({
+          patient_id: candidateId,
+          name: candidateName || null,
+          gender: typeof candidate.gender === "string" ? candidate.gender : null,
+          age: typeof candidate.age === "number" ? candidate.age : null,
+        });
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
+
+  useEffect(() => {
     try {
       localStorage.setItem(
         EMR_STATE_KEY,
@@ -254,6 +297,13 @@ export default function EmrPage() {
       setRecordId(recordIdParam);
     }
   }, [searchParams]);
+
+  // 当URL中有record_id时，自动生成诊断
+  useEffect(() => {
+    if (recordId && !emrId) {
+      generateEmrByRecordId(recordId);
+    }
+  }, [recordId, emrId]);
 
   useEffect(() => {
     if (!globalQuery.trim()) {

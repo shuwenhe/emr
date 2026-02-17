@@ -115,6 +115,7 @@ export default function UploadPage() {
 
   useEffect(() => {
     if (result?.record_id) {
+      // 上传完成后，跳转到EMR/诊断分析页面
       router.push(`/emr?record_id=${result.record_id}`);
     }
   }, [result, router]);
