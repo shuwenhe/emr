@@ -354,7 +354,7 @@ def list_emrs(
     limit: int = 50,
     include_archived: bool = False,
 ) -> List[Dict[str, Any]]:
-    query = "SELECT * FROM emrs"
+    query = "SELECT emr_id, record_id, patient_id, created_at, archived, emr_json FROM emrs"
     params: List[Any] = []
     where = []
     if patient_id:
@@ -366,11 +366,26 @@ def list_emrs(
         query += " WHERE " + " AND ".join(where)
     query += " ORDER BY created_at DESC LIMIT %s"
     params.append(limit)
+    
+    results: List[Dict[str, Any]] = []
     with _connect() as conn:
         with conn.cursor() as cursor:
             cursor.execute(query, params)
             rows = cursor.fetchall()
-    return [dict(row) for row in rows]
+    
+    for row in rows:
+        # 返回完整的 emr_json 数据，如果有的话；否则返回表字段
+        if row.get("emr_json"):
+            try:
+                emr_data = json.loads(row["emr_json"])
+                results.append(emr_data)
+            except (json.JSONDecodeError, TypeError):
+                # 如果JSON解析失败，返回基本信息
+                results.append(dict(row))
+        else:
+            results.append(dict(row))
+    
+    return results
 
 
 def get_emr_by_record_id(record_id: str) -> Optional[Dict[str, Any]]:

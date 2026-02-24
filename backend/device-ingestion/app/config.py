@@ -13,7 +13,7 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 EMR_DIR = DATA_DIR / "emr"
 EMR_DIR.mkdir(parents=True, exist_ok=True)
 
-REPORTS_DIR = Path("./reports")
+REPORTS_DIR = Path("/Users/shuwen/hospital-report/reports")
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
 

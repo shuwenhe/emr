@@ -5,7 +5,7 @@ import logging
 from urllib.parse import quote
 from pathlib import Path
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from fastapi.responses import FileResponse
@@ -64,6 +64,15 @@ app.add_middleware(
 app.mount("/data", StaticFiles(directory=str(DATA_DIR)), name="data")
 _device_stop_event: asyncio.Event | None = None
 logger = logging.getLogger(__name__)
+
+
+def _generate_report_after_ingest(record_id: str) -> None:
+    try:
+        logger.info("Starting background report generation for record %s", record_id)
+        result = generate_emr(record_id)
+        logger.info("Report generation completed for record %s, emr_id=%s", record_id, result.get("emr_id"))
+    except Exception as exc:
+        logger.exception("Report generation failed for record %s: %s", record_id, exc)
 
 
 @app.exception_handler(OperationalError)
@@ -144,7 +153,11 @@ def _resolve_trash_path(date: str, filename: str) -> Path:
 
 
 @app.post("/ingest")
-async def ingest(file: UploadFile = File(...), metadata: str = Form(...)):
+async def ingest(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    metadata: str = Form(...),
+):
     _validate_file(file)
 
     try:
@@ -158,10 +171,12 @@ async def ingest(file: UploadFile = File(...), metadata: str = Form(...)):
 
     qc_issues = run_qc(parsed)
     result = save_payload(file.filename, file_bytes, parsed.model_dump())
+    background_tasks.add_task(_generate_report_after_ingest, result["record_id"])
 
     return {
         **result,
         "qc_issues": qc_issues,
+        "report_generation": "scheduled",
     }
 
 
@@ -223,8 +238,15 @@ def get_emr_endpoint(emr_id: str):
 
 @app.get("/emr")
 def list_emr_endpoint(patient_id: str | None = None, include_archived: bool = False):
-    emrs = list_emrs(patient_id=patient_id, include_archived=include_archived)
+    # 优先使用数据库查询（更可靠且完整）
+    emrs = list_platform_emrs(patient_id=patient_id, limit=1000, include_archived=include_archived)
+    
+    # 如果从数据库未找到，回退到文件系统查询
     if patient_id and not emrs:
+        fs_emrs = list_emrs(patient_id=patient_id, include_archived=include_archived)
+        if fs_emrs:
+            return fs_emrs
+        # 如果文件系统也未找到，尝试按患者名字匹配
         patient = get_patient(patient_id)
         patient_name = patient.get("name") if patient else None
         if patient_name:

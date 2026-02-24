@@ -1,4 +1,5 @@
 import json
+import logging
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -92,7 +93,11 @@ def generate_emr(record_id: str) -> Dict[str, Any]:
     save_emr(emr)
 
     if report:
-        generate_docx_report(report, emr)
+        try:
+            docx_path = generate_docx_report(report, emr)
+            logging.info("DOCX report generated: %s", docx_path)
+        except Exception as exc:
+            logging.exception("DOCX generation failed for emr %s: %s", emr_id, exc)
 
     return emr
 

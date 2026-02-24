@@ -358,11 +358,15 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
     with open(metadata_path, "r", encoding="utf-8") as handle:
         metadata = json.load(handle)
 
-    payload_path = _find_payload_file(record_dir)
+    payload_path = None
+    try:
+        payload_path = _find_payload_file(record_dir)
+    except FileNotFoundError:
+        payload_path = None
     image_paths = [str(path) for path in _find_image_files(record_dir)]
 
     temps: List[float] = []
-    if payload_path.suffix.lower() == ".csv":
+    if payload_path and payload_path.suffix.lower() == ".csv":
         temps = _load_csv_temperatures(payload_path)
 
     metrics = _summarize_temperatures(temps)
@@ -374,7 +378,7 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
     temperature_labels = {"text": None, "values": []}
     region_comparison: List[Dict[str, Any]] = []
     abnormal_regions: List[Dict[str, Any]] = []
-    if payload_path.suffix.lower() == ".csv":
+    if payload_path and payload_path.suffix.lower() == ".csv":
         grid = _load_csv_grid(payload_path)
         if grid is not None:
             region_comparison = _region_analysis(grid, body_avg_temp_c)
@@ -537,5 +541,5 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
         "report": report,
         "plan": plan,
         "dispatch": dispatch,
-        "payload_path": str(payload_path),
+        "payload_path": str(payload_path) if payload_path else None,
     }

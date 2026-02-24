@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Document, HeadingLevel, Packer, Paragraph, TextRun } from "docx";
 import { flashSuccessButton } from "../lib/flash";
 
 type Patient = {
@@ -350,15 +351,63 @@ export default function TreatmentPage() {
     }
   }
 
-  function handleExportPlan() {
+  async function handleExportPlan() {
     if (!treatmentPlan) return;
-    
-    const blob = new Blob([JSON.stringify(treatmentPlan, null, 2)], {
-      type: "application/json;charset=utf-8",
+
+    const patient = patients.find((item) => item.patient_id === selectedPatientId);
+    const safePatientName = patient?.name || "患者";
+    const doc = new Document({
+      sections: [
+        {
+          properties: {},
+          children: [
+            new Paragraph({
+              text: "治疗方案",
+              heading: HeadingLevel.TITLE,
+            }),
+            new Paragraph({
+              children: [new TextRun(`方案编号：${treatmentPlan.plan_id}`)],
+            }),
+            new Paragraph({
+              children: [new TextRun(`患者姓名：${safePatientName}`)],
+            }),
+            new Paragraph({
+              children: [
+                new TextRun(
+                  `温度：${treatmentPlan.temperature}°C  单次时长：${treatmentPlan.duration}分钟  频率：${treatmentPlan.frequency}  疗程：${treatmentPlan.course}次`
+                ),
+              ],
+            }),
+            new Paragraph({
+              text: "注意事项",
+              heading: HeadingLevel.HEADING_2,
+            }),
+            new Paragraph({
+              children: [new TextRun(treatmentPlan.notes || "-")],
+            }),
+            new Paragraph({
+              text: "推荐穴位",
+              heading: HeadingLevel.HEADING_2,
+            }),
+            ...treatmentPlan.acupoints.map(
+              (point) =>
+                new Paragraph({
+                  children: [
+                    new TextRun({ text: point.name, bold: true }),
+                    new TextRun(`  位置：${point.location}`),
+                    new TextRun(`  功效：${point.reason}`),
+                  ],
+                })
+            ),
+          ],
+        },
+      ],
     });
+
+    const blob = await Packer.toBlob(doc);
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `treatment-plan-${treatmentPlan.plan_id}.json`;
+    link.download = `${safePatientName}-治疗方案.docx`;
     document.body.appendChild(link);
     link.click();
     link.remove();

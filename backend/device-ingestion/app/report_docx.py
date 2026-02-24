@@ -34,7 +34,9 @@ def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     date_dir.mkdir(parents=True, exist_ok=True)
 
     patient_name = _safe_name(str(patient.get("name") or "患者")) or "患者"
-    filename = f"{patient_name}_{created_dt.strftime('%Y%m%d_%H%M%S')}.docx"
+    emr_id = str(emr.get("emr_id") or report.get("report_id") or "")
+    emr_suffix = f"_{_safe_name(emr_id)}" if emr_id else ""
+    filename = f"{patient_name}_{created_dt.strftime('%Y%m%d_%H%M%S')}{emr_suffix}.docx"
     output_path = date_dir / filename
 
     doc = Document()
@@ -78,4 +80,5 @@ def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
             doc.add_picture(str(image_file), width=Inches(5.5))
 
     doc.save(str(output_path))
+    print(f"[DOCX] Saved report to: {output_path}")
     return output_path
