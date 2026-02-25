@@ -22,6 +22,25 @@ services:
     networks:
       - hospital-network
 
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: hospital-clickhouse
+    environment:
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-hospital}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-hospital}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-thermal}
+    # No host port mappings: ClickHouse is reachable from other compose services
+    # via the internal Docker network at port 9000 (native) and 8123 (HTTP).
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8123/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hospital-network
+
   backend:
     build:
       context: ./backend
@@ -89,6 +108,8 @@ services:
 
 volumes:
   mysql_data:
+    driver: local
+  clickhouse_data:
     driver: local
 
 networks:
