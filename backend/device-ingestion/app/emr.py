@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 
 from .data_platform import get_emr_by_record_id, save_emr, save_report
 from .config import DATA_DIR, EMR_DIR
-from .report_docx import generate_docx_report
+from .report_template import generate_template_report
 
 
 class EmrNotFoundError(FileNotFoundError):
@@ -94,10 +94,10 @@ def generate_emr(record_id: str) -> Dict[str, Any]:
 
     if report:
         try:
-            docx_path = generate_docx_report(report, emr)
-            logging.info("DOCX report generated: %s", docx_path)
+            report_path = generate_template_report(report, emr)
+            logging.info("Template report generated: %s", report_path)
         except Exception as exc:
-            logging.exception("DOCX generation failed for emr %s: %s", emr_id, exc)
+            logging.exception("Template report generation failed for emr %s: %s", emr_id, exc)
 
     return emr
 
@@ -194,9 +194,9 @@ def update_emr(emr_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
         except Exception:
             emr.setdefault("warnings", []).append("report_db_save_failed")
         try:
-            generate_docx_report(report, emr)
+            generate_template_report(report, emr)
         except Exception:
-            emr.setdefault("warnings", []).append("report_docx_generate_failed")
+            emr.setdefault("warnings", []).append("report_template_generate_failed")
 
     with open(_emr_path(emr_id), "w", encoding="utf-8") as handle:
         json.dump(emr, handle, ensure_ascii=False, indent=2)

@@ -16,6 +16,9 @@ EMR_DIR.mkdir(parents=True, exist_ok=True)
 REPORTS_DIR = BASE_DIR / "reports"
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
+TEMPLATE_DIR = BASE_DIR / "template"
+DEFAULT_REPORT_TEMPLATE = "A23BA8165CAC43548B79D032858D4ADB.tpl"
+
 
 def _load_mysql_config() -> dict:
 	if not MYSQL_CONFIG_PATH.exists():

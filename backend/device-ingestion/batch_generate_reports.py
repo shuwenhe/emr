@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-批量为所有EMR记录生成DOCX报告文件
+批量为所有EMR记录生成模板报告文件
 解决患者侯宝玉只有1个报告的问题
 """
 
@@ -13,13 +13,13 @@ from datetime import datetime
 sys.path.insert(0, str(Path(__file__).parent))
 
 from app.data_platform import list_emrs as list_db_emrs, get_patient
-from app.report_docx import generate_docx_report
+from app.report_template import generate_template_report
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 def generate_reports_for_patient(patient_id: str, patient_name: str):
-    """为某个患者的所有EMR生成DOCX报告"""
+    """为某个患者的所有EMR生成模板报告"""
     
     print(f"\n{'='*70}")
     print(f"为患者 {patient_name} (ID: {patient_id}) 生成报告")
@@ -47,7 +47,7 @@ def generate_reports_for_patient(patient_id: str, patient_name: str):
             created_at = emr.get("created_at", "")
             diagnosis = emr.get("diagnosis", "")[:50]
             
-            # 构造report和emr对象（generate_docx_report期望的格式）
+            # 构造report和emr对象（generate_template_report期望的格式）
             report = emr.get("report", {})
             if not report:
                 # 如果没有report字段，用EMR数据填充
@@ -61,10 +61,10 @@ def generate_reports_for_patient(patient_id: str, patient_name: str):
                     "analysis": {}
                 }
             
-            # 生成DOCX文件
-            docx_path = generate_docx_report(report, emr)
+            # 生成模板报告文件
+                report_path = generate_template_report(report, emr)
             print(f"  {i:2}. ✓ {emr_id:16} | {created_at:19} | {diagnosis:50}")
-            print(f"       └─> {docx_path.name}")
+                print(f"       └─> {report_path.name}")
             success_count += 1
             
         except Exception as e:
@@ -82,7 +82,7 @@ def main():
     """为所有患者生成报告"""
     
     print("=" * 70)
-    print("DOCX报告批量生成工具")
+    print("模板报告批量生成工具")
     print("=" * 70)
     
     # 目标患者

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-为所有已有的EMR记录批量生成DOCX报告文件
+为所有已有的EMR记录批量生成模板报告文件
 """
 
 import sys
@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def main():
-    """批量为已有EMR记录生成DOCX文件"""
+    """批量为已有EMR记录生成模板报告文件"""
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     
