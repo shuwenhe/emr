@@ -4,12 +4,23 @@
 import argparse
 import csv
 import json
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from docx import Document
 from docx.shared import Inches
+
+DEVICE_INGESTION_DIR = Path(__file__).resolve().parents[1] / "device-ingestion"
+if DEVICE_INGESTION_DIR.exists():
+    sys.path.insert(0, str(DEVICE_INGESTION_DIR))
+
+try:
+    from app.report_template import generate_template_report
+except Exception as exc:  # pragma: no cover - optional runtime dependency
+    generate_template_report = None
+    _TEMPLATE_IMPORT_ERROR = exc
 
 
 def _load_metadata(path: Path) -> Dict:
@@ -242,6 +253,78 @@ def _build_advice(body_part: Optional[str]) -> Dict[str, List[str]]:
     }
 
 
+def _build_template_payload(
+    dataset_id: str,
+    patient_name: str,
+    metadata: Dict[str, Any],
+    metrics: Dict[str, Optional[float]],
+    report_data: Optional[Dict[str, Any]],
+    plan_data: Optional[Dict[str, Any]],
+    images: List[Path],
+) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    report: Dict[str, Any] = dict(report_data or {})
+
+    patient = dict(report.get("patient") or {})
+    patient.setdefault("patient_id", metadata.get("patient_id"))
+    patient.setdefault("name", metadata.get("patient_name") or patient_name)
+    patient.setdefault("gender", metadata.get("gender"))
+    patient.setdefault("age", metadata.get("age"))
+    patient.setdefault("body_part", metadata.get("body_part"))
+    patient.setdefault("posture", metadata.get("posture"))
+    report["patient"] = patient
+
+    created_at = report.get("created_at") or metadata.get("capture_time")
+    if not created_at:
+        created_at = datetime.now().isoformat(timespec="seconds")
+    report["created_at"] = created_at
+
+    if not report.get("report_id"):
+        report["report_id"] = f"RPT-{dataset_id}"
+
+    analysis = report.get("analysis") if isinstance(report.get("analysis"), dict) else {}
+    if not analysis.get("temperature_metrics"):
+        analysis["temperature_metrics"] = {
+            "min_c": metrics.get("min_c"),
+            "max_c": metrics.get("max_c"),
+            "avg_c": metrics.get("avg_c"),
+            "count": metrics.get("count"),
+        }
+    if not analysis.get("summary"):
+        analysis["summary"] = report.get("diagnosis") or report.get("doctor_opinion") or "-"
+    report["analysis"] = analysis
+
+    if not report.get("doctor_opinion"):
+        report["doctor_opinion"] = metadata.get("doctor_opinion")
+
+    clinical = report.get("clinical") if isinstance(report.get("clinical"), dict) else {}
+    if metadata.get("chief_complaint") and not clinical.get("chief_complaint"):
+        clinical["chief_complaint"] = metadata.get("chief_complaint")
+    if metadata.get("past_history") and not clinical.get("past_history"):
+        clinical["past_history"] = metadata.get("past_history")
+    report["clinical"] = clinical
+
+    if not report.get("treatment_plan") and plan_data:
+        report["treatment_plan"] = plan_data
+
+    if not report.get("thermal_images"):
+        report["thermal_images"] = [str(path.resolve()) for path in images]
+    if not report.get("thermal_marked_image") and images:
+        report["thermal_marked_image"] = str(images[0].resolve())
+
+    emr = {
+        "emr_id": report.get("record_id") or dataset_id,
+        "created_at": created_at,
+        "patient": patient,
+        "hospital": "张氏疼痛外治中心",
+        "unit": "张氏疼痛外治中心",
+        "diagnosis": report.get("diagnosis"),
+        "doctor_opinion": report.get("doctor_opinion"),
+        "clinical": clinical,
+    }
+
+    return report, emr
+
+
 def _objective_table(temps: Dict[str, Optional[float]]) -> Tuple[List[Tuple[str, float]], List[Tuple[str, float]]]:
     avg = temps["avg_c"] or 0.0
     front = [
@@ -431,13 +514,14 @@ def generate_reports(
     datasets: List[str],
     patient_name: str,
     data_root: Path,
+    template_name: Optional[str] = None,
 ) -> List[Path]:
-    date_folder = datetime.now().strftime("%Y%m%d")
-    output_dir = output_root / date_folder
-    output_dir.mkdir(parents=True, exist_ok=True)
+    if generate_template_report is None:
+        raise RuntimeError(
+            "模板报告生成不可用，请先安装 pythonnet 并配置 FastReport。"
+        ) from _TEMPLATE_IMPORT_ERROR
 
     created_files: List[Path] = []
-    base_time = datetime.now()
 
     for index, dataset_id in enumerate(datasets):
         dataset_dir = data_root / dataset_id
@@ -453,13 +537,22 @@ def generate_reports(
         plan_data = _load_json_if_exists(dataset_dir / "plan.json")
         images = _collect_images(dataset_dir)
 
-        doc = _build_report(dataset_id, patient_name, metadata, metrics, report_data, plan_data, images)
+        report_payload, emr_payload = _build_template_payload(
+            dataset_id,
+            patient_name,
+            metadata,
+            metrics,
+            report_data,
+            plan_data,
+            images,
+        )
 
-        timestamp = (base_time + timedelta(seconds=index)).strftime("%Y%m%d_%H%M%S")
-        file_name = f"{patient_name}_{timestamp}.docx"
-        output_path = output_dir / file_name
-        doc.save(output_path)
-        created_files.append(output_path)
+        output_path = generate_template_report(
+            report_payload,
+            emr_payload,
+            template_name=template_name,
+        )
+        created_files.append(Path(output_path))
 
     return created_files
 
@@ -483,6 +576,11 @@ def main() -> None:
         default=str(Path(__file__).resolve().parents[2] / "data"),
         help="Root folder containing test datasets",
     )
+    parser.add_argument(
+        "--template",
+        default=None,
+        help="Template file name under template/ (e.g. A23BA8165CAC43548B79D032858D4ADB.tpl)",
+    )
     args = parser.parse_args()
 
     output_root = Path(args.output_root)
@@ -493,6 +591,7 @@ def main() -> None:
         datasets=args.datasets,
         patient_name=args.name,
         data_root=data_root,
+        template_name=args.template,
     )
 
     if not created_files:
