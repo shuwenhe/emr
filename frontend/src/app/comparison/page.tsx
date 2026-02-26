@@ -143,7 +143,7 @@ export default function ComparisonPage() {
     console.log("Patient ID:", patientId);
     
     try {
-      const url = `${API_BASE}/emr?patient_id=${encodeURIComponent(patientId)}`;
+      const url = `${API_BASE}/emr?patient_id=${encodeURIComponent(patientId)}&include_archived=true`;
       console.log("Fetching from URL:", url);
       
       const response = await fetch(url);
@@ -403,6 +403,15 @@ export default function ComparisonPage() {
     return String(value);
   }
 
+  function buildThermalImageUrl(path?: string) {
+    if (!path) return "";
+    const normalized = String(path).replace(/^\//, "");
+    if (normalized.startsWith("data/")) {
+      return `${API_BASE}/${normalized}`;
+    }
+    return `${API_BASE}/data/${normalized}`;
+  }
+
   function buildComparisonPayload() {
     const patient = patients.find((item) => item.patient_id === selectedPatientId);
     return {
@@ -600,7 +609,6 @@ export default function ComparisonPage() {
           {process.env.NODE_ENV === 'development' && (
             <div className="mt-2 rounded border border-gray-300 bg-gray-50 p-2 text-xs text-gray-600">
               <div className="font-semibold mb-1">调试信息:</div>
-              <div>• 患者总数: {patients.length}</div>
               <div>• 选中患者ID: {selectedPatientId || '无'}</div>
               <div>• EMR记录数: {emrRecords.length}</div>
               <div>• 自动加载完成: {autoLoadComplete ? '是' : '否'}</div>
@@ -609,7 +617,7 @@ export default function ComparisonPage() {
                   <div className="font-semibold">上下文信息:</div>
                   <div>• Patient ID: {lastContext.patient_id || '无'}</div>
                   <div>• 姓名: {lastContext.name || '无'}</div>
-                  <div>• 性别: {lastContext.gender || '无'}</div>
+                  <div>• 性别: {lastContext.gender ? formatGender(lastContext.gender) : '无'}</div>
                   <div>• 年龄: {lastContext.age || '无'}</div>
                 </div>
               )}
@@ -865,7 +873,7 @@ export default function ComparisonPage() {
                 )}
                 {beforeEmr.thermal_marked_image && (
                   <img
-                    src={`${API_BASE}/${beforeEmr.thermal_marked_image}`}
+                    src={buildThermalImageUrl(beforeEmr.thermal_marked_image)}
                     alt="治疗前热成像"
                     className="w-full rounded-xl border border-slate-200"
                   />
@@ -907,7 +915,7 @@ export default function ComparisonPage() {
                 )}
                 {afterEmr.thermal_marked_image && (
                   <img
-                    src={`${API_BASE}/${afterEmr.thermal_marked_image}`}
+                    src={buildThermalImageUrl(afterEmr.thermal_marked_image)}
                     alt="治疗后热成像"
                     className="w-full rounded-xl border border-slate-200"
                   />

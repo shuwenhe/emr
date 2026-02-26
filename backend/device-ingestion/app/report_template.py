@@ -80,7 +80,9 @@ def _load_fastreport():
     try:
         import clr  # type: ignore
     except Exception as exc:  # pragma: no cover - runtime dependency
-        raise RuntimeError("pythonnet 未安装，无法加载 FastReport 模板。") from exc
+        raise RuntimeError(
+            "FastReport 依赖的 .NET 运行时未就绪（pythonnet/mono 或 coreclr 缺失）。"
+        ) from exc
 
     assembly_path = os.getenv("FASTREPORT_ASSEMBLY")
     if assembly_path:

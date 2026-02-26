@@ -541,6 +541,17 @@ export default function EmrPage() {
     await fetchEmrById(emrId.trim());
   }
 
+  async function handleFetchLatestForPatient() {
+    const targetPatientId = currentPatientIdForFilter.trim() || patientId.trim();
+    if (!targetPatientId) {
+      setSearchMessage("请先选择患者或输入患者ID");
+      return;
+    }
+    setCurrentSearchPatient(null);
+    const ok = await fetchLatestEmrForPatient(targetPatientId);
+    setSearchMessage(ok ? "已读取患者最近病例" : "未找到该患者的病历记录");
+  }
+
   async function handleList() {
     setCurrentSearchPatient(null);
     await listEmrsByPatientId(patientId.trim());
@@ -882,7 +893,7 @@ export default function EmrPage() {
             <div className="flex flex-wrap gap-3">
               <button
                 className="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-                onClick={handleFetch}
+                onClick={handleFetchLatestForPatient}
               >
                 一键读取患者最近病例
               </button>

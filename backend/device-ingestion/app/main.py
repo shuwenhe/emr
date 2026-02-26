@@ -256,6 +256,34 @@ def list_emr_endpoint(patient_id: str | None = None, include_archived: bool = Fa
                 for item in fallback
                 if (item.get("patient") or {}).get("name") == patient_name
             ]
+        return emrs
+
+    # 如果数据库有结果，同时尝试合并文件系统中的EMR，避免遗漏
+    if patient_id:
+        try:
+            fs_emrs = list_emrs(patient_id=patient_id, include_archived=include_archived)
+        except Exception:
+            fs_emrs = []
+
+        merged = {str(item.get("emr_id")): item for item in emrs if item.get("emr_id")}
+        for item in fs_emrs:
+            key = str(item.get("emr_id")) if item.get("emr_id") else None
+            if key and key not in merged:
+                merged[key] = item
+
+        # 额外按姓名合并，补齐 patient_id 为空的 EMR
+        patient = get_patient(patient_id)
+        patient_name = patient.get("name") if patient else None
+        if patient_name:
+            fallback = list_emrs(patient_id=None, include_archived=include_archived)
+            for item in fallback:
+                if (item.get("patient") or {}).get("name") != patient_name:
+                    continue
+                key = str(item.get("emr_id")) if item.get("emr_id") else None
+                if key and key not in merged:
+                    merged[key] = item
+
+        emrs = list(merged.values()) if merged else emrs
     return emrs
 
 
