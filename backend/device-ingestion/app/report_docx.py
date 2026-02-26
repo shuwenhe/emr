@@ -72,6 +72,23 @@ def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     doc.add_heading("医生意见", level=2)
     doc.add_paragraph(str(report.get("doctor_opinion") or "-"))
 
+    ai_payload = report.get("ai") or {}
+    ai_plan_text = ""
+    plan = report.get("treatment_plan") or {}
+    if isinstance(plan, dict):
+        ai_plan_text = str(plan.get("ai_recommendation") or "").strip()
+    if not ai_plan_text:
+        ai_plan_text = str(ai_payload.get("treatment_plan_text") or "").strip()
+    ai_report_note = str(ai_payload.get("report_note") or "").strip()
+
+    if ai_plan_text:
+        doc.add_heading("AI治疗方案建议", level=2)
+        doc.add_paragraph(ai_plan_text)
+
+    if ai_report_note:
+        doc.add_heading("AI补充说明", level=2)
+        doc.add_paragraph(ai_report_note)
+
     image_path = report.get("thermal_marked_image")
     if image_path:
         image_file = Path(image_path)

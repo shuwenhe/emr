@@ -1,8 +1,13 @@
 import csv
 import json
+import logging
+import os
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+import urllib.error
+import urllib.request
 
 import re
 import yaml
@@ -16,6 +21,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 from .config import DATA_DIR
 from .data_platform import get_patient_history, save_plan, save_report
 from .emr import upsert_emr_from_analysis
+from .clickhouse_store import insert_thermal_csv
 
 BASE_DIR = Path(__file__).resolve().parents[3]
 TREATMENT_RULES_PATH = BASE_DIR / "config" / "treatment_rules.yaml"
@@ -30,6 +36,101 @@ def _load_treatment_rules() -> dict:
 
 
 _TREATMENT_RULES = _load_treatment_rules()
+
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:1.7b")
+OLLAMA_ENABLED = os.getenv("OLLAMA_ENABLED", "1") != "0"
+
+
+def _extract_json_block(text: str) -> Optional[dict]:
+    if not text:
+        return None
+    text = text.strip()
+    try:
+        return json.loads(text)
+    except Exception:
+        pass
+    match = re.search(r"\{.*\}", text, re.DOTALL)
+    if not match:
+        return None
+    try:
+        return json.loads(match.group(0))
+    except Exception:
+        return None
+
+
+def _ollama_generate(prompt: str, *, temperature: float = 0.2, max_tokens: int = 512) -> str:
+    if not OLLAMA_ENABLED:
+        return ""
+    payload = {
+        "model": OLLAMA_MODEL,
+        "prompt": prompt,
+        "stream": False,
+        "options": {"temperature": temperature, "num_predict": max_tokens},
+    }
+    data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    request = urllib.request.Request(
+        f"{OLLAMA_BASE_URL}/api/generate",
+        data=data,
+        headers={"Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=20) as response:
+            body = response.read().decode("utf-8")
+        result = json.loads(body)
+        return str(result.get("response") or "").strip()
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError):
+        return ""
+
+
+def _build_llm_context(
+    patient: Dict[str, Any],
+    body_part: str,
+    summary: str,
+    risk_level: str,
+    metrics: Dict[str, Any],
+    abnormal_regions: List[Dict[str, Any]],
+) -> str:
+    return (
+        "你是一名医疗热成像评估助手。请基于以下信息生成简洁、谨慎的中文内容。"
+        "输出只需客观结论，避免夸大或绝对化表述。\n"
+        f"患者信息：姓名={patient.get('name','-')} 性别={patient.get('gender','-')} 年龄={patient.get('age','-')} 部位={body_part}\n"
+        f"风险等级：{risk_level}\n"
+        f"温度摘要：{summary}\n"
+        f"温度指标：min={metrics.get('min_c')} max={metrics.get('max_c')} avg={metrics.get('avg_c')}\n"
+        f"异常区域：{abnormal_regions}\n"
+    )
+
+
+def _generate_llm_diagnosis_and_opinion(context: str) -> Dict[str, str]:
+    prompt = (
+        context
+        + "请返回严格JSON，包含字段：diagnosis, doctor_opinion, report_note。"
+        "其中 doctor_opinion 和 report_note 需明确‘仅供参考’。"
+    )
+    text = _ollama_generate(prompt, temperature=0.2, max_tokens=400)
+    data = _extract_json_block(text) or {}
+    return {
+        "diagnosis": str(data.get("diagnosis") or "").strip(),
+        "doctor_opinion": str(data.get("doctor_opinion") or "").strip(),
+        "report_note": str(data.get("report_note") or "").strip(),
+    }
+
+
+def _generate_llm_plan_text(context: str, plan: Dict[str, Any]) -> str:
+    plan_summary = {
+        "intensity_level": plan.get("intensity_level"),
+        "sessions": plan.get("sessions"),
+        "frequency": plan.get("frequency"),
+        "target_regions": plan.get("target_regions"),
+        "acupoints": plan.get("acupoints"),
+    }
+    prompt = (
+        context
+        + "以下为规则引擎生成的治疗方案要点，请生成精简中文说明（3-6句），并标注‘AI建议，仅供参考’：\n"
+        + json.dumps(plan_summary, ensure_ascii=False)
+    )
+    return _ollama_generate(prompt, temperature=0.3, max_tokens=300)
 
 
 def _parse_iso_datetime(value: str) -> datetime:
@@ -427,10 +528,29 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
     plan_id = f"PLAN-{record_id}"
 
     doctor_opinion = clinical.get("doctor_opinion")
+    diagnosis = clinical.get("diagnosis")
+
+    llm_context = _build_llm_context(
+        patient=patient,
+        body_part=body_part,
+        summary=summary,
+        risk_level=risk_level,
+        metrics=metrics,
+        abnormal_regions=abnormal_regions,
+    )
+    llm_result = _generate_llm_diagnosis_and_opinion(llm_context) if OLLAMA_ENABLED else {}
+    ai_diagnosis = str(llm_result.get("diagnosis") or "").strip()
+    ai_doctor_opinion = str(llm_result.get("doctor_opinion") or "").strip()
+    ai_report_note = str(llm_result.get("report_note") or "").strip()
+
+    if not diagnosis and ai_diagnosis:
+        diagnosis = ai_diagnosis
+    if not doctor_opinion and ai_doctor_opinion:
+        doctor_opinion = ai_doctor_opinion
+
     if not doctor_opinion:
         doctor_opinion = f"基于热成像温度分布评估，风险等级为 {risk_level}，建议结合临床进一步判断。"
 
-    diagnosis = clinical.get("diagnosis")
     if not diagnosis:
         diagnosis = summary if summary else "影像学提示无明显异常"
 
@@ -499,7 +619,22 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
         abnormal_regions,
     )
 
+    ai_plan_text = ""
+    if OLLAMA_ENABLED:
+        ai_plan_text = _generate_llm_plan_text(llm_context, plan).strip()
+        if ai_plan_text:
+            plan["ai_recommendation"] = ai_plan_text
+
     report["treatment_plan"] = plan
+
+    if OLLAMA_ENABLED and (ai_diagnosis or ai_doctor_opinion or ai_plan_text or ai_report_note):
+        report["ai"] = {
+            "model": OLLAMA_MODEL,
+            "diagnosis": ai_diagnosis,
+            "doctor_opinion": ai_doctor_opinion,
+            "treatment_plan_text": ai_plan_text,
+            "report_note": ai_report_note,
+        }
 
     intensity = plan["intensity_level"]
     dispatch = {
@@ -532,6 +667,20 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
 
     save_report(record_id, report)
     save_plan(record_id, plan)
+    
+    # Write CSV data to ClickHouse if exists
+    csv_files = list(record_dir.glob("*.csv"))
+    for csv_file in csv_files:
+        try:
+            insert_thermal_csv(
+                record_id=record_id,
+                metadata=metadata,
+                data_path=str(csv_file),
+                frame_id=csv_file.stem
+            )
+        except Exception as exc:
+            logging.warning("ClickHouse ingest failed for %s: %s", csv_file.name, exc)
+    
     try:
         upsert_emr_from_analysis(record_id, report, plan, metadata)
     except Exception:

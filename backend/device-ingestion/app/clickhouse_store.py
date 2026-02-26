@@ -119,6 +119,13 @@ def insert_thermal_csv(
     with data_file.open("r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for item in reader:
+            try:
+                row = int(item["row"])
+                col = int(item["col"])
+                temp = float(item["temperature_c"])
+            except (ValueError, KeyError):
+                continue  # Skip invalid rows
+            
             batch.append(
                 (
                     record_id,
@@ -126,9 +133,9 @@ def insert_thermal_csv(
                     patient_id,
                     capture_time,
                     frame_id,
-                    int(item["row"]),
-                    int(item["col"]),
-                    float(item["temperature_c"]),
+                    row,
+                    col,
+                    temp,
                 )
             )
             if len(batch) >= batch_size:
