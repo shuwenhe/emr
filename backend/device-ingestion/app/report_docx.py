@@ -82,7 +82,7 @@ def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     ai_report_note = str(ai_payload.get("report_note") or "").strip()
 
     if ai_plan_text:
-        doc.add_heading("AI治疗方案建议", level=2)
+        doc.add_heading("治疗方案建议", level=2)
         doc.add_paragraph(ai_plan_text)
 
     if ai_report_note:
