@@ -585,8 +585,8 @@ export default function PatientsPage() {
       <main className="mx-auto max-w-7xl px-6 py-12">
         <header className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-semibold text-slate-900">患者登记</h1>
-            <p className="mt-2 text-slate-600">患者信息登记与管理</p>
+            <h1 className="text-3xl font-semibold text-slate-900 whitespace-nowrap">患者登记</h1>
+            <p className="mt-2 text-slate-600 whitespace-nowrap">患者信息登记与管理</p>
           </div>
           <button
             className="rounded-full bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
@@ -620,7 +620,7 @@ export default function PatientsPage() {
                     <th className="px-4 py-3 font-medium">性别</th>
                     <th className="px-4 py-3 font-medium">年龄</th>
                     <th className="px-4 py-3 font-medium">登记时间</th>
-                    <th className="px-4 py-3 font-medium">操作</th>
+                    <th className="px-4 py-3 font-medium whitespace-nowrap">操作</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
@@ -644,7 +644,7 @@ export default function PatientsPage() {
                       <td className="px-4 py-3">
                         <div className="flex gap-2">
                           <button
-                            className="rounded-full border border-blue-200 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50"
+                            className="rounded-full border border-blue-200 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50 whitespace-nowrap"
                             onClick={() => {
                               persistCurrentPatient(patient);
                               fetchPatientEmrs(patient);
@@ -653,7 +653,7 @@ export default function PatientsPage() {
                             病历
                           </button>
                           <button
-                            className="rounded-full border border-green-200 px-3 py-1 text-xs font-semibold text-green-600 hover:bg-green-50"
+                            className="rounded-full border border-green-200 px-3 py-1 text-xs font-semibold text-green-600 hover:bg-green-50 whitespace-nowrap"
                             onClick={() => {
                               persistCurrentPatient(patient);
                               handleOpenReportHistory(patient);
@@ -662,7 +662,7 @@ export default function PatientsPage() {
                             报告
                           </button>
                           <button
-                            className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                            className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50 whitespace-nowrap"
                             onClick={() => handleArchivePatient(patient)}
                           >
                             归档
@@ -1059,10 +1059,10 @@ export default function PatientsPage() {
 
         {showReportModal && reportPatient && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="relative max-h-[90vh] w-full max-w-4xl overflow-auto rounded-2xl bg-white p-8 shadow-xl">
+            <div className="relative max-h-[95vh] w-[95vw] max-w-6xl overflow-auto rounded-2xl bg-white p-8 shadow-xl">
               <div className="mb-6 flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-semibold text-slate-900">历史报告文件</h2>
+                  <h2 className="text-2xl font-semibold text-slate-900 whitespace-nowrap">历史报告文件</h2>
                   <p className="mt-1 text-sm text-slate-500">
                     {reportPatient.name || reportPatient.patient_id}
                   </p>
@@ -1157,10 +1157,10 @@ export default function PatientsPage() {
                   <table className="min-w-full text-left text-sm">
                     <thead className="bg-slate-50 text-slate-600">
                       <tr>
-                        <th className="px-4 py-3 font-medium">文件名</th>
-                        <th className="px-4 py-3 font-medium">日期</th>
-                        <th className="px-4 py-3 font-medium">大小</th>
-                        <th className="px-4 py-3 font-medium">操作</th>
+                        <th className="px-4 py-3 font-medium whitespace-nowrap">文件名</th>
+                        <th className="px-4 py-3 font-medium whitespace-nowrap">日期</th>
+                        <th className="px-4 py-3 font-medium whitespace-nowrap">大小</th>
+                        <th className="px-4 py-3 font-medium whitespace-nowrap">操作</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200">
@@ -1172,26 +1172,26 @@ export default function PatientsPage() {
                           <td className="px-4 py-3">
                             <div className="flex flex-wrap gap-2">
                               <button
-                                className="rounded-full border border-blue-200 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50"
+                                className="rounded-full border border-blue-200 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50 whitespace-nowrap"
                                 onClick={() => handlePreviewReport(file)}
                               >
                                 查看
                               </button>
                               <button
-                                className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                                className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 whitespace-nowrap"
                                 onClick={() => handlePrintReport(file)}
                               >
                                 打印
                               </button>
                               <a
-                                className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
+                                className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 whitespace-nowrap"
                                 href={buildReportDownloadUrl(file)}
                                 download
                               >
                                 下载
                               </a>
                               <button
-                                className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                                className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50 whitespace-nowrap"
                                 onClick={() => handleArchiveReport(file)}
                               >
                                 归档

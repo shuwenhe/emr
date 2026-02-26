@@ -40,6 +40,9 @@ export default function UploadPage() {
   }
   const [patientsLoading, setPatientsLoading] = useState(true);
   const [patientsError, setPatientsError] = useState("");
+  const [reportGenerating, setReportGenerating] = useState(false);
+  const [reportProgress, setReportProgress] = useState(0);
+  const [reportStatus, setReportStatus] = useState("");
 
   useEffect(() => {
     fetchPatients();
@@ -155,6 +158,9 @@ export default function UploadPage() {
 
     setUploading(true);
     setResult(null);
+    setReportGenerating(false);
+    setReportProgress(0);
+    setReportStatus("");
 
     const metadata = {
       device: {
@@ -190,16 +196,78 @@ export default function UploadPage() {
       const data = await response.json();
       
       if (response.ok) {
+        setUploading(false);
+        setReportGenerating(true);
+        setReportStatus("数据上传成功，正在生成报告...");
+        
+        // 开始模拟进度并轮询检查报告状态
+        await checkReportGeneration(data.record_id);
+        
         setResult({ record_id: data.record_id });
         flashSuccessButton();
       } else {
         setResult({ error: data.detail || "上传失败" });
+        setUploading(false);
       }
     } catch (error) {
       setResult({ error: `上传失败: ${String(error)}` });
-    } finally {
       setUploading(false);
     }
+  }
+
+  async function checkReportGeneration(recordId: string) {
+    const startTime = Date.now();
+    const maxWaitTime = 30000; // 最多等待30秒
+    const pollInterval = 1000; // 每秒轮询一次
+    
+    // 模拟进度更新
+    const progressInterval = setInterval(() => {
+      setReportProgress((prev) => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(90, (elapsed / maxWaitTime) * 100);
+        
+        // 根据进度更新状态提示
+        if (progress < 20) {
+          setReportStatus("正在分析热成像数据...");
+        } else if (progress < 50) {
+          setReportStatus("正在生成诊断结论...");
+        } else if (progress < 80) {
+          setReportStatus("正在生成治疗方案...");
+        } else {
+          setReportStatus("正在生成报告文档...");
+        }
+        
+        return progress;
+      });
+    }, 100);
+
+    // 轮询检查报告是否生成完成
+    while (Date.now() - startTime < maxWaitTime) {
+      try {
+        const response = await fetch(`${API_BASE}/emr?record_id=${recordId}`);
+        if (response.ok) {
+          const emrData = await response.json();
+          if (emrData && emrData.emr_id) {
+            // 报告生成完成
+            clearInterval(progressInterval);
+            setReportProgress(100);
+            setReportStatus("报告生成完成！");
+            setReportGenerating(false);
+            return;
+          }
+        }
+      } catch {
+        // 继续轮询
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, pollInterval));
+    }
+    
+    // 超时
+    clearInterval(progressInterval);
+    setReportProgress(100);
+    setReportStatus("报告生成中，请稍后查看...");
+    setReportGenerating(false);
   }
 
   return (
@@ -404,10 +472,26 @@ export default function UploadPage() {
           <button
             className="w-full rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:bg-slate-300"
             onClick={handleUpload}
-            disabled={uploading}
+            disabled={uploading || reportGenerating}
           >
-            {uploading ? "上传中..." : "上传数据"}
+            {uploading ? "上传中..." : reportGenerating ? "生成报告中..." : "上传数据"}
           </button>
+
+          {reportGenerating && (
+            <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-semibold text-blue-900">报告生成中</p>
+                <p className="text-sm font-semibold text-blue-700">{Math.round(reportProgress)}%</p>
+              </div>
+              <div className="w-full bg-blue-200 rounded-full h-2.5 mb-2">
+                <div 
+                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+                  style={{ width: `${reportProgress}%` }}
+                ></div>
+              </div>
+              <p className="text-xs text-blue-700">{reportStatus}</p>
+            </div>
+          )}
 
           {result && (
             <div className="mt-4">

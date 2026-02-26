@@ -23,6 +23,12 @@ def _parse_datetime(value: Optional[str]) -> datetime:
         return datetime.now()
 
 
+def _strip_think(text: str) -> str:
+    if not text:
+        return text
+    return text.replace("<think>", "").replace("</think>", "").strip()
+
+
 def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     patient = (report.get("patient") or emr.get("patient") or {})
     analysis = report.get("analysis") or {}
@@ -34,9 +40,7 @@ def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     date_dir.mkdir(parents=True, exist_ok=True)
 
     patient_name = _safe_name(str(patient.get("name") or "患者")) or "患者"
-    emr_id = str(emr.get("emr_id") or report.get("report_id") or "")
-    emr_suffix = f"_{_safe_name(emr_id)}" if emr_id else ""
-    filename = f"{patient_name}_{created_dt.strftime('%Y%m%d_%H%M%S')}{emr_suffix}.docx"
+    filename = f"{patient_name}{created_dt.strftime('%Y%m%d%H%M%S')}.docx"
     output_path = date_dir / filename
 
     doc = Document()
@@ -67,10 +71,10 @@ def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     doc.add_paragraph(str(analysis.get("risk_level", "-")).upper())
 
     doc.add_heading("诊断结论", level=2)
-    doc.add_paragraph(str(report.get("diagnosis") or "-"))
+    doc.add_paragraph(_strip_think(str(report.get("diagnosis") or "-")))
 
     doc.add_heading("医生意见", level=2)
-    doc.add_paragraph(str(report.get("doctor_opinion") or "-"))
+    doc.add_paragraph(_strip_think(str(report.get("doctor_opinion") or "-")))
 
     ai_payload = report.get("ai") or {}
     ai_plan_text = ""
@@ -82,11 +86,16 @@ def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     ai_report_note = str(ai_payload.get("report_note") or "").strip()
 
     if ai_plan_text:
+        ai_plan_text = _strip_think(ai_plan_text.replace("AI", "").replace("ＡＩ", "").strip())
+    if ai_report_note:
+        ai_report_note = _strip_think(ai_report_note.replace("AI", "").replace("ＡＩ", "").strip())
+
+    if ai_plan_text:
         doc.add_heading("治疗方案建议", level=2)
         doc.add_paragraph(ai_plan_text)
 
     if ai_report_note:
-        doc.add_heading("AI补充说明", level=2)
+        doc.add_heading("补充说明", level=2)
         doc.add_paragraph(ai_report_note)
 
     image_path = report.get("thermal_marked_image")

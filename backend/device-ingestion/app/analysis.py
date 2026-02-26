@@ -79,7 +79,9 @@ def _ollama_generate(prompt: str, *, temperature: float = 0.2, max_tokens: int =
             body = response.read().decode("utf-8")
         result = json.loads(body)
         return str(result.get("response") or "").strip()
-    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError):
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
+        logging.error(f"Ollama generate error: {type(e).__name__}: {e}")
+        logging.error(f"Model: {OLLAMA_MODEL}, URL: {OLLAMA_BASE_URL}")
         return ""
 
 
@@ -127,7 +129,7 @@ def _generate_llm_plan_text(context: str, plan: Dict[str, Any]) -> str:
     }
     prompt = (
         context
-        + "以下为规则引擎生成的治疗方案要点，请生成精简中文说明（3-6句），并标注‘AI建议，仅供参考’：\n"
+        + "以下为规则引擎生成的治疗方案要点，请生成精简中文说明（3-6句），并标注‘仅供参考’：\n"
         + json.dumps(plan_summary, ensure_ascii=False)
     )
     return _ollama_generate(prompt, temperature=0.3, max_tokens=300)
