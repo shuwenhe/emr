@@ -1,6 +1,6 @@
 clickhouse:
   host: "localhost"
-  port: 9001
-  database: "thermal"
+  port: 9000
+  database: "hospital"
   user: "hospital"
   password: "hospital"

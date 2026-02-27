@@ -28,12 +28,13 @@ services:
     environment:
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-hospital}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-hospital}
-      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-thermal}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-hospital}
     ports:
-      - "${CLICKHOUSE_PORT:-9001}:9000"
-      - "${CLICKHOUSE_HTTP_PORT:-8124}:8123"
+      - "${CLICKHOUSE_PORT:-9000}:9000"
+      - "${CLICKHOUSE_HTTP_PORT:-8123}:8123"
     volumes:
       - clickhouse_data:/var/lib/clickhouse
+      - ./database/init_clickhouse.sh:/docker-entrypoint-initdb.d/init_clickhouse.sh
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8123/ || exit 1"]
       interval: 10s
