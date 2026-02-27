@@ -46,6 +46,14 @@ Reports are generated under `reports/YYYYMMDD/` with filenames:
 - `make report`
 - `make clean`
 
+## Documentation
+- **[AI报告生成代码分析](docs/ai-analysis/)** - 完整的AI报告生成系统代码分析（6份详细文档）
+  - 系统架构与流程详解
+  - 代码质量审查与改进建议
+  - 故障排查指南
+- **[设备接入接口](docs/设备接入接口.md)** - API详细说明
+- **[治疗规则说明](docs/TREATMENT_RULES.md)** - 治疗方案规则文档
+
 ## Notes
 - Python 3.12 is required.
 - The report template is based on [docs/红外热成像评估报告_文字提取.md](docs/红外热成像评估报告_文字提取.md).

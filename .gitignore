@@ -2,6 +2,13 @@
 /backend/device-ingestion/data/
 /backend/device-ingestion/device-drop/
 /backend/device-ingestion/device-processed/
+/backend/device-ingestion/output/
+/backend/device-ingestion/outputs/
+/backend/device-ingestion/temp/
+/backend/device-ingestion/tmp/
+/backend/device-ingestion/logs/
+/backend/device-ingestion/exports/
+/backend/device-ingestion/generated/
 /data/
 /reports/
 /frontend/node_modules/

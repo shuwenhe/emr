@@ -931,7 +931,7 @@ export default function EmrPage() {
                   }}
                 />
                 <button
-                  className="rounded-full bg-amber-600 px-5 py-2 text-sm font-semibold text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:bg-amber-300"
+                  className="rounded-full bg-amber-600 px-5 py-2 text-sm font-semibold text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:bg-amber-300 whitespace-nowrap"
                   onClick={handleGlobalSearch}
                   disabled={searching}
                 >

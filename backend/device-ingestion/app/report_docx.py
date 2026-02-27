@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -8,6 +9,7 @@ from docx import Document
 from docx.shared import Inches
 
 from .config import REPORTS_DIR
+from .llm_report import generate_report_ai, is_llm_enabled
 
 
 def _safe_name(value: str) -> str:
@@ -81,12 +83,21 @@ def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     doc.add_paragraph(_strip_think(str(report.get("doctor_opinion") or "-")))
 
     ai_payload = report.get("ai") or {}
+    if not ai_payload and is_llm_enabled():
+        try:
+            ai_payload = generate_report_ai(report, emr)
+            if ai_payload:
+                report.setdefault("ai", ai_payload)
+        except Exception as exc:
+            logging.exception("LLM report generation failed: %s", exc)
     ai_plan_text = ""
-    plan = report.get("treatment_plan") or {}
+    plan = report.get("treatment_plan") or emr.get("treatment_plan") or {}
     if isinstance(plan, dict):
         ai_plan_text = str(plan.get("ai_recommendation") or "").strip()
     if not ai_plan_text:
         ai_plan_text = str(ai_payload.get("treatment_plan_text") or "").strip()
+        if ai_plan_text and isinstance(plan, dict):
+            plan["ai_recommendation"] = ai_plan_text
     ai_report_note = str(ai_payload.get("report_note") or "").strip()
 
     if ai_plan_text:
