@@ -34,14 +34,18 @@ def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     analysis = report.get("analysis") or {}
     metrics = (analysis.get("temperature_metrics") or {}) if isinstance(analysis, dict) else {}
 
-    created_at = report.get("created_at") or emr.get("created_at")
-    created_dt = _parse_datetime(created_at)
-    date_dir = REPORTS_DIR / created_dt.strftime("%Y%m%d")
+    # 使用当前时间作为报告生成时间（而不是采集时间）
+    report_generated_dt = datetime.now()
+    date_dir = REPORTS_DIR / report_generated_dt.strftime("%Y%m%d")
     date_dir.mkdir(parents=True, exist_ok=True)
 
     patient_name = _safe_name(str(patient.get("name") or "患者")) or "患者"
-    filename = f"{patient_name}{created_dt.strftime('%Y%m%d%H%M%S')}.docx"
+    filename = f"{patient_name}{report_generated_dt.strftime('%Y%m%d%H%M%S')}.docx"
     output_path = date_dir / filename
+    
+    # 解析采集时间用于报告内容显示
+    created_at = report.get("created_at") or emr.get("created_at")
+    created_dt = _parse_datetime(created_at)
 
     doc = Document()
     doc.add_heading("红外热成像评估报告", level=1)
