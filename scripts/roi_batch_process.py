@@ -28,9 +28,6 @@ from functools import partial
 
 # 添加脚本目录到路径
 sys.path.insert(0, str(Path(__file__).parent))
-from roi_mediapipe_dynamic import (
-    detect_landmarks, build_dynamic_rois, to_rgb, calc_stats
-)
 
 
 @dataclass
@@ -120,6 +117,11 @@ def find_csv_files(input_dir: Path) -> Generator[Path, None, None]:
 def process_single_file(csv_file: Path, input_dir: Path, output_dir: Path, vmin: float, vmax: float, 
                        cmap: str, logger: logging.Logger) -> ProcessResult:
     """处理单个文件"""
+    # 在子进程中导入模块，确保multiprocessing正确加载
+    from roi_mediapipe_dynamic import (
+        detect_landmarks, build_dynamic_rois, to_rgb, calc_stats
+    )
+    
     start_time = time.time()
     result = ProcessResult(
         input_file=csv_file,
