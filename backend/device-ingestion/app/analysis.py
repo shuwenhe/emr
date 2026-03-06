@@ -2,6 +2,7 @@ import csv
 import json
 import logging
 import os
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -22,6 +23,11 @@ from .config import DATA_DIR
 from .data_platform import get_patient_history, save_plan, save_report
 from .emr import upsert_emr_from_analysis
 from .clickhouse_store import insert_thermal_csv
+
+# 添加scripts目录用于导入ROI模块
+_SCRIPTS_DIR = Path(__file__).resolve().parents[3] / "scripts"
+if str(_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS_DIR))
 
 BASE_DIR = Path(__file__).resolve().parents[3]
 TREATMENT_RULES_PATH = BASE_DIR / "config" / "treatment_rules.yaml"
@@ -92,16 +98,48 @@ def _build_llm_context(
     risk_level: str,
     metrics: Dict[str, Any],
     abnormal_regions: List[Dict[str, Any]],
+    roi_analysis: Optional[Dict[str, Any]] = None,
 ) -> str:
-    return (
+    context = (
         "你是一名医疗热成像评估助手。请基于以下信息生成简洁、谨慎的中文内容。"
         "输出只需客观结论，避免夸大或绝对化表述。\n"
         f"患者信息：姓名={patient.get('name','-')} 性别={patient.get('gender','-')} 年龄={patient.get('age','-')} 部位={body_part}\n"
         f"风险等级：{risk_level}\n"
         f"温度摘要：{summary}\n"
         f"温度指标：min={metrics.get('min_c')} max={metrics.get('max_c')} avg={metrics.get('avg_c')}\n"
-        f"异常区域：{abnormal_regions}\n"
     )
+    
+    # 添加ROI分析信息（如果可用）
+    if roi_analysis and roi_analysis.get("roi_list"):
+        context += "\n身体部位温度分析（MediaPipe姿态识别）：\n"
+        roi_list = roi_analysis.get("roi_list", [])
+        # 取前5个最热的部位
+        for roi in roi_list[:5]:
+            context += f"  - {roi['name']}: {roi['mean_c']}°C (±{roi['std_c']}, n={roi['count']})\n"
+        
+        # 添加对称性信息
+        roi_dict = {roi['name']: roi for roi in roi_list}
+        symmetry_pairs = [
+            ("左眼", "右眼"),
+            ("左脸颊", "右脸颊"),
+            ("左臂", "右臂"),
+            ("左腿", "右腿"),
+        ]
+        has_asymmetry = False
+        for left_name, right_name in symmetry_pairs:
+            if left_name in roi_dict and right_name in roi_dict:
+                left_temp = roi_dict[left_name].get("mean_c", 0)
+                right_temp = roi_dict[right_name].get("mean_c", 0)
+                diff = abs(left_temp - right_temp)
+                if diff > 0.5:
+                    context += f"  左右对比：{left_name}({left_temp}°C) vs {right_name}({right_temp}°C)，温差{diff:.2f}°C\n"
+                    has_asymmetry = True
+        
+        if not has_asymmetry:
+            context += "  左右对称性：良好\n"
+    
+    context += f"异常区域：{abnormal_regions}\n"
+    return context
 
 
 def _generate_llm_diagnosis_and_opinion(context: str) -> Dict[str, str]:
@@ -265,13 +303,28 @@ def _build_treatment_plan(
 
 def _find_payload_file(record_dir: Path) -> Path:
     image_exts = {".png", ".jpg", ".jpeg"}
+    csv_candidates: List[Path] = []
+    other_candidates: List[Path] = []
     for item in record_dir.iterdir():
-        if (
-            item.is_file()
-            and item.suffix.lower() != ".json"
-            and item.suffix.lower() not in image_exts
-        ):
-            return item
+        if not item.is_file():
+            continue
+        suffix = item.suffix.lower()
+        if suffix == ".json" or suffix in image_exts:
+            continue
+        if suffix == ".csv":
+            csv_candidates.append(item)
+        else:
+            other_candidates.append(item)
+
+    if csv_candidates:
+        matrix_candidates = [p for p in csv_candidates if p.stem.endswith("_matrix")]
+        if matrix_candidates:
+            return sorted(matrix_candidates)[0]
+        return sorted(csv_candidates)[0]
+
+    if other_candidates:
+        return sorted(other_candidates)[0]
+
     raise FileNotFoundError("payload_file_not_found")
 
 
@@ -286,9 +339,11 @@ def _find_image_files(record_dir: Path) -> List[Path]:
 
 def _load_csv_temperatures(file_path: Path) -> List[float]:
     temps: List[float] = []
+    has_temperature_column = False
     with open(file_path, "r", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
         for row in reader:
+            has_temperature_column = has_temperature_column or ("temperature_c" in row)
             value = row.get("temperature_c")
             if value is None:
                 continue
@@ -296,6 +351,18 @@ def _load_csv_temperatures(file_path: Path) -> List[float]:
                 temps.append(float(value))
             except ValueError:
                 continue
+    if temps:
+        return temps
+
+    if not has_temperature_column:
+        try:
+            matrix = np.loadtxt(str(file_path), delimiter=",")
+            if matrix.ndim == 1:
+                matrix = matrix.reshape(1, -1)
+            if matrix.ndim == 2:
+                return matrix.flatten().tolist()
+        except Exception:
+            return temps
     return temps
 
 
@@ -303,9 +370,11 @@ def _load_csv_grid(file_path: Path) -> Optional[np.ndarray]:
     rows: List[int] = []
     cols: List[int] = []
     temps: List[float] = []
+    has_row_col_columns = False
     with open(file_path, "r", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
         for row in reader:
+            has_row_col_columns = has_row_col_columns or ("row" in row and "col" in row and "temperature_c" in row)
             try:
                 r = int(row.get("row", ""))
                 c = int(row.get("col", ""))
@@ -317,6 +386,15 @@ def _load_csv_grid(file_path: Path) -> Optional[np.ndarray]:
             temps.append(t)
 
     if not rows or not cols or not temps:
+        if not has_row_col_columns:
+            try:
+                matrix = np.loadtxt(str(file_path), delimiter=",")
+                if matrix.ndim == 1:
+                    matrix = matrix.reshape(1, -1)
+                if matrix.ndim == 2:
+                    return matrix
+            except Exception:
+                return None
         return None
 
     max_r = max(rows)
@@ -449,6 +527,94 @@ def _risk_level(avg_temp: Optional[float]) -> str:
     return "low"
 
 
+def _analyze_roi_regions(payload_path: Path, csv_is_matrix: bool = True) -> Optional[Dict[str, Any]]:
+    """
+    使用MediaPipe + ROI系统分析热成像数据
+    返回14个身体部位的温度统计，如果失败返回None
+    """
+    try:
+        from roi_mediapipe_dynamic import (
+            detect_landmarks, build_dynamic_rois, to_rgb, calc_stats
+        )
+    except ImportError:
+        logging.debug("ROI modules not available, skipping ROI analysis")
+        return None
+    
+    try:
+        # 尝试加载以二维矩阵形式存储的CSV（非标准表格格式）
+        if csv_is_matrix:
+            matrix = np.loadtxt(str(payload_path), delimiter=",")
+            if matrix.ndim != 2:
+                return None
+        else:
+            # 如果是标准CSV表格，转换为矩阵
+            grid = _load_csv_grid(payload_path)
+            if grid is None:
+                return None
+            matrix = grid
+        
+        h, w = matrix.shape
+        
+        # 关键点检测
+        rgb = to_rgb(matrix, vmin=28, vmax=40, cmap_name="inferno")
+        landmarks = detect_landmarks(rgb)
+        
+        if not landmarks:
+            logging.debug("No landmarks detected in ROI analysis")
+            return None
+        
+        # 构建ROI
+        rois = build_dynamic_rois(h, w, landmarks)
+        
+        # 计算统计
+        roi_stats = {}
+        roi_list = []
+        
+        for roi_name, mask in rois.items():
+            values = matrix[mask]
+            if len(values) == 0:
+                continue
+
+            ys, xs = np.where(mask)
+            center_x_pct = None
+            center_y_pct = None
+            if xs.size > 0 and ys.size > 0:
+                center_x_pct = round(float(xs.mean()) / max(w - 1, 1) * 100.0, 2)
+                center_y_pct = round(float(ys.mean()) / max(h - 1, 1) * 100.0, 2)
+            
+            stats = calc_stats(values)
+            roi_stats[roi_name] = stats
+            roi_list.append({
+                "name": roi_name,
+                "count": stats.get("count", 0),
+                "mean_c": round(stats.get("mean", 0), 2),
+                "min_c": round(stats.get("min", 0), 2),
+                "max_c": round(stats.get("max", 0), 2),
+                "std_c": round(stats.get("std", 0), 2),
+                "center_x_pct": center_x_pct,
+                "center_y_pct": center_y_pct,
+            })
+        
+        if not roi_list:
+            return None
+        
+        # 按平均温度排序
+        roi_list.sort(key=lambda x: x["mean_c"], reverse=True)
+        
+        return {
+            "roi_stats": roi_stats,
+            "roi_list": roi_list,
+            "total_rois": len(roi_list),
+            "hottest_region": roi_list[0]["name"] if roi_list else None,
+            "hottest_temp": roi_list[0]["mean_c"] if roi_list else None,
+            "coolest_region": roi_list[-1]["name"] if roi_list else None,
+            "coolest_temp": roi_list[-1]["mean_c"] if roi_list else None,
+        }
+    except Exception as exc:
+        logging.debug(f"ROI analysis failed: {exc}")
+        return None
+
+
 def analyze_record(record_id: str) -> Dict[str, Any]:
     record_dir = DATA_DIR / record_id
     if not record_dir.exists():
@@ -481,6 +647,7 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
     temperature_labels = {"text": None, "values": []}
     region_comparison: List[Dict[str, Any]] = []
     abnormal_regions: List[Dict[str, Any]] = []
+    roi_analysis: Optional[Dict[str, Any]] = None
     if payload_path and payload_path.suffix.lower() == ".csv":
         grid = _load_csv_grid(payload_path)
         if grid is not None:
@@ -505,6 +672,9 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
                 relative_path = Path(marked_image_path).relative_to(DATA_DIR)
                 image_paths.append(str(relative_path))
                 temperature_labels = _extract_temperature_labels(marked_image_path)
+        
+        # 尝试进行ROI分析
+        roi_analysis = _analyze_roi_regions(payload_path, csv_is_matrix=True)
 
     capture_time = (metadata.get("capture") or {}).get("capture_time") or datetime.now().isoformat()
     device = metadata.get("device") or {}
@@ -539,6 +709,7 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
         risk_level=risk_level,
         metrics=metrics,
         abnormal_regions=abnormal_regions,
+        roi_analysis=roi_analysis,
     )
     llm_result = _generate_llm_diagnosis_and_opinion(llm_context) if OLLAMA_ENABLED else {}
     ai_diagnosis = str(llm_result.get("diagnosis") or "").strip()
@@ -607,6 +778,7 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
                 "regions": region_comparison,
                 "abnormal_regions": abnormal_regions,
             },
+            "roi_analysis": roi_analysis,
             "qc": {"issues": []},
         },
     }

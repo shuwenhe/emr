@@ -237,7 +237,19 @@ def get_emr_endpoint(emr_id: str):
 
 
 @app.get("/emr")
-def list_emr_endpoint(patient_id: str | None = None, include_archived: bool = False):
+def list_emr_endpoint(
+    patient_id: str | None = None,
+    record_id: str | None = None,
+    include_archived: bool = False,
+):
+    if record_id:
+        return list_platform_emrs(
+            record_id=record_id,
+            patient_id=patient_id,
+            limit=1,
+            include_archived=include_archived,
+        )
+
     # 优先使用数据库查询（更可靠且完整）
     emrs = list_platform_emrs(patient_id=patient_id, limit=1000, include_archived=include_archived)
     

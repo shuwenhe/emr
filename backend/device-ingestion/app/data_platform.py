@@ -91,6 +91,22 @@ def init_db() -> None:
                 cursor.execute("ALTER TABLE patients ADD COLUMN archived TINYINT DEFAULT 0")
             except Exception:
                 pass
+            try:
+                cursor.execute("CREATE INDEX idx_emrs_record ON emrs (record_id)")
+            except Exception:
+                pass
+            try:
+                cursor.execute("CREATE INDEX idx_emrs_created ON emrs (created_at)")
+            except Exception:
+                pass
+            try:
+                cursor.execute("CREATE INDEX idx_emrs_archived_created ON emrs (archived, created_at)")
+            except Exception:
+                pass
+            try:
+                cursor.execute("CREATE INDEX idx_emrs_patient_archived_created ON emrs (patient_id, archived, created_at)")
+            except Exception:
+                pass
 
 
 def _now() -> str:
@@ -353,25 +369,54 @@ def list_emrs(
     patient_id: Optional[str] = None,
     limit: int = 50,
     include_archived: bool = False,
+    record_id: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
-    query = "SELECT emr_id, record_id, patient_id, created_at, archived, emr_json FROM emrs"
+    results: List[Dict[str, Any]] = []
+    where: List[str] = []
     params: List[Any] = []
-    where = []
+
+    if record_id:
+        where.append("record_id = %s")
+        params.append(record_id)
     if patient_id:
         where.append("patient_id = %s")
         params.append(patient_id)
     if not include_archived:
         where.append("archived = 0")
-    if where:
-        query += " WHERE " + " AND ".join(where)
-    query += " ORDER BY created_at DESC LIMIT %s"
-    params.append(limit)
-    
-    results: List[Dict[str, Any]] = []
+
+    where_clause = f" WHERE {' AND '.join(where)}" if where else ""
+
     with _connect() as conn:
         with conn.cursor() as cursor:
-            cursor.execute(query, params)
-            rows = cursor.fetchall()
+            if record_id:
+                cursor.execute(
+                    "SELECT emr_id, record_id, patient_id, created_at, archived, emr_json "
+                    f"FROM emrs{where_clause} LIMIT 1",
+                    params,
+                )
+                rows = cursor.fetchall()
+            else:
+                id_params = list(params)
+                id_params.append(limit)
+                cursor.execute(
+                    "SELECT emr_id FROM emrs"
+                    f"{where_clause} "
+                    "ORDER BY created_at DESC LIMIT %s",
+                    id_params,
+                )
+                emr_ids = [row["emr_id"] for row in cursor.fetchall() if row.get("emr_id")]
+                if not emr_ids:
+                    return []
+
+                placeholders = ", ".join(["%s"] * len(emr_ids))
+                cursor.execute(
+                    "SELECT emr_id, record_id, patient_id, created_at, archived, emr_json "
+                    f"FROM emrs WHERE emr_id IN ({placeholders})",
+                    emr_ids,
+                )
+                rows = cursor.fetchall()
+                row_map = {row["emr_id"]: row for row in rows if row.get("emr_id")}
+                rows = [row_map[emr_id] for emr_id in emr_ids if emr_id in row_map]
     
     for row in rows:
         # 返回完整的 emr_json 数据，如果有的话；否则返回表字段

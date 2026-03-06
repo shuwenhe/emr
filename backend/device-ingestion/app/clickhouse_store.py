@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict, Iterable, Optional
 
 from clickhouse_driver import Client
+import numpy as np
 
 from .config import (
     CLICKHOUSE_DB,
@@ -116,35 +117,66 @@ def insert_thermal_csv(
     batch: list[tuple] = []
     data_file = Path(data_path)
 
+    def flush_batch() -> None:
+        nonlocal total
+        if batch:
+            client.execute(insert_sql, batch)
+            total += len(batch)
+            batch.clear()
+
     with data_file.open("r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
-        for item in reader:
-            try:
-                row = int(item["row"])
-                col = int(item["col"])
-                temp = float(item["temperature_c"])
-            except (ValueError, KeyError):
-                continue  # Skip invalid rows
-            
-            batch.append(
-                (
-                    record_id,
-                    device_id,
-                    patient_id,
-                    capture_time,
-                    frame_id,
-                    row,
-                    col,
-                    temp,
-                )
-            )
-            if len(batch) >= batch_size:
-                client.execute(insert_sql, batch)
-                total += len(batch)
-                batch.clear()
+        fieldnames = reader.fieldnames or []
+        structured_csv = {"row", "col", "temperature_c"}.issubset(set(fieldnames))
+        if structured_csv:
+            for item in reader:
+                try:
+                    row = int(item["row"])
+                    col = int(item["col"])
+                    temp = float(item["temperature_c"])
+                except (ValueError, KeyError):
+                    continue
 
-    if batch:
-        client.execute(insert_sql, batch)
-        total += len(batch)
+                batch.append(
+                    (
+                        record_id,
+                        device_id,
+                        patient_id,
+                        capture_time,
+                        frame_id,
+                        row,
+                        col,
+                        temp,
+                    )
+                )
+                if len(batch) >= batch_size:
+                    flush_batch()
+        else:
+            # matrix CSV fallback (no headers): each row is a temperature row
+            matrix = np.loadtxt(str(data_file), delimiter=",", dtype=np.float32)
+            if matrix.ndim == 1:
+                matrix = matrix.reshape(1, -1)
+            if matrix.ndim != 2:
+                raise ValueError("invalid_matrix_csv_shape")
+
+            for r in range(matrix.shape[0]):
+                for c in range(matrix.shape[1]):
+                    temp = float(matrix[r, c])
+                    batch.append(
+                        (
+                            record_id,
+                            device_id,
+                            patient_id,
+                            capture_time,
+                            frame_id,
+                            int(r),
+                            int(c),
+                            temp,
+                        )
+                    )
+                    if len(batch) >= batch_size:
+                        flush_batch()
+
+    flush_batch()
 
     return total

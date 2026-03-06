@@ -23,6 +23,45 @@ type PatientSearchResult = {
   id_card?: string | null;
 };
 
+type RoiOverlayPoint = {
+  name: string;
+  meanC: number;
+  x: number;
+  y: number;
+};
+
+type RoiOverlayLayoutPoint = RoiOverlayPoint & {
+  labelX: number;
+  labelY: number;
+  showLeader: boolean;
+};
+
+const ROI_LABEL_POSITIONS: Record<string, { x: number; y: number }> = {
+  "额头": { x: 50, y: 9 },
+  "左眼": { x: 45, y: 13 },
+  "右眼": { x: 55, y: 13 },
+  "鼻子": { x: 50, y: 16 },
+  "左脸颊": { x: 42, y: 18 },
+  "右脸颊": { x: 58, y: 18 },
+  "下巴": { x: 50, y: 22 },
+  "颈部": { x: 50, y: 28 },
+  "胸部": { x: 50, y: 38 },
+  "腹部": { x: 50, y: 52 },
+  "左臂": { x: 30, y: 40 },
+  "右臂": { x: 70, y: 40 },
+  "左腿": { x: 44, y: 74 },
+  "右腿": { x: 56, y: 74 },
+};
+
+const THERMAL_PLOT_BOUNDS = {
+  left: 3,
+  right: 72,
+  top: 8,
+  bottom: 97,
+};
+
+const HEAD_ROI_NAME_REGEX = /(额头|眼|脸颊|鼻子|鼻|下巴)/;
+
 const API_BASE = "http://localhost:8000";
 const EMR_STATE_KEY = "patient_flow_state_emr";
 
@@ -248,6 +287,176 @@ export default function EmrPage() {
     return regions as Record<string, unknown>[];
   }, [report]);
 
+  const roiOverlayPoints = useMemo(() => {
+    if (!report || typeof report !== "object") {
+      return [] as RoiOverlayPoint[];
+    }
+    const analysis = report.analysis && typeof report.analysis === "object"
+      ? (report.analysis as Record<string, unknown>)
+      : undefined;
+    const roiAnalysis = analysis?.roi_analysis && typeof analysis.roi_analysis === "object"
+      ? (analysis.roi_analysis as Record<string, unknown>)
+      : undefined;
+    const roiList = roiAnalysis?.roi_list;
+    if (!Array.isArray(roiList)) {
+      return [] as RoiOverlayPoint[];
+    }
+
+    const points: RoiOverlayPoint[] = [];
+    for (const item of roiList as Record<string, unknown>[]) {
+      const rawName = String(item.name || "").trim();
+      if (!rawName) {
+        continue;
+      }
+      const normalizedName = rawName.replace(/_/g, " ");
+      const mappedName = ROI_LABEL_POSITIONS[rawName] ? rawName : normalizedName;
+      const meanC = toNumber(item.mean_c);
+      if (meanC === null) {
+        continue;
+      }
+
+      let pos = ROI_LABEL_POSITIONS[mappedName] || ROI_LABEL_POSITIONS[rawName];
+      const centerXPct = toNumber(item.center_x_pct);
+      const centerYPct = toNumber(item.center_y_pct);
+      if (centerXPct !== null && centerYPct !== null) {
+        const clampedX = Math.max(0, Math.min(100, centerXPct));
+        const clampedY = Math.max(0, Math.min(100, centerYPct));
+        pos = {
+          x:
+            THERMAL_PLOT_BOUNDS.left
+            + (clampedX / 100) * (THERMAL_PLOT_BOUNDS.right - THERMAL_PLOT_BOUNDS.left),
+          y:
+            THERMAL_PLOT_BOUNDS.top
+            + (clampedY / 100) * (THERMAL_PLOT_BOUNDS.bottom - THERMAL_PLOT_BOUNDS.top),
+        };
+      }
+
+      if (!pos) {
+        continue;
+      }
+      points.push({
+        name: mappedName,
+        meanC,
+        x: pos.x,
+        y: pos.y,
+      });
+    }
+
+    return points.sort((a, b) => b.meanC - a.meanC);
+  }, [report]);
+
+  const roiOverlayLayoutPoints = useMemo(() => {
+    if (roiOverlayPoints.length === 0) {
+      return [] as RoiOverlayLayoutPoint[];
+    }
+
+    const clampPercent = (value: number, min: number, max: number) =>
+      Math.max(min, Math.min(max, value));
+
+    const labelBoxWidthPct = 12;
+    const labelBoxHeightPct = 4.8;
+    const minVerticalGapPct = 5.2;
+    const minHorizontalGapPct = 8.0;
+    const plotCenterX = (THERMAL_PLOT_BOUNDS.left + THERMAL_PLOT_BOUNDS.right) / 2;
+    const headLeftLaneX = plotCenterX - 8.5;
+    const headRightLaneX = plotCenterX + 8.5;
+    const headTopMinY = THERMAL_PLOT_BOUNDS.top + 2;
+    const headBottomMaxY = THERMAL_PLOT_BOUNDS.top + 25;
+
+    const placed: RoiOverlayLayoutPoint[] = [];
+
+    const ensureNoOverlap = (
+      candidateX: number,
+      candidateY: number,
+      minY: number,
+      maxY: number
+    ) => {
+      let x = candidateX;
+      let y = candidateY;
+      for (let tries = 0; tries < 14; tries += 1) {
+        const overlap = placed.find((item) => {
+          const horizontalHit =
+            Math.abs(item.labelX - x) < minHorizontalGapPct;
+          const verticalHit =
+            Math.abs(item.labelY - y) < minVerticalGapPct;
+          return horizontalHit && verticalHit;
+        });
+        if (!overlap) {
+          return {
+            x: clampPercent(x, 3, 97),
+            y: clampPercent(y, minY, maxY),
+          };
+        }
+        y = overlap.labelY + minVerticalGapPct;
+        if (y > maxY) {
+          y = overlap.labelY - minVerticalGapPct;
+          x += x <= plotCenterX ? -3 : 3;
+        }
+      }
+
+      return {
+        x: clampPercent(x, 3, 97),
+        y: clampPercent(y, minY, maxY),
+      };
+    };
+
+    const headPoints = roiOverlayPoints
+      .filter((point) => HEAD_ROI_NAME_REGEX.test(point.name) || point.y <= 33)
+      .sort((a, b) => a.y - b.y || a.x - b.x);
+
+    let leftLaneNextY = headTopMinY;
+    let rightLaneNextY = headTopMinY;
+    let centerAlternator = false;
+
+    for (const point of headPoints) {
+      let laneX = point.x <= plotCenterX ? headLeftLaneX : headRightLaneX;
+      if (Math.abs(point.x - plotCenterX) < 2.8) {
+        laneX = centerAlternator ? headRightLaneX : headLeftLaneX;
+        centerAlternator = !centerAlternator;
+      }
+
+      const preferredY = clampPercent(point.y, headTopMinY, headBottomMaxY);
+      const laneNextY = laneX < plotCenterX ? leftLaneNextY : rightLaneNextY;
+      const seedY = Math.max(preferredY, laneNextY);
+      const safe = ensureNoOverlap(laneX, seedY, headTopMinY, headBottomMaxY);
+
+      placed.push({
+        ...point,
+        labelX: safe.x,
+        labelY: safe.y,
+        showLeader: true,
+      });
+
+      if (laneX < plotCenterX) {
+        leftLaneNextY = safe.y + minVerticalGapPct;
+      } else {
+        rightLaneNextY = safe.y + minVerticalGapPct;
+      }
+    }
+
+    const bodyPoints = roiOverlayPoints.filter((point) =>
+      !headPoints.some((head) => head.name === point.name && head.x === point.x && head.y === point.y)
+    );
+
+    for (const point of bodyPoints) {
+      const minY = THERMAL_PLOT_BOUNDS.top;
+      const maxY = THERMAL_PLOT_BOUNDS.bottom;
+      const safe = ensureNoOverlap(point.x, point.y, minY, maxY);
+      const moved =
+        Math.abs(safe.x - point.x) > labelBoxWidthPct / 3 ||
+        Math.abs(safe.y - point.y) > labelBoxHeightPct / 3;
+
+      placed.push({
+        ...point,
+        labelX: safe.x,
+        labelY: safe.y,
+        showLeader: moved,
+      });
+    }
+
+    return placed;
+  }, [roiOverlayPoints]);
+
   const patientSummary = useMemo(() => {
     if (report && typeof report.patient === "object") {
       const patient = report.patient as Record<string, unknown>;
@@ -277,6 +486,34 @@ export default function EmrPage() {
     };
   }, [currentSearchPatient, report]);
 
+  const thermalImageUrl = useMemo(() => {
+    if (!report || typeof report !== "object") {
+      return "";
+    }
+
+    const normalizeImagePath = (value: unknown) => {
+      const raw = String(value || "").trim();
+      if (!raw) return "";
+      if (/^https?:\/\//i.test(raw)) {
+        return raw;
+      }
+      const stripped = raw.replace(/^\/+/, "").replace(/^data\//i, "");
+      return `${API_BASE}/data/${stripped}`;
+    };
+
+    const direct = normalizeImagePath(report.thermal_marked_image);
+    if (direct) return direct;
+
+    if (Array.isArray(report.thermal_images)) {
+      for (const item of report.thermal_images) {
+        const candidate = normalizeImagePath(item);
+        if (candidate) return candidate;
+      }
+    }
+
+    return "";
+  }, [report]);
+
   const fetchReports = useCallback(async () => {
     try {
       const response = await fetch(`${API_BASE}/reports`);
@@ -298,12 +535,27 @@ export default function EmrPage() {
     }
   }, [searchParams]);
 
-  // 当URL中有record_id时，自动生成诊断
+  // 当URL中有record_id时，始终确保当前报告与该record_id一致
   useEffect(() => {
-    if (recordId && !emrId) {
-      generateEmrByRecordId(recordId);
+    const recordIdParam = searchParams.get("record_id") || "";
+    if (!recordIdParam) {
+      return;
     }
-  }, [recordId, emrId]);
+    if (recordId !== recordIdParam) {
+      return;
+    }
+
+    const currentReportRecordId =
+      report && typeof report === "object"
+        ? String(report.record_id || "")
+        : "";
+
+    if (currentReportRecordId === recordIdParam) {
+      return;
+    }
+
+    generateEmrByRecordId(recordIdParam);
+  }, [searchParams, recordId, report]);
 
   useEffect(() => {
     if (!globalQuery.trim()) {
@@ -403,6 +655,14 @@ export default function EmrPage() {
       r5_c3: "右膝",
     };
     return mapping[key] || String(value);
+  }
+
+  function formatRoiLabel(value: unknown) {
+    const raw = String(value || "").trim();
+    if (!raw) return "-";
+    const mapped = formatRegionLabel(raw);
+    if (mapped !== raw) return mapped;
+    return raw.replace(/_/g, " ");
   }
 
   function formatGender(value?: string) {
@@ -1157,6 +1417,56 @@ export default function EmrPage() {
                 </div>
               )}
 
+              {report.analysis && typeof report.analysis === "object" &&
+               Boolean((report.analysis as Record<string, unknown>).roi_analysis) &&
+               typeof (report.analysis as Record<string, unknown>).roi_analysis === "object" &&
+               Boolean(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).roi_list) &&
+               Array.isArray(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).roi_list) &&
+               (((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).roi_list as unknown[]).length > 0 && (
+                <div className="rounded-xl border border-slate-200 p-4">
+                  <h3 className="text-sm font-semibold text-slate-900">姿态分区温度（ROI）</h3>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-lg bg-slate-50 p-3">
+                      <p className="text-xs text-slate-500">识别区域数</p>
+                      <p className="mt-1 text-base font-semibold text-slate-900">
+                        {String(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).total_rois ?? "-")}
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-slate-50 p-3">
+                      <p className="text-xs text-slate-500">最热区域</p>
+                      <p className="mt-1 text-base font-semibold text-slate-900">
+                        {formatRoiLabel(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).hottest_region)}
+                        {" "}
+                        ({String(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).hottest_temp ?? "-")}°C)
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-slate-50 p-3">
+                      <p className="text-xs text-slate-500">最冷区域</p>
+                      <p className="mt-1 text-base font-semibold text-slate-900">
+                        {formatRoiLabel(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).coolest_region)}
+                        {" "}
+                        ({String(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).coolest_temp ?? "-")}°C)
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    {(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).roi_list as Record<string, unknown>[]).map((roi, idx) => (
+                      <div
+                        key={`${String(roi.name || "roi")}-${idx}`}
+                        className="grid gap-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-700 sm:grid-cols-6"
+                      >
+                        <div className="font-medium text-slate-900">{formatRoiLabel(roi.name)}</div>
+                        <div>均值 {String(roi.mean_c ?? "-")}°C</div>
+                        <div>最低 {String(roi.min_c ?? "-")}°C</div>
+                        <div>最高 {String(roi.max_c ?? "-")}°C</div>
+                        <div>标准差 {String(roi.std_c ?? "-")}</div>
+                        <div>样本 {String(roi.count ?? "-")}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="rounded-xl border border-slate-200 p-4">
                 <h3 className="text-sm font-semibold text-slate-900">诊断结论</h3>
                 <p className="mt-2 text-slate-700">
@@ -1203,15 +1513,46 @@ export default function EmrPage() {
           )}
         </section>
 
-        {report && report.thermal_marked_image && (
+        {thermalImageUrl && (
           <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
             <h2 className="text-lg font-semibold text-slate-900">热成像图</h2>
             <div className="mt-4">
+              <p className="mb-3 text-xs text-slate-500">已叠加人体部位温度标签（头部标签自动避让，基于 ROI 分析）</p>
+            </div>
+            <div className="relative mt-2 w-full max-w-2xl">
               <img
-                src={`${API_BASE}/data/${String(report.thermal_marked_image)}`}
+                src={thermalImageUrl}
                 alt="Thermal Marked Image"
                 className="w-full max-w-2xl rounded-xl border border-slate-200"
               />
+              <svg className="pointer-events-none absolute inset-0 z-10 h-full w-full">
+                {roiOverlayLayoutPoints.map((point, index) => {
+                  if (!point.showLeader) {
+                    return null;
+                  }
+                  const edgeX = point.labelX <= point.x ? point.labelX + 4.5 : point.labelX - 4.5;
+                  return (
+                    <line
+                      key={`line-${point.name}-${index}`}
+                      x1={`${point.x}%`}
+                      y1={`${point.y}%`}
+                      x2={`${edgeX}%`}
+                      y2={`${point.labelY}%`}
+                      stroke="rgba(15, 23, 42, 0.85)"
+                      strokeWidth="1"
+                    />
+                  );
+                })}
+              </svg>
+              {roiOverlayLayoutPoints.map((point, index) => (
+                <div
+                  key={`${point.name}-${index}`}
+                  className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-md border border-white/30 bg-slate-900/70 px-2 py-1 text-[11px] font-semibold text-white"
+                  style={{ left: `${point.labelX}%`, top: `${point.labelY}%` }}
+                >
+                  {point.name} {point.meanC.toFixed(1)}°C
+                </div>
+              ))}
             </div>
           </section>
         )}
