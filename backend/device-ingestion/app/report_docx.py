@@ -37,6 +37,13 @@ _CJK_FONT_CANDIDATES = [
     "Arial Unicode MS",
 ]
 _CJK_FONT_PROP: Optional[fm.FontProperties] = None
+_FACIAL_LABEL_OFFSETS = {
+    "右眼": (8.0, -4.0),
+    "左眼": (-8.0, -4.0),
+    "鼻子": (0.0, -1.8),
+    "右脸颊": (11.0, 1.5),
+    "左脸颊": (-11.0, 1.5),
+}
 
 
 def _safe_name(value: str) -> str:
@@ -154,15 +161,32 @@ def _roi_label_points_for_docx(report: Dict[str, Any]) -> list[Dict[str, Any]]:
         y = THERMAL_PLOT_BOUNDS["top"] + (cy / 100.0) * (
             THERMAL_PLOT_BOUNDS["bottom"] - THERMAL_PLOT_BOUNDS["top"]
         )
-        points.append({"name": name, "mean_c": mean_c, "x": x, "y": y})
+        label_x = x
+        label_y = y
+        for key, (dx, dy) in _FACIAL_LABEL_OFFSETS.items():
+            if key in name:
+                label_x = max(2.0, min(98.0, x + dx))
+                label_y = max(2.0, min(98.0, y + dy))
+                break
 
-    points.sort(key=lambda p: p["y"])
-    min_y_gap = 3.8
+        points.append(
+            {
+                "name": name,
+                "mean_c": mean_c,
+                "x": x,
+                "y": y,
+                "label_x": label_x,
+                "label_y": label_y,
+            }
+        )
+
+    points.sort(key=lambda p: p["label_y"])
+    min_y_gap = 3.2
     for i in range(1, len(points)):
         prev = points[i - 1]
         cur = points[i]
-        if abs(cur["x"] - prev["x"]) < 8 and (cur["y"] - prev["y"]) < min_y_gap:
-            cur["y"] = min(97.0, prev["y"] + min_y_gap)
+        if abs(cur["label_x"] - prev["label_x"]) < 8 and (cur["label_y"] - prev["label_y"]) < min_y_gap:
+            cur["label_y"] = min(97.0, prev["label_y"] + min_y_gap)
     return points
 
 
@@ -183,23 +207,31 @@ def _render_labeled_thermal_image_for_docx(base_image: Path, report: Dict[str, A
         for point in points:
             px = (point["x"] / 100.0) * w
             py = (point["y"] / 100.0) * h
+            lpx = (point.get("label_x", point["x"]) / 100.0) * w
+            lpy = (point.get("label_y", point["y"]) / 100.0) * h
             text = f"{point['name']} {point['mean_c']:.1f}°C"
             ax.annotate(
                 text,
                 xy=(px, py),
-                xytext=(px, py),
+                xytext=(lpx, lpy),
                 textcoords="data",
-                fontsize=8,
+                fontsize=4,
                 fontproperties=cjk_font,
                 color="white",
                 ha="center",
                 va="center",
+                arrowprops={
+                    "arrowstyle": "-",
+                    "color": "#0f172a",
+                    "lw": 0.5,
+                    "alpha": 0.85,
+                },
                 bbox={
-                    "boxstyle": "round,pad=0.25",
+                    "boxstyle": "round,pad=0.18",
                     "facecolor": "#0f172a",
                     "alpha": 0.72,
                     "edgecolor": "#ffffff",
-                    "linewidth": 0.5,
+                    "linewidth": 0.4,
                 },
             )
 

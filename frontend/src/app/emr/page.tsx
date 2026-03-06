@@ -64,6 +64,7 @@ const HEAD_ROI_NAME_REGEX = /(额头|眼|脸颊|鼻子|鼻|下巴)/;
 
 const API_BASE = "http://localhost:8000";
 const EMR_STATE_KEY = "patient_flow_state_emr";
+const REPORTS_PAGE_SIZE = 10;
 
 export default function EmrPage() {
   const router = useRouter();
@@ -89,6 +90,7 @@ export default function EmrPage() {
   const [searchMessage, setSearchMessage] = useState("");
   const [currentSearchPatient, setCurrentSearchPatient] = useState<PatientSearchResult | null>(null);
   const [showAbnormalDetails, setShowAbnormalDetails] = useState(false);
+  const [reportPage, setReportPage] = useState(1);
 
   useEffect(() => {
     try {
@@ -236,6 +238,33 @@ export default function EmrPage() {
       return matchName || matchId;
     });
   }, [currentPatientIdForFilter, currentPatientName, reportFiles, showAllReports]);
+
+  const reportFilesForDisplay = useMemo(() => {
+    return visibleReportFiles.length ? visibleReportFiles : reportFiles;
+  }, [reportFiles, visibleReportFiles]);
+
+  const reportTotalPages = useMemo(() => {
+    if (!reportFilesForDisplay.length) {
+      return 1;
+    }
+    return Math.max(1, Math.ceil(reportFilesForDisplay.length / REPORTS_PAGE_SIZE));
+  }, [reportFilesForDisplay]);
+
+  const paginatedReportFiles = useMemo(() => {
+    const start = (reportPage - 1) * REPORTS_PAGE_SIZE;
+    const end = start + REPORTS_PAGE_SIZE;
+    return reportFilesForDisplay.slice(start, end);
+  }, [reportFilesForDisplay, reportPage]);
+
+  useEffect(() => {
+    setReportPage(1);
+  }, [showAllReports, currentPatientName, currentPatientIdForFilter]);
+
+  useEffect(() => {
+    if (reportPage > reportTotalPages) {
+      setReportPage(reportTotalPages);
+    }
+  }, [reportPage, reportTotalPages]);
 
   const overview = useMemo(() => {
     const analysis = report && typeof report.analysis === "object"
@@ -1592,7 +1621,7 @@ export default function EmrPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
-                    {(visibleReportFiles.length ? visibleReportFiles : reportFiles).map((file) => (
+                    {paginatedReportFiles.map((file) => (
                       <tr key={`${file.date}-${file.name}`}>
                         <td className="px-4 py-2 text-slate-700">{file.date}</td>
                         <td className="px-4 py-2 text-slate-900">{file.name}</td>
@@ -1627,6 +1656,27 @@ export default function EmrPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+              <div className="mt-4 flex items-center justify-between">
+                <p className="text-xs text-slate-500">
+                  第 {reportPage} / {reportTotalPages} 页，共 {reportFilesForDisplay.length} 份报告
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    onClick={() => setReportPage((prev) => Math.max(1, prev - 1))}
+                    disabled={reportPage <= 1}
+                  >
+                    上一页
+                  </button>
+                  <button
+                    className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    onClick={() => setReportPage((prev) => Math.min(reportTotalPages, prev + 1))}
+                    disabled={reportPage >= reportTotalPages}
+                  >
+                    下一页
+                  </button>
+                </div>
               </div>
             </>
           )}
