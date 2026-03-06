@@ -1,0 +1,83 @@
+﻿======================================================================
+热成像批量处理 - 统计报告
+======================================================================
+
+处理时间: 2026-03-06 10:50:10
+
+处理统计:
+  总文件数:   65
+  成功:       0 ✓
+  失败:       65 ✗
+  成功率:     0.0%
+
+性能统计:
+  总耗时:     0.55 秒
+  平均/文件:  0.01 秒
+  吞吐量:     117.6 文件/秒
+
+失败文件列表:
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - 1_B8A6B4E749D24C899104D4B846DE3E5F_1.csv: name 'input_dir' is not defined
+  - 1_B8A6B4E749D24C899104D4B846DE3E5F_1_mediapipe_roi.csv: could not convert string '\ufeffroi_name' to float64 at row 0, column 1.
+  - 1_B8A6B4E749D24C899104D4B846DE3E5F_1_mediapipe_roi_test.csv: could not convert string '\ufeffroi_name' to float64 at row 0, column 1.
+  - 1_B8A6B4E749D24C899104D4B846DE3E5F_1_quick_roi.csv: could not convert string '\ufeffroi_name' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
+  - frame_0001.csv: could not convert string 'row' to float64 at row 0, column 1.
