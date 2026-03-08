@@ -4,22 +4,51 @@ import json
 import logging
 import os
 import re
+from datetime import datetime
 import urllib.error
 import urllib.request
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:1.7b")
 OLLAMA_ENABLED = os.getenv("OLLAMA_ENABLED", "1") != "0"
 RAG_ENABLED = os.getenv("RAG_ENABLED", "1") != "0"
 RAG_TOP_K = max(1, int(os.getenv("RAG_TOP_K", "5")))
+RAG_SCORE_THRESHOLD = float(os.getenv("RAG_SCORE_THRESHOLD", "0"))
+RAG_VECTOR_ENABLED = os.getenv("RAG_VECTOR_ENABLED", "1") != "0"
+RAG_VECTOR_KB_PATH = os.getenv(
+    "RAG_VECTOR_KB_PATH",
+    str(Path(__file__).resolve().parents[2] / "config" / "kb" / "current"),
+)
+RAG_EMBED_PROVIDER = os.getenv("RAG_EMBED_PROVIDER", "ollama")
+RAG_EMBED_MODEL = os.getenv("RAG_EMBED_MODEL", "bge-m3:latest")
+RAG_OPENAI_BASE_URL = os.getenv("RAG_OPENAI_BASE_URL")
+RAG_OPENAI_API_KEY = os.getenv("RAG_OPENAI_API_KEY")
 RAG_KB_PATH = os.getenv(
     "RAG_KB_PATH",
     str(Path(__file__).resolve().parents[2] / "config" / "knowledge_base.jsonl"),
 )
 
 _KB_ITEMS_CACHE: Optional[List[Dict[str, Any]]] = None
+_VECTOR_KB_CACHE: Optional[Any] = None
+_VECTOR_EMBEDDINGS: Any = None
+_VECTOR_DISABLED_REASON: Optional[str] = None
+_REF_PATTERN = re.compile(r"\[(\d+)\]")
+_SYSTEM_PROMPT = (
+    "你是医疗热成像评估助手。你只能基于提供的资料回答。"
+    "必须在结论中使用编号引用（如[1]），不得编造，不确定就明确说明无法确认。"
+)
+
+# Airport-inquiry uses a rule-first extraction strategy before LLM/tool routing.
+# Reuse that idea here to stabilize KB retrieval against noisy free text.
+_KEYWORD_RULES: Dict[str, List[str]] = {
+    "body_part": [
+        "颈", "肩", "肩背", "背", "腰", "腰背", "腹", "上腹", "下腹", "膝", "踝", "足", "手", "腕", "肘", "胸", "头", "面", "颈肩",
+    ],
+    "risk": ["低风险", "中风险", "高风险", "炎症", "疼痛", "应激", "循环", "供血", "温差", "异常", "复评"],
+    "treatment": ["疗程", "频次", "干预", "理疗", "保暖", "复测", "随访", "医生意见", "治疗方案"],
+}
 
 
 def is_llm_enabled() -> bool:
@@ -133,6 +162,25 @@ def _tokenize_text(text: str) -> List[str]:
     return [token for token in (latin + cjk) if token]
 
 
+def _extract_rule_keywords(text: str) -> List[str]:
+    if not text:
+        return []
+    matched: List[str] = []
+    lowered = text.lower()
+    for _, words in _KEYWORD_RULES.items():
+        for word in words:
+            if word and (word in text or word.lower() in lowered):
+                matched.append(word)
+    # keep order and deduplicate
+    seen = set()
+    result: List[str] = []
+    for item in matched:
+        if item not in seen:
+            seen.add(item)
+            result.append(item)
+    return result
+
+
 def _build_retrieval_query(report: Dict[str, Any], emr: Dict[str, Any]) -> str:
     patient = report.get("patient") or emr.get("patient") or {}
     analysis = report.get("analysis") or {}
@@ -154,12 +202,139 @@ def _build_retrieval_query(report: Dict[str, Any], emr: Dict[str, Any]) -> str:
         f"平均温:{metrics.get('avg_c')}",
         "异常区域:" + ",".join(region_names),
     ]
+
+    # Add deterministic medical keywords extracted from EMR narrative fields.
+    emr_text = "\n".join(
+        [
+            str(emr.get("chief_complaint") or ""),
+            str(emr.get("diagnosis") or ""),
+            str(emr.get("doctor_opinion") or ""),
+            str(emr.get("history") or ""),
+        ]
+    )
+    keywords = _extract_rule_keywords(emr_text)
+    if keywords:
+        query_parts.append("规则关键词:" + ",".join(keywords))
+
     return "\n".join(query_parts)
+
+
+def _load_vector_kb() -> Optional[Any]:
+    global _VECTOR_KB_CACHE, _VECTOR_DISABLED_REASON
+    if _VECTOR_KB_CACHE is not None:
+        return _VECTOR_KB_CACHE
+    if _VECTOR_DISABLED_REASON is not None:
+        return None
+    if not RAG_VECTOR_ENABLED:
+        _VECTOR_DISABLED_REASON = "vector disabled"
+        return None
+
+    try:
+        from .rag_kb_loader import load_kb
+
+        _VECTOR_KB_CACHE = load_kb(RAG_VECTOR_KB_PATH)
+        return _VECTOR_KB_CACHE
+    except Exception as exc:
+        _VECTOR_DISABLED_REASON = str(exc)
+        logging.warning("vector kb unavailable: %s", exc)
+        return None
+
+
+def _load_vector_embeddings() -> Optional[Any]:
+    global _VECTOR_EMBEDDINGS, _VECTOR_DISABLED_REASON
+    if _VECTOR_EMBEDDINGS is not None:
+        return _VECTOR_EMBEDDINGS
+    if _VECTOR_DISABLED_REASON is not None and "vector disabled" in _VECTOR_DISABLED_REASON:
+        return None
+
+    try:
+        from .rag_embeddings import build_embeddings
+
+        base_url = OLLAMA_BASE_URL if RAG_EMBED_PROVIDER == "ollama" else RAG_OPENAI_BASE_URL
+        _VECTOR_EMBEDDINGS = build_embeddings(
+            provider=RAG_EMBED_PROVIDER,
+            embed_model=RAG_EMBED_MODEL,
+            base_url=base_url,
+            api_key=RAG_OPENAI_API_KEY,
+        )
+        return _VECTOR_EMBEDDINGS
+    except Exception as exc:
+        _VECTOR_DISABLED_REASON = str(exc)
+        logging.warning("vector embeddings unavailable: %s", exc)
+        return None
+
+
+def _retrieve_context_vector(query: str, top_k: int = RAG_TOP_K) -> Optional[Dict[str, Any]]:
+    kb = _load_vector_kb()
+    embeddings = _load_vector_embeddings()
+    if kb is None or embeddings is None:
+        return None
+
+    try:
+        import faiss
+        import numpy as np
+
+        vec = embeddings.embed_query(query)
+        arr = np.array([vec], dtype="float32")
+        faiss.normalize_L2(arr)
+        scores, indices = kb.index.search(arr, top_k)
+    except Exception as exc:
+        logging.warning("vector retrieval failed: %s", exc)
+        return None
+
+    scores_list = scores[0].tolist()
+    indices_list = indices[0].tolist()
+    if scores_list and RAG_SCORE_THRESHOLD > 0 and scores_list[0] < RAG_SCORE_THRESHOLD:
+        return {"query": query, "items": [], "citations": [], "context": ""}
+
+    selected: List[Dict[str, Any]] = []
+    citations: List[Dict[str, Any]] = []
+    context_lines: List[str] = []
+    rank = 0
+    for idx, score in zip(indices_list, scores_list):
+        if idx < 0:
+            continue
+        row = kb.chunks.get(int(idx))
+        if not isinstance(row, dict):
+            continue
+        rank += 1
+        excerpt = str(row.get("excerpt_markdown") or row.get("text_for_embedding") or "").strip()
+        if not excerpt:
+            continue
+        item = {
+            "id": str(row.get("chunk_id") or f"VEC-{idx}"),
+            "title": " > ".join(row.get("title_path") or []) if isinstance(row.get("title_path"), list) else str(row.get("title_path") or ""),
+            "content": excerpt,
+            "source": str(row.get("file_path") or ""),
+            "tags": [],
+        }
+        selected.append(item)
+        citations.append(
+            {
+                "ref": rank,
+                "id": item["id"],
+                "title": item["title"],
+                "source": item["source"],
+                "score": float(score),
+            }
+        )
+        context_lines.append(f"[{rank}] {item['title'] or '-'}\n{item['content']}")
+
+    return {
+        "query": query,
+        "items": selected,
+        "citations": citations,
+        "context": "\n\n".join(context_lines),
+    }
 
 
 def _retrieve_context(query: str, top_k: int = RAG_TOP_K) -> Dict[str, Any]:
     if not RAG_ENABLED:
         return {"query": query, "items": [], "context": ""}
+
+    vector_result = _retrieve_context_vector(query, top_k=top_k)
+    if isinstance(vector_result, dict):
+        return vector_result
 
     items = _load_kb_items()
     if not items:
@@ -169,13 +344,15 @@ def _retrieve_context(query: str, top_k: int = RAG_TOP_K) -> Dict[str, Any]:
     if not q_tokens:
         return {"query": query, "items": [], "context": ""}
 
-    scored: List[tuple[float, Dict[str, Any]]] = []
+    scored: List[Tuple[float, Dict[str, Any]]] = []
     for item in items:
+        title_text = str(item.get("title") or "")
+        tags_text = " ".join(_to_list_of_str(item.get("tags")))
         item_text = " ".join(
             [
-                str(item.get("title") or ""),
+                title_text,
                 str(item.get("content") or ""),
-                " ".join(_to_list_of_str(item.get("tags"))),
+                tags_text,
             ]
         )
         i_tokens = set(_tokenize_text(item_text))
@@ -184,21 +361,43 @@ def _retrieve_context(query: str, top_k: int = RAG_TOP_K) -> Dict[str, Any]:
         overlap = q_tokens.intersection(i_tokens)
         if not overlap:
             continue
-        score = len(overlap) / max(1, len(q_tokens))
+
+        title_tokens = set(_tokenize_text(title_text))
+        tag_tokens = set(_tokenize_text(tags_text))
+        title_overlap = len(q_tokens.intersection(title_tokens)) / max(1, len(q_tokens))
+        tag_overlap = len(q_tokens.intersection(tag_tokens)) / max(1, len(q_tokens))
+        base_overlap = len(overlap) / max(1, len(q_tokens))
+        score = base_overlap + (0.35 * title_overlap) + (0.25 * tag_overlap)
         scored.append((score, item))
 
     scored.sort(key=lambda x: x[0], reverse=True)
-    selected = [row[1] for row in scored[:top_k]]
+    if scored and RAG_SCORE_THRESHOLD > 0 and scored[0][0] < RAG_SCORE_THRESHOLD:
+        scored = []
+    selected_pairs = scored[:top_k]
+    selected = [row[1] for row in selected_pairs]
+
+    citations: List[Dict[str, Any]] = []
+    for rank, (score, item) in enumerate(selected_pairs, start=1):
+        citations.append(
+            {
+                "ref": rank,
+                "id": item.get("id"),
+                "title": item.get("title"),
+                "source": item.get("source"),
+                "score": score,
+            }
+        )
 
     context_lines: List[str] = []
-    for item in selected:
+    for rank, item in enumerate(selected, start=1):
         context_lines.append(
-            f"[{item['id']}] {item.get('title') or '-'}\n{item.get('content') or ''}"
+            f"[{rank}] {item.get('title') or '-'}\n{item.get('content') or ''}"
         )
 
     return {
         "query": query,
         "items": selected,
+        "citations": citations,
         "context": "\n\n".join(context_lines),
     }
 
@@ -229,8 +428,8 @@ def _build_llm_context(
     )
     if retrieved_context:
         context += (
-            "\n以下是检索到的医学知识条目（每条以[条目ID]开头）。"
-            "请仅在有依据时引用，并在输出中给出依据条目ID：\n"
+            "\n以下是检索到的医学知识条目（每条以编号[1][2]...开头）。"
+            "请仅在有依据时引用，并在输出中保留对应编号：\n"
             f"{retrieved_context}\n"
         )
     return context
@@ -245,13 +444,58 @@ def _parse_evidence_ids(value: Any) -> List[str]:
     return []
 
 
+def _strip_invalid_refs(answer: str, max_ref: int) -> str:
+    def replace(match: re.Match[str]) -> str:
+        num = int(match.group(1))
+        return match.group(0) if num <= max_ref else ""
+
+    return _REF_PATTERN.sub(replace, answer or "")
+
+
+def _extract_ref_numbers(text: str) -> Set[int]:
+    if not text:
+        return set()
+    return {int(item) for item in _REF_PATTERN.findall(text)}
+
+
+def _resolve_ref_ids(text: str, citations: List[Dict[str, Any]]) -> List[str]:
+    refs = _extract_ref_numbers(text)
+    resolved: List[str] = []
+    for num in sorted(refs):
+        idx = num - 1
+        if idx < 0 or idx >= len(citations):
+            continue
+        item_id = str(citations[idx].get("id") or "").strip()
+        if item_id:
+            resolved.append(item_id)
+    return resolved
+
+
+def _handle_common_query(question: str) -> Optional[str]:
+    text = (question or "").strip()
+    if any(keyword in text for keyword in ["今天几号", "今天几月几号", "今天是几号", "今天日期", "现在几号", "今日日期", "今天多少号"]):
+        now = datetime.now()
+        return f"今天是 {now.year}年{now.month}月{now.day}日。"
+    if any(keyword in text for keyword in ["现在几点", "现在时间", "当前时间", "几点了"]):
+        now = datetime.now()
+        return f"现在时间是 {now.year}年{now.month}月{now.day}日 {now.hour}:{now.minute:02d}。"
+    if "星期几" in text or "周几" in text:
+        now = datetime.now()
+        weekdays = ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"]
+        return f"今天是 {now.year}年{now.month}月{now.day}日，{weekdays[now.weekday()]}。"
+    return None
+
+
 def _generate_llm_diagnosis_and_opinion(context: str) -> Dict[str, Any]:
     base_prompt = (
-        context
+        _SYSTEM_PROMPT
+        + "\n\n"
+        + context
         + "请返回严格JSON，包含字段：diagnosis, doctor_opinion, report_note, evidence_item_ids。"
         "每个字段输出 3-5 句中文，不少于 80 字，需包含风险等级与温度范围信息，"
+        "并在 diagnosis/doctor_opinion/report_note 中使用引用编号（如[1]）。"
         "其中 doctor_opinion 和 report_note 必须明确‘仅供参考’。"
-        "evidence_item_ids 为字符串数组，填写你使用的依据条目ID（如 [\"KB-001\",\"KB-010\"]）。"
+        "evidence_item_ids 为字符串数组，可填写依据条目ID或引用编号（如 [\"KB-001\",\"[1]\"]）。"
     )
     text = _ollama_generate(base_prompt, temperature=0.2, max_tokens=900)
     data = _extract_json_block(text) or {}
@@ -267,12 +511,15 @@ def _generate_llm_diagnosis_and_opinion(context: str) -> Dict[str, Any]:
 
     if any(_too_short(value) for value in result.values()):
         retry_prompt = (
-            context
+            _SYSTEM_PROMPT
+            + "\n\n"
+            + context
             + "请返回严格JSON，包含字段：diagnosis, doctor_opinion, report_note, evidence_item_ids。"
             "请输出更详细的内容，每个字段不少于 120 字，分为 3-5 句，"
             "需包含风险等级、温度范围与建议要点，"
+            "并在 diagnosis/doctor_opinion/report_note 中使用引用编号（如[1]）。"
             "其中 doctor_opinion 和 report_note 必须包含‘仅供参考’。"
-            "evidence_item_ids 为字符串数组，填写依据条目ID。"
+            "evidence_item_ids 为字符串数组，可填写依据条目ID或引用编号。"
         )
         text = _ollama_generate(retry_prompt, temperature=0.2, max_tokens=1200)
         data = _extract_json_block(text) or {}
@@ -295,10 +542,12 @@ def _generate_llm_plan_text(context: str, plan: Dict[str, Any]) -> Dict[str, Any
         "acupoints": plan.get("acupoints"),
     }
     prompt = (
-        context
+        _SYSTEM_PROMPT
+        + "\n\n"
+        + context
         + "以下为规则引擎生成的治疗方案要点，请返回严格JSON，包含字段：treatment_plan_text, evidence_item_ids。"
         "请生成精简但具体的中文说明（3-6句），"
-        "需涵盖频次/疗程/关键部位，并标注‘仅供参考’：\n"
+        "需涵盖频次/疗程/关键部位，并标注‘仅供参考’，且使用引用编号（如[1]）：\n"
         + json.dumps(plan_summary, ensure_ascii=False)
     )
     text = _ollama_generate(prompt, temperature=0.3, max_tokens=700)
@@ -314,12 +563,33 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
         return {}
 
     retrieval_query = _build_retrieval_query(report, emr)
+    common_answer = _handle_common_query(retrieval_query)
+    if common_answer:
+        return {
+            "model": OLLAMA_MODEL,
+            "retrieved_context": "",
+            "retrieved_items": [],
+            "report_note": common_answer,
+            "evidence_item_ids": [],
+        }
+
     retrieval_result = _retrieve_context(retrieval_query)
     retrieved_context = str(retrieval_result.get("context") or "")
+    citations = retrieval_result.get("citations") or []
+    if not retrieval_result.get("items"):
+        return {
+            "model": OLLAMA_MODEL,
+            "retrieved_context": "",
+            "retrieved_items": [],
+            "report_note": "知识库未找到依据，无法确认。",
+            "evidence_item_ids": [],
+        }
+
     context = _build_llm_context(report, emr, retrieved_context=retrieved_context)
     diag_payload = _generate_llm_diagnosis_and_opinion(context)
     plan_text = ""
     plan_evidence_ids: List[str] = []
+    plan_payload: Dict[str, Any] = {}
     plan = report.get("treatment_plan") or {}
     if isinstance(plan, dict):
         plan_payload = _generate_llm_plan_text(context, plan)
@@ -340,21 +610,47 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
         ],
     }
     if diag_payload.get("diagnosis"):
-        payload["diagnosis"] = diag_payload["diagnosis"]
+        payload["diagnosis"] = _strip_invalid_refs(str(diag_payload["diagnosis"]), len(citations))
     if diag_payload.get("doctor_opinion"):
-        payload["doctor_opinion"] = diag_payload["doctor_opinion"]
+        payload["doctor_opinion"] = _strip_invalid_refs(str(diag_payload["doctor_opinion"]), len(citations))
     if diag_payload.get("report_note"):
-        payload["report_note"] = diag_payload["report_note"]
+        payload["report_note"] = _strip_invalid_refs(str(diag_payload["report_note"]), len(citations))
     if plan_text:
-        payload["treatment_plan_text"] = plan_text
+        payload["treatment_plan_text"] = _strip_invalid_refs(plan_text, len(citations))
 
     diagnosis_evidence_ids = _parse_evidence_ids(diag_payload.get("evidence_item_ids"))
+    diagnosis_evidence_ids.extend(
+        _resolve_ref_ids(
+            "\n".join(
+                [
+                    str(payload.get("diagnosis") or ""),
+                    str(payload.get("doctor_opinion") or ""),
+                    str(payload.get("report_note") or ""),
+                    json.dumps(diag_payload.get("evidence_item_ids") or [], ensure_ascii=False),
+                ]
+            ),
+            citations,
+        )
+    )
     if diagnosis_evidence_ids:
-        payload["diagnosis_evidence_item_ids"] = diagnosis_evidence_ids
+        payload["diagnosis_evidence_item_ids"] = sorted(set(diagnosis_evidence_ids))
+
+    plan_evidence_ids.extend(
+        _resolve_ref_ids(
+            "\n".join(
+                [
+                    str(payload.get("treatment_plan_text") or ""),
+                    json.dumps(plan_payload.get("evidence_item_ids") or [], ensure_ascii=False),
+                ]
+            ),
+            citations,
+        )
+    )
     if plan_evidence_ids:
-        payload["plan_evidence_item_ids"] = plan_evidence_ids
+        payload["plan_evidence_item_ids"] = sorted(set(plan_evidence_ids))
 
     merged_evidence_ids = sorted(set(diagnosis_evidence_ids + plan_evidence_ids))
     payload["evidence_item_ids"] = merged_evidence_ids
+    payload["citations"] = citations
 
     return payload

@@ -48,6 +48,7 @@ coverage.xml
 *.ipynb_checkpoints/
 pnpm-lock.yaml
 yarn.lock
+TCM-Pretrain-Data-ShizhenGPT/
 
 # nginx
 nginx.log
