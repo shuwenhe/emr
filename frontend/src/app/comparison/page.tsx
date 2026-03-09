@@ -231,6 +231,7 @@ export default function ComparisonPage() {
     setAfterEmr(null);
     setComparison(null);
     setAutoCompared(false);
+    setLoadingEmrRecords(false);
     if (patientId) {
       fetchEmrRecords(patientId);
     } else {
@@ -720,6 +721,7 @@ export default function ComparisonPage() {
                       setComparison(null);
                       setAutoCompared(false);
                       setAutoLoadComplete(false);
+                      setLoadingEmrRecords(false);
                     }}
                   >
                     切换患者
