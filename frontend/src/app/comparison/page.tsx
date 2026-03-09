@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 
 type Patient = {
   patient_id: string;
@@ -144,6 +145,52 @@ export default function ComparisonPage() {
       setPatients([]);
     }
   }
+
+    function getRiskImprovement(beforeRisk: string, afterRisk: string): string {
+      const riskLevels = { low: 1, medium: 2, high: 3, unknown: 0 };
+      const beforeLevel = riskLevels[beforeRisk as keyof typeof riskLevels] || 0;
+      const afterLevel = riskLevels[afterRisk as keyof typeof riskLevels] || 0;
+
+      if (afterLevel < beforeLevel) return "改善";
+      if (afterLevel > beforeLevel) return "加重";
+      return "稳定";
+    }
+
+    function getEffectivenessLevel(avgDelta: number, riskImprovement: string): string {
+      if (riskImprovement === "改善" && avgDelta < 0) return "显著";
+      if (riskImprovement === "改善" || avgDelta < -0.5) return "有效";
+      if (riskImprovement === "稳定" && Math.abs(avgDelta) < 0.3) return "维持";
+      return "需观察";
+    }
+
+    const calculateComparison = useCallback((before: EmrRecord | null, after: EmrRecord | null) => {
+      console.log("Calculating comparison...");
+      console.log("Before metrics:", before?.temperature_metrics);
+      console.log("After metrics:", after?.temperature_metrics);
+    
+      if (!before || !after || !before.temperature_metrics || !after.temperature_metrics) {
+        console.warn("Cannot calculate comparison: missing data or temperature metrics");
+        setComparison(null);
+        return;
+      }
+
+      const avgDelta = after.temperature_metrics.avg_c - before.temperature_metrics.avg_c;
+      const maxDelta = after.temperature_metrics.max_c - before.temperature_metrics.max_c;
+      const bodyAvgDelta = after.temperature_metrics.body_avg_temp_c - before.temperature_metrics.body_avg_temp_c;
+
+      const riskImprovement = getRiskImprovement(before.risk_level, after.risk_level);
+
+      const comparisonResult = {
+        avgDelta,
+        maxDelta,
+        bodyAvgDelta,
+        riskImprovement,
+        effectiveness: getEffectivenessLevel(avgDelta, riskImprovement)
+      };
+    
+      console.log("Comparison result:", comparisonResult);
+      setComparison(comparisonResult);
+    }, []);
 
   const fetchEmrRecords = useCallback(async (patientId: string) => {
     console.log("=== Fetching EMR records ===");
@@ -383,52 +430,6 @@ export default function ComparisonPage() {
     } catch (error) {
       console.error("加载最近病例失败:", error);
     }
-  }
-
-  function calculateComparison(before: EmrRecord | null, after: EmrRecord | null) {
-    console.log("Calculating comparison...");
-    console.log("Before metrics:", before?.temperature_metrics);
-    console.log("After metrics:", after?.temperature_metrics);
-    
-    if (!before || !after || !before.temperature_metrics || !after.temperature_metrics) {
-      console.warn("Cannot calculate comparison: missing data or temperature metrics");
-      setComparison(null);
-      return;
-    }
-
-    const avgDelta = after.temperature_metrics.avg_c - before.temperature_metrics.avg_c;
-    const maxDelta = after.temperature_metrics.max_c - before.temperature_metrics.max_c;
-    const bodyAvgDelta = after.temperature_metrics.body_avg_temp_c - before.temperature_metrics.body_avg_temp_c;
-
-    const riskImprovement = getRiskImprovement(before.risk_level, after.risk_level);
-
-    const comparisonResult = {
-      avgDelta,
-      maxDelta,
-      bodyAvgDelta,
-      riskImprovement,
-      effectiveness: getEffectivenessLevel(avgDelta, riskImprovement)
-    };
-    
-    console.log("Comparison result:", comparisonResult);
-    setComparison(comparisonResult);
-  }
-
-  function getRiskImprovement(beforeRisk: string, afterRisk: string): string {
-    const riskLevels = { low: 1, medium: 2, high: 3, unknown: 0 };
-    const beforeLevel = riskLevels[beforeRisk as keyof typeof riskLevels] || 0;
-    const afterLevel = riskLevels[afterRisk as keyof typeof riskLevels] || 0;
-
-    if (afterLevel < beforeLevel) return "改善";
-    if (afterLevel > beforeLevel) return "加重";
-    return "稳定";
-  }
-
-  function getEffectivenessLevel(avgDelta: number, riskImprovement: string): string {
-    if (riskImprovement === "改善" && avgDelta < 0) return "显著";
-    if (riskImprovement === "改善" || avgDelta < -0.5) return "有效";
-    if (riskImprovement === "稳定" && Math.abs(avgDelta) < 0.3) return "维持";
-    return "需观察";
   }
 
   function formatTemp(value?: number) {
@@ -750,7 +751,7 @@ export default function ComparisonPage() {
           
           {!selectedPatientId && patients.length === 0 && (
             <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700">
-              系统中暂无患者数据，请先在"患者登记"或"数据上传"页面添加患者。
+              系统中暂无患者数据，请先在&quot;患者登记&quot;或&quot;数据上传&quot;页面添加患者。
             </div>
           )}
           
@@ -914,10 +915,13 @@ export default function ComparisonPage() {
                   </div>
                 )}
                 {beforeEmr.thermal_marked_image && (
-                  <img
+                  <Image
                     src={buildThermalImageUrl(beforeEmr.thermal_marked_image)}
                     alt="治疗前热成像"
+                    width={1200}
+                    height={900}
                     className="w-full rounded-xl border border-slate-200"
+                    unoptimized
                   />
                 )}
               </div>
@@ -956,10 +960,13 @@ export default function ComparisonPage() {
                   </div>
                 )}
                 {afterEmr.thermal_marked_image && (
-                  <img
+                  <Image
                     src={buildThermalImageUrl(afterEmr.thermal_marked_image)}
                     alt="治疗后热成像"
+                    width={1200}
+                    height={900}
                     className="w-full rounded-xl border border-slate-200"
+                    unoptimized
                   />
                 )}
               </div>

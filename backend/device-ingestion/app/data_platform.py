@@ -8,6 +8,7 @@ from typing import Any, Callable, Dict, List, Optional, TypeVar
 
 import pymysql
 from pymysql.err import OperationalError
+from dbutils.pooled_db import PooledDB
 
 from .config import MYSQL_DB, MYSQL_HOST, MYSQL_PASSWORD, MYSQL_PORT, MYSQL_USER
 
@@ -19,6 +20,38 @@ _DB_RETRY_BACKOFF_BASE = 0.5
 _COMPRESSION_THRESHOLD_MB = 10  # Compress data larger than 10MB
 _T = TypeVar("_T")
 
+# Database connection pool
+# mincached: minimum number of idle connections in the pool
+# maxcached: maximum number of idle connections in the pool
+# maxconnections: maximum number of connections overall
+# blocking: wait if pool is exhausted (True) or raise exception (False)
+_db_pool: Optional[PooledDB] = None
+
+def _get_connection_pool() -> PooledDB:
+    """Get or create the database connection pool."""
+    global _db_pool
+    if _db_pool is None:
+        logger.info("Initializing MySQL connection pool")
+        _db_pool = PooledDB(
+            creator=pymysql,
+            maxconnections=10,  # Maximum connections overall
+            mincached=2,        # Keep at least 2 warm connections
+            maxcached=5,        # Cache up to 5 idle connections
+            blocking=True,      # Wait if pool exhausted
+            ping=1,             # Check connections before use (1=default)
+            host=MYSQL_HOST,
+            port=MYSQL_PORT,
+            user=MYSQL_USER,
+            password=MYSQL_PASSWORD,
+            database=MYSQL_DB,
+            cursorclass=pymysql.cursors.DictCursor,
+            autocommit=True,
+            connect_timeout=10,
+            read_timeout=60,
+            write_timeout=60,
+        )
+        logger.info("MySQL connection pool initialized successfully")
+    return _db_pool
 
 def _compress_data(data: str) -> str:
     """Compress data and return as base64-encoded string with marker prefix."""
@@ -37,18 +70,9 @@ def _decompress_data(data: str) -> str:
 
 
 def _connect() -> pymysql.connections.Connection:
-    conn = pymysql.connect(
-        host=MYSQL_HOST,
-        port=MYSQL_PORT,
-        user=MYSQL_USER,
-        password=MYSQL_PASSWORD,
-        database=MYSQL_DB,
-        cursorclass=pymysql.cursors.DictCursor,
-        autocommit=True,
-        connect_timeout=10,
-        read_timeout=60,
-        write_timeout=60,
-    )
+    """Get a connection from the pool."""
+    pool = _get_connection_pool()
+    conn = pool.connection()
     try:
         conn.ping(reconnect=False)
     except Exception:
