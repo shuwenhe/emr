@@ -12,12 +12,13 @@ from .config import MYSQL_DB, MYSQL_HOST, MYSQL_PASSWORD, MYSQL_PORT, MYSQL_USER
 logger = logging.getLogger(__name__)
 
 _DB_RETRYABLE_ERROR_CODES = {2006, 2013, 2055}
-_DB_MAX_RETRIES = 1
+_DB_MAX_RETRIES = 3
+_DB_RETRY_BACKOFF_BASE = 0.5
 _T = TypeVar("_T")
 
 
 def _connect() -> pymysql.connections.Connection:
-    return pymysql.connect(
+    conn = pymysql.connect(
         host=MYSQL_HOST,
         port=MYSQL_PORT,
         user=MYSQL_USER,
@@ -25,10 +26,16 @@ def _connect() -> pymysql.connections.Connection:
         database=MYSQL_DB,
         cursorclass=pymysql.cursors.DictCursor,
         autocommit=True,
-        connect_timeout=5,
-        read_timeout=30,
-        write_timeout=30,
+        connect_timeout=10,
+        read_timeout=60,
+        write_timeout=60,
     )
+    try:
+        conn.ping(reconnect=False)
+    except Exception:
+        conn.close()
+        raise
+    return conn
 
 
 def _is_retryable_operational_error(exc: OperationalError) -> bool:
@@ -42,15 +49,45 @@ def _is_retryable_operational_error(exc: OperationalError) -> bool:
 def _run_db_op(fn: Callable[[pymysql.connections.Connection], _T]) -> _T:
     last_exc: Optional[Exception] = None
     for attempt in range(_DB_MAX_RETRIES + 1):
+        conn = None
         try:
-            with _connect() as conn:
-                return fn(conn)
+            conn = _connect()
+            # Verify connection is alive before using it
+            try:
+                conn.ping(reconnect=True)
+            except Exception as e:
+                logger.warning(f"Connection ping failed: {e}")
+                raise OperationalError(2006, "Connection not alive")
+            
+            result = fn(conn)
+            conn.close()
+            return result
         except OperationalError as exc:
+            if conn:
+                try:
+                    conn.close()
+                except Exception:
+                    pass
             last_exc = exc
             if not _is_retryable_operational_error(exc) or attempt >= _DB_MAX_RETRIES:
                 raise
-            logger.warning("Retrying MySQL operation after OperationalError: %s", exc)
-            time.sleep(0.2)
+            # Exponential backoff: 0.5s, 1s, 2s
+            wait_time = _DB_RETRY_BACKOFF_BASE * (2 ** attempt)
+            logger.warning(
+                "Retrying MySQL operation after OperationalError (attempt %d/%d, waiting %.1fs): %s",
+                attempt + 1,
+                _DB_MAX_RETRIES + 1,
+                wait_time,
+                exc,
+            )
+            time.sleep(wait_time)
+        except Exception:
+            if conn:
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+            raise
     if last_exc:
         raise last_exc
     raise RuntimeError("database_operation_failed")
@@ -328,6 +365,13 @@ def update_record_images(record_id: str, image_paths: List[str]) -> None:
 
 
 def save_report(record_id: str, report: Dict[str, Any]) -> None:
+    report_json = json.dumps(report, ensure_ascii=False, default=str)
+    report_size_mb = len(report_json.encode('utf-8')) / (1024 * 1024)
+    logger.info(f"Saving report for {record_id}, size: {report_size_mb:.2f} MB")
+    
+    if report_size_mb > 60:
+        logger.warning(f"Report size ({report_size_mb:.2f} MB) is very large for {record_id}")
+    
     def _op(conn: pymysql.connections.Connection) -> None:
         with conn.cursor() as cursor:
             cursor.execute(
@@ -338,7 +382,7 @@ def save_report(record_id: str, report: Dict[str, Any]) -> None:
                 report_json=VALUES(report_json),
                 created_at=VALUES(created_at)
             """,
-            (record_id, json.dumps(report, ensure_ascii=False, default=str), _now()),
+            (record_id, report_json, _now()),
             )
     _run_db_op(_op)
 
