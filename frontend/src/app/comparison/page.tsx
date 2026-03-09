@@ -46,6 +46,7 @@ export default function ComparisonPage() {
   const [autoCompared, setAutoCompared] = useState(false);
   const [autoLoadComplete, setAutoLoadComplete] = useState(false);
   const [recordIdFromUrl, setRecordIdFromUrl] = useState<string | null>(null);
+  const [loadingEmrRecords, setLoadingEmrRecords] = useState(false);
 
   useEffect(() => {
     // 获取 URL 参数中的 record_id
@@ -142,6 +143,7 @@ export default function ComparisonPage() {
     console.log("=== Fetching EMR records ===");
     console.log("Patient ID:", patientId);
     
+    setLoadingEmrRecords(true);
     try {
       const url = `${API_BASE}/emr?patient_id=${encodeURIComponent(patientId)}&include_archived=true`;
       console.log("Fetching from URL:", url);
@@ -200,6 +202,8 @@ export default function ComparisonPage() {
     } catch (error) {
       console.error("Failed to fetch EMR records:", error);
       setEmrRecords([]);
+    } finally {
+      setLoadingEmrRecords(false);
     }
   }
 
@@ -673,22 +677,35 @@ export default function ComparisonPage() {
                       return `${genderText} · ${patient.age}岁 · 患者ID: ${patient.patient_id}`;
                     })()}
                   </p>
-                  {emrRecords.length > 0 && (
+                  {loadingEmrRecords && (
+                    <p className="mt-1 text-xs text-blue-600">
+                      🔄 正在查询诊断报告...
+                    </p>
+                  )}
+                  {!loadingEmrRecords && emrRecords.length > 0 && (
                     <p className="mt-1 text-xs text-blue-600">
                       ✓ 已找到 {emrRecords.length} 条诊断报告
                     </p>
                   )}
-                  {emrRecords.length === 0 && selectedPatientId && (
-                    <p className="mt-1 text-xs text-red-600">
-                      ⚠ 未找到诊断报告（正在查询中...）
-                    </p>
+                  {!loadingEmrRecords && emrRecords.length === 0 && selectedPatientId && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <p className="text-xs text-red-600">
+                        ⚠ 该患者暂无诊断报告
+                      </p>
+                      <a
+                        href="/upload"
+                        className="text-xs text-blue-600 hover:text-blue-800 underline font-medium"
+                      >
+                        立即上传数据 →
+                      </a>
+                    </div>
                   )}
                 </div>
                 <div className="flex gap-2">
                   <button
                     className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                     onClick={handleLoadRecentRecords}
-                    disabled={emrRecords.length < 2}
+                    disabled={emrRecords.length < 2 || loadingEmrRecords}
                     title={emrRecords.length < 2 ? '需要至少2条诊断报告' : '一键加载最近两条病例进行对比'}
                   >
                     📋 一键读取最近病例
