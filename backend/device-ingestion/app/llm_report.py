@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import re
+import sys
 from datetime import datetime
 import urllib.error
 import urllib.request
@@ -39,6 +40,17 @@ _SYSTEM_PROMPT = (
     "你是医疗热成像评估助手。你只能基于提供的资料回答。"
     "必须在结论中使用编号引用（如[1]），不得编造，不确定就明确说明无法确认。"
 )
+
+
+def _import_top_level_rag_modules():
+    project_root = Path(__file__).resolve().parents[3]
+    project_root_str = str(project_root)
+    if project_root_str not in sys.path:
+        sys.path.insert(0, project_root_str)
+    from rag.embeddings import build_embeddings
+    from rag.kb_loader import load_kb
+
+    return load_kb, build_embeddings
 
 # Airport-inquiry uses a rule-first extraction strategy before LLM/tool routing.
 # Reuse that idea here to stabilize KB retrieval against noisy free text.
@@ -230,7 +242,7 @@ def _load_vector_kb() -> Optional[Any]:
         return None
 
     try:
-        from .rag_kb_loader import load_kb
+        load_kb, _ = _import_top_level_rag_modules()
 
         _VECTOR_KB_CACHE = load_kb(RAG_VECTOR_KB_PATH)
         return _VECTOR_KB_CACHE
@@ -248,7 +260,7 @@ def _load_vector_embeddings() -> Optional[Any]:
         return None
 
     try:
-        from .rag_embeddings import build_embeddings
+        _, build_embeddings = _import_top_level_rag_modules()
 
         base_url = OLLAMA_BASE_URL if RAG_EMBED_PROVIDER == "ollama" else RAG_OPENAI_BASE_URL
         _VECTOR_EMBEDDINGS = build_embeddings(
@@ -290,22 +302,35 @@ def _retrieve_context_vector(query: str, top_k: int = RAG_TOP_K) -> Optional[Dic
     selected: List[Dict[str, Any]] = []
     citations: List[Dict[str, Any]] = []
     context_lines: List[str] = []
+
+    def _row_field(row: Any, name: str) -> Any:
+        if isinstance(row, dict):
+            return row.get(name)
+        if hasattr(row, name):
+            return getattr(row, name)
+        return None
+
     rank = 0
     for idx, score in zip(indices_list, scores_list):
         if idx < 0:
             continue
         row = kb.chunks.get(int(idx))
-        if not isinstance(row, dict):
+        if row is None:
             continue
         rank += 1
-        excerpt = str(row.get("excerpt_markdown") or row.get("text_for_embedding") or "").strip()
+        excerpt = str(_row_field(row, "excerpt_markdown") or _row_field(row, "text_for_embedding") or "").strip()
         if not excerpt:
             continue
+        title_path = _row_field(row, "title_path")
+        if isinstance(title_path, list):
+            title_value = " > ".join(title_path)
+        else:
+            title_value = str(title_path or "")
         item = {
-            "id": str(row.get("chunk_id") or f"VEC-{idx}"),
-            "title": " > ".join(row.get("title_path") or []) if isinstance(row.get("title_path"), list) else str(row.get("title_path") or ""),
+            "id": str(_row_field(row, "chunk_id") or f"VEC-{idx}"),
+            "title": title_value,
             "content": excerpt,
-            "source": str(row.get("file_path") or ""),
+            "source": str(_row_field(row, "file_path") or ""),
             "tags": [],
         }
         selected.append(item)
