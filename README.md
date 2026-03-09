@@ -44,7 +44,17 @@ Reports are generated under `reports/YYYYMMDD/` with filenames:
 - `make install`
 - `make run`
 - `make report`
+- `make kb-build`
+- `make kb-build-markdown`
+- `make kb-rebuild`
+- `make kb-clean`
 - `make clean`
+
+## RAG Knowledge Base
+- Source documents default directory: [rag/dataset](rag/dataset)
+- KB build output default directory: [rag/kb](rag/kb)
+- Active runtime index path: [rag/kb/current](rag/kb/current)
+- Versioned build artifacts are stored in [rag/kb/versions](rag/kb/versions)
 
 ## Documentation
 - **[AI报告生成代码分析](docs/ai-analysis/)** - 完整的AI报告生成系统代码分析（6份详细文档）

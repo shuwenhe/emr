@@ -45,7 +45,7 @@ class Settings:
     @classmethod
     def from_env(cls) -> "Settings":
         return cls(
-            kb_path=os.getenv("KB_PATH", "./data/kb/current"),
+            kb_path=os.getenv("KB_PATH", "./rag/kb/current"),
             provider=os.getenv("PROVIDER", "ollama"),
             llm_model=os.getenv("LLM_MODEL", "qwen-7b"),
             embed_model=os.getenv("EMBED_MODEL", "bge-m3:latest"),

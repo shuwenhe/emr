@@ -6,6 +6,22 @@ from typing import Optional
 from .config import clamp_provider
 
 
+def _sanitize_proxy_env_for_ollama() -> None:
+    proxy_keys = [
+        "ALL_PROXY",
+        "all_proxy",
+        "HTTP_PROXY",
+        "http_proxy",
+        "HTTPS_PROXY",
+        "https_proxy",
+    ]
+    for key in proxy_keys:
+        value = os.getenv(key)
+        if not value:
+            continue
+        os.environ.pop(key, None)
+
+
 def build_embeddings(
     provider: str,
     embed_model: str,
@@ -14,6 +30,7 @@ def build_embeddings(
 ):
     provider = clamp_provider(provider)
     if provider == "ollama":
+        _sanitize_proxy_env_for_ollama()
         from langchain_ollama import OllamaEmbeddings
 
         resolved_base_url = base_url or os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
@@ -33,6 +50,7 @@ def build_chat_model(
 ):
     provider = clamp_provider(provider)
     if provider == "ollama":
+        _sanitize_proxy_env_for_ollama()
         from langchain_ollama import ChatOllama
 
         resolved_base_url = base_url or os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")

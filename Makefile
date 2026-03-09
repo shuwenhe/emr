@@ -5,7 +5,7 @@ VENV_PY := $(VENV_DIR)/bin/python
 KB_PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),$(PYTHON))
 
 KB_SOURCE_DIR ?= $(CURDIR)/rag/dataset
-KB_OUT_DIR ?= $(CURDIR)/backend/config/kb
+KB_OUT_DIR ?= $(CURDIR)/rag/kb
 KB_PROVIDER ?= ollama
 KB_EMBED_MODEL ?= bge-m3:latest
 KB_BASE_URL ?=

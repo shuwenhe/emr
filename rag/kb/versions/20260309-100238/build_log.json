@@ -1,0 +1,22 @@
+{
+  "kb_version": "20260309-100238",
+  "source_dir": "/home/shuwen/hospital-report/rag/dataset",
+  "included_files": [
+    "/home/shuwen/hospital-report/rag/dataset/hospital.docx"
+  ],
+  "skipped_files": [],
+  "failed_files": [],
+  "degraded_files": [],
+  "embedding_failed_chunks": [
+    {
+      "chunk_id": "95c2fbc3d3a4916469b70c9795172d245e265c0b",
+      "file_path": "hospital.docx",
+      "reason": "Embedding failed after retries: failed to encode response: json: unsupported value: NaN (status code: 500)"
+    },
+    {
+      "chunk_id": "58f66950857347cad657bc2cf91a90d7864e2e13",
+      "file_path": "hospital.docx",
+      "reason": "Embedding failed after retries: failed to encode response: json: unsupported value: NaN (status code: 500)"
+    }
+  ]
+}
