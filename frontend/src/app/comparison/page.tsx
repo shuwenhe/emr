@@ -345,6 +345,35 @@ export default function ComparisonPage() {
     }
   }
 
+  // 一键加载最近病例并自动对比
+  async function handleLoadRecentRecords() {
+    if (!selectedPatientId || emrRecords.length < 2) {
+      return;
+    }
+
+    // 获取最近的两条记录（已按时间倒序排列）
+    const recentRecords = emrRecords.slice(0, 2);
+    const [latest, previous] = recentRecords;
+
+    try {
+      // 加载两条记录的详细信息
+      const [latestDetail, previousDetail] = await Promise.all([
+        fetchEmrDetail(latest.emr_id),
+        fetchEmrDetail(previous.emr_id)
+      ]);
+
+      // 设置治疗前后记录（previous是较早的，latest是较新的）
+      setBeforeEmr(previousDetail);
+      setAfterEmr(latestDetail);
+      
+      // 自动计算对比
+      calculateComparison(previousDetail, latestDetail);
+      setAutoCompared(true);
+    } catch (error) {
+      console.error("加载最近病例失败:", error);
+    }
+  }
+
   function calculateComparison(before: EmrRecord | null, after: EmrRecord | null) {
     console.log("Calculating comparison...");
     console.log("Before metrics:", before?.temperature_metrics);
@@ -620,9 +649,6 @@ export default function ComparisonPage() {
                   <div>• 性别: {lastContext.gender ? formatGender(lastContext.gender) : '无'}</div>
                   <div>• 年龄: {lastContext.age || '无'}</div>
                 </div>
-              )}
-              {!lastContext && (
-                <div className="mt-1 text-yellow-600">• 未检测到上下文信息</div>
               )}
             </div>
           )}
