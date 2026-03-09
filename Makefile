@@ -38,7 +38,7 @@ install:
 
 
 run-backend: install
-	$(VENV_PY) -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --app-dir $(SERVICE_DIR)
+	exec $(VENV_PY) -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --app-dir $(SERVICE_DIR)
 
 run-frontend:
 	@bash -c 'cd "$(CURDIR)/frontend"; if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" && nvm use 20; fi; npm run dev'
