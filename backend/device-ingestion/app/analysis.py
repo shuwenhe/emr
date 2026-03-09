@@ -477,6 +477,61 @@ def _compare_temp(value: Optional[float], baseline: Optional[float], delta: floa
     return "normal"
 
 
+_GRID_REGION_MAP_DEFAULT = {
+    "r1_c1": "左上（左肩颈）",
+    "r1_c2": "上中（颈胸）",
+    "r1_c3": "右上（右肩颈）",
+    "r2_c1": "左中（左胸腹）",
+    "r2_c2": "中部（胸腹中线）",
+    "r2_c3": "右中（右胸腹）",
+    "r3_c1": "左下（左腰髋）",
+    "r3_c2": "下中（下腹/骨盆）",
+    "r3_c3": "右下（右腰髋）",
+}
+
+_GRID_REGION_MAP_FACE = {
+    "r1_c1": "左额颞区",
+    "r1_c2": "额中区",
+    "r1_c3": "右额颞区",
+    "r2_c1": "左眼眶/左颊上区",
+    "r2_c2": "鼻-口周中区",
+    "r2_c3": "右眼眶/右颊上区",
+    "r3_c1": "左颊下颌区",
+    "r3_c2": "颏下区",
+    "r3_c3": "右颊下颌区",
+}
+
+_GRID_REGION_MAP_BACK = {
+    "r1_c1": "左上背（肩胛上区）",
+    "r1_c2": "上背中线区",
+    "r1_c3": "右上背（肩胛上区）",
+    "r2_c1": "左中背（肩胛内侧）",
+    "r2_c2": "中背脊柱旁区",
+    "r2_c3": "右中背（肩胛内侧）",
+    "r3_c1": "左下背（腰背）",
+    "r3_c2": "下背中线（腰骶）",
+    "r3_c3": "右下背（腰背）",
+}
+
+
+def _region_to_body_part_cn(region_code: str, body_part: Optional[str]) -> str:
+    code = str(region_code or "").strip().lower()
+    body = str(body_part or "").strip().lower()
+    if not code:
+        return ""
+
+    face_keys = ("面", "脸", "颜面", "头面", "face")
+    back_keys = ("背", "腰背", "肩背", "背部", "back")
+    if any(key in body for key in face_keys):
+        region_map = _GRID_REGION_MAP_FACE
+    elif any(key in body for key in back_keys):
+        region_map = _GRID_REGION_MAP_BACK
+    else:
+        region_map = _GRID_REGION_MAP_DEFAULT
+
+    return region_map.get(code, code)
+
+
 def _region_analysis(grid: np.ndarray, baseline: Optional[float]) -> List[Dict[str, Any]]:
     if grid.size == 0 or np.all(np.isnan(grid)):
         return []
@@ -642,6 +697,8 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
     avg_temp = metrics["avg_c"]
     risk_level = _risk_level(avg_temp)
     body_avg_temp_c = avg_temp
+    patient = metadata.get("patient") or {}
+    body_part = patient.get("body_part") or "unknown"
 
     marked_image_path = None
     temperature_labels = {"text": None, "values": []}
@@ -655,6 +712,7 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
             abnormal_regions = [
                 {
                     "region": item["region"],
+                    "region_cn": _region_to_body_part_cn(item["region"], body_part),
                     "status": item["status"],
                     "avg_c": item["avg_c"],
                     "delta_c": round(item["avg_c"] - body_avg_temp_c, 2)
@@ -678,9 +736,7 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
 
     capture_time = (metadata.get("capture") or {}).get("capture_time") or datetime.now().isoformat()
     device = metadata.get("device") or {}
-    patient = metadata.get("patient") or {}
     clinical = metadata.get("clinical") or {}
-    body_part = patient.get("body_part") or "unknown"
     patient_id = patient.get("patient_id")
 
     summary = "温度指标不可用"

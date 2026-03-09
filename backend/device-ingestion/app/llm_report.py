@@ -202,7 +202,17 @@ def _build_retrieval_query(report: Dict[str, Any], emr: Dict[str, Any]) -> str:
 
     region_names = []
     if isinstance(abnormal_regions, list):
-        region_names = [str(item.get("region") or "") for item in abnormal_regions if isinstance(item, dict)]
+        for item in abnormal_regions:
+            if not isinstance(item, dict):
+                continue
+            region = str(item.get("region") or "").strip()
+            region_cn = str(item.get("region_cn") or "").strip()
+            if region_cn and region:
+                region_names.append(f"{region_cn}({region})")
+            elif region_cn:
+                region_names.append(region_cn)
+            elif region:
+                region_names.append(region)
 
     query_parts = [
         f"部位:{patient.get('body_part')}",

@@ -45,6 +45,42 @@ _FACIAL_LABEL_OFFSETS = {
     "左脸颊": (-11.0, 1.5),
 }
 
+_GRID_REGION_MAP_DEFAULT = {
+    "r1_c1": "左上（左肩颈）",
+    "r1_c2": "上中（颈胸）",
+    "r1_c3": "右上（右肩颈）",
+    "r2_c1": "左中（左胸腹）",
+    "r2_c2": "中部（胸腹中线）",
+    "r2_c3": "右中（右胸腹）",
+    "r3_c1": "左下（左腰髋）",
+    "r3_c2": "下中（下腹/骨盆）",
+    "r3_c3": "右下（右腰髋）",
+}
+
+_GRID_REGION_MAP_FACE = {
+    "r1_c1": "左额颞区",
+    "r1_c2": "额中区",
+    "r1_c3": "右额颞区",
+    "r2_c1": "左眼眶/左颊上区",
+    "r2_c2": "鼻-口周中区",
+    "r2_c3": "右眼眶/右颊上区",
+    "r3_c1": "左颊下颌区",
+    "r3_c2": "颏下区",
+    "r3_c3": "右颊下颌区",
+}
+
+_GRID_REGION_MAP_BACK = {
+    "r1_c1": "左上背（肩胛上区）",
+    "r1_c2": "上背中线区",
+    "r1_c3": "右上背（肩胛上区）",
+    "r2_c1": "左中背（肩胛内侧）",
+    "r2_c2": "中背脊柱旁区",
+    "r2_c3": "右中背（肩胛内侧）",
+    "r3_c1": "左下背（腰背）",
+    "r3_c2": "下背中线（腰骶）",
+    "r3_c3": "右下背（腰背）",
+}
+
 
 def _safe_name(value: str) -> str:
     return "".join(ch for ch in value if ch.isalnum() or ch in ("_", "-", "·"))
@@ -70,6 +106,23 @@ def _fmt_temp(value: Any) -> str:
         return f"{float(value):.2f}"
     except Exception:
         return "-"
+
+
+def _region_to_body_part_cn(region_code: str, body_part: Optional[str]) -> str:
+    code = str(region_code or "").strip().lower()
+    body = str(body_part or "").strip().lower()
+    if not code:
+        return ""
+
+    face_keys = ("面", "脸", "颜面", "头面", "face")
+    back_keys = ("背", "腰背", "肩背", "背部", "back")
+    if any(key in body for key in face_keys):
+        region_map = _GRID_REGION_MAP_FACE
+    elif any(key in body for key in back_keys):
+        region_map = _GRID_REGION_MAP_BACK
+    else:
+        region_map = _GRID_REGION_MAP_DEFAULT
+    return region_map.get(code, code)
 
 
 def _resolve_image_file(image_path: str) -> Optional[Path]:
@@ -311,13 +364,15 @@ def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     regional = (analysis.get("regional_comparison") or {}) if isinstance(analysis, dict) else {}
     abnormal_regions = regional.get("abnormal_regions") if isinstance(regional, dict) else None
     if isinstance(abnormal_regions, list) and abnormal_regions:
+        body_part = (report.get("patient") or emr.get("patient") or {}).get("body_part")
         for item in abnormal_regions:
-            region = item.get("region", "-")
+            region = str(item.get("region", "-") or "-")
+            region_cn = str(item.get("region_cn") or "").strip() or _region_to_body_part_cn(region, body_part)
             status = str(item.get("status", "-")).upper()
             avg_c = _fmt_temp(item.get("avg_c"))
             delta_c = _fmt_temp(item.get("delta_c"))
             doc.add_paragraph(
-                f"{region}: 状态 {status}，均温 {avg_c}°C，Δ {delta_c}°C",
+                f"{region_cn}（{region}）: 状态 {status}，均温 {avg_c}°C，Δ {delta_c}°C",
                 style="List Bullet",
             )
     else:
