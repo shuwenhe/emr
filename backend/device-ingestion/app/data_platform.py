@@ -495,6 +495,12 @@ def list_emrs(
     include_archived: bool = False,
     record_id: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
+    """
+    ✅ 优化：两步查询避免排序缓冲区溢出
+    步骤1：只查询小字段用于排序（emr_id, created_at, archived）
+    步骤2：根据ID批量获取完整数据
+    这样 ORDER BY 只处理小数据，不会导致 MySQL sort buffer 溢出
+    """
     results: List[Dict[str, Any]] = []
     where: List[str] = []
     params: List[Any] = []
@@ -502,6 +508,32 @@ def list_emrs(
     if record_id:
         where.append("record_id = %s")
         params.append(record_id)
+        # For single record query, use direct approach
+        with _connect() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT emr_id, record_id, patient_id, created_at, archived, emr_json "
+                    f"FROM emrs WHERE record_id = %s LIMIT 1",
+                    (record_id,),
+                )
+                row = cursor.fetchone()
+        
+        if not row:
+            return []
+        
+        if row.get("emr_json"):
+            try:
+                emr_data = json.loads(row["emr_json"])
+                if isinstance(emr_data, str):
+                    emr_data = _decompress_data(emr_data)
+                    emr_data = json.loads(emr_data)
+                return [emr_data]
+            except (json.JSONDecodeError, TypeError):
+                return [dict(row)]
+        else:
+            return [dict(row)]
+    
+    # 多记录查询：两步避免排序缓冲溢出
     if patient_id:
         where.append("patient_id = %s")
         params.append(patient_id)
@@ -509,51 +541,53 @@ def list_emrs(
         where.append("archived = 0")
 
     where_clause = f" WHERE {' AND '.join(where)}" if where else ""
-
+    
+    # ✅ 步骤1：只查询必要的小字段用于排序和获取ID
+    # 不包含大的emr_json字段，避免排序缓冲区溢出
+    id_params = list(params)
+    id_params.append(limit)
+    
     with _connect() as conn:
         with conn.cursor() as cursor:
-            if record_id:
-                cursor.execute(
-                    "SELECT emr_id, record_id, patient_id, created_at, archived, emr_json "
-                    f"FROM emrs{where_clause} LIMIT 1",
-                    params,
-                )
-                rows = cursor.fetchall()
-            else:
-                id_params = list(params)
-                id_params.append(limit)
-                cursor.execute(
-                    "SELECT emr_id FROM emrs"
-                    f"{where_clause} "
-                    "ORDER BY created_at DESC LIMIT %s",
-                    id_params,
-                )
-                emr_ids = [row["emr_id"] for row in cursor.fetchall() if row.get("emr_id")]
-                if not emr_ids:
-                    return []
-
-                placeholders = ", ".join(["%s"] * len(emr_ids))
-                cursor.execute(
-                    "SELECT emr_id, record_id, patient_id, created_at, archived, emr_json "
-                    f"FROM emrs WHERE emr_id IN ({placeholders})",
-                    emr_ids,
-                )
-                rows = cursor.fetchall()
-                row_map = {row["emr_id"]: row for row in rows if row.get("emr_id")}
-                rows = [row_map[emr_id] for emr_id in emr_ids if emr_id in row_map]
+            cursor.execute(
+                "SELECT emr_id, created_at "
+                f"FROM emrs{where_clause} "
+                "ORDER BY created_at DESC LIMIT %s",
+                id_params,
+            )
+            id_rows = cursor.fetchall()
     
-    for row in rows:
-        # 返回完整的 emr_json 数据，如果有的话；否则返回表字段
+    if not id_rows:
+        return []
+    
+    emr_ids = [row["emr_id"] for row in id_rows]
+    
+    # ✅ 步骤2：根据ID列表批量获取完整数据
+    # 由于已经排过序，直接按ID顺序获取即可
+    placeholders = ", ".join(["%s"] * len(emr_ids))
+    
+    with _connect() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT emr_id, record_id, patient_id, created_at, archived, emr_json "
+                f"FROM emrs WHERE emr_id IN ({placeholders})",
+                emr_ids,
+            )
+            data_rows = cursor.fetchall()
+    
+    # 按原始排序顺序返回
+    row_map = {row["emr_id"]: row for row in data_rows}
+    ordered_rows = [row_map[emr_id] for emr_id in emr_ids if emr_id in row_map]
+    
+    for row in ordered_rows:
         if row.get("emr_json"):
             try:
                 emr_data = json.loads(row["emr_json"])
-                # If it's a string (compressed), decompress it then parse
                 if isinstance(emr_data, str):
                     emr_data = _decompress_data(emr_data)
                     emr_data = json.loads(emr_data)
                 results.append(emr_data)
             except (json.JSONDecodeError, TypeError):
-                # 如果JSON解析失败，返回基本信息
                 results.append(dict(row))
         else:
             results.append(dict(row))

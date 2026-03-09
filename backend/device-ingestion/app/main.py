@@ -241,7 +241,16 @@ def list_emr_endpoint(
     patient_id: str | None = None,
     record_id: str | None = None,
     include_archived: bool = False,
+    limit: int = 100,
 ):
+    """
+    查询EMR列表，支持按患者或记录ID过滤
+    - 优化：两步查询，先排序ID再批量获取数据，避免MySQL排序缓冲溢出
+    - limit：默认100条，最大1000条，防止内存溢出
+    """
+    # 限制最大查询数量
+    limit = min(limit, 1000)
+    
     if record_id:
         return list_platform_emrs(
             record_id=record_id,
@@ -250,53 +259,11 @@ def list_emr_endpoint(
             include_archived=include_archived,
         )
 
-    # 优先使用数据库查询（更可靠且完整）
-    emrs = list_platform_emrs(patient_id=patient_id, limit=1000, include_archived=include_archived)
-    
-    # 如果从数据库未找到，回退到文件系统查询
-    if patient_id and not emrs:
-        fs_emrs = list_emrs(patient_id=patient_id, include_archived=include_archived)
-        if fs_emrs:
-            return fs_emrs
-        # 如果文件系统也未找到，尝试按患者名字匹配
-        patient = get_patient(patient_id)
-        patient_name = patient.get("name") if patient else None
-        if patient_name:
-            fallback = list_emrs(patient_id=None, include_archived=include_archived)
-            emrs = [
-                item
-                for item in fallback
-                if (item.get("patient") or {}).get("name") == patient_name
-            ]
-        return emrs
-
-    # 如果数据库有结果，同时尝试合并文件系统中的EMR，避免遗漏
-    if patient_id:
-        try:
-            fs_emrs = list_emrs(patient_id=patient_id, include_archived=include_archived)
-        except Exception:
-            fs_emrs = []
-
-        merged = {str(item.get("emr_id")): item for item in emrs if item.get("emr_id")}
-        for item in fs_emrs:
-            key = str(item.get("emr_id")) if item.get("emr_id") else None
-            if key and key not in merged:
-                merged[key] = item
-
-        # 额外按姓名合并，补齐 patient_id 为空的 EMR
-        patient = get_patient(patient_id)
-        patient_name = patient.get("name") if patient else None
-        if patient_name:
-            fallback = list_emrs(patient_id=None, include_archived=include_archived)
-            for item in fallback:
-                if (item.get("patient") or {}).get("name") != patient_name:
-                    continue
-                key = str(item.get("emr_id")) if item.get("emr_id") else None
-                if key and key not in merged:
-                    merged[key] = item
-
-        emrs = list(merged.values()) if merged else emrs
-    return emrs
+    return list_platform_emrs(
+        patient_id=patient_id, 
+        limit=limit, 
+        include_archived=include_archived
+    )
 
 
 @app.put("/emr/{emr_id}")
