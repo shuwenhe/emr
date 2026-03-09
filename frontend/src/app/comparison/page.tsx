@@ -684,20 +684,30 @@ export default function ComparisonPage() {
                     </p>
                   )}
                 </div>
-                <button
-                  className="text-xs text-blue-600 hover:text-blue-800 underline"
-                  onClick={() => {
-                    setSelectedPatientId("");
-                    setEmrRecords([]);
-                    setBeforeEmr(null);
-                    setAfterEmr(null);
-                    setComparison(null);
-                    setAutoCompared(false);
-                    setAutoLoadComplete(false);
-                  }}
-                >
-                  切换患者
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                    onClick={handleLoadRecentRecords}
+                    disabled={emrRecords.length < 2}
+                    title={emrRecords.length < 2 ? '需要至少2条诊断报告' : '一键加载最近两条病例进行对比'}
+                  >
+                    📋 一键读取最近病例
+                  </button>
+                  <button
+                    className="text-xs text-blue-600 hover:text-blue-800 underline"
+                    onClick={() => {
+                      setSelectedPatientId("");
+                      setEmrRecords([]);
+                      setBeforeEmr(null);
+                      setAfterEmr(null);
+                      setComparison(null);
+                      setAutoCompared(false);
+                      setAutoLoadComplete(false);
+                    }}
+                  >
+                    切换患者
+                  </button>
+                </div>
               </div>
             </div>
           )}

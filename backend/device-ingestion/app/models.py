@@ -89,6 +89,7 @@ class DeviceIngestRequest(BaseModel):
 
 class EmrGenerateRequest(BaseModel):
     record_id: str = Field(..., description="采集记录 ID")
+    force: bool = Field(False, description="是否强制重新生成（默认false，已存在则直接返回）")
 
 
 class HistoryImportRequest(BaseModel):

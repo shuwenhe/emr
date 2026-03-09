@@ -69,8 +69,9 @@ logger = logging.getLogger(__name__)
 def _generate_report_after_ingest(record_id: str) -> None:
     try:
         logger.info("Starting background report generation for record %s", record_id)
-        result = generate_emr(record_id)
-        logger.info("Report generation completed for record %s, emr_id=%s", record_id, result.get("emr_id"))
+        result = generate_emr(record_id, force=False)  # 不强制重新生成，如果已存在则跳过
+        if result:
+            logger.info("Report generation completed for record %s, emr_id=%s", record_id, result.get("emr_id"))
     except Exception as exc:
         logger.exception("Report generation failed for record %s: %s", record_id, exc)
 
@@ -221,7 +222,7 @@ def dispatch(request: DispatchRequest):
 @app.post("/emr/generate")
 def generate_emr_endpoint(request: EmrGenerateRequest):
     try:
-        return generate_emr(request.record_id)
+        return generate_emr(request.record_id, force=request.force)
     except FileNotFoundError as exc:
         detail = exc.args[0] if exc.args else "record_not_found"
         raise HTTPException(status_code=404, detail=detail) from exc

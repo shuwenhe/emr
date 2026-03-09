@@ -41,11 +41,18 @@ def _report_path(record_id: str) -> Path:
     return _record_dir(record_id) / "report.json"
 
 
-def generate_emr(record_id: str) -> Dict[str, Any]:
+def generate_emr(record_id: str, force: bool = False) -> Dict[str, Any]:
     from .analysis import analyze_record
     record_dir = _record_dir(record_id)
     if not record_dir.exists():
         raise FileNotFoundError("record_not_found")
+
+    # 幂等性检查：如果EMR已存在且未强制重新生成，则直接返回
+    if not force:
+        existing = get_emr_by_record_id(record_id)
+        if existing:
+            logging.info("EMR already exists for record %s (emr_id=%s), returning existing", record_id, existing.get("emr_id"))
+            return existing
 
     analyze_result = analyze_record(record_id)
     report = analyze_result.get("report") or {}
