@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 
 type Patient = {
@@ -32,6 +32,14 @@ type LastEmrContext = {
   age?: number;
 };
 
+type ComparisonResult = {
+  avgDelta: number;
+  maxDelta: number;
+  bodyAvgDelta: number;
+  riskImprovement: string;
+  effectiveness: string;
+};
+
 const API_BASE = "http://localhost:8000";
 
 export default function ComparisonPage() {
@@ -41,18 +49,16 @@ export default function ComparisonPage() {
   const [emrRecords, setEmrRecords] = useState<EmrRecord[]>([]);
   const [beforeEmr, setBeforeEmr] = useState<EmrRecord | null>(null);
   const [afterEmr, setAfterEmr] = useState<EmrRecord | null>(null);
-  const [comparison, setComparison] = useState<any>(null);
+  const [comparison, setComparison] = useState<ComparisonResult | null>(null);
   const [lastContext, setLastContext] = useState<LastEmrContext | null>(null);
   const [autoCompared, setAutoCompared] = useState(false);
   const [autoLoadComplete, setAutoLoadComplete] = useState(false);
-  const [recordIdFromUrl, setRecordIdFromUrl] = useState<string | null>(null);
   const [loadingEmrRecords, setLoadingEmrRecords] = useState(false);
 
   useEffect(() => {
     // 获取 URL 参数中的 record_id
     const recordIdParam = searchParams.get("record_id");
     if (recordIdParam) {
-      setRecordIdFromUrl(recordIdParam);
       console.log("Found record_id in URL:", recordIdParam);
     }
   }, [searchParams]);
@@ -139,7 +145,7 @@ export default function ComparisonPage() {
     }
   }
 
-  async function fetchEmrRecords(patientId: string) {
+  const fetchEmrRecords = useCallback(async (patientId: string) => {
     console.log("=== Fetching EMR records ===");
     console.log("Patient ID:", patientId);
     
@@ -164,8 +170,8 @@ export default function ComparisonPage() {
       
       if (records.length > 0) {
         console.log("Sample EMR record:", records[0]);
-        console.log("All EMR IDs:", records.map((r: any) => r.emr_id));
-        console.log("All creation dates:", records.map((r: any) => r.created_at));
+        console.log("All EMR IDs:", records.map((r: EmrRecord) => r.emr_id));
+        console.log("All creation dates:", records.map((r: EmrRecord) => r.created_at));
       }
       
       const sortedRecords = records.sort((a, b) => 
@@ -205,7 +211,7 @@ export default function ComparisonPage() {
     } finally {
       setLoadingEmrRecords(false);
     }
-  }
+  }, [calculateComparison]);
 
   async function fetchEmrDetail(emrId: string): Promise<EmrRecord | null> {
     try {
@@ -326,7 +332,7 @@ export default function ComparisonPage() {
         age: p.age
       })));
     }
-  }, [patients, lastContext, autoLoadComplete]);
+  }, [patients, lastContext, autoLoadComplete, fetchEmrRecords, selectedPatientId]);
 
   async function handleBeforeChange(emrId: string) {
     if (emrId) {
@@ -446,24 +452,6 @@ export default function ComparisonPage() {
     return `${API_BASE}/data/${normalized}`;
   }
 
-  function buildComparisonPayload() {
-    const patient = patients.find((item) => item.patient_id === selectedPatientId);
-    return {
-      patient: patient
-        ? {
-            patient_id: patient.patient_id,
-            name: patient.name,
-            gender: patient.gender,
-            age: patient.age,
-          }
-        : null,
-      before: beforeEmr,
-      after: afterEmr,
-      comparison,
-      generated_at: new Date().toISOString(),
-    };
-  }
-
   async function handleExportComparison() {
     if (!comparison || !beforeEmr || !afterEmr) return;
     const patient = patients.find((item) => item.patient_id === selectedPatientId);
@@ -472,7 +460,6 @@ export default function ComparisonPage() {
       Document,
       Packer,
       Paragraph,
-      TextRun,
       HeadingLevel,
       Table,
       TableRow,
