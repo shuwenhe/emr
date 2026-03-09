@@ -513,6 +513,8 @@ _GRID_REGION_MAP_BACK = {
     "r3_c3": "右下背（腰背）",
 }
 
+_EXCLUDED_REPORT_REGIONS = {"r1_c1", "r1_c2", "r1_c3", "r2_c1"}
+
 
 def _region_to_body_part_cn(region_code: str, body_part: Optional[str]) -> str:
     code = str(region_code or "").strip().lower()
@@ -543,11 +545,14 @@ def _region_analysis(grid: np.ndarray, baseline: Optional[float]) -> List[Dict[s
 
     for r_idx, r_group in enumerate(row_splits, start=1):
         for c_idx, c_group in enumerate(col_splits, start=1):
+            region_code = f"r{r_idx}_c{c_idx}"
+            if region_code in _EXCLUDED_REPORT_REGIONS:
+                continue
             block = grid[np.ix_(r_group, c_group)]
             avg = float(np.nanmean(block)) if not np.all(np.isnan(block)) else None
             regions.append(
                 {
-                    "region": f"r{r_idx}_c{c_idx}",
+                    "region": region_code,
                     "avg_c": round(avg, 2) if avg is not None else None,
                     "status": _compare_temp(avg, baseline),
                 }

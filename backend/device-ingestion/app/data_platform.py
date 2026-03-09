@@ -1,10 +1,19 @@
 import json
+import logging
+import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, TypeVar
 
 import pymysql
+from pymysql.err import OperationalError
 
 from .config import MYSQL_DB, MYSQL_HOST, MYSQL_PASSWORD, MYSQL_PORT, MYSQL_USER
+
+logger = logging.getLogger(__name__)
+
+_DB_RETRYABLE_ERROR_CODES = {2006, 2013, 2055}
+_DB_MAX_RETRIES = 1
+_T = TypeVar("_T")
 
 
 def _connect() -> pymysql.connections.Connection:
@@ -16,7 +25,35 @@ def _connect() -> pymysql.connections.Connection:
         database=MYSQL_DB,
         cursorclass=pymysql.cursors.DictCursor,
         autocommit=True,
+        connect_timeout=5,
+        read_timeout=30,
+        write_timeout=30,
     )
+
+
+def _is_retryable_operational_error(exc: OperationalError) -> bool:
+    try:
+        code = int(exc.args[0]) if exc.args else None
+    except Exception:
+        code = None
+    return code in _DB_RETRYABLE_ERROR_CODES
+
+
+def _run_db_op(fn: Callable[[pymysql.connections.Connection], _T]) -> _T:
+    last_exc: Optional[Exception] = None
+    for attempt in range(_DB_MAX_RETRIES + 1):
+        try:
+            with _connect() as conn:
+                return fn(conn)
+        except OperationalError as exc:
+            last_exc = exc
+            if not _is_retryable_operational_error(exc) or attempt >= _DB_MAX_RETRIES:
+                raise
+            logger.warning("Retrying MySQL operation after OperationalError: %s", exc)
+            time.sleep(0.2)
+    if last_exc:
+        raise last_exc
+    raise RuntimeError("database_operation_failed")
 
 
 def init_db() -> None:
@@ -117,7 +154,7 @@ def upsert_patient(patient: Dict[str, Any]) -> Optional[str]:
     patient_id = patient.get("patient_id")
     if not patient_id:
         return None
-    with _connect() as conn:
+    def _op(conn: pymysql.connections.Connection) -> None:
         with conn.cursor() as cursor:
             cursor.execute(
             """
@@ -140,6 +177,7 @@ def upsert_patient(patient: Dict[str, Any]) -> Optional[str]:
                 _now(),
             ),
             )
+    _run_db_op(_op)
     return patient_id
 
 
@@ -325,7 +363,7 @@ def save_emr(emr: Dict[str, Any]) -> None:
 
     archived = 1 if emr.get("archived") else 0
 
-    with _connect() as conn:
+    def _op(conn: pymysql.connections.Connection) -> None:
         with conn.cursor() as cursor:
             cursor.execute(
             """
@@ -347,6 +385,7 @@ def save_emr(emr: Dict[str, Any]) -> None:
                 json.dumps(emr, ensure_ascii=False, default=str),
             ),
             )
+    _run_db_op(_op)
 
 
 def list_records(patient_id: Optional[str] = None, limit: int = 50) -> List[Dict[str, Any]]:
@@ -434,15 +473,16 @@ def list_emrs(
 
 
 def get_emr_by_record_id(record_id: str) -> Optional[Dict[str, Any]]:
-    with _connect() as conn:
+    def _op(conn: pymysql.connections.Connection) -> Optional[Dict[str, Any]]:
         with conn.cursor() as cursor:
             cursor.execute(
                 "SELECT emr_json FROM emrs WHERE record_id = %s", (record_id,)
             )
             row = cursor.fetchone()
-    if not row:
-        return None
-    return json.loads(row["emr_json"])
+        if not row:
+            return None
+        return json.loads(row["emr_json"])
+    return _run_db_op(_op)
 
 
 def get_report(record_id: str) -> Optional[Dict[str, Any]]:

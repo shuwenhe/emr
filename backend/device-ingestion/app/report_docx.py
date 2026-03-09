@@ -81,6 +81,8 @@ _GRID_REGION_MAP_BACK = {
     "r3_c3": "右下背（腰背）",
 }
 
+_EXCLUDED_REPORT_REGIONS = {"r1_c1", "r1_c2", "r1_c3", "r2_c1"}
+
 
 def _safe_name(value: str) -> str:
     return "".join(ch for ch in value if ch.isalnum() or ch in ("_", "-", "·"))
@@ -365,8 +367,11 @@ def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     abnormal_regions = regional.get("abnormal_regions") if isinstance(regional, dict) else None
     if isinstance(abnormal_regions, list) and abnormal_regions:
         body_part = (report.get("patient") or emr.get("patient") or {}).get("body_part")
+        rendered = False
         for item in abnormal_regions:
             region = str(item.get("region", "-") or "-")
+            if region in _EXCLUDED_REPORT_REGIONS:
+                continue
             region_cn = str(item.get("region_cn") or "").strip() or _region_to_body_part_cn(region, body_part)
             status = str(item.get("status", "-")).upper()
             avg_c = _fmt_temp(item.get("avg_c"))
@@ -375,6 +380,9 @@ def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
                 f"{region_cn}（{region}）: 状态 {status}，均温 {avg_c}°C，Δ {delta_c}°C",
                 style="List Bullet",
             )
+            rendered = True
+        if not rendered:
+            doc.add_paragraph("未发现明显异常区域")
     else:
         doc.add_paragraph("未发现明显异常区域")
 
