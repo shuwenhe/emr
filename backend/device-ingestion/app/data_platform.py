@@ -455,8 +455,30 @@ def save_plan(record_id: str, plan: Dict[str, Any]) -> None:
 def save_emr(emr: Dict[str, Any]) -> None:
     patient = emr.get("patient") or {}
     patient_id = upsert_patient(patient) if patient else None
+    record_id = emr.get("record_id")
+
+    if not patient_id and record_id:
+        def _resolve_patient_id(conn: pymysql.connections.Connection) -> Optional[str]:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT patient_id FROM records WHERE record_id = %s LIMIT 1",
+                    (record_id,),
+                )
+                row = cursor.fetchone()
+            return row.get("patient_id") if row else None
+
+        patient_id = _run_db_op(_resolve_patient_id)
+        if patient_id:
+            logger.info("Resolved missing EMR patient_id from record %s -> %s", record_id, patient_id)
 
     archived = 1 if emr.get("archived") else 0
+    if not patient_id:
+        archived = 1
+        logger.warning(
+            "EMR %s has no resolvable patient_id (record_id=%s); archiving to avoid orphan active data",
+            emr.get("emr_id"),
+            record_id,
+        )
     
     # Prepare EMR JSON with compression for large data
     emr_json = json.dumps(emr, ensure_ascii=False, default=str)
@@ -487,7 +509,7 @@ def save_emr(emr: Dict[str, Any]) -> None:
             """,
             (
                 emr.get("emr_id"),
-                emr.get("record_id"),
+                record_id,
                 patient_id,
                 emr.get("created_at") or _now(),
                 archived,
