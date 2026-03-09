@@ -1,6 +1,8 @@
 import json
 import logging
 import time
+import zlib
+import base64
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, TypeVar
 
@@ -14,7 +16,24 @@ logger = logging.getLogger(__name__)
 _DB_RETRYABLE_ERROR_CODES = {2006, 2013, 2055}
 _DB_MAX_RETRIES = 3
 _DB_RETRY_BACKOFF_BASE = 0.5
+_COMPRESSION_THRESHOLD_MB = 10  # Compress data larger than 10MB
 _T = TypeVar("_T")
+
+
+def _compress_data(data: str) -> str:
+    """Compress data and return as base64-encoded string with marker prefix."""
+    compressed = zlib.compress(data.encode('utf-8'), level=6)
+    encoded = base64.b64encode(compressed).decode('ascii')
+    return f"ZLIB_COMPRESSED:{encoded}"
+
+
+def _decompress_data(data: str) -> str:
+    """Decompress base64-encoded zlib data if marked, otherwise return as-is."""
+    if isinstance(data, str) and data.startswith("ZLIB_COMPRESSED:"):
+        encoded = data[16:]  # Remove prefix
+        compressed = base64.b64decode(encoded)
+        return zlib.decompress(compressed).decode('utf-8')
+    return data
 
 
 def _connect() -> pymysql.connections.Connection:
@@ -369,8 +388,14 @@ def save_report(record_id: str, report: Dict[str, Any]) -> None:
     report_size_mb = len(report_json.encode('utf-8')) / (1024 * 1024)
     logger.info(f"Saving report for {record_id}, size: {report_size_mb:.2f} MB")
     
-    if report_size_mb > 60:
-        logger.warning(f"Report size ({report_size_mb:.2f} MB) is very large for {record_id}")
+    # Compress if larger than threshold
+    if report_size_mb > _COMPRESSION_THRESHOLD_MB:
+        logger.info(f"Compressing report ({report_size_mb:.2f} MB) for {record_id}")
+        compressed = _compress_data(report_json)
+        # Wrap compressed string as JSON string to satisfy JSON column validation
+        report_json = json.dumps(compressed, ensure_ascii=False)
+        compressed_size_mb = len(report_json.encode('utf-8')) / (1024 * 1024)
+        logger.info(f"Compressed report size: {compressed_size_mb:.2f} MB (ratio: {compressed_size_mb/report_size_mb*100:.1f}%)")
     
     def _op(conn: pymysql.connections.Connection) -> None:
         with conn.cursor() as cursor:
@@ -408,6 +433,20 @@ def save_emr(emr: Dict[str, Any]) -> None:
     patient_id = upsert_patient(patient) if patient else None
 
     archived = 1 if emr.get("archived") else 0
+    
+    # Prepare EMR JSON with compression for large data
+    emr_json = json.dumps(emr, ensure_ascii=False, default=str)
+    emr_size_mb = len(emr_json.encode('utf-8')) / (1024 * 1024)
+    logger.info(f"Saving EMR {emr.get('emr_id')}, size: {emr_size_mb:.2f} MB")
+    
+    # Compress if larger than threshold
+    if emr_size_mb > _COMPRESSION_THRESHOLD_MB:
+        logger.info(f"Compressing EMR ({emr_size_mb:.2f} MB) {emr.get('emr_id')}")
+        compressed = _compress_data(emr_json)
+        # Wrap compressed string as JSON string to satisfy JSON column validation
+        emr_json = json.dumps(compressed, ensure_ascii=False)
+        compressed_size_mb = len(emr_json.encode('utf-8')) / (1024 * 1024)
+        logger.info(f"Compressed EMR size: {compressed_size_mb:.2f} MB (ratio: {compressed_size_mb/emr_size_mb*100:.1f}%)")
 
     def _op(conn: pymysql.connections.Connection) -> None:
         with conn.cursor() as cursor:
@@ -428,7 +467,7 @@ def save_emr(emr: Dict[str, Any]) -> None:
                 patient_id,
                 emr.get("created_at") or _now(),
                 archived,
-                json.dumps(emr, ensure_ascii=False, default=str),
+                emr_json,
             ),
             )
     _run_db_op(_op)
@@ -508,6 +547,10 @@ def list_emrs(
         if row.get("emr_json"):
             try:
                 emr_data = json.loads(row["emr_json"])
+                # If it's a string (compressed), decompress it then parse
+                if isinstance(emr_data, str):
+                    emr_data = _decompress_data(emr_data)
+                    emr_data = json.loads(emr_data)
                 results.append(emr_data)
             except (json.JSONDecodeError, TypeError):
                 # 如果JSON解析失败，返回基本信息
@@ -527,7 +570,16 @@ def get_emr_by_record_id(record_id: str) -> Optional[Dict[str, Any]]:
             row = cursor.fetchone()
         if not row:
             return None
-        return json.loads(row["emr_json"])
+        
+        # Parse JSON (handles both uncompressed objects and compressed strings)
+        result = json.loads(row["emr_json"])
+        
+        # If it's a string (compressed), decompress it then parse
+        if isinstance(result, str):
+            result = _decompress_data(result)
+            result = json.loads(result)
+        
+        return result
     return _run_db_op(_op)
 
 
@@ -540,7 +592,16 @@ def get_report(record_id: str) -> Optional[Dict[str, Any]]:
             row = cursor.fetchone()
     if not row:
         return None
-    return json.loads(row["report_json"])
+    
+    # Parse JSON (handles both uncompressed objects and compressed strings)
+    result = json.loads(row["report_json"])
+    
+    # If it's a string (compressed), decompress it then parse
+    if isinstance(result, str):
+        result = _decompress_data(result)
+        result = json.loads(result)
+    
+    return result
 
 
 def get_patient_history(
@@ -569,13 +630,23 @@ def get_patient_history(
     history: List[Dict[str, Any]] = []
     for row in rows:
         report_json = row.get("report_json")
+        report_data = None
+        if report_json:
+            # Parse JSON (handles both uncompressed objects and compressed strings)
+            parsed = json.loads(report_json)
+            # If it's a string (compressed), decompress it then parse
+            if isinstance(parsed, str):
+                parsed = _decompress_data(parsed)
+                parsed = json.loads(parsed)
+            report_data = parsed
+        
         history.append(
             {
                 "record_id": row.get("record_id"),
                 "created_at": row.get("created_at"),
                 "data_path": row.get("data_path"),
                 "image_paths": json.loads(row.get("image_paths_json") or "[]"),
-                "report": json.loads(report_json) if report_json else None,
+                "report": report_data,
             }
         )
 
