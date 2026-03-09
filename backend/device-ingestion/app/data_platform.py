@@ -328,7 +328,7 @@ def update_record_images(record_id: str, image_paths: List[str]) -> None:
 
 
 def save_report(record_id: str, report: Dict[str, Any]) -> None:
-    with _connect() as conn:
+    def _op(conn: pymysql.connections.Connection) -> None:
         with conn.cursor() as cursor:
             cursor.execute(
             """
@@ -340,10 +340,11 @@ def save_report(record_id: str, report: Dict[str, Any]) -> None:
             """,
             (record_id, json.dumps(report, ensure_ascii=False, default=str), _now()),
             )
+    _run_db_op(_op)
 
 
 def save_plan(record_id: str, plan: Dict[str, Any]) -> None:
-    with _connect() as conn:
+    def _op(conn: pymysql.connections.Connection) -> None:
         with conn.cursor() as cursor:
             cursor.execute(
             """
@@ -355,6 +356,7 @@ def save_plan(record_id: str, plan: Dict[str, Any]) -> None:
             """,
             (record_id, json.dumps(plan, ensure_ascii=False), _now()),
             )
+    _run_db_op(_op)
 
 
 def save_emr(emr: Dict[str, Any]) -> None:
