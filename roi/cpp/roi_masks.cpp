@@ -4,6 +4,19 @@
 #include <algorithm>
 #include <vector>
 #include <numeric>
+#include <cstdio>
+
+inline void emit_cpp_log(const char* event) {
+    std::fprintf(stdout, "※ %s ※\n", event);
+    std::fflush(stdout);
+}
+
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((constructor))
+static void on_lib_loaded() {
+    emit_cpp_log("C++ LIB LOADED: libemr_roi_masks.so");
+}
+#endif
 
 // 辅助：clamp 值到范围
 inline float clamp(float val, float lo, float hi) {
@@ -20,6 +33,7 @@ inline int iclamp(int val, int lo, int hi) {
  */
 int rect_mask(int height, int width, float x1, float y1, float x2, float y2,
               unsigned char* mask_out) {
+    emit_cpp_log("C++ CALL: rect_mask");
     if (!mask_out || height <= 0 || width <= 0) return -1;
     
     // 初始化掩膜为0
@@ -48,6 +62,7 @@ int rect_mask(int height, int width, float x1, float y1, float x2, float y2,
  */
 int polygon_mask(int height, int width, const float* vertices, int num_vertices,
                  unsigned char* mask_out) {
+    emit_cpp_log("C++ CALL: polygon_mask");
     if (!mask_out || !vertices || num_vertices < 3 || height <= 0 || width <= 0) {
         return -1;
     }
@@ -95,6 +110,7 @@ int polygon_mask(int height, int width, const float* vertices, int num_vertices,
  */
 int segment_mask(int height, int width, float x1, float y1, float x2, float y2,
                  float thickness, unsigned char* mask_out) {
+    emit_cpp_log("C++ CALL: segment_mask");
     if (!mask_out || height <= 0 || width <= 0 || thickness < 0) return -1;
     
     std::memset(mask_out, 0, height * width);
@@ -177,6 +193,7 @@ int calc_stats_fast(const float* values, int count,
                     float* out_min, float* out_max, float* out_mean,
                     float* out_median, float* out_std,
                     float* out_p05, float* out_p95) {
+    emit_cpp_log("C++ CALL: calc_stats_fast");
     if (!values || count <= 0 || !out_min || !out_max || !out_mean) {
         return -1;
     }
