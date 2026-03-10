@@ -103,5 +103,21 @@ class EMRService:
         except Exception as exc:
             raise EMRNotFoundError(f"Failed to list EMRs: {exc}") from exc
 
+    def update_emr(self, emr_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
+        logger.info("Updating EMR %s", emr_id)
+        try:
+            legacy_emr = importlib.import_module("app.emr")
+            return legacy_emr.update_emr(emr_id, updates)
+        except Exception as exc:
+            raise EMRNotFoundError(f"Failed to update EMR {emr_id}: {exc}") from exc
+
+    def archive_emr(self, emr_id: str, archived: bool = True) -> Dict[str, Any]:
+        logger.info("Archiving EMR %s (archived=%s)", emr_id, archived)
+        try:
+            legacy_emr = importlib.import_module("app.emr")
+            return legacy_emr.archive_emr(emr_id, archived)
+        except Exception as exc:
+            raise EMRNotFoundError(f"Failed to archive EMR {emr_id}: {exc}") from exc
+
 
 __all__ = ["EMRService"]

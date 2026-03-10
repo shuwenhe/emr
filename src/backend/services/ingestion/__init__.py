@@ -73,5 +73,19 @@ class IngestionService:
         except Exception as exc:
             raise ValidationError(f"Ingestion failed: {exc}") from exc
 
+    def ingest_capture_dir(self, capture_path: str, move_to_processed: bool = True) -> Dict[str, Any]:
+        capture_dir = Path(capture_path)
+        if not capture_dir.exists() or not capture_dir.is_dir():
+            raise FileNotFoundError("capture_path_not_found")
+        legacy_device_connector = importlib.import_module("app.device_connector")
+        result = legacy_device_connector.ingest_capture_dir(capture_dir)
+        if move_to_processed:
+            legacy_device_connector.move_capture_dir(capture_dir)
+        return {"ingested": [result], "skipped": []}
+
+    def ingest_pending_captures(self, move_to_processed: bool = True) -> Dict[str, Any]:
+        legacy_device_connector = importlib.import_module("app.device_connector")
+        return legacy_device_connector.ingest_pending_captures(move_to_processed=move_to_processed)
+
 
 __all__ = ["IngestionService"]

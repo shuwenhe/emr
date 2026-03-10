@@ -604,12 +604,15 @@ def _generate_roi_labeled_image(
     output_path: Path,
 ) -> Optional[str]:
     if not base_image_path:
+        logging.info("ROI labeled image: no base_image_path provided")
         return None
     points = _roi_label_points(roi_analysis)
     if not points:
+        logging.info("ROI labeled image: no label points extracted from roi_analysis")
         return None
 
     try:
+        logging.info(f"Generating ROI labeled image with {len(points)} points to {output_path}")
         cjk_font = _get_cjk_font_prop()
         image = plt.imread(str(base_image_path))
         fig, ax = plt.subplots(figsize=(6, 4), dpi=180)
@@ -651,10 +654,12 @@ def _generate_roi_labeled_image(
         fig.savefig(str(output_path), bbox_inches="tight", pad_inches=0)
         plt.close(fig)
         if output_path.exists() and output_path.is_file():
+            logging.info(f"ROI labeled image generated successfully: {output_path}")
             return str(output_path)
+        logging.warning(f"ROI labeled image file not found after saving: {output_path}")
         return None
     except Exception as exc:
-        logging.debug("generate ROI labeled image failed: %s", exc)
+        logging.error(f"generate ROI labeled image failed: {exc}", exc_info=True)
         return None
 
 
@@ -783,12 +788,18 @@ def _analyze_roi_regions(payload_path: Path, csv_is_matrix: bool = True) -> Opti
     使用MediaPipe + ROI系统分析热成像数据
     返回14个身体部位的温度统计，如果失败返回None
     """
+    # Add scripts directory to Python path for ROI module imports
+    scripts_dir = Path(__file__).resolve().parents[3] / "scripts"
+    if str(scripts_dir) not in sys.path:
+        sys.path.insert(0, str(scripts_dir))
+    
     try:
         from roi_mediapipe_dynamic import (
             detect_landmarks, build_dynamic_rois, to_rgb, calc_stats
         )
-    except ImportError:
-        logging.debug("ROI modules not available, skipping ROI analysis")
+        logging.info("ROI modules imported successfully")
+    except ImportError as e:
+        logging.warning(f"ROI modules not available, skipping ROI analysis: {e}")
         return None
     
     try:
@@ -862,7 +873,7 @@ def _analyze_roi_regions(payload_path: Path, csv_is_matrix: bool = True) -> Opti
             "coolest_temp": roi_list[-1]["mean_c"] if roi_list else None,
         }
     except Exception as exc:
-        logging.debug(f"ROI analysis failed: {exc}")
+        logging.error(f"ROI analysis failed: {exc}", exc_info=True)
         return None
 
 
@@ -930,7 +941,9 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
         
         # 尝试进行ROI分析
         roi_analysis = _analyze_roi_regions(payload_path, csv_is_matrix=True)
+        logging.info(f"ROI analysis result: {'success' if roi_analysis else 'failed or None'}, has {len(roi_analysis.get('roi_list', [])) if roi_analysis else 0} ROIs")
         if marked_image_path and roi_analysis:
+            logging.info(f"Attempting to generate ROI labeled image with base: {marked_image_path}")
             roi_labeled_image_path = _generate_roi_labeled_image(
                 marked_image_path,
                 roi_analysis,
@@ -939,6 +952,8 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
             if roi_labeled_image_path:
                 relative_roi_path = Path(roi_labeled_image_path).relative_to(DATA_DIR)
                 image_paths.append(str(relative_roi_path))
+        else:
+            logging.info(f"Skipping ROI labeled image: marked_image_path={bool(marked_image_path)}, roi_analysis={bool(roi_analysis)}")
 
     capture_time = (metadata.get("capture") or {}).get("capture_time") or datetime.now().isoformat()
     device = metadata.get("device") or {}
