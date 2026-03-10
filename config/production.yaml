@@ -1,0 +1,35 @@
+# Production Environment Configuration
+# Overrides default.yaml for production
+
+# Disable debug mode
+debug: false
+
+# Production database with connection pooling
+mysql:
+  pool_size: 20
+  max_overflow: 40
+
+# Production LLM (Azure or cloud-hosted)
+llm:
+  enabled: true
+  base_url: https://api.example.com/v1
+  timeout: 120
+
+# Production logging
+logging:
+  level: INFO
+  to_file: true
+  retention_days: 90
+
+# Enable Redis for caching
+redis:
+  enabled: true
+  password: "${REDIS_PASSWORD}"
+
+# Security settings
+security:
+  secret_key: "${SECRET_KEY}"
+  allowed_hosts:
+    - "emr.example.com"
+  cors_origins:
+    - "https://emr.example.com"

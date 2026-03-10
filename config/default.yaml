@@ -1,0 +1,62 @@
+# Application Configuration
+# Default settings for development environment
+
+# ==================== Database ====================
+mysql:
+  host: localhost
+  port: 3306
+  user: emr_user
+  password: emr_password
+  database: emr_db
+  pool_size: 10
+  max_overflow: 20
+
+clickhouse:
+  host: localhost
+  port: 9000
+  user: default
+  password: ""
+  database: emr
+
+# ==================== Storage ====================
+storage:
+  root: storage
+  max_upload_size: 104857600  # 100MB
+
+# ==================== LLM Configuration ====================
+llm:
+  enabled: false
+  provider: ollama
+  model: qwen2.5:14b
+  base_url: http://localhost:11434
+  temperature: 0.7
+  max_tokens: 2000
+  timeout: 60
+
+# ==================== RAG Configuration ====================
+rag:
+  kb_dir: rag/kb
+  dataset_dir: rag/dataset
+  embed_model: bge-m3:latest
+  chunk_size: 800
+  chunk_overlap: 100
+  batch_size: 32
+
+# ==================== Logging ====================
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  to_file: true
+  retention_days: 30
+
+# ==================== Performance ====================
+redis:
+  enabled: false
+  host: localhost
+  port: 6379
+  db: 0
+  password: ""
+  
+cache:
+  ttl: 3600  # seconds
+  max_size: 1000  # entries

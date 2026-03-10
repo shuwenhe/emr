@@ -1,17 +1,71 @@
-# emr
+# EMR - Infrared Thermal Imaging Medical System
 
-Infrared thermal imaging ingestion, analysis, and report generation workflow.
+Enterprise-grade infrared thermal imaging ingestion, analysis, and report generation workflow.
 
-## Quick Start
-1. Create venv and install dependencies
-	- `make install`
-2. Run the ingestion service
-	- `make run`
-3. Generate DOCX reports from test data
-	- `make report`
+## 🏗️ Architecture
 
-## Services
-The FastAPI service lives under [backend/device-ingestion](backend/device-ingestion).
+This project follows **Clean Architecture** principles with clear separation of concerns:
+
+```
+src/backend/
+├── api/              # API Gateway (FastAPI routes, middleware)
+├── services/         # Business Logic Layer
+│   ├── ingestion/    # Device data import & QC
+│   ├── analysis/     # Thermal analysis & ROI detection  
+│   ├── emr/          # Electronic Medical Records
+│   ├── reports/      # Report generation (DOCX/PDF)
+│   ├── treatment/    # Treatment planning & dispatch
+│   └── ai/           # AI/LLM services
+├── core/             # Infrastructure (config, logging, exceptions)
+├── models/           # Data models (domain, schemas, entities)
+├── repositories/     # Data access layer
+└── utils/            # Shared utilities
+```
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Python 3.12+
+- Node.js 18+ (for frontend)
+- MySQL 8.0+
+- (Optional) ClickHouse for analytics
+- (Optional) Ollama for AI features
+
+### Installation
+
+1. **Clone and setup virtual environment**
+   ```bash
+   git clone <repository>
+   cd emr
+   make install
+   ```
+
+2. **Configure environment**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your settings
+   ```
+
+3. **Initialize database**
+   ```bash
+   make db-init
+   ```
+
+4. **Run services**
+   ```bash
+   # Backend API (terminal 1)
+   make run-backend
+   
+   # Frontend (terminal 2)
+   make run-frontend
+   ```
+
+## 📚 Services
+
+### Backend API
+FastAPI service on port 8000
+- Location: `src/backend/`
+- Docs: http://localhost:8000/docs
 
 ## Frontend
 Next.js app lives under [frontend](frontend). EMR page route: /emr

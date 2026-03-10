@@ -1,0 +1,24 @@
+# Development Environment Configuration
+# Overrides default.yaml for development
+
+# Enable debug mode
+debug: true
+
+# Development database  
+mysql:
+  database: emr_dev
+  pool_size: 5
+
+# Development LLM (local ollama)
+llm:
+  enabled: true
+  base_url: http://localhost:11434
+
+# More verbose logging
+logging:
+  level: DEBUG
+  to_file: true
+
+# Disable Redis in development
+redis:
+  enabled: false

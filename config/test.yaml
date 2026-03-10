@@ -1,0 +1,24 @@
+# Test Environment Configuration
+# Overrides default.yaml for testing
+
+# Test database
+mysql:
+  database: emr_test
+  pool_size: 5
+
+# Use in-memory storage for tests
+storage:
+  root: /tmp/emr_test_storage
+
+# Disable LLM in tests
+llm:
+  enabled: false
+
+# Test logging
+logging:
+  level: DEBUG
+  to_file: false
+
+# Disable Redis in tests
+redis:
+  enabled: false

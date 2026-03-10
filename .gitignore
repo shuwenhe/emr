@@ -1,4 +1,14 @@
 /.venv/
+
+# ==================== Storage (Runtime Data) ====================
+# New unified storage directory
+/storage/data/
+/storage/reports/
+/storage/logs/
+/storage/cache/
+/storage/uploads/
+
+# Legacy storage paths (to be removed after migration)
 /backend/device-ingestion/data/
 /backend/device-ingestion/device-drop/
 /backend/device-ingestion/device-processed/
@@ -12,6 +22,9 @@
 /data/
 /reports/
 /logs/
+/batch_results/
+
+# ==================== Frontend ====================
 /frontend/node_modules/
 /frontend/.next/
 /frontend/.next/cache/
