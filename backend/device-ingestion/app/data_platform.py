@@ -573,6 +573,7 @@ def list_emrs(
                 if isinstance(emr_data, str):
                     emr_data = _decompress_data(emr_data)
                     emr_data = json.loads(emr_data)
+                emr_data = _normalize_emr_for_api(emr_data)
                 return [emr_data]
             except (json.JSONDecodeError, TypeError):
                 return [dict(row)]
@@ -632,6 +633,9 @@ def list_emrs(
                 if isinstance(emr_data, str):
                     emr_data = _decompress_data(emr_data)
                     emr_data = json.loads(emr_data)
+                
+                # Normalize EMR fields for backward compatibility
+                emr_data = _normalize_emr_for_api(emr_data)
                 results.append(emr_data)
             except (json.JSONDecodeError, TypeError):
                 results.append(dict(row))
@@ -639,6 +643,44 @@ def list_emrs(
             results.append(dict(row))
     
     return results
+
+
+def _normalize_emr_for_api(emr: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Ensure EMR has top-level temperature_metrics and risk_level fields
+    by extracting them from report.analysis if missing.
+    """
+    if "temperature_metrics" not in emr or "risk_level" not in emr:
+        report = emr.get("report")
+        if isinstance(report, dict):
+            analysis = report.get("analysis")
+            if isinstance(analysis, dict):
+                if "temperature_metrics" not in emr:
+                    temperature_metrics = analysis.get("temperature_metrics")
+                    body_avg_temp_c = analysis.get("body_avg_temp_c")
+                    if temperature_metrics and isinstance(temperature_metrics, dict):
+                        full_metrics = dict(temperature_metrics)
+                        if body_avg_temp_c is not None:
+                            full_metrics["body_avg_temp_c"] = body_avg_temp_c
+                        emr["temperature_metrics"] = full_metrics
+                    
+                if "risk_level" not in emr:
+                    risk_level = analysis.get("risk_level")
+                    if risk_level:
+                        emr["risk_level"] = risk_level
+                        
+                # Extract thermal image paths if missing
+                if "thermal_roi_labeled_image" not in emr:
+                    thermal_roi = report.get("thermal_roi_labeled_image")
+                    if thermal_roi:
+                        emr["thermal_roi_labeled_image"] = thermal_roi
+                        
+                if "thermal_marked_image" not in emr:
+                    thermal_marked = report.get("thermal_marked_image")
+                    if thermal_marked:
+                        emr["thermal_marked_image"] = thermal_marked
+    
+    return emr
 
 
 def get_emr_by_record_id(record_id: str) -> Optional[Dict[str, Any]]:

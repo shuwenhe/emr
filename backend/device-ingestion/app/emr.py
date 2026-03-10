@@ -68,11 +68,27 @@ def generate_emr(record_id: str, force: bool = False) -> Dict[str, Any]:
     emr_id = existing.get("emr_id") if existing else f"EMR-{uuid.uuid4()}"
     created_at = datetime.now().isoformat(timespec="seconds")
 
+    # Extract temperature metrics and risk level from report.analysis
+    analysis = report.get("analysis") if isinstance(report, dict) else {}
+    temperature_metrics = analysis.get("temperature_metrics") if isinstance(analysis, dict) else None
+    body_avg_temp_c = analysis.get("body_avg_temp_c") if isinstance(analysis, dict) else None
+    risk_level = analysis.get("risk_level") if isinstance(analysis, dict) else "unknown"
+    
+    # Build temperature_metrics with both avg_c and body_avg_temp_c
+    if temperature_metrics and isinstance(temperature_metrics, dict):
+        full_metrics = dict(temperature_metrics)
+        if body_avg_temp_c is not None:
+            full_metrics["body_avg_temp_c"] = body_avg_temp_c
+    else:
+        full_metrics = {}
+
     emr = {
         "emr_id": emr_id,
         "record_id": record_id,
         "created_at": created_at,
         "archived": False,
+        "risk_level": risk_level,
+        "temperature_metrics": full_metrics if full_metrics else None,
         "patient": {
             "patient_id": patient.get("patient_id"),
             "name": patient.get("name"),
@@ -91,6 +107,8 @@ def generate_emr(record_id: str, force: bool = False) -> Dict[str, Any]:
         "diagnosis": report.get("diagnosis"),
         "doctor_opinion": report.get("doctor_opinion"),
         "thermal_images": report.get("thermal_images") or [],
+        "thermal_roi_labeled_image": report.get("thermal_roi_labeled_image"),
+        "thermal_marked_image": report.get("thermal_marked_image"),
         "report": report,
         "treatment_plan": plan,
     }
@@ -124,11 +142,27 @@ def upsert_emr_from_analysis(
     patient = metadata.get("patient") or {}
     clinical = metadata.get("clinical") or {}
 
+    # Extract temperature metrics and risk level from report.analysis
+    analysis = report.get("analysis") if isinstance(report, dict) else {}
+    temperature_metrics = analysis.get("temperature_metrics") if isinstance(analysis, dict) else None
+    body_avg_temp_c = analysis.get("body_avg_temp_c") if isinstance(analysis, dict) else None
+    risk_level = analysis.get("risk_level") if isinstance(analysis, dict) else "unknown"
+    
+    # Build temperature_metrics with both avg_c and body_avg_temp_c
+    if temperature_metrics and isinstance(temperature_metrics, dict):
+        full_metrics = dict(temperature_metrics)
+        if body_avg_temp_c is not None:
+            full_metrics["body_avg_temp_c"] = body_avg_temp_c
+    else:
+        full_metrics = {}
+
     emr = {
         "emr_id": emr_id,
         "record_id": record_id,
         "created_at": created_at,
         "archived": existing.get("archived") if existing else False,
+        "risk_level": risk_level,
+        "temperature_metrics": full_metrics if full_metrics else None,
         "patient": {
             "patient_id": patient.get("patient_id"),
             "name": patient.get("name"),
@@ -147,6 +181,8 @@ def upsert_emr_from_analysis(
         "diagnosis": report.get("diagnosis"),
         "doctor_opinion": report.get("doctor_opinion"),
         "thermal_images": report.get("thermal_images") or [],
+        "thermal_roi_labeled_image": report.get("thermal_roi_labeled_image"),
+        "thermal_marked_image": report.get("thermal_marked_image"),
         "report": report,
         "treatment_plan": plan,
     }
@@ -174,6 +210,44 @@ def _resolve_data_image_path(path_value: Any) -> Optional[Path]:
     if candidate.exists() and candidate.is_file():
         return candidate
     return None
+
+
+def _normalize_emr_fields(emr: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Ensure EMR has top-level temperature_metrics and risk_level fields
+    by extracting them from report.analysis if missing.
+    """
+    if "temperature_metrics" not in emr or "risk_level" not in emr:
+        report = emr.get("report")
+        if isinstance(report, dict):
+            analysis = report.get("analysis")
+            if isinstance(analysis, dict):
+                if "temperature_metrics" not in emr:
+                    temperature_metrics = analysis.get("temperature_metrics")
+                    body_avg_temp_c = analysis.get("body_avg_temp_c")
+                    if temperature_metrics and isinstance(temperature_metrics, dict):
+                        full_metrics = dict(temperature_metrics)
+                        if body_avg_temp_c is not None:
+                            full_metrics["body_avg_temp_c"] = body_avg_temp_c
+                        emr["temperature_metrics"] = full_metrics
+                    
+                if "risk_level" not in emr:
+                    risk_level = analysis.get("risk_level")
+                    if risk_level:
+                        emr["risk_level"] = risk_level
+                        
+                # Extract thermal image paths if missing
+                if "thermal_roi_labeled_image" not in emr:
+                    thermal_roi = report.get("thermal_roi_labeled_image")
+                    if thermal_roi:
+                        emr["thermal_roi_labeled_image"] = thermal_roi
+                        
+                if "thermal_marked_image" not in emr:
+                    thermal_marked = report.get("thermal_marked_image")
+                    if thermal_marked:
+                        emr["thermal_marked_image"] = thermal_marked
+    
+    return emr
 
 
 def _refresh_roi_labeled_image(emr: Dict[str, Any]) -> bool:
@@ -233,6 +307,10 @@ def get_emr(emr_id: str) -> Dict[str, Any]:
         raise EmrNotFoundError("emr_not_found")
 
     emr = _load_json(path)
+    
+    # Normalize EMR fields (extract metrics from report.analysis if missing)
+    emr = _normalize_emr_fields(emr)
+    
     updated = _refresh_roi_labeled_image(emr)
     if updated:
         with open(path, "w", encoding="utf-8") as handle:
