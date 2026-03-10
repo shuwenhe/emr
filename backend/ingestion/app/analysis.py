@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import sys
+import threading
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -96,6 +97,39 @@ OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:1.7b")
 OLLAMA_ENABLED = os.getenv("OLLAMA_ENABLED", "1") != "0"
 THERMAL_DTYPE = np.float32
 THERMAL_RENDER_DPI = int(os.getenv("THERMAL_RENDER_DPI", "100"))
+_ROI_MODULE_BINDINGS: Optional[Dict[str, Any]] = None
+_ROI_MODULE_IMPORT_ERROR: Optional[str] = None
+_ROI_MODULE_LOCK = threading.Lock()
+
+
+def _get_roi_module_bindings() -> Optional[Dict[str, Any]]:
+    global _ROI_MODULE_BINDINGS, _ROI_MODULE_IMPORT_ERROR
+
+    if _ROI_MODULE_BINDINGS is not None:
+        return _ROI_MODULE_BINDINGS
+    if _ROI_MODULE_IMPORT_ERROR is not None:
+        return None
+
+    with _ROI_MODULE_LOCK:
+        if _ROI_MODULE_BINDINGS is not None:
+            return _ROI_MODULE_BINDINGS
+        if _ROI_MODULE_IMPORT_ERROR is not None:
+            return None
+
+        try:
+            roi_module = importlib.import_module("roi_mediapipe_dynamic")
+            _ROI_MODULE_BINDINGS = {
+                "detect_landmarks": getattr(roi_module, "detect_landmarks"),
+                "build_dynamic_rois": getattr(roi_module, "build_dynamic_rois"),
+                "to_rgb": getattr(roi_module, "to_rgb"),
+                "calc_stats": getattr(roi_module, "calc_stats"),
+            }
+            logging.info("ROI modules imported and cached successfully")
+            return _ROI_MODULE_BINDINGS
+        except (ImportError, AttributeError) as e:
+            _ROI_MODULE_IMPORT_ERROR = str(e)
+            logging.warning(f"ROI modules not available, skipping ROI analysis: {e}")
+            return None
 
 
 def _extract_json_block(text: str) -> Optional[dict]:
@@ -404,16 +438,6 @@ def _load_csv_temperatures(file_path: Path) -> List[float]:
                 continue
     if temps:
         return temps
-
-    if not has_temperature_column:
-        try:
-            matrix = np.loadtxt(str(file_path), delimiter=",", dtype=THERMAL_DTYPE)
-            if matrix.ndim == 1:
-                matrix = matrix.reshape(1, -1)
-            if matrix.ndim == 2:
-                return matrix.flatten().tolist()
-        except Exception:
-            return temps
     return temps
 
 
@@ -456,6 +480,33 @@ def _load_csv_grid(file_path: Path) -> Optional[np.ndarray]:
     temp_values = np.asarray(temps, dtype=THERMAL_DTYPE)
     grid[row_idx, col_idx] = temp_values
     return grid
+
+
+def _summarize_grid_temperatures(grid: np.ndarray) -> Dict[str, Optional[float]]:
+    if grid.size == 0:
+        return {
+            "min_c": None,
+            "max_c": None,
+            "avg_c": None,
+            "count": 0,
+        }
+
+    valid_mask = ~np.isnan(grid)
+    count = int(np.count_nonzero(valid_mask))
+    if count == 0:
+        return {
+            "min_c": None,
+            "max_c": None,
+            "avg_c": None,
+            "count": 0,
+        }
+
+    return {
+        "min_c": round(float(np.nanmin(grid)), 2),
+        "max_c": round(float(np.nanmax(grid)), 2),
+        "avg_c": round(float(np.nanmean(grid)), 2),
+        "count": count,
+    }
 
 
 def _generate_marked_image(
@@ -946,34 +997,36 @@ def _fallback_roi_analysis(matrix: np.ndarray) -> Dict[str, Any]:
     }
 
 
-def _analyze_roi_regions(payload_path: Path, csv_is_matrix: bool = True) -> Optional[Dict[str, Any]]:
+def _analyze_roi_regions(
+    payload_path: Path,
+    csv_is_matrix: bool = True,
+    matrix: Optional[np.ndarray] = None,
+) -> Optional[Dict[str, Any]]:
     """
     使用MediaPipe + ROI系统分析热成像数据
     返回14个身体部位的温度统计，如果失败返回None
     """
-    try:
-        roi_module = importlib.import_module("roi_mediapipe_dynamic")
-        detect_landmarks = getattr(roi_module, "detect_landmarks")
-        build_dynamic_rois = getattr(roi_module, "build_dynamic_rois")
-        to_rgb = getattr(roi_module, "to_rgb")
-        calc_stats = getattr(roi_module, "calc_stats")
-        logging.info("ROI modules imported successfully")
-    except ImportError as e:
-        logging.warning(f"ROI modules not available, skipping ROI analysis: {e}")
+    roi_bindings = _get_roi_module_bindings()
+    if not roi_bindings:
         return None
+    detect_landmarks = roi_bindings["detect_landmarks"]
+    build_dynamic_rois = roi_bindings["build_dynamic_rois"]
+    to_rgb = roi_bindings["to_rgb"]
+    calc_stats = roi_bindings["calc_stats"]
     
     try:
-        # 尝试加载以二维矩阵形式存储的CSV（非标准表格格式）
-        if csv_is_matrix:
-            matrix = np.loadtxt(str(payload_path), delimiter=",", dtype=THERMAL_DTYPE)
-            if matrix.ndim != 2:
-                return None
-        else:
-            # 如果是标准CSV表格，转换为矩阵
-            grid = _load_csv_grid(payload_path)
-            if grid is None:
-                return None
-            matrix = grid
+        # 优先复用调用方已加载的矩阵，避免重复IO与内存分配
+        if matrix is None:
+            if csv_is_matrix:
+                matrix = np.loadtxt(str(payload_path), delimiter=",", dtype=THERMAL_DTYPE)
+                if matrix.ndim != 2:
+                    return None
+            else:
+                # 如果是标准CSV表格，转换为矩阵
+                grid = _load_csv_grid(payload_path)
+                if grid is None:
+                    return None
+                matrix = grid
 
         if matrix.dtype != THERMAL_DTYPE:
             matrix = matrix.astype(THERMAL_DTYPE, copy=False)
@@ -1047,11 +1100,14 @@ def _analyze_roi_regions(payload_path: Path, csv_is_matrix: bool = True) -> Opti
             logging.error(f"ROI analysis failed: {exc}")
         # 使用 fallback 方法进行基础区域分析
         try:
+            if matrix is not None and matrix.ndim == 2:
+                logging.info("Using fallback ROI analysis with fixed regions")
+                return _fallback_roi_analysis(matrix)
             if csv_is_matrix:
-                matrix = np.loadtxt(str(payload_path), delimiter=",", dtype=THERMAL_DTYPE)
-                if matrix.ndim == 2:
+                fallback_matrix = np.loadtxt(str(payload_path), delimiter=",", dtype=THERMAL_DTYPE)
+                if fallback_matrix.ndim == 2:
                     logging.info("Using fallback ROI analysis with fixed regions")
-                    return _fallback_roi_analysis(matrix)
+                    return _fallback_roi_analysis(fallback_matrix)
         except Exception as fallback_exc:
             logging.error(f"Fallback ROI analysis also failed: {fallback_exc}")
         return None
@@ -1076,11 +1132,17 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
         payload_path = None
     image_paths = [str(path) for path in _find_image_files(record_dir)]
 
+    grid: Optional[np.ndarray] = None
     temps: List[float] = []
     if payload_path and payload_path.suffix.lower() == ".csv":
-        temps = _load_csv_temperatures(payload_path)
-
-    metrics = _summarize_temperatures(temps)
+        grid = _load_csv_grid(payload_path)
+        if grid is not None:
+            metrics = _summarize_grid_temperatures(grid)
+        else:
+            temps = _load_csv_temperatures(payload_path)
+            metrics = _summarize_temperatures(temps)
+    else:
+        metrics = _summarize_temperatures(temps)
     avg_temp = metrics["avg_c"]
     risk_level = _risk_level(avg_temp)
     body_avg_temp_c = avg_temp
@@ -1095,7 +1157,6 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
     abnormal_regions: List[Dict[str, Any]] = []
     roi_analysis: Optional[Dict[str, Any]] = None
     if payload_path and payload_path.suffix.lower() == ".csv":
-        grid = _load_csv_grid(payload_path)
         if grid is not None:
             region_comparison = _region_analysis(grid, body_avg_temp_c)
             abnormal_regions = [
@@ -1112,7 +1173,7 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
                 if item.get("status") in {"high", "low"}
             ]
         # 尝试进行ROI分析
-        roi_analysis = _analyze_roi_regions(payload_path, csv_is_matrix=True)
+        roi_analysis = _analyze_roi_regions(payload_path, csv_is_matrix=True, matrix=grid)
         logging.info(f"ROI analysis result: {'success' if roi_analysis else 'failed or None'}, has {len(roi_analysis.get('roi_list', [])) if roi_analysis else 0} ROIs")
         
         if grid is not None:
