@@ -7,8 +7,7 @@ from typing import Any, Dict, List, Optional
 
 from .data_platform import get_emr_by_record_id, save_emr, save_report
 from .config import DATA_DIR, EMR_DIR
-from .report_docx import generate_docx_report
-from .report_template import generate_template_report
+from backend.reports import generate_docx_report, generate_template_report
 
 
 class EmrNotFoundError(FileNotFoundError):

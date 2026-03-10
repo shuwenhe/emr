@@ -13,7 +13,7 @@ from datetime import datetime
 sys.path.insert(0, str(Path(__file__).parent))
 
 from app.data_platform import list_emrs as list_db_emrs, get_patient
-from app.report_template import generate_template_report
+from backend.reports import generate_template_report
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
