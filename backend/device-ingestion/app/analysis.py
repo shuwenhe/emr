@@ -33,11 +33,11 @@ THERMAL_PLOT_BOUNDS = {
 }
 
 FACIAL_LABEL_OFFSETS = {
-    "右眼": (8.0, -4.0),
-    "左眼": (-8.0, -4.0),
-    "鼻子": (0.0, -1.8),
-    "右脸颊": (11.0, 1.5),
-    "左脸颊": (-11.0, 1.5),
+    "右眼": (10.0, -8.0),
+    "左眼": (-10.0, -8.0),
+    "鼻子": (0.0, -2.5),
+    "右脸颊": (14.0, 3.5),
+    "左脸颊": (-14.0, 3.5),
 }
 
 _CJK_FONT_CANDIDATES = [
@@ -577,12 +577,24 @@ def _roi_label_points(roi_analysis: Optional[Dict[str, Any]]) -> List[Dict[str, 
         )
 
     points.sort(key=lambda p: p["label_y"])
-    min_y_gap = 3.2
+    min_y_gap = 5.0
+    min_x_threshold = 15.0
+    
     for i in range(1, len(points)):
-        prev = points[i - 1]
         cur = points[i]
-        if abs(cur["label_x"] - prev["label_x"]) < 8 and (cur["label_y"] - prev["label_y"]) < min_y_gap:
-            cur["label_y"] = min(97.0, prev["label_y"] + min_y_gap)
+        max_prev_y = -1.0
+        
+        for j in range(i):
+            prev = points[j]
+            x_dist = abs(cur["label_x"] - prev["label_x"])
+            y_dist = cur["label_y"] - prev["label_y"]
+            
+            if x_dist < min_x_threshold and y_dist < min_y_gap:
+                max_prev_y = max(max_prev_y, prev["label_y"])
+        
+        if max_prev_y >= 0:
+            cur["label_y"] = min(97.0, max_prev_y + min_y_gap)
+    
     return points
 
 
