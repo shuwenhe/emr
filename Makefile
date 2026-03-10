@@ -1,4 +1,3 @@
-SERVICE_DIR := backend/device-ingestion
 PYTHON ?= python3.12
 VENV_DIR := .venv
 VENV_PY := $(VENV_DIR)/bin/python
@@ -14,14 +13,13 @@ KB_MAX_LEN ?= 800
 KB_OVERLAP ?= 100
 KB_BATCH_SIZE ?= 32
 
-.PHONY: help install run-backend run-backend-v2 run-frontend db-check report kb-build kb-build-markdown kb-rebuild kb-clean clean
+.PHONY: help install run-backend run-frontend db-check report kb-build kb-build-markdown kb-rebuild kb-clean clean
 
 help:
 	@echo "Available targets:"
 	@echo "  make help     # list available commands"
-	@echo "  make install  # install dependencies for device-ingestion"
-	@echo "  make run-backend   # run device-ingestion service"
-	@echo "  make run-backend-v2 # run refactored backend entrypoint"
+	@echo "  make install  # install dependencies"
+	@echo "  make run-backend   # run backend service"
 	@echo "  make run-frontend  # run Next.js frontend (dev)"
 	@echo "  make db-check # verify MySQL connectivity and privileges"
 	@echo "  make report   # generate docx reports"
@@ -34,14 +32,11 @@ help:
 install:
 	$(PYTHON) -m venv $(VENV_DIR)
 	$(VENV_PY) -m pip install -U pip
-	$(VENV_PY) -m pip install -r $(SERVICE_DIR)/requirements.txt
+	$(VENV_PY) -m pip install -r requirements/base.txt
 	@bash -c 'cd "$(CURDIR)/frontend"; if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" && nvm install 20 && nvm use 20; fi; npm install'
 
 
 run-backend: install
-	exec $(VENV_PY) -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --app-dir $(SERVICE_DIR)
-
-run-backend-v2: install
 	exec $(VENV_PY) -m uvicorn src.backend.api.main:app --host 0.0.0.0 --port 8000 --reload
 
 run-frontend:
@@ -70,9 +65,8 @@ kb-clean:
 
 clean:
 	@rm -rf $(VENV_DIR)
-	@rm -rf $(SERVICE_DIR)/data
 	@rm -rf storage/data storage/reports storage/logs storage/cache storage/uploads
-	@rm -rf $(SERVICE_DIR)/__pycache__
-	@find $(SERVICE_DIR) -name "*.pyc" -delete
+	@find src -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
+	@find src -name "*.pyc" -delete 2>/dev/null || true
 
 default: help

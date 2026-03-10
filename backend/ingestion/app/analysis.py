@@ -34,11 +34,13 @@ THERMAL_PLOT_BOUNDS = {
 }
 
 FACIAL_LABEL_OFFSETS = {
-    "右眼": (10.0, -8.0),
-    "左眼": (-10.0, -8.0),
-    "鼻子": (0.0, -2.5),
-    "右脸颊": (14.0, 3.5),
-    "左脸颊": (-14.0, 3.5),
+    "右眼": (15.0, -10.0),
+    "左眼": (-15.0, -10.0),
+    "鼻子": (0.0, 8.0),
+    "右脸颊": (18.0, 5.0),
+    "左脸颊": (-18.0, 5.0),
+    "额头": (0.0, -12.0),
+    "口部": (0.0, 10.0),
 }
 
 _HEAD_LABEL_KEYWORDS = (
@@ -455,7 +457,16 @@ def _generate_marked_image(
     grid: np.ndarray,
     output_path: Path,
     roi_analysis: Optional[Dict[str, Any]] = None,
+    draw_roi_labels: bool = False,
 ) -> Optional[str]:
+    """生成标注热图
+    
+    Args:
+        grid: 温度矩阵
+        output_path: 输出路径
+        roi_analysis: ROI分析结果（仅在draw_roi_labels=True时使用）
+        draw_roi_labels: 是否绘制ROI标签（默认False，避免重复叠加）
+    """
     if grid.size == 0 or np.all(np.isnan(grid)):
         return None
 
@@ -493,40 +504,42 @@ def _generate_marked_image(
         bbox=dict(boxstyle="round,pad=0.3", facecolor="black", alpha=0.5),
     )
 
-    points = _roi_label_points(roi_analysis)
-    if points:
-        cjk_font = _get_cjk_font_prop()
-        rows, cols = grid.shape
-        for point in points:
-            px = (point["x"] / 100.0) * max(cols - 1, 1)
-            py = (point["y"] / 100.0) * max(rows - 1, 1)
-            lpx = (point.get("label_x", point["x"]) / 100.0) * max(cols - 1, 1)
-            lpy = (point.get("label_y", point["y"]) / 100.0) * max(rows - 1, 1)
-            text = f"{point['name']} {point['mean_c']:.1f}°C"
-            ax.annotate(
-                text,
-                xy=(px, py),
-                xytext=(lpx, lpy),
-                textcoords="data",
-                fontsize=6,
-                fontproperties=cjk_font,
-                color="white",
-                ha="center",
-                va="center",
-                arrowprops={
-                    "arrowstyle": "-",
-                    "color": "#0f172a",
-                    "lw": 0.6,
-                    "alpha": 0.85,
-                },
-                bbox={
-                    "boxstyle": "round,pad=0.2",
-                    "facecolor": "#0f172a",
-                    "alpha": 0.75,
-                    "edgecolor": "#ffffff",
-                    "linewidth": 0.45,
-                },
-            )
+    # 仅在明确要求时才绘制ROI标签，以避免重复叠加
+    if draw_roi_labels:
+        points = _roi_label_points(roi_analysis)
+        if points:
+            cjk_font = _get_cjk_font_prop()
+            rows, cols = grid.shape
+            for point in points:
+                px = (point["x"] / 100.0) * max(cols - 1, 1)
+                py = (point["y"] / 100.0) * max(rows - 1, 1)
+                lpx = (point.get("label_x", point["x"]) / 100.0) * max(cols - 1, 1)
+                lpy = (point.get("label_y", point["y"]) / 100.0) * max(rows - 1, 1)
+                text = f"{point['name']} {point['mean_c']:.1f}°C"
+                ax.annotate(
+                    text,
+                    xy=(px, py),
+                    xytext=(lpx, lpy),
+                    textcoords="data",
+                    fontsize=7.5,  # 保持小字号便于阅读
+                    fontproperties=cjk_font,
+                    color="white",
+                    ha="center",
+                    va="center",
+                    arrowprops={
+                        "arrowstyle": "->",
+                        "color": "#ffffff",
+                        "lw": 1.0,
+                        "alpha": 0.7,
+                    },
+                    bbox={
+                        "boxstyle": "round,pad=0.35",
+                        "facecolor": "#1e293b",
+                        "alpha": 0.85,
+                        "edgecolor": "#ffffff",
+                        "linewidth": 0.8,
+                    },
+                )
 
     fig.tight_layout()
     fig.savefig(output_path, bbox_inches="tight")
@@ -631,9 +644,10 @@ def _roi_label_points(roi_analysis: Optional[Dict[str, Any]]) -> List[Dict[str, 
             }
         )
 
+    # 改进的标签位置调整算法，避免重叠
     points.sort(key=lambda p: p["label_y"])
-    min_y_gap = 5.0
-    min_x_threshold = 15.0
+    min_y_gap = 6.5  # 增加垂直间距
+    min_x_threshold = 18.0  # 增加水平检测范围
     
     for i in range(1, len(points)):
         cur = points[i]
@@ -644,31 +658,36 @@ def _roi_label_points(roi_analysis: Optional[Dict[str, Any]]) -> List[Dict[str, 
             x_dist = abs(cur["label_x"] - prev["label_x"])
             y_dist = cur["label_y"] - prev["label_y"]
             
+            # 如果水平位置接近且垂直间距不足，需要调整
             if x_dist < min_x_threshold and y_dist < min_y_gap:
                 max_prev_y = max(max_prev_y, prev["label_y"])
         
         if max_prev_y >= 0:
-            cur["label_y"] = min(97.0, max_prev_y + min_y_gap)
+            cur["label_y"] = min(95.0, max_prev_y + min_y_gap)
 
+    # 特别处理头部区域的标签，使其更整齐
     head_points: List[Dict[str, Any]] = []
     for point in points:
         name = str(point.get("name") or "")
-        is_head = point["y"] <= 35.0 or any(key in name for key in _HEAD_LABEL_KEYWORDS)
+        is_head = point["y"] <= 40.0 or any(key in name for key in _HEAD_LABEL_KEYWORDS)
         if is_head:
             head_points.append(point)
 
     if head_points:
         head_points.sort(key=lambda p: p["label_x"])
-        min_head_x_gap = 9.0
+        min_head_x_gap = 12.0  # 增加水平间距
         for idx in range(1, len(head_points)):
             prev = head_points[idx - 1]
             cur = head_points[idx]
             if (cur["label_x"] - prev["label_x"]) < min_head_x_gap:
-                cur["label_x"] = min(98.0, prev["label_x"] + min_head_x_gap)
+                cur["label_x"] = min(96.0, prev["label_x"] + min_head_x_gap)
 
-        base_y = 10.0
+        # 根据位置分两行显示头部标签，避免拥挤
+        base_y = 8.0
         for idx, point in enumerate(head_points):
-            point["label_y"] = max(2.0, min(24.0, base_y + (idx % 2) * 5.0))
+            # 交替分两行，左边的标签在上，右边的在下，形成错落布局
+            row_offset = 0 if idx % 2 == 0 else 7.0
+            point["label_y"] = max(2.0, min(22.0, base_y + row_offset))
     
     return points
 
@@ -706,23 +725,23 @@ def _generate_roi_labeled_image(
                 xy=(px, py),
                 xytext=(lpx, lpy),
                 textcoords="data",
-                fontsize=5,
+                fontsize=7.5,  # 增大字号便于阅读
                 fontproperties=cjk_font,
                 color="white",
                 ha="center",
                 va="center",
                 arrowprops={
-                    "arrowstyle": "-",
-                    "color": "#0f172a",
-                    "lw": 0.5,
-                    "alpha": 0.85,
+                    "arrowstyle": "->",  # 使用箭头样式更明确
+                    "color": "#ffffff",
+                    "lw": 1.0,  # 增加线条粗细
+                    "alpha": 0.7,
                 },
                 bbox={
-                    "boxstyle": "round,pad=0.18",
-                    "facecolor": "#0f172a",
-                    "alpha": 0.72,
+                    "boxstyle": "round,pad=0.35",  # 增加内边距
+                    "facecolor": "#1e293b",  # 深色背景
+                    "alpha": 0.85,  # 提高不透明度
                     "edgecolor": "#ffffff",
-                    "linewidth": 0.4,
+                    "linewidth": 0.8,
                 },
             )
 
@@ -858,6 +877,66 @@ def _risk_level(avg_temp: Optional[float]) -> str:
     return "low"
 
 
+def _fallback_roi_analysis(matrix: np.ndarray) -> Dict[str, Any]:
+    """
+    当 MediaPipe 不可用时，使用固定区域进行基础温度分析
+    返回预定义区域的温度统计
+    """
+    h, w = matrix.shape
+    roi_list = []
+    
+    # 定义固定区域（百分比坐标），调整为更精确的面部区域
+    fixed_regions = [
+        {"name": "额头", "x_pct": (35, 65), "y_pct": (8, 18)},
+        {"name": "右眼", "x_pct": (32, 45), "y_pct": (20, 32)},
+        {"name": "左眼", "x_pct": (55, 68), "y_pct": (20, 32)},
+        {"name": "鼻子", "x_pct": (44, 56), "y_pct": (32, 48)},
+        {"name": "右脸颊", "x_pct": (22, 42), "y_pct": (38, 58)},
+        {"name": "左脸颊", "x_pct": (58, 78), "y_pct": (38, 58)},
+        {"name": "口部", "x_pct": (42, 58), "y_pct": (52, 65)},
+    ]
+    
+    for region in fixed_regions:
+        try:
+            x_start = int(w * region["x_pct"][0] / 100)
+            x_end = int(w * region["x_pct"][1] / 100)
+            y_start = int(h * region["y_pct"][0] / 100)
+            y_end = int(h * region["y_pct"][1] / 100)
+            
+            roi_data = matrix[y_start:y_end, x_start:x_end]
+            valid_data = roi_data[~np.isnan(roi_data)]
+            
+            if len(valid_data) > 0:
+                center_x_pct = (region["x_pct"][0] + region["x_pct"][1]) / 2
+                center_y_pct = (region["y_pct"][0] + region["y_pct"][1]) / 2
+                
+                roi_list.append({
+                    "name": region["name"],
+                    "count": len(valid_data),
+                    "mean_c": round(float(np.mean(valid_data)), 2),
+                    "min_c": round(float(np.min(valid_data)), 2),
+                    "max_c": round(float(np.max(valid_data)), 2),
+                    "std_c": round(float(np.std(valid_data)), 2),
+                    "center_x_pct": center_x_pct,
+                    "center_y_pct": center_y_pct,
+                })
+        except Exception as e:
+            logging.debug(f"Failed to analyze region {region['name']}: {e}")
+            continue
+    
+    if not roi_list:
+        return None
+    
+    # 按平均温度排序
+    roi_list.sort(key=lambda x: x["mean_c"], reverse=True)
+    
+    return {
+        "roi_list": roi_list,
+        "hottest_temp": roi_list[0]["mean_c"] if roi_list else None,
+        "coolest_temp": roi_list[-1]["mean_c"] if roi_list else None,
+    }
+
+
 def _analyze_roi_regions(payload_path: Path, csv_is_matrix: bool = True) -> Optional[Dict[str, Any]]:
     """
     使用MediaPipe + ROI系统分析热成像数据
@@ -950,7 +1029,22 @@ def _analyze_roi_regions(payload_path: Path, csv_is_matrix: bool = True) -> Opti
             "coolest_temp": roi_list[-1]["mean_c"] if roi_list else None,
         }
     except Exception as exc:
-        logging.error(f"ROI analysis failed: {exc}", exc_info=True)
+        message = str(exc)
+        if "mediapipe" in message.lower() and (
+            "solutions" in message.lower() or "legacy" in message.lower()
+        ):
+            logging.warning(f"ROI analysis skipped due to MediaPipe compatibility: {exc}")
+        else:
+            logging.error(f"ROI analysis failed: {exc}")
+        # 使用 fallback 方法进行基础区域分析
+        try:
+            if csv_is_matrix:
+                matrix = np.loadtxt(str(payload_path), delimiter=",")
+                if matrix.ndim == 2:
+                    logging.info("Using fallback ROI analysis with fixed regions")
+                    return _fallback_roi_analysis(matrix)
+        except Exception as fallback_exc:
+            logging.error(f"Fallback ROI analysis also failed: {fallback_exc}")
         return None
 
 
@@ -985,6 +1079,7 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
     body_part = patient.get("body_part") or "unknown"
 
     marked_image_path = None
+    base_marked_image_path = None
     roi_labeled_image_path = None
     temperature_labels = {"text": None, "values": []}
     region_comparison: List[Dict[str, Any]] = []
@@ -1012,18 +1107,21 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
         logging.info(f"ROI analysis result: {'success' if roi_analysis else 'failed or None'}, has {len(roi_analysis.get('roi_list', [])) if roi_analysis else 0} ROIs")
         
         if grid is not None:
+            # 生成基础热图（不绘制ROI标签，避免后续重复叠加）
             marked_image_path = _generate_marked_image(
                 grid,
                 record_dir / "thermal_marked.png",
-                roi_analysis=roi_analysis,
+                roi_analysis=None,  # 不在这里绘制ROI标签
             )
             if marked_image_path:
+                base_marked_image_path = marked_image_path
                 relative_path = Path(marked_image_path).relative_to(DATA_DIR)
                 image_paths.append(str(relative_path))
                 temperature_labels = _extract_temperature_labels(marked_image_path)
 
+        # 如果有ROI分析结果，生成带ROI标签的图像（小字体、清晰标注，只有这一层）
         if marked_image_path and roi_analysis:
-            logging.info(f"Attempting to generate ROI labeled image with base: {marked_image_path}")
+            logging.info(f"Generating small-font ROI labeled image with base: {marked_image_path}")
             roi_labeled_image_path = _generate_roi_labeled_image(
                 marked_image_path,
                 roi_analysis,
@@ -1032,9 +1130,8 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
             if roi_labeled_image_path:
                 relative_roi_path = Path(roi_labeled_image_path).relative_to(DATA_DIR)
                 image_paths.append(str(relative_roi_path))
-                marked_image_path = roi_labeled_image_path
         else:
-            logging.info(f"Skipping ROI labeled image: marked_image_path={bool(marked_image_path)}, roi_analysis={bool(roi_analysis)}")
+            logging.info(f"Skipping ROI labeled image (only basic thermal): marked_image_path={bool(marked_image_path)}, roi_analysis={bool(roi_analysis)}")
 
     capture_time = (metadata.get("capture") or {}).get("capture_time") or datetime.now().isoformat()
     device = metadata.get("device") or {}
@@ -1116,7 +1213,7 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
         "capture": metadata.get("capture"),
         "environment": metadata.get("environment"),
         "thermal_images": image_paths,
-        "thermal_marked_image": str(Path(marked_image_path).relative_to(DATA_DIR)) if marked_image_path else None,
+        "thermal_marked_image": str(Path(base_marked_image_path).relative_to(DATA_DIR)) if base_marked_image_path else (str(Path(marked_image_path).relative_to(DATA_DIR)) if marked_image_path else None),
         "thermal_roi_labeled_image": str(Path(roi_labeled_image_path).relative_to(DATA_DIR)) if roi_labeled_image_path else None,
         "thermal_marked_labels": temperature_labels,
         "diagnosis": diagnosis,
@@ -1216,8 +1313,8 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
     
     try:
         upsert_emr_from_analysis(record_id, report, plan, metadata)
-    except Exception:
-        pass
+    except Exception as exc:
+        logging.exception("EMR upsert and report generation failed for record %s: %s", record_id, exc)
 
     return {
         "report": report,

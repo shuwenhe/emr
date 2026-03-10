@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import sys
-# Add device-ingestion to path for config imports
-_DEVICE_INGESTION_DIR = Path(__file__).resolve().parents[1] / "device-ingestion"
+# Add ingestion to path for config imports
+_DEVICE_INGESTION_DIR = Path(__file__).resolve().parents[1] / "ingestion"
 if str(_DEVICE_INGESTION_DIR) not in sys.path:
     sys.path.insert(0, str(_DEVICE_INGESTION_DIR))
 
@@ -162,7 +162,7 @@ def _build_tables(
             )
 
     marked_image = _resolve_image_path(
-        report.get("thermal_roi_labeled_image") or report.get("thermal_marked_image")
+        report.get("thermal_marked_image") or report.get("thermal_roi_labeled_image")
     )
     marked_bytes = _read_image_bytes(marked_image)
     thermal_images = report.get("thermal_images") or []

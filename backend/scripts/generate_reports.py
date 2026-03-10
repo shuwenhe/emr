@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from docx import Document
 from docx.shared import Inches
 
-DEVICE_INGESTION_DIR = Path(__file__).resolve().parents[1] / "device-ingestion"
+DEVICE_INGESTION_DIR = Path(__file__).resolve().parents[1] / "ingestion"
 if DEVICE_INGESTION_DIR.exists():
     sys.path.insert(0, str(DEVICE_INGESTION_DIR))
 

@@ -118,7 +118,24 @@ def detect_landmarks(rgb: np.ndarray) -> dict[str, Pt]:
         raise RuntimeError("未安装 mediapipe，请先执行: pip install mediapipe") from exc
 
     h, w, _ = rgb.shape
-    mp_pose = mp.solutions.pose
+
+    mp_pose = None
+    if hasattr(mp, "solutions") and hasattr(mp.solutions, "pose"):
+        mp_pose = mp.solutions.pose
+    else:
+        try:
+            from mediapipe.python.solutions import pose as legacy_pose
+
+            mp_pose = legacy_pose
+        except Exception:
+            mp_pose = None
+
+    if mp_pose is None:
+        raise RuntimeError(
+            "当前 mediapipe 版本不提供 legacy solutions API（mp.solutions.pose），"
+            "无法进行关键点检测。请安装兼容版本（如 mediapipe==0.10.11）"
+            "或迁移到 MediaPipe Tasks 方案。"
+        )
 
     with mp_pose.Pose(
         static_image_mode=True,

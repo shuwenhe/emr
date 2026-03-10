@@ -118,18 +118,25 @@ def generate_emr(record_id: str, force: bool = False) -> Dict[str, Any]:
     save_emr(emr)
 
     if report:
+        logging.info("Attempting to generate DOCX report for emr %s (report_id=%s)", emr_id, report.get("report_id"))
         try:
             # FastReport disabled, use DOCX directly
             report_path = generate_docx_report(report, emr)
-            emr["docx_report_path"] = str(report_path)
-            report["docx_report_path"] = str(report_path)
-            emr["report"] = report
-            with open(_emr_path(emr_id), "w", encoding="utf-8") as handle:
-                json.dump(emr, handle, ensure_ascii=False, indent=2, default=str)
-            save_emr(emr)
-            logging.info("DOCX report generated: %s", report_path)
+            logging.info("DOCX generation returned: %s (type: %s)", report_path, type(report_path).__name__)
+            if report_path:
+                emr["docx_report_path"] = str(report_path)
+                report["docx_report_path"] = str(report_path)
+                emr["report"] = report
+                with open(_emr_path(emr_id), "w", encoding="utf-8") as handle:
+                    json.dump(emr, handle, ensure_ascii=False, indent=2, default=str)
+                save_emr(emr)
+                logging.info("DOCX report persisted: %s", report_path)
+            else:
+                logging.warning("generate_docx_report returned None or falsy value for emr %s", emr_id)
         except Exception as exc:
             logging.exception("DOCX report generation failed for emr %s: %s", emr_id, exc)
+    else:
+        logging.warning("Report is empty/None for emr %s, skipping DOCX generation", emr_id)
 
     return emr
 
@@ -272,10 +279,14 @@ def _refresh_roi_labeled_image(emr: Dict[str, Any]) -> bool:
         return False
 
     marked = _resolve_data_image_path(report.get("thermal_marked_image"))
+    if marked is not None and marked.name == "thermal_roi_labeled.png":
+        marked = None
     if marked is None:
         thermal_images = report.get("thermal_images")
         if isinstance(thermal_images, list):
             for item in thermal_images:
+                if str(item).endswith("thermal_roi_labeled.png"):
+                    continue
                 marked = _resolve_data_image_path(item)
                 if marked is not None:
                     break
@@ -295,7 +306,6 @@ def _refresh_roi_labeled_image(emr: Dict[str, Any]) -> bool:
 
     relative = str(Path(generated).relative_to(DATA_DIR))
     report["thermal_roi_labeled_image"] = relative
-    report["thermal_marked_image"] = relative
 
     thermal_images = report.get("thermal_images")
     if isinstance(thermal_images, list) and relative not in thermal_images:

@@ -63,7 +63,7 @@ services:
       - ./config:/app/config:ro
       - ./data:/app/data
       - ./reports:/app/reports
-      - ./backend/device-ingestion:/app:delegated  # 开发时热重载
+      - ./backend/ingestion:/app:delegated  # 开发时热重载
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s

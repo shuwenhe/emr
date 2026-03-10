@@ -70,13 +70,15 @@ class Settings(BaseSettings):
     
     @property
     def DATA_DIR(self) -> Path:
-        """Patient data directory."""
-        return self.STORAGE_ROOT / "data"
+        """Patient data directory (legacy location for compatibility)."""
+        project_root = Path(__file__).resolve().parents[3]
+        return project_root / "data"
     
     @property
     def REPORTS_DIR(self) -> Path:
-        """Generated reports directory."""
-        return self.STORAGE_ROOT / "reports"
+        """Generated reports directory (legacy location for compatibility)."""
+        project_root = Path(__file__).resolve().parents[3]
+        return project_root / "reports"
     
     @property
     def LOGS_DIR(self) -> Path:

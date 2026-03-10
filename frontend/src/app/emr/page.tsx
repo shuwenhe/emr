@@ -530,13 +530,14 @@ export default function EmrPage() {
       return `${API_BASE}/data/${stripped}`;
     };
 
-    const direct =
-      normalizeImagePath((report as { thermal_roi_labeled_image?: string }).thermal_roi_labeled_image) ||
-      normalizeImagePath(report.thermal_marked_image);
+    const direct = normalizeImagePath(report.thermal_marked_image);
     if (direct) return direct;
 
     if (Array.isArray(report.thermal_images)) {
       for (const item of report.thermal_images) {
+        if (String(item || "").includes("thermal_roi_labeled")) {
+          continue;
+        }
         const candidate = normalizeImagePath(item);
         if (candidate) return candidate;
       }
