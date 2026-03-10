@@ -26,8 +26,20 @@ if str(_LEGACY_BACKEND_DIR) not in sys.path:
 class IngestionService:
     """Service for ingesting thermal imaging data from devices."""
     
+    # Cache imported modules at class level
+    _legacy_models = None
+    _legacy_qc = None
+    _legacy_storage = None
+    _legacy_device_connector = None
+    
     def __init__(self):
         self.data_dir = settings.DATA_DIR
+        # Lazy load modules on first use
+        if IngestionService._legacy_models is None:
+            IngestionService._legacy_models = importlib.import_module("app.models")
+            IngestionService._legacy_qc = importlib.import_module("app.qc")
+            IngestionService._legacy_storage = importlib.import_module("app.storage")
+            IngestionService._legacy_device_connector = importlib.import_module("app.device_connector")
         
     def ingest_data(
         self,
@@ -55,9 +67,9 @@ class IngestionService:
             raise ValidationError(f"Data file not found: {data_file}")
 
         try:
-            legacy_models = importlib.import_module("app.models")
-            legacy_qc = importlib.import_module("app.qc")
-            legacy_storage = importlib.import_module("app.storage")
+            legacy_models = self._legacy_models
+            legacy_qc = self._legacy_qc
+            legacy_storage = self._legacy_storage
 
             parsed = legacy_models.IngestMetadata.model_validate(metadata)
             if validate:
@@ -77,14 +89,14 @@ class IngestionService:
         capture_dir = Path(capture_path)
         if not capture_dir.exists() or not capture_dir.is_dir():
             raise FileNotFoundError("capture_path_not_found")
-        legacy_device_connector = importlib.import_module("app.device_connector")
+        legacy_device_connector = self._legacy_device_connector
         result = legacy_device_connector.ingest_capture_dir(capture_dir)
         if move_to_processed:
             legacy_device_connector.move_capture_dir(capture_dir)
         return {"ingested": [result], "skipped": []}
 
     def ingest_pending_captures(self, move_to_processed: bool = True) -> Dict[str, Any]:
-        legacy_device_connector = importlib.import_module("app.device_connector")
+        legacy_device_connector = self._legacy_device_connector
         return legacy_device_connector.ingest_pending_captures(move_to_processed=move_to_processed)
 
 

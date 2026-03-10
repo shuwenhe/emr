@@ -26,8 +26,13 @@ if str(_LEGACY_BACKEND_DIR) not in sys.path:
 class AnalysisService:
     """Service for analyzing thermal imaging data."""
     
+    # Cache imported modules at class level
+    _legacy_analysis = None
+    
     def __init__(self):
         self.data_dir = settings.DATA_DIR
+        if AnalysisService._legacy_analysis is None:
+            AnalysisService._legacy_analysis = importlib.import_module("app.analysis")
         
     def analyze_record(
         self,
@@ -56,8 +61,7 @@ class AnalysisService:
         """
         logger.info("Analyzing record %s (roi=%s, llm=%s)", record_id, enable_roi, enable_llm)
         try:
-            legacy_analysis = importlib.import_module("app.analysis")
-            return legacy_analysis.analyze_record(record_id)
+            return self._legacy_analysis.analyze_record(record_id)
         except FileNotFoundError:
             raise
         except Exception as exc:

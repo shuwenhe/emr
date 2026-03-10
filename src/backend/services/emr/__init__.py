@@ -26,8 +26,14 @@ if str(_LEGACY_BACKEND_DIR) not in sys.path:
 class EMRService:
     """Service for managing electronic medical records."""
     
+    # Cache imported modules at class level
+    _legacy_emr = None
+    
     def __init__(self):
         self.emr_dir = settings.EMR_DIR
+        # Lazy load module on first use
+        if EMRService._legacy_emr is None:
+            EMRService._legacy_emr = importlib.import_module("app.emr")
         
     def create_emr(
         self,
@@ -48,7 +54,7 @@ class EMRService:
         """
         logger.info("Creating EMR for record %s", record_id)
         try:
-            legacy_emr = importlib.import_module("app.emr")
+            legacy_emr = self._legacy_emr
             return legacy_emr.generate_emr(record_id, force=False)
         except FileNotFoundError:
             raise
@@ -69,7 +75,7 @@ class EMRService:
             EMRNotFoundError: If EMR not found
         """
         logger.info("Retrieving EMR %s", emr_id)
-        legacy_emr = importlib.import_module("app.emr")
+        legacy_emr = self._legacy_emr
         legacy_not_found = getattr(legacy_emr, "EmrNotFoundError", FileNotFoundError)
         try:
             return legacy_emr.get_emr(emr_id)
@@ -95,7 +101,7 @@ class EMRService:
         """
         logger.info("Listing EMRs (patient=%s, limit=%s, offset=%s)", patient_id, limit, offset)
         try:
-            legacy_emr = importlib.import_module("app.emr")
+            legacy_emr = self._legacy_emr
             items = legacy_emr.list_emrs(patient_id=patient_id, include_archived=False)
             start = max(0, offset)
             end = start + max(0, limit)
@@ -106,7 +112,7 @@ class EMRService:
     def update_emr(self, emr_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
         logger.info("Updating EMR %s", emr_id)
         try:
-            legacy_emr = importlib.import_module("app.emr")
+            legacy_emr = self._legacy_emr
             return legacy_emr.update_emr(emr_id, updates)
         except Exception as exc:
             raise EMRNotFoundError(f"Failed to update EMR {emr_id}: {exc}") from exc
@@ -114,7 +120,7 @@ class EMRService:
     def archive_emr(self, emr_id: str, archived: bool = True) -> Dict[str, Any]:
         logger.info("Archiving EMR %s (archived=%s)", emr_id, archived)
         try:
-            legacy_emr = importlib.import_module("app.emr")
+            legacy_emr = self._legacy_emr
             return legacy_emr.archive_emr(emr_id, archived)
         except Exception as exc:
             raise EMRNotFoundError(f"Failed to archive EMR {emr_id}: {exc}") from exc

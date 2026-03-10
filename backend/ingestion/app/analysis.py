@@ -94,6 +94,8 @@ _TREATMENT_RULES = _load_treatment_rules()
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:1.7b")
 OLLAMA_ENABLED = os.getenv("OLLAMA_ENABLED", "1") != "0"
+THERMAL_DTYPE = np.float32
+THERMAL_RENDER_DPI = int(os.getenv("THERMAL_RENDER_DPI", "100"))
 
 
 def _extract_json_block(text: str) -> Optional[dict]:
@@ -148,22 +150,23 @@ def _build_llm_context(
     abnormal_regions: List[Dict[str, Any]],
     roi_analysis: Optional[Dict[str, Any]] = None,
 ) -> str:
-    context = (
+    lines = [
         "你是一名医疗热成像评估助手。请基于以下信息生成简洁、谨慎的中文内容。"
-        "输出只需客观结论，避免夸大或绝对化表述。\n"
-        f"患者信息：姓名={patient.get('name','-')} 性别={patient.get('gender','-')} 年龄={patient.get('age','-')} 部位={body_part}\n"
-        f"风险等级：{risk_level}\n"
-        f"温度摘要：{summary}\n"
-        f"温度指标：min={metrics.get('min_c')} max={metrics.get('max_c')} avg={metrics.get('avg_c')}\n"
-    )
+        "输出只需客观结论，避免夸大或绝对化表述。",
+        f"患者信息：姓名={patient.get('name','-')} 性别={patient.get('gender','-')} 年龄={patient.get('age','-')} 部位={body_part}",
+        f"风险等级：{risk_level}",
+        f"温度摘要：{summary}",
+        f"温度指标：min={metrics.get('min_c')} max={metrics.get('max_c')} avg={metrics.get('avg_c')}",
+    ]
     
     # 添加ROI分析信息（如果可用）
     if roi_analysis and roi_analysis.get("roi_list"):
-        context += "\n身体部位温度分析（MediaPipe姿态识别）：\n"
+        lines.append("")
+        lines.append("身体部位温度分析（MediaPipe姿态识别）：")
         roi_list = roi_analysis.get("roi_list", [])
         # 取前5个最热的部位
         for roi in roi_list[:5]:
-            context += f"  - {roi['name']}: {roi['mean_c']}°C (±{roi['std_c']}, n={roi['count']})\n"
+            lines.append(f"  - {roi['name']}: {roi['mean_c']}°C (±{roi['std_c']}, n={roi['count']})")
         
         # 添加对称性信息
         roi_dict = {roi['name']: roi for roi in roi_list}
@@ -180,14 +183,14 @@ def _build_llm_context(
                 right_temp = roi_dict[right_name].get("mean_c", 0)
                 diff = abs(left_temp - right_temp)
                 if diff > 0.5:
-                    context += f"  左右对比：{left_name}({left_temp}°C) vs {right_name}({right_temp}°C)，温差{diff:.2f}°C\n"
+                    lines.append(f"  左右对比：{left_name}({left_temp}°C) vs {right_name}({right_temp}°C)，温差{diff:.2f}°C")
                     has_asymmetry = True
         
         if not has_asymmetry:
-            context += "  左右对称性：良好\n"
-    
-    context += f"异常区域：{abnormal_regions}\n"
-    return context
+            lines.append("  左右对称性：良好")
+
+    lines.append(f"异常区域：{abnormal_regions}")
+    return "\n".join(lines)
 
 
 def _generate_llm_diagnosis_and_opinion(context: str) -> Dict[str, str]:
@@ -404,7 +407,7 @@ def _load_csv_temperatures(file_path: Path) -> List[float]:
 
     if not has_temperature_column:
         try:
-            matrix = np.loadtxt(str(file_path), delimiter=",")
+            matrix = np.loadtxt(str(file_path), delimiter=",", dtype=THERMAL_DTYPE)
             if matrix.ndim == 1:
                 matrix = matrix.reshape(1, -1)
             if matrix.ndim == 2:
@@ -436,7 +439,7 @@ def _load_csv_grid(file_path: Path) -> Optional[np.ndarray]:
     if not rows or not cols or not temps:
         if not has_row_col_columns:
             try:
-                matrix = np.loadtxt(str(file_path), delimiter=",")
+                matrix = np.loadtxt(str(file_path), delimiter=",", dtype=THERMAL_DTYPE)
                 if matrix.ndim == 1:
                     matrix = matrix.reshape(1, -1)
                 if matrix.ndim == 2:
@@ -447,9 +450,11 @@ def _load_csv_grid(file_path: Path) -> Optional[np.ndarray]:
 
     max_r = max(rows)
     max_c = max(cols)
-    grid = np.full((max_r + 1, max_c + 1), np.nan, dtype=float)
-    for r, c, t in zip(rows, cols, temps):
-        grid[r, c] = t
+    grid = np.full((max_r + 1, max_c + 1), np.nan, dtype=THERMAL_DTYPE)
+    row_idx = np.asarray(rows, dtype=np.int32)
+    col_idx = np.asarray(cols, dtype=np.int32)
+    temp_values = np.asarray(temps, dtype=THERMAL_DTYPE)
+    grid[row_idx, col_idx] = temp_values
     return grid
 
 
@@ -474,7 +479,7 @@ def _generate_marked_image(
     min_val = float(np.nanmin(grid))
     max_val = float(np.nanmax(grid))
 
-    fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
+    fig, ax = plt.subplots(figsize=(6, 4), dpi=THERMAL_RENDER_DPI)
     im = ax.imshow(masked, cmap="inferno")
     ax.set_title("Infrared Thermal Map")
     ax.axis("off")
@@ -829,16 +834,20 @@ def _region_analysis(grid: np.ndarray, baseline: Optional[float]) -> List[Dict[s
         return []
 
     rows, cols = grid.shape
-    row_splits = np.array_split(np.arange(rows), 3)
-    col_splits = np.array_split(np.arange(cols), 3)
+    row_step = max(rows // 3, 1)
+    col_step = max(cols // 3, 1)
     regions: List[Dict[str, Any]] = []
 
-    for r_idx, r_group in enumerate(row_splits, start=1):
-        for c_idx, c_group in enumerate(col_splits, start=1):
-            region_code = f"r{r_idx}_c{c_idx}"
+    for r_idx in range(3):
+        r_start = r_idx * row_step
+        r_end = rows if r_idx == 2 else min((r_idx + 1) * row_step, rows)
+        for c_idx in range(3):
+            c_start = c_idx * col_step
+            c_end = cols if c_idx == 2 else min((c_idx + 1) * col_step, cols)
+            region_code = f"r{r_idx + 1}_c{c_idx + 1}"
             if region_code in _EXCLUDED_REPORT_REGIONS:
                 continue
-            block = grid[np.ix_(r_group, c_group)]
+            block = grid[r_start:r_end, c_start:c_end]
             avg = float(np.nanmean(block)) if not np.all(np.isnan(block)) else None
             regions.append(
                 {
@@ -942,11 +951,6 @@ def _analyze_roi_regions(payload_path: Path, csv_is_matrix: bool = True) -> Opti
     使用MediaPipe + ROI系统分析热成像数据
     返回14个身体部位的温度统计，如果失败返回None
     """
-    # Add scripts directory to Python path for ROI module imports
-    scripts_dir = Path(__file__).resolve().parents[3] / "scripts"
-    if str(scripts_dir) not in sys.path:
-        sys.path.insert(0, str(scripts_dir))
-    
     try:
         roi_module = importlib.import_module("roi_mediapipe_dynamic")
         detect_landmarks = getattr(roi_module, "detect_landmarks")
@@ -961,7 +965,7 @@ def _analyze_roi_regions(payload_path: Path, csv_is_matrix: bool = True) -> Opti
     try:
         # 尝试加载以二维矩阵形式存储的CSV（非标准表格格式）
         if csv_is_matrix:
-            matrix = np.loadtxt(str(payload_path), delimiter=",")
+            matrix = np.loadtxt(str(payload_path), delimiter=",", dtype=THERMAL_DTYPE)
             if matrix.ndim != 2:
                 return None
         else:
@@ -970,6 +974,9 @@ def _analyze_roi_regions(payload_path: Path, csv_is_matrix: bool = True) -> Opti
             if grid is None:
                 return None
             matrix = grid
+
+        if matrix.dtype != THERMAL_DTYPE:
+            matrix = matrix.astype(THERMAL_DTYPE, copy=False)
         
         h, w = matrix.shape
         
@@ -989,16 +996,15 @@ def _analyze_roi_regions(payload_path: Path, csv_is_matrix: bool = True) -> Opti
         roi_list = []
         
         for roi_name, mask in rois.items():
-            values = matrix[mask]
-            if len(values) == 0:
+            ys, xs = np.where(mask)
+            if xs.size == 0 or ys.size == 0:
                 continue
 
-            ys, xs = np.where(mask)
+            values = matrix[ys, xs]
             center_x_pct = None
             center_y_pct = None
-            if xs.size > 0 and ys.size > 0:
-                center_x_pct = round(float(xs.mean()) / max(w - 1, 1) * 100.0, 2)
-                center_y_pct = round(float(ys.mean()) / max(h - 1, 1) * 100.0, 2)
+            center_x_pct = round(float(xs.mean()) / max(w - 1, 1) * 100.0, 2)
+            center_y_pct = round(float(ys.mean()) / max(h - 1, 1) * 100.0, 2)
             
             stats = calc_stats(values)
             roi_stats[roi_name] = stats
@@ -1012,6 +1018,9 @@ def _analyze_roi_regions(payload_path: Path, csv_is_matrix: bool = True) -> Opti
                 "center_x_pct": center_x_pct,
                 "center_y_pct": center_y_pct,
             })
+            del values
+
+        del rois
         
         if not roi_list:
             return None
@@ -1039,7 +1048,7 @@ def _analyze_roi_regions(payload_path: Path, csv_is_matrix: bool = True) -> Opti
         # 使用 fallback 方法进行基础区域分析
         try:
             if csv_is_matrix:
-                matrix = np.loadtxt(str(payload_path), delimiter=",")
+                matrix = np.loadtxt(str(payload_path), delimiter=",", dtype=THERMAL_DTYPE)
                 if matrix.ndim == 2:
                     logging.info("Using fallback ROI analysis with fixed regions")
                     return _fallback_roi_analysis(matrix)

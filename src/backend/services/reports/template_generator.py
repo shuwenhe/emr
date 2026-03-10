@@ -178,7 +178,6 @@ def _build_tables(
             {
                 "Line": line_index,
                 "BigFileBlob1": array_type(marked_bytes),
-                "FileBlob1": array_type(marked_bytes),
             }
         )
         line_index += 1
@@ -192,7 +191,6 @@ def _build_tables(
             {
                 "Line": line_index,
                 "BigFileBlob1": array_type(image_bytes),
-                "FileBlob1": array_type(image_bytes),
             }
         )
         line_index += 1
@@ -258,7 +256,7 @@ def _build_tables(
         ),
         (
             "qsimgs",
-            {"Line": int_type, "BigFileBlob1": array_type, "FileBlob1": array_type},
+            {"Line": int_type, "BigFileBlob1": array_type},
             qsimgs_rows,
         ),
         (
