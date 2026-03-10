@@ -4,13 +4,21 @@ AI-powered services including LLM report generation and RAG.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+import importlib
+import sys
+from pathlib import Path
+from typing import Any, Dict
 
 from src.backend.core.config import settings
 from src.backend.core.exceptions import LLMError
 from src.backend.core.logging import get_logger
 
 logger = get_logger(__name__)
+
+
+_LEGACY_BACKEND_DIR = Path(__file__).resolve().parents[4] / "backend" / "device-ingestion"
+if str(_LEGACY_BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(_LEGACY_BACKEND_DIR))
 
 
 class AIService:
@@ -48,12 +56,14 @@ class AIService:
         if not self.is_enabled():
             logger.warning("LLM features are disabled")
             return {}
-        
-        logger.info(f"Generating AI report summary using {self.llm_model}")
-        
-        # TODO: Migrate from device-ingestion/app/llm_report.py
-        
-        raise NotImplementedError("AI service not yet implemented")
+
+        logger.info("Generating AI report summary using %s", self.llm_model)
+        try:
+            legacy_llm = importlib.import_module("app.llm_report")
+            payload = legacy_llm.generate_report_ai(report, emr)
+            return payload if isinstance(payload, dict) else {}
+        except Exception as exc:
+            raise LLMError(f"LLM report generation failed: {exc}") from exc
 
 
 __all__ = ["AIService"]

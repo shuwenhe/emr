@@ -6,6 +6,9 @@ Thermal data analysis, ROI detection, and temperature metrics calculation.
 
 from __future__ import annotations
 
+import importlib
+import sys
+from pathlib import Path
 from typing import Any, Dict
 
 from src.backend.core.config import settings
@@ -13,6 +16,11 @@ from src.backend.core.exceptions import AnalysisError
 from src.backend.core.logging import get_logger
 
 logger = get_logger(__name__)
+
+
+_LEGACY_BACKEND_DIR = Path(__file__).resolve().parents[4] / "backend" / "device-ingestion"
+if str(_LEGACY_BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(_LEGACY_BACKEND_DIR))
 
 
 class AnalysisService:
@@ -46,11 +54,14 @@ class AnalysisService:
         Raises:
             AnalysisError: If analysis fails
         """
-        logger.info(f"Analyzing record {record_id}")
-        
-        # TODO: Migrate from device-ingestion/app/analysis.py
-        
-        raise NotImplementedError("Analysis service not yet implemented")
+        logger.info("Analyzing record %s (roi=%s, llm=%s)", record_id, enable_roi, enable_llm)
+        try:
+            legacy_analysis = importlib.import_module("app.analysis")
+            return legacy_analysis.analyze_record(record_id)
+        except FileNotFoundError:
+            raise
+        except Exception as exc:
+            raise AnalysisError(f"Analysis failed for record {record_id}: {exc}") from exc
 
 
 __all__ = ["AnalysisService"]

@@ -6,15 +6,21 @@ Handles device data import, quality control, and initial processing.
 
 from __future__ import annotations
 
-import logging
+import importlib
+import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from src.backend.core.config import settings
 from src.backend.core.exceptions import ValidationError
 from src.backend.core.logging import get_logger
 
 logger = get_logger(__name__)
+
+
+_LEGACY_BACKEND_DIR = Path(__file__).resolve().parents[4] / "backend" / "device-ingestion"
+if str(_LEGACY_BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(_LEGACY_BACKEND_DIR))
 
 
 class IngestionService:
@@ -44,12 +50,28 @@ class IngestionService:
         Raises:
             ValidationError: If data validation fails
         """
-        logger.info(f"Ingesting data from {data_file}")
-        
-        # TODO: Implement actual ingestion logic
-        # This will be migrated from device-ingestion/app/
-        
-        raise NotImplementedError("Ingestion service not yet implemented")
+        logger.info("Ingesting data from %s", data_file)
+        if not data_file.exists() or not data_file.is_file():
+            raise ValidationError(f"Data file not found: {data_file}")
+
+        try:
+            legacy_models = importlib.import_module("app.models")
+            legacy_qc = importlib.import_module("app.qc")
+            legacy_storage = importlib.import_module("app.storage")
+
+            parsed = legacy_models.IngestMetadata.model_validate(metadata)
+            if validate:
+                issues = legacy_qc.run_qc(parsed)
+                if issues:
+                    raise ValidationError("QC validation failed", details={"issues": issues})
+
+            file_bytes = data_file.read_bytes()
+            result = legacy_storage.save_payload(data_file.name, file_bytes, parsed.model_dump())
+            return str(result.get("record_id") or "")
+        except ValidationError:
+            raise
+        except Exception as exc:
+            raise ValidationError(f"Ingestion failed: {exc}") from exc
 
 
 __all__ = ["IngestionService"]
