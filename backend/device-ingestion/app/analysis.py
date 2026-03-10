@@ -15,6 +15,7 @@ import yaml
 
 import matplotlib
 import numpy as np
+from matplotlib import font_manager as fm
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
@@ -23,6 +24,35 @@ from .config import DATA_DIR
 from .data_platform import get_patient_history, save_plan, save_report
 from .emr import upsert_emr_from_analysis
 from .clickhouse_store import insert_thermal_csv
+
+THERMAL_PLOT_BOUNDS = {
+    "left": 3,
+    "right": 72,
+    "top": 8,
+    "bottom": 97,
+}
+
+FACIAL_LABEL_OFFSETS = {
+    "右眼": (8.0, -4.0),
+    "左眼": (-8.0, -4.0),
+    "鼻子": (0.0, -1.8),
+    "右脸颊": (11.0, 1.5),
+    "左脸颊": (-11.0, 1.5),
+}
+
+_CJK_FONT_CANDIDATES = [
+    "Noto Sans CJK SC",
+    "Noto Sans SC",
+    "Source Han Sans CN",
+    "WenQuanYi Zen Hei",
+    "WenQuanYi Micro Hei",
+    "Microsoft YaHei",
+    "SimHei",
+    "PingFang SC",
+    "Heiti SC",
+    "Arial Unicode MS",
+]
+_CJK_FONT_PROP: Optional[fm.FontProperties] = None
 
 # 添加scripts目录用于导入ROI模块
 _SCRIPTS_DIR = Path(__file__).resolve().parents[3] / "scripts"
@@ -467,6 +497,155 @@ def _extract_temperature_labels(image_path: Optional[str]) -> Dict[str, Any]:
     return {"text": text, "values": values}
 
 
+def _get_cjk_font_prop() -> Optional[fm.FontProperties]:
+    global _CJK_FONT_PROP
+    if _CJK_FONT_PROP is not None:
+        return _CJK_FONT_PROP
+
+    try:
+        for entry in fm.fontManager.ttflist:
+            if entry.name in _CJK_FONT_CANDIDATES:
+                _CJK_FONT_PROP = fm.FontProperties(fname=entry.fname)
+                return _CJK_FONT_PROP
+
+        for font_path in fm.findSystemFonts():
+            lowered = font_path.lower()
+            if (
+                "notosanscjk" in lowered
+                or "sourcehansans" in lowered
+                or "wqy-zenhei" in lowered
+                or "wqy-microhei" in lowered
+                or "simhei" in lowered
+                or "msyh" in lowered
+                or "yahei" in lowered
+                or "pingfang" in lowered
+                or "heiti" in lowered
+            ):
+                _CJK_FONT_PROP = fm.FontProperties(fname=font_path)
+                return _CJK_FONT_PROP
+    except Exception:
+        return None
+
+    return None
+
+
+def _roi_label_points(roi_analysis: Optional[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    if not isinstance(roi_analysis, dict):
+        return []
+    roi_list = roi_analysis.get("roi_list")
+    if not isinstance(roi_list, list):
+        return []
+
+    points: List[Dict[str, Any]] = []
+    for item in roi_list:
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("name") or "").strip()
+        if not name:
+            continue
+        try:
+            mean_c = float(item.get("mean_c"))
+            cx = max(0.0, min(100.0, float(item.get("center_x_pct"))))
+            cy = max(0.0, min(100.0, float(item.get("center_y_pct"))))
+        except Exception:
+            continue
+
+        x = THERMAL_PLOT_BOUNDS["left"] + (cx / 100.0) * (
+            THERMAL_PLOT_BOUNDS["right"] - THERMAL_PLOT_BOUNDS["left"]
+        )
+        y = THERMAL_PLOT_BOUNDS["top"] + (cy / 100.0) * (
+            THERMAL_PLOT_BOUNDS["bottom"] - THERMAL_PLOT_BOUNDS["top"]
+        )
+
+        label_x = x
+        label_y = y
+        for key, (dx, dy) in FACIAL_LABEL_OFFSETS.items():
+            if key in name:
+                label_x = max(2.0, min(98.0, x + dx))
+                label_y = max(2.0, min(98.0, y + dy))
+                break
+
+        points.append(
+            {
+                "name": name,
+                "mean_c": mean_c,
+                "x": x,
+                "y": y,
+                "label_x": label_x,
+                "label_y": label_y,
+            }
+        )
+
+    points.sort(key=lambda p: p["label_y"])
+    min_y_gap = 3.2
+    for i in range(1, len(points)):
+        prev = points[i - 1]
+        cur = points[i]
+        if abs(cur["label_x"] - prev["label_x"]) < 8 and (cur["label_y"] - prev["label_y"]) < min_y_gap:
+            cur["label_y"] = min(97.0, prev["label_y"] + min_y_gap)
+    return points
+
+
+def _generate_roi_labeled_image(
+    base_image_path: Optional[str],
+    roi_analysis: Optional[Dict[str, Any]],
+    output_path: Path,
+) -> Optional[str]:
+    if not base_image_path:
+        return None
+    points = _roi_label_points(roi_analysis)
+    if not points:
+        return None
+
+    try:
+        cjk_font = _get_cjk_font_prop()
+        image = plt.imread(str(base_image_path))
+        fig, ax = plt.subplots(figsize=(6, 4), dpi=180)
+        ax.imshow(image)
+        ax.axis("off")
+
+        h, w = image.shape[0], image.shape[1]
+        for point in points:
+            px = (point["x"] / 100.0) * w
+            py = (point["y"] / 100.0) * h
+            lpx = (point.get("label_x", point["x"]) / 100.0) * w
+            lpy = (point.get("label_y", point["y"]) / 100.0) * h
+            text = f"{point['name']} {point['mean_c']:.1f}°C"
+            ax.annotate(
+                text,
+                xy=(px, py),
+                xytext=(lpx, lpy),
+                textcoords="data",
+                fontsize=5,
+                fontproperties=cjk_font,
+                color="white",
+                ha="center",
+                va="center",
+                arrowprops={
+                    "arrowstyle": "-",
+                    "color": "#0f172a",
+                    "lw": 0.5,
+                    "alpha": 0.85,
+                },
+                bbox={
+                    "boxstyle": "round,pad=0.18",
+                    "facecolor": "#0f172a",
+                    "alpha": 0.72,
+                    "edgecolor": "#ffffff",
+                    "linewidth": 0.4,
+                },
+            )
+
+        fig.savefig(str(output_path), bbox_inches="tight", pad_inches=0)
+        plt.close(fig)
+        if output_path.exists() and output_path.is_file():
+            return str(output_path)
+        return None
+    except Exception as exc:
+        logging.debug("generate ROI labeled image failed: %s", exc)
+        return None
+
+
 def _compare_temp(value: Optional[float], baseline: Optional[float], delta: float = 0.3) -> str:
     if value is None or baseline is None:
         return "unknown"
@@ -706,6 +885,7 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
     body_part = patient.get("body_part") or "unknown"
 
     marked_image_path = None
+    roi_labeled_image_path = None
     temperature_labels = {"text": None, "values": []}
     region_comparison: List[Dict[str, Any]] = []
     abnormal_regions: List[Dict[str, Any]] = []
@@ -738,6 +918,15 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
         
         # 尝试进行ROI分析
         roi_analysis = _analyze_roi_regions(payload_path, csv_is_matrix=True)
+        if marked_image_path and roi_analysis:
+            roi_labeled_image_path = _generate_roi_labeled_image(
+                marked_image_path,
+                roi_analysis,
+                record_dir / "thermal_roi_labeled.png",
+            )
+            if roi_labeled_image_path:
+                relative_roi_path = Path(roi_labeled_image_path).relative_to(DATA_DIR)
+                image_paths.append(str(relative_roi_path))
 
     capture_time = (metadata.get("capture") or {}).get("capture_time") or datetime.now().isoformat()
     device = metadata.get("device") or {}
@@ -820,6 +1009,7 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
         "environment": metadata.get("environment"),
         "thermal_images": image_paths,
         "thermal_marked_image": str(Path(marked_image_path).relative_to(DATA_DIR)) if marked_image_path else None,
+        "thermal_roi_labeled_image": str(Path(roi_labeled_image_path).relative_to(DATA_DIR)) if roi_labeled_image_path else None,
         "thermal_marked_labels": temperature_labels,
         "diagnosis": diagnosis,
         "doctor_opinion": doctor_opinion,

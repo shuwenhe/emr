@@ -158,11 +158,104 @@ def upsert_emr_from_analysis(
     return emr
 
 
+def _resolve_data_image_path(path_value: Any) -> Optional[Path]:
+    raw = str(path_value or "").strip()
+    if not raw:
+        return None
+
+    candidate = Path(raw)
+    if candidate.exists() and candidate.is_file():
+        return candidate
+
+    normalized = raw.lstrip("/")
+    if normalized.startswith("data/"):
+        normalized = normalized[5:]
+    candidate = DATA_DIR / normalized
+    if candidate.exists() and candidate.is_file():
+        return candidate
+    return None
+
+
+def _refresh_roi_labeled_image(emr: Dict[str, Any]) -> bool:
+    report = emr.get("report")
+    if not isinstance(report, dict):
+        return False
+
+    analysis = report.get("analysis")
+    if not isinstance(analysis, dict):
+        return False
+    roi_analysis = analysis.get("roi_analysis")
+    if not isinstance(roi_analysis, dict) or not isinstance(roi_analysis.get("roi_list"), list):
+        return False
+
+    record_id = str(emr.get("record_id") or report.get("record_id") or "").strip()
+    if not record_id:
+        return False
+
+    marked = _resolve_data_image_path(report.get("thermal_marked_image"))
+    if marked is None:
+        thermal_images = report.get("thermal_images")
+        if isinstance(thermal_images, list):
+            for item in thermal_images:
+                marked = _resolve_data_image_path(item)
+                if marked is not None:
+                    break
+    if marked is None:
+        return False
+
+    try:
+        from .analysis import _generate_roi_labeled_image
+    except Exception:
+        return False
+
+    out_path = DATA_DIR / record_id / "thermal_roi_labeled.png"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    generated = _generate_roi_labeled_image(str(marked), roi_analysis, out_path)
+    if not generated:
+        return False
+
+    relative = str(Path(generated).relative_to(DATA_DIR))
+    report["thermal_roi_labeled_image"] = relative
+
+    thermal_images = report.get("thermal_images")
+    if isinstance(thermal_images, list) and relative not in thermal_images:
+        thermal_images.append(relative)
+    elif not isinstance(thermal_images, list):
+        report["thermal_images"] = [relative]
+
+    emr["report"] = report
+    return True
+
+
 def get_emr(emr_id: str) -> Dict[str, Any]:
     path = _emr_path(emr_id)
     if not path.exists():
         raise EmrNotFoundError("emr_not_found")
-    return _load_json(path)
+
+    emr = _load_json(path)
+    updated = _refresh_roi_labeled_image(emr)
+    if updated:
+        with open(path, "w", encoding="utf-8") as handle:
+            json.dump(emr, handle, ensure_ascii=False, indent=2)
+
+        record_id = emr.get("record_id")
+        report = emr.get("report")
+        if isinstance(record_id, str) and record_id and isinstance(report, dict):
+            report_path = _report_path(record_id)
+            report_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(report_path, "w", encoding="utf-8") as handle:
+                json.dump(report, handle, ensure_ascii=False, indent=2)
+            try:
+                save_report(record_id, report)
+            except Exception:
+                pass
+
+        try:
+            save_emr(emr)
+        except Exception:
+            pass
+
+    return emr
 
 
 def update_emr(emr_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:

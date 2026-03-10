@@ -16,6 +16,7 @@ type EmrRecord = {
   patient_id: string;
   created_at: string;
   risk_level: string;
+  thermal_roi_labeled_image?: string;
   thermal_marked_image?: string;
   temperature_metrics?: {
     min_c: number;
@@ -55,6 +56,7 @@ export default function ComparisonPage() {
   const [autoCompared, setAutoCompared] = useState(false);
   const [autoLoadComplete, setAutoLoadComplete] = useState(false);
   const [loadingEmrRecords, setLoadingEmrRecords] = useState(false);
+  const [imageCacheBust] = useState(() => `${Date.now()}`);
 
   useEffect(() => {
     // 获取 URL 参数中的 record_id
@@ -269,6 +271,7 @@ export default function ComparisonPage() {
         patient_id: data.patient_id,
         created_at: data.created_at,
         risk_level: data.report?.analysis?.risk_level || "unknown",
+        thermal_roi_labeled_image: data.report?.thermal_roi_labeled_image,
         thermal_marked_image: data.report?.thermal_marked_image,
         temperature_metrics: data.report?.analysis?.temperature_metrics
       };
@@ -447,10 +450,15 @@ export default function ComparisonPage() {
   function buildThermalImageUrl(path?: string) {
     if (!path) return "";
     const normalized = String(path).replace(/^\//, "");
-    if (normalized.startsWith("data/")) {
-      return `${API_BASE}/${normalized}`;
-    }
-    return `${API_BASE}/data/${normalized}`;
+    const baseUrl = normalized.startsWith("data/")
+      ? `${API_BASE}/${normalized}`
+      : `${API_BASE}/data/${normalized}`;
+    const separator = baseUrl.includes("?") ? "&" : "?";
+    return `${baseUrl}${separator}v=${encodeURIComponent(imageCacheBust)}`;
+  }
+
+  function preferredThermalImagePath(emr: EmrRecord) {
+    return emr.thermal_roi_labeled_image || emr.thermal_marked_image;
   }
 
   async function handleExportComparison() {
@@ -914,9 +922,9 @@ export default function ComparisonPage() {
                     </div>
                   </div>
                 )}
-                {beforeEmr.thermal_marked_image && (
+                {preferredThermalImagePath(beforeEmr) && (
                   <Image
-                    src={buildThermalImageUrl(beforeEmr.thermal_marked_image)}
+                    src={buildThermalImageUrl(preferredThermalImagePath(beforeEmr))}
                     alt="治疗前热成像"
                     width={1200}
                     height={900}
@@ -959,9 +967,9 @@ export default function ComparisonPage() {
                     </div>
                   </div>
                 )}
-                {afterEmr.thermal_marked_image && (
+                {preferredThermalImagePath(afterEmr) && (
                   <Image
-                    src={buildThermalImageUrl(afterEmr.thermal_marked_image)}
+                    src={buildThermalImageUrl(preferredThermalImagePath(afterEmr))}
                     alt="治疗后热成像"
                     width={1200}
                     height={900}

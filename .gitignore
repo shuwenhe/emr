@@ -11,6 +11,7 @@
 /backend/device-ingestion/generated/
 /data/
 /reports/
+/logs/
 /frontend/node_modules/
 /frontend/.next/
 /frontend/.next/cache/
