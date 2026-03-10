@@ -33,7 +33,7 @@ HTTP 503 Service Unavailable
 
 ### Step 1: 执行SQL优化脚本
 ```bash
-cd /home/shuwen/hospital-report/backend/device-ingestion
+cd /home/shuwen/emr/backend/device-ingestion
 mysql -u root -p < mysql_optimization.sql
 ```
 

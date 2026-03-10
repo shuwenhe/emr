@@ -17,7 +17,7 @@
 - 影响31个患者的数据查询
 
 # 修复方法
-cd /home/shuwen/hospital-report/backend/device-ingestion
+cd /home/shuwen/emr/backend/device-ingestion
 mysql -u hospital -phospital hospital << 'EOF'
 UPDATE emrs e
 INNER JOIN patients p ON JSON_UNQUOTE(JSON_EXTRACT(e.emr_json, '$.patient.name')) = p.name

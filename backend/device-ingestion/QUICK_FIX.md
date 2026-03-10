@@ -28,7 +28,7 @@
 #### 快速临时修复（立即生效，不需重启）
 ```bash
 # 在有 MySQL 访问权限的服务器上执行
-cd /home/shuwen/hospital-report/backend/device-ingestion
+cd /home/shuwen/emr/backend/device-ingestion
 
 # 方式1：使用 SQL 脚本
 mysql -u <用户名> -p < mysql_optimization.sql

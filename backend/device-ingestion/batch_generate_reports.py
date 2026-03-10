@@ -80,6 +80,8 @@ def generate_reports_for_patient(patient_id: str, patient_name: str):
 
 def main():
     """为所有患者生成报告"""
+    project_root = Path(__file__).resolve().parents[2]
+    reports_dir = project_root / "reports"
     
     print("=" * 70)
     print("模板报告批量生成工具")
@@ -109,7 +111,7 @@ def main():
     print(f"  总计: {total_success + total_fail}")
     print(f"{'='*70}")
     print(f"\n✅ 报告生成完成！")
-    print(f"   报告文件位置: /Users/shuwen/hospital-report/reports/")
+    print(f"   报告文件位置: {reports_dir}/")
     print(f"   前端应该能看到所有生成的报告文件")
     print(f"{'='*70}\n")
 

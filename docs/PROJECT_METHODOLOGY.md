@@ -119,7 +119,7 @@ THEN 显示报告列表和预览选项
 ### 1. 代码组织结构
 
 ```
-hospital-report/
+emr/
 ├── frontend/                 # Next.js 15 前端应用
 │   ├── src/
 │   │   ├── app/             # App Router 路由

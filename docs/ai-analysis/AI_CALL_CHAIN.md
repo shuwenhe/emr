@@ -361,7 +361,7 @@ except Exception as exc:
 
 ```bash
 # 查看是否有"ai"字段
-cat /home/shuwen/hospital-report/data/{record_id}/report.json | grep -A 20 '"ai"'
+cat /home/shuwen/emr/data/{record_id}/report.json | grep -A 20 '"ai"'
 
 # 预期输出：
 # "ai": {
@@ -398,7 +398,7 @@ EOF
 
 ```bash
 # 检查Ollama调用日志
-grep -i "ollama\|llm\|generate" /var/log/hospital-report/*.log
+grep -i "ollama\|llm\|generate" /var/log/emr/*.log
 
 # 应该看到类似：
 # INFO: Ollama generate: model=qwen3:1.7b, tokens=512

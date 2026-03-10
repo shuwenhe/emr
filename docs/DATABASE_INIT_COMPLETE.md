@@ -32,24 +32,24 @@
 ## 📝 相关文件
 
 ### 初始化脚本
-- `/home/shuwen/hospital-report/database/init_mysql.sql` - MySQL初始化脚本
-- `/home/shuwen/hospital-report/database/init_clickhouse.sh` - ClickHouse初始化脚本
-- `/home/shuwen/hospital-report/database/init_thermal.sql` - ClickHouse SQL脚本
-- `/home/shuwen/hospital-report/init_clickhouse.py` - Python初始化脚本
+- `/home/shuwen/emr/database/init_mysql.sql` - MySQL初始化脚本
+- `/home/shuwen/emr/database/init_clickhouse.sh` - ClickHouse初始化脚本
+- `/home/shuwen/emr/database/init_thermal.sql` - ClickHouse SQL脚本
+- `/home/shuwen/emr/init_clickhouse.py` - Python初始化脚本
 
 ### 配置文件
-- `/home/shuwen/hospital-report/config/mysql.yaml` - MySQL连接配置
-- `/home/shuwen/hospital-report/config/clickhouse.yaml` - ClickHouse连接配置
-- `/home/shuwen/hospital-report/docker-compose.yml` - Docker Compose配置
+- `/home/shuwen/emr/config/mysql.yaml` - MySQL连接配置
+- `/home/shuwen/emr/config/clickhouse.yaml` - ClickHouse连接配置
+- `/home/shuwen/emr/docker-compose.yml` - Docker Compose配置
 
 ### 数据同步
-- `/home/shuwen/hospital-report/sync_to_clickhouse.py` - MySQL到ClickHouse数据同步脚本
+- `/home/shuwen/emr/sync_to_clickhouse.py` - MySQL到ClickHouse数据同步脚本
 
 ## 🚀 快速开始
 
 ### 使用Docker启动所有服务
 ```bash
-cd /home/shuwen/hospital-report
+cd /home/shuwen/emr
 docker-compose up -d
 ```
 
@@ -89,12 +89,12 @@ clickhouse-client -h 127.0.0.1 -u hospital -p hospital -d hospital --query "SHOW
 
 ### 初始化ClickHouse（如果容器未自动初始化）
 ```bash
-python3 /home/shuwen/hospital-report/init_clickhouse.py
+python3 /home/shuwen/emr/init_clickhouse.py
 ```
 
 ### 同步MySQL数据到ClickHouse
 ```bash
-python3 /home/shuwen/hospital-report/sync_to_clickhouse.py
+python3 /home/shuwen/emr/sync_to_clickhouse.py
 ```
 
 ### 查询ClickHouse数据
@@ -125,4 +125,4 @@ A: 查看初始化日志：`docker logs hospital-mysql`
 
 ## 📚 更多信息
 
-详见: `/home/shuwen/hospital-report/CLICKHOUSE_SETUP.md`
+详见: `/home/shuwen/emr/CLICKHOUSE_SETUP.md`

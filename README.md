@@ -1,4 +1,4 @@
-# hospital-report
+# emr
 
 Infrared thermal imaging ingestion, analysis, and report generation workflow.
 

@@ -12,8 +12,9 @@ from datetime import datetime
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-# 使用绝对路径指向EMR数据目录
-EMR_DIR = Path("/Users/shuwen/hospital-report/data/emr")
+# 使用项目根目录下的EMR数据目录
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+EMR_DIR = PROJECT_ROOT / "data" / "emr"
 from app.data_platform import upsert_patient, list_emrs as list_db_emrs, get_patient
 
 def main():

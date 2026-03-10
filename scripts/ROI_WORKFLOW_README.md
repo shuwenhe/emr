@@ -13,7 +13,7 @@
 ### 方案 A：单矩阵快速标注（一次性用）
 
 ```bash
-cd /home/shuwen/hospital-report
+cd /home/shuwen/emr
 
 python3 scripts/roi_temp_stats_from_heatmap.py \
   --matrix-csv data/35/2/1_B8A6B4E749D24C899104D4B846DE3E5F_1.csv \

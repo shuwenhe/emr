@@ -12,7 +12,7 @@
 
 ### 1. /app/main.py
 
-**文件**：`/home/shuwen/hospital-report/backend/device-ingestion/app/main.py`  
+**文件**：`/home/shuwen/emr/backend/device-ingestion/app/main.py`  
 **行数**：239-266  
 **改动**：简化 `/emr` 端点，消除冗余查询
 
@@ -52,7 +52,7 @@ def list_emr_endpoint(
 
 ### 2. /app/data_platform.py
 
-**文件**：`/home/shuwen/hospital-report/backend/device-ingestion/app/data_platform.py`  
+**文件**：`/home/shuwen/emr/backend/device-ingestion/app/data_platform.py`  
 **行数**：492-604  
 **改动**：优化 `list_emrs()` 为两步查询模式
 
@@ -185,7 +185,7 @@ curl -X GET "http://localhost:8000/emr?patient_id=PA0793AA8CF11&include_archived
 ## 📚 相关文件位置
 
 ```
-hospital-report/backend/device-ingestion/
+emr/backend/device-ingestion/
 
 ├── app/
 │   ├── main.py ✅ 已修改
