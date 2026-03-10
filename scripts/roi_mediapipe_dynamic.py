@@ -15,12 +15,29 @@ from __future__ import annotations
 
 import argparse
 import csv
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.path import Path as MplPath
+
+# 尝试导入C++加速库，否则fallback到Python
+try:
+    from roi_masks_binding import (
+        rect_mask_c, polygon_mask_c, segment_mask_c, calc_stats_fast_c,
+        is_c_lib_available
+    )
+    C_LIB_AVAILABLE = is_c_lib_available()
+except ImportError:
+    rect_mask_c = None
+    polygon_mask_c = None
+    segment_mask_c = None
+    calc_stats_fast_c = None
+    C_LIB_AVAILABLE = False
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -30,6 +47,14 @@ class Pt:
 
 
 def rect_mask(height: int, width: int, x1: float, y1: float, x2: float, y2: float) -> np.ndarray:
+    # 尝试使用C++加速版本
+    if C_LIB_AVAILABLE and rect_mask_c:
+        mask_bytes = rect_mask_c(height, width, x1, y1, x2, y2)
+        if mask_bytes is not None:
+            mask = np.frombuffer(mask_bytes, dtype=np.uint8).reshape((height, width))
+            return mask.astype(bool)
+    
+    # Fallback到Python实现
     mask = np.zeros((height, width), dtype=bool)
     x1i = int(np.clip(min(x1, x2), 0, width - 1))
     x2i = int(np.clip(max(x1, x2), 0, width - 1))
@@ -40,6 +65,14 @@ def rect_mask(height: int, width: int, x1: float, y1: float, x2: float, y2: floa
 
 
 def polygon_mask(height: int, width: int, vertices: list[tuple[float, float]]) -> np.ndarray:
+    # 尝试使用C++加速版本
+    if C_LIB_AVAILABLE and polygon_mask_c:
+        mask_bytes = polygon_mask_c(height, width, vertices)
+        if mask_bytes is not None:
+            mask = np.frombuffer(mask_bytes, dtype=np.uint8).reshape((height, width))
+            return mask.astype(bool)
+    
+    # Fallback到Python实现
     path = MplPath(vertices)
     xx, yy = np.meshgrid(np.arange(width), np.arange(height))
     points = np.vstack((xx.ravel(), yy.ravel())).T
@@ -48,6 +81,15 @@ def polygon_mask(height: int, width: int, vertices: list[tuple[float, float]]) -
 
 
 def segment_mask(height: int, width: int, p1: Pt, p2: Pt, thickness: float) -> np.ndarray:
+    # 尝试使用C++加速版本
+    if C_LIB_AVAILABLE and segment_mask_c:
+        mask_bytes = segment_mask_c(height, width, float(p1.x), float(p1.y),
+                                     float(p2.x), float(p2.y), thickness)
+        if mask_bytes is not None:
+            mask = np.frombuffer(mask_bytes, dtype=np.uint8).reshape((height, width))
+            return mask.astype(bool)
+    
+    # Fallback到Python实现
     xx, yy = np.meshgrid(np.arange(width), np.arange(height))
     px = xx.astype(np.float32)
     py = yy.astype(np.float32)
@@ -85,6 +127,14 @@ def calc_stats(values: np.ndarray) -> dict[str, float]:
             "p05": 0.0,
             "p95": 0.0,
         }
+    
+    # 尝试使用C++加速版本
+    if C_LIB_AVAILABLE and calc_stats_fast_c:
+        stats = calc_stats_fast_c(values)
+        if stats is not None:
+            return stats
+    
+    # Fallback到Python实现
     return {
         "count": int(values.size),
         "min": float(np.min(values)),
