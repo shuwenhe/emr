@@ -3,7 +3,7 @@
 Interactive ROI temperature statistics tool for thermal matrix CSV.
 
 Usage example:
-python3 scripts/roi_temp_stats_from_heatmap.py \
+python3 roi/python/roi_temp_stats_from_heatmap.py \
   --matrix-csv data/35/2/1_B8A6B4E749D24C899104D4B846DE3E5F_1.csv \
   --out-csv data/35/2/1_B8A6B4E749D24C899104D4B846DE3E5F_1_roi_stats.csv \
   --vmin 28 --vmax 40

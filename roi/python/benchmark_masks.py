@@ -13,22 +13,35 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # 导入Python原生实现和C++版本
-from roi_mediapipe_dynamic import (
-    rect_mask, polygon_mask, segment_mask, calc_stats, Pt,
-    C_LIB_AVAILABLE
-)
+# 支持相对导入（模块方式）和直接导入（脚本方式）
+try:
+    from .roi_mediapipe_dynamic import (
+        rect_mask, polygon_mask, segment_mask, calc_stats, Pt,
+        C_LIB_AVAILABLE
+    )
+except (ImportError, ValueError):
+    from roi_mediapipe_dynamic import (
+        rect_mask, polygon_mask, segment_mask, calc_stats, Pt,
+        C_LIB_AVAILABLE
+    )
 
 # 也导入C++直接绑定，用于对比
 try:
-    from roi_masks_binding import (
+    from .roi_masks_binding import (
         rect_mask_c, polygon_mask_c, segment_mask_c,
         calc_stats_fast_c
     )
-except ImportError:
-    rect_mask_c = None
-    polygon_mask_c = None
-    segment_mask_c = None
-    calc_stats_fast_c = None
+except (ImportError, ValueError):
+    try:
+        from roi_masks_binding import (
+            rect_mask_c, polygon_mask_c, segment_mask_c,
+            calc_stats_fast_c
+        )
+    except ImportError:
+        rect_mask_c = None
+        polygon_mask_c = None
+        segment_mask_c = None
+        calc_stats_fast_c = None
 
 
 def benchmark_rect_mask(height=480, width=640, runs=100):

@@ -12,8 +12,9 @@ KB_API_KEY ?=
 KB_MAX_LEN ?= 800
 KB_OVERLAP ?= 100
 KB_BATCH_SIZE ?= 32
+ROI_DIR ?= $(CURDIR)/roi
 
-.PHONY: help install run-backend run-frontend db-check report kb-build kb-build-markdown kb-rebuild kb-clean clean
+.PHONY: help install run-backend run-frontend db-check report kb-build kb-build-markdown kb-rebuild kb-clean roi-build roi-benchmark clean
 
 help:
 	@echo "Available targets:"
@@ -27,6 +28,8 @@ help:
 	@echo "  make kb-build-markdown # build KB and print markdown/chunk debug"
 	@echo "  make kb-rebuild # alias of kb-build"
 	@echo "  make kb-clean # remove generated KB artifacts"
+	@echo "  make roi-build # build ROI C++ library under roi/cpp"
+	@echo "  make roi-benchmark # run ROI Python/C++ benchmark"
 	@echo "  make clean    # remove generated files"
 
 install:
@@ -62,6 +65,12 @@ kb-rebuild: kb-build
 kb-clean:
 	@rm -rf "$(KB_OUT_DIR)/current" "$(KB_OUT_DIR)/versions"
 	@echo "Removed $(KB_OUT_DIR)/current and $(KB_OUT_DIR)/versions"
+
+roi-build:
+	@bash "$(ROI_DIR)/build.sh"
+
+roi-benchmark:
+	@"$(KB_PY)" "$(ROI_DIR)/python/benchmark_masks.py"
 
 clean:
 	@rm -rf $(VENV_DIR)

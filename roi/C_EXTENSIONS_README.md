@@ -12,16 +12,25 @@
 ## 文件结构
 
 ```
-emr/scripts/
-├── roi_masks.h              # C++ 头文件（函数声明）
-├── roi_masks.cpp            # C++ 实现
-├── roi_masks_binding.py     # Python ctypes 绑定
-├── roi_mediapipe_dynamic.py # 主ROI分析脚本（已集成C++调用）
-├── CMakeLists.txt           # CMake 编译配置
+emr/roi/
+├── cpp/                     # C++ 源代码目录
+│   ├── roi_masks.h          # C++ 头文件（函数声明）
+│   ├── roi_masks.cpp        # C++ 实现（~310行）
+│   ├── CMakeLists.txt       # CMake 编译配置
+│   ├── build/               # 编译中间文件（编译生成）
+│   └── lib/                 # 编译输出库文件（编译生成）
+├── python/                  # Python 文件目录
+│   ├── roi_masks_binding.py         # Python ctypes 绑定
+│   ├── roi_mediapipe_dynamic.py     # 主ROI分析脚本（已集成C++调用）
+│   ├── benchmark_masks.py           # 性能基准测试
+│   ├── roi_accuracy_validator.py    # ROI 准确性验证
+│   ├── roi_batch_apply.py           # ROI 批量应用
+│   ├── roi_batch_process.py         # ROI 批量处理
+│   ├── roi_quick_extract.py         # ROI 快速提取
+│   ├── roi_template_define.py       # ROI 模板定义
+│   └── roi_temp_stats_from_heatmap.py  # 从热图统计温度
 ├── build.sh                 # 编译脚本（Linux/macOS）
-├── build.bat                # 编译脚本（Windows）
-├── benchmark_masks.py       # 性能基准测试
-└── README.md                # 本文件
+└── C_EXTENSIONS_README.md   # 本文件
 ```
 
 ## 编译步骤
@@ -35,38 +44,38 @@ emr/scripts/
 ### Linux / macOS 编译
 
 ```bash
-cd emr/scripts
+cd emr/roi
 
-# 方案1：使用提供的脚本
+# 方案1：使用提供的脚本（推荐）
 chmod +x build.sh
 ./build.sh
 
 # 或者方案2：手动编译
-mkdir -p build
-cd build
+mkdir -p cpp/build
+cd cpp/build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build . -j$(nproc)
-cd ..
+cd ../..
 ```
 
 ### Windows 编译
 
 ```cmd
-cd emr\scripts
+cd emr\roi
 
 # 使用VS编译器
-mkdir build
-cd build
+mkdir cpp\build
+cd cpp\build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build . --config Release -j%NUMBER_OF_PROCESSORS%
-cd ..
+cd ..\..
 ```
 
 ### 编译结果
 
 编译完成后，库文件会生成到：
-- **Linux/macOS**: `emr/scripts/lib/libemr_roi_masks.so`
-- **Windows**: `emr/scripts/lib/emr_roi_masks.dll`
+- **Linux/macOS**: `emr/roi/cpp/lib/libemr_roi_masks.so`
+- **Windows**: `emr/roi/cpp/lib/emr_roi_masks.dll`
 
 ## 使用方式
 
@@ -75,7 +84,15 @@ cd ..
 只需导入 `roi_mediapipe_dynamic.py`，它会自动检测和加载C++库：
 
 ```python
-from emr.scripts.roi_mediapipe_dynamic import (
+# 方式1：直接从 roi/python/ 目录导入
+from roi.python.roi_mediapipe_dynamic import (
+    rect_mask, polygon_mask, segment_mask, calc_stats
+)
+
+# 方式2：包含 roi/python/ 目录到PYTHONPATH后直接导入
+import sys
+sys.path.insert(0, 'emr/roi/python')
+from roi_mediapipe_dynamic import (
     rect_mask, polygon_mask, segment_mask, calc_stats
 )
 
@@ -91,7 +108,10 @@ stats = calc_stats(values_array)
 如需检查C++库是否可用或直接调用C++版本：
 
 ```python
-from emr.scripts.roi_masks_binding import (
+import sys
+sys.path.insert(0, 'emr/roi/python')
+
+from roi_masks_binding import (
     is_c_lib_available, rect_mask_c, polygon_mask_c, segment_mask_c
 )
 
@@ -107,8 +127,15 @@ else:
 运行性能基准测试：
 
 ```bash
-cd emr/scripts
+cd emr/roi/python
 python benchmark_masks.py
+```
+
+或者从 roi 目录：
+
+```bash
+cd emr/roi
+python python/benchmark_masks.py
 ```
 
 **示例输出**
@@ -150,24 +177,25 @@ Speedup: 6.19x
 
 1. **编译是否成功**
    ```bash
-   ls -la emr/scripts/lib/
+    ls -la emr/roi/cpp/lib/
+    ls -la emr/roi/cpp/build/lib/
    ```
    确保库文件存在
 
 2. **依赖库是否缺失**（Linux）
    ```bash
-   ldd emr/scripts/lib/libemr_roi_masks.so
+    ldd emr/roi/cpp/lib/libemr_roi_masks.so
    ```
    检查是否有缺失的依赖
 
 3. **权限问题**
    ```bash
-   chmod 755 emr/scripts/lib/libemr_roi_masks.so
+    chmod 755 emr/roi/cpp/lib/libemr_roi_masks.so
    ```
 
 4. **PYTHONPATH 设置**
    ```bash
-   export PYTHONPATH="${PYTHONPATH}:$(pwd)/emr/scripts"
+    export PYTHONPATH="${PYTHONPATH}:$(pwd)/emr/roi/python"
    ```
 
 ### 启用调试日志
@@ -175,17 +203,32 @@ Speedup: 6.19x
 ```python
 import logging
 logging.basicConfig(level=logging.DEBUG)
+
+import sys
+sys.path.insert(0, 'emr/roi/python')
+from roi_masks_binding import is_c_lib_available
+print(f"C++ Library Available: {is_c_lib_available()}")
 ```
 
 ### 强制使用Python版本
 
-如果需要测试Python版本或故障排查：
+如果需要测试Python版本或故障排查，修改 `roi/python/roi_masks_binding.py` 中的全局变量：
 
 ```python
-import emr.scripts.roi_masks_binding as binding
-binding.C_LIB_AVAILABLE = False  # 禁用C++库
+# 在 roi/python/roi_masks_binding.py 中
+_c_lib = None  # 强制设置为 None
+```
+
+或在您的代码中：
+
+```python
+import sys
+sys.path.insert(0, 'emr/roi/python')
+import roi_masks_binding
+roi_masks_binding._c_lib = None  # 禁用C++库
 
 # 后续调用会自动使用Python fallback
+from roi_mediapipe_dynamic import calc_stats
 ```
 
 ## 技术细节
@@ -254,15 +297,28 @@ binding.C_LIB_AVAILABLE = False  # 禁用C++库
 ## 快速开始
 
 ```bash
-# 1. 编译
-cd emr/scripts
+# 1. 编译 C++ 库
+cd emr/roi
 ./build.sh
 
 # 2. 运行性能测试
-python benchmark_masks.py
+python python/benchmark_masks.py
 
 # 3. 在项目中使用（自动）
-# 只需正常导入 roi_mediapipe_dynamic.py 即可
+# 将以下代码添加到您的项目中
+import sys
+sys.path.insert(0, 'path/to/emr/roi/python')
+from roi_mediapipe_dynamic import polygon_mask, calc_stats
+# 库会自动检测并加载C++版本，或fallback到Python
 ```
 
-有问题？查看 `benchmark_masks.py` 了解使用示例。
+**主要改进（相比原始结构）**
+- ✅ 独立的 ROI 模块：所有 ROI 相关代码隔离在 `roi/` 目录
+- ✅ C++ 文件独立管理：`roi/cpp/` 包含所有编译相关文件
+- ✅ Python 文件独立管理：`roi/python/` 包含所有 Python 代码和工具脚本
+- ✅ 编译输出隔离：库文件生成到 `roi/cpp/lib/`，避免混淆
+- ✅ 向后兼容：自动库发现机制，无需修改现有代码
+- ✅ 易于维护：清晰的目录结构，便于后续扩展
+- ✅ 模块化设计：便于将 ROI 功能作为子模块共享或版本管理
+
+有问题？查看 `roi/python/benchmark_masks.py` 了解使用示例。

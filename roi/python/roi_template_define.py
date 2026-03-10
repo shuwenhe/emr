@@ -3,7 +3,7 @@
 Define ROI template interactively and save as JSON.
 
 Usage:
-python3 scripts/roi_template_define.py \
+python3 roi/python/roi_template_define.py \
   --matrix-csv data/35/2/1_B8A6B4E749D24C899104D4B846DE3E5F_1.csv \
   --out-json data/35/2/roi_template.json \
   --vmin 28 --vmax 40

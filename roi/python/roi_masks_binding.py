@@ -13,10 +13,12 @@ logger = logging.getLogger(__name__)
 
 # 设置库搜索路径
 _SCRIPT_DIR = Path(__file__).resolve().parent
+_PARENT_DIR = _SCRIPT_DIR.parent
 _LIB_SEARCH_PATHS = [
-    _SCRIPT_DIR / "lib",  # CMake build 输出
-    _SCRIPT_DIR / "build" / "lib",
-    _SCRIPT_DIR,  # 本地目录
+    _PARENT_DIR / "cpp" / "build" / "lib",  # CMake build 输出 (新位置)
+    _PARENT_DIR / "cpp" / "lib",
+    _PARENT_DIR / "cpp" / "build",  # 可能直接在build目录
+    _PARENT_DIR / "lib",  # 共享lib目录
 ]
 
 if sys.platform == "win32":

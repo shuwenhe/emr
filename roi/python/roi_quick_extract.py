@@ -4,7 +4,7 @@ Quick ROI extraction with predefined standard body regions.
 Automatically applies standard anatomical ROI to thermal matrix.
 
 Usage:
-python3 scripts/roi_quick_extract.py \
+python3 roi/python/roi_quick_extract.py \
   --matrix-csv data/35/2/1_B8A6B4E749D24C899104D4B846DE3E5F_1.csv \
   --out-csv data/35/2/1_B8A6B4E749D24C899104D4B846DE3E5F_1_quick_roi.csv
 """

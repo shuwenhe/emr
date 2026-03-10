@@ -4,7 +4,7 @@ Use MediaPipe Pose landmarks to dynamically define body-part ROI on thermal matr
 then export temperature statistics.
 
 Usage:
-python3 scripts/roi_mediapipe_dynamic.py \
+python3 roi/python/roi_mediapipe_dynamic.py \
   --matrix-csv data/35/2/1_B8A6B4E749D24C899104D4B846DE3E5F_1.csv \
   --out-csv data/35/2/1_B8A6B4E749D24C899104D4B846DE3E5F_1_mediapipe_roi.csv \
   --out-overlay data/35/2/1_B8A6B4E749D24C899104D4B846DE3E5F_1_mediapipe_overlay.png \
@@ -24,18 +24,26 @@ import matplotlib.pyplot as plt
 from matplotlib.path import Path as MplPath
 
 # 尝试导入C++加速库，否则fallback到Python
+# 支持相对导入（模块方式）和直接导入（脚本方式）
 try:
-    from roi_masks_binding import (
+    from .roi_masks_binding import (
         rect_mask_c, polygon_mask_c, segment_mask_c, calc_stats_fast_c,
         is_c_lib_available
     )
-    C_LIB_AVAILABLE = is_c_lib_available()
-except ImportError:
-    rect_mask_c = None
-    polygon_mask_c = None
-    segment_mask_c = None
-    calc_stats_fast_c = None
-    C_LIB_AVAILABLE = False
+except (ImportError, ValueError):
+    try:
+        from roi_masks_binding import (
+            rect_mask_c, polygon_mask_c, segment_mask_c, calc_stats_fast_c,
+            is_c_lib_available
+        )
+    except ImportError:
+        rect_mask_c = None
+        polygon_mask_c = None
+        segment_mask_c = None
+        calc_stats_fast_c = None
+        is_c_lib_available = lambda: False
+
+C_LIB_AVAILABLE = is_c_lib_available() if callable(is_c_lib_available) else False
 
 logger = logging.getLogger(__name__)
 

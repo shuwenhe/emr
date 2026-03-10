@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -O3 -DNDEBUG -shared -Wl,-soname,libemr_roi_masks.so -o lib/libemr_roi_masks.so CMakeFiles/emr_roi_masks.dir/roi_masks.cpp.o 

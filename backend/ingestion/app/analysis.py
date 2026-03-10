@@ -73,12 +73,15 @@ _CJK_FONT_CANDIDATES = [
 ]
 _CJK_FONT_PROP: Optional[fm.FontProperties] = None
 
-# 添加scripts目录用于导入ROI模块
-_SCRIPTS_DIR = Path(__file__).resolve().parents[3] / "scripts"
-if str(_SCRIPTS_DIR) not in sys.path:
-    sys.path.insert(0, str(_SCRIPTS_DIR))
+# 添加ROI目录用于导入ROI模块（优先新结构 roi/python，兼容旧结构 scripts）
+_BASE_DIR = Path(__file__).resolve().parents[3]
+_ROI_PY_DIR = _BASE_DIR / "roi" / "python"
+_LEGACY_SCRIPTS_DIR = _BASE_DIR / "scripts"
+for _import_dir in (_ROI_PY_DIR, _LEGACY_SCRIPTS_DIR):
+    if _import_dir.exists() and str(_import_dir) not in sys.path:
+        sys.path.insert(0, str(_import_dir))
 
-BASE_DIR = Path(__file__).resolve().parents[3]
+BASE_DIR = _BASE_DIR
 TREATMENT_RULES_PATH = BASE_DIR / "config" / "treatment_rules.yaml"
 
 

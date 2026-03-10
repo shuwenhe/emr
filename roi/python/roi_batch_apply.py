@@ -3,7 +3,7 @@
 Batch apply ROI template to multiple thermal matrices and export summary.
 
 Usage:
-python3 scripts/roi_batch_apply.py \
+python3 roi/python/roi_batch_apply.py \
   --template-json data/35/2/roi_template.json \
   --matrix-dir data/35/2 \
   --out-summary data/35/2/roi_batch_summary.csv
