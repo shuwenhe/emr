@@ -434,7 +434,7 @@ def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
         doc.add_heading("补充说明", level=2)
         doc.add_paragraph(ai_report_note)
 
-    image_path = report.get("thermal_marked_image")
+    image_path = report.get("thermal_roi_labeled_image") or report.get("thermal_marked_image")
     image_file = _resolve_image_file(str(image_path or "")) if image_path else None
     if image_file is None:
         thermal_images = report.get("thermal_images") if isinstance(report, dict) else None

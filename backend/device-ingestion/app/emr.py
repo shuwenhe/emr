@@ -121,6 +121,12 @@ def generate_emr(record_id: str, force: bool = False) -> Dict[str, Any]:
         try:
             # FastReport disabled, use DOCX directly
             report_path = generate_docx_report(report, emr)
+            emr["docx_report_path"] = str(report_path)
+            report["docx_report_path"] = str(report_path)
+            emr["report"] = report
+            with open(_emr_path(emr_id), "w", encoding="utf-8") as handle:
+                json.dump(emr, handle, ensure_ascii=False, indent=2, default=str)
+            save_emr(emr)
             logging.info("DOCX report generated: %s", report_path)
         except Exception as exc:
             logging.exception("DOCX report generation failed for emr %s: %s", emr_id, exc)
@@ -289,6 +295,7 @@ def _refresh_roi_labeled_image(emr: Dict[str, Any]) -> bool:
 
     relative = str(Path(generated).relative_to(DATA_DIR))
     report["thermal_roi_labeled_image"] = relative
+    report["thermal_marked_image"] = relative
 
     thermal_images = report.get("thermal_images")
     if isinstance(thermal_images, list) and relative not in thermal_images:
@@ -296,6 +303,39 @@ def _refresh_roi_labeled_image(emr: Dict[str, Any]) -> bool:
     elif not isinstance(thermal_images, list):
         report["thermal_images"] = [relative]
 
+    emr["report"] = report
+    return True
+
+
+def _has_valid_docx_report(emr: Dict[str, Any]) -> bool:
+    raw_path = str(emr.get("docx_report_path") or "").strip()
+    if not raw_path:
+        report = emr.get("report")
+        if isinstance(report, dict):
+            raw_path = str(report.get("docx_report_path") or "").strip()
+    if not raw_path:
+        return False
+
+    report_file = Path(raw_path)
+    return report_file.exists() and report_file.is_file()
+
+
+def _ensure_docx_report(emr: Dict[str, Any]) -> bool:
+    if _has_valid_docx_report(emr):
+        return False
+
+    report = emr.get("report")
+    if not isinstance(report, dict) or not report:
+        return False
+
+    try:
+        report_path = generate_docx_report(report, emr)
+    except Exception:
+        emr.setdefault("warnings", []).append("report_docx_generate_failed")
+        return False
+
+    emr["docx_report_path"] = str(report_path)
+    report["docx_report_path"] = str(report_path)
     emr["report"] = report
     return True
 
@@ -311,7 +351,8 @@ def get_emr(emr_id: str) -> Dict[str, Any]:
     emr = _normalize_emr_fields(emr)
     
     updated = _refresh_roi_labeled_image(emr)
-    if updated:
+    report_file_updated = _ensure_docx_report(emr)
+    if updated or report_file_updated:
         with open(path, "w", encoding="utf-8") as handle:
             json.dump(emr, handle, ensure_ascii=False, indent=2)
 
@@ -374,7 +415,9 @@ def update_emr(emr_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
             emr.setdefault("warnings", []).append("report_db_save_failed")
         try:
             # FastReport disabled, use DOCX directly
-            generate_docx_report(report, emr)
+            docx_path = generate_docx_report(report, emr)
+            emr["docx_report_path"] = str(docx_path)
+            report["docx_report_path"] = str(docx_path)
         except Exception:
             emr.setdefault("warnings", []).append("report_docx_generate_failed")
 

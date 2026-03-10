@@ -161,7 +161,9 @@ def _build_tables(
                 }
             )
 
-    marked_image = _resolve_image_path(report.get("thermal_marked_image"))
+    marked_image = _resolve_image_path(
+        report.get("thermal_roi_labeled_image") or report.get("thermal_marked_image")
+    )
     marked_bytes = _read_image_bytes(marked_image)
     thermal_images = report.get("thermal_images") or []
 

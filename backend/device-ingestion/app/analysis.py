@@ -1,4 +1,5 @@
 import csv
+import importlib
 import json
 import logging
 import os
@@ -39,6 +40,21 @@ FACIAL_LABEL_OFFSETS = {
     "右脸颊": (14.0, 3.5),
     "左脸颊": (-14.0, 3.5),
 }
+
+_HEAD_LABEL_KEYWORDS = (
+    "眼",
+    "鼻",
+    "额",
+    "颞",
+    "口",
+    "唇",
+    "脸",
+    "颊",
+    "耳",
+    "头",
+    "下颌",
+    "颏",
+)
 
 _CJK_FONT_CANDIDATES = [
     "Noto Sans CJK SC",
@@ -435,7 +451,11 @@ def _load_csv_grid(file_path: Path) -> Optional[np.ndarray]:
     return grid
 
 
-def _generate_marked_image(grid: np.ndarray, output_path: Path) -> Optional[str]:
+def _generate_marked_image(
+    grid: np.ndarray,
+    output_path: Path,
+    roi_analysis: Optional[Dict[str, Any]] = None,
+) -> Optional[str]:
     if grid.size == 0 or np.all(np.isnan(grid)):
         return None
 
@@ -472,6 +492,41 @@ def _generate_marked_image(grid: np.ndarray, output_path: Path) -> Optional[str]
         fontsize=9,
         bbox=dict(boxstyle="round,pad=0.3", facecolor="black", alpha=0.5),
     )
+
+    points = _roi_label_points(roi_analysis)
+    if points:
+        cjk_font = _get_cjk_font_prop()
+        rows, cols = grid.shape
+        for point in points:
+            px = (point["x"] / 100.0) * max(cols - 1, 1)
+            py = (point["y"] / 100.0) * max(rows - 1, 1)
+            lpx = (point.get("label_x", point["x"]) / 100.0) * max(cols - 1, 1)
+            lpy = (point.get("label_y", point["y"]) / 100.0) * max(rows - 1, 1)
+            text = f"{point['name']} {point['mean_c']:.1f}°C"
+            ax.annotate(
+                text,
+                xy=(px, py),
+                xytext=(lpx, lpy),
+                textcoords="data",
+                fontsize=6,
+                fontproperties=cjk_font,
+                color="white",
+                ha="center",
+                va="center",
+                arrowprops={
+                    "arrowstyle": "-",
+                    "color": "#0f172a",
+                    "lw": 0.6,
+                    "alpha": 0.85,
+                },
+                bbox={
+                    "boxstyle": "round,pad=0.2",
+                    "facecolor": "#0f172a",
+                    "alpha": 0.75,
+                    "edgecolor": "#ffffff",
+                    "linewidth": 0.45,
+                },
+            )
 
     fig.tight_layout()
     fig.savefig(output_path, bbox_inches="tight")
@@ -594,6 +649,26 @@ def _roi_label_points(roi_analysis: Optional[Dict[str, Any]]) -> List[Dict[str, 
         
         if max_prev_y >= 0:
             cur["label_y"] = min(97.0, max_prev_y + min_y_gap)
+
+    head_points: List[Dict[str, Any]] = []
+    for point in points:
+        name = str(point.get("name") or "")
+        is_head = point["y"] <= 35.0 or any(key in name for key in _HEAD_LABEL_KEYWORDS)
+        if is_head:
+            head_points.append(point)
+
+    if head_points:
+        head_points.sort(key=lambda p: p["label_x"])
+        min_head_x_gap = 9.0
+        for idx in range(1, len(head_points)):
+            prev = head_points[idx - 1]
+            cur = head_points[idx]
+            if (cur["label_x"] - prev["label_x"]) < min_head_x_gap:
+                cur["label_x"] = min(98.0, prev["label_x"] + min_head_x_gap)
+
+        base_y = 10.0
+        for idx, point in enumerate(head_points):
+            point["label_y"] = max(2.0, min(24.0, base_y + (idx % 2) * 5.0))
     
     return points
 
@@ -794,9 +869,11 @@ def _analyze_roi_regions(payload_path: Path, csv_is_matrix: bool = True) -> Opti
         sys.path.insert(0, str(scripts_dir))
     
     try:
-        from roi_mediapipe_dynamic import (
-            detect_landmarks, build_dynamic_rois, to_rgb, calc_stats
-        )
+        roi_module = importlib.import_module("roi_mediapipe_dynamic")
+        detect_landmarks = getattr(roi_module, "detect_landmarks")
+        build_dynamic_rois = getattr(roi_module, "build_dynamic_rois")
+        to_rgb = getattr(roi_module, "to_rgb")
+        calc_stats = getattr(roi_module, "calc_stats")
         logging.info("ROI modules imported successfully")
     except ImportError as e:
         logging.warning(f"ROI modules not available, skipping ROI analysis: {e}")
@@ -930,18 +1007,21 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
                 for item in region_comparison
                 if item.get("status") in {"high", "low"}
             ]
-            marked_image_path = _generate_marked_image(
-                grid, record_dir / "thermal_marked.png"
-            )
-            if marked_image_path:
-                # 转换为相对于DATA_DIR的路径用于API访问
-                relative_path = Path(marked_image_path).relative_to(DATA_DIR)
-                image_paths.append(str(relative_path))
-                temperature_labels = _extract_temperature_labels(marked_image_path)
-        
         # 尝试进行ROI分析
         roi_analysis = _analyze_roi_regions(payload_path, csv_is_matrix=True)
         logging.info(f"ROI analysis result: {'success' if roi_analysis else 'failed or None'}, has {len(roi_analysis.get('roi_list', [])) if roi_analysis else 0} ROIs")
+        
+        if grid is not None:
+            marked_image_path = _generate_marked_image(
+                grid,
+                record_dir / "thermal_marked.png",
+                roi_analysis=roi_analysis,
+            )
+            if marked_image_path:
+                relative_path = Path(marked_image_path).relative_to(DATA_DIR)
+                image_paths.append(str(relative_path))
+                temperature_labels = _extract_temperature_labels(marked_image_path)
+
         if marked_image_path and roi_analysis:
             logging.info(f"Attempting to generate ROI labeled image with base: {marked_image_path}")
             roi_labeled_image_path = _generate_roi_labeled_image(
@@ -952,6 +1032,7 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
             if roi_labeled_image_path:
                 relative_roi_path = Path(roi_labeled_image_path).relative_to(DATA_DIR)
                 image_paths.append(str(relative_roi_path))
+                marked_image_path = roi_labeled_image_path
         else:
             logging.info(f"Skipping ROI labeled image: marked_image_path={bool(marked_image_path)}, roi_analysis={bool(roi_analysis)}")
 
