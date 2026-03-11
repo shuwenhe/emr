@@ -90,6 +90,7 @@ export default function EmrPage() {
   const [archived, setArchived] = useState(false);
   const [report, setReport] = useState<ReportPayload>(null);
   const [reportFiles, setReportFiles] = useState<ReportFile[]>([]);
+  const [reportFilesError, setReportFilesError] = useState<string>("");
   const [previewHtml, setPreviewHtml] = useState<string>("");
   const [showPreview, setShowPreview] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
@@ -562,10 +563,15 @@ export default function EmrPage() {
   const fetchReports = useCallback(async () => {
     try {
       const response = await fetch(`${API_BASE}/reports`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
       const data = (await response.json()) as ReportFile[];
       setReportFiles(Array.isArray(data) ? data : []);
-    } catch {
+      setReportFilesError("");
+    } catch (error) {
       setReportFiles([]);
+      setReportFilesError(`历史报告加载失败：${String(error)}`);
     }
   }, []);
 
@@ -1612,7 +1618,9 @@ export default function EmrPage() {
               {showAllReports ? "仅看当前患者" : "显示全部"}
             </button>
           </div>
-          {reportFiles.length === 0 ? (
+          {reportFilesError ? (
+            <p className="mt-4 text-sm text-rose-600">{reportFilesError}</p>
+          ) : reportFiles.length === 0 ? (
             <p className="mt-4 text-sm text-slate-500">暂无报告文件</p>
           ) : (
             <>

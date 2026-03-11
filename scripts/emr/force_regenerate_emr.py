@@ -3,16 +3,17 @@
 Force regenerate EMR and DOCX report for a record.
 """
 import sys
-sys.path.insert(0, "/home/shuwen/emr/ingestion")
-sys.path.insert(0, "/home/shuwen/emr/backend")
-
-import json
-import logging
 from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+INGESTION_DIR = PROJECT_ROOT / "ingestion"
+if str(INGESTION_DIR) not in sys.path:
+    sys.path.insert(0, str(INGESTION_DIR))
+
+import logging
 
 logging.basicConfig(level=logging.DEBUG, format='%(name)s - %(levelname)s - %(message)s')
 
-from app.config import DATA_DIR
 from app.emr import generate_emr
 from app.data_platform import get_emr_by_record_id
 
