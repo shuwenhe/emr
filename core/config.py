@@ -165,6 +165,30 @@ class Settings(BaseSettings):
         default="http://report-file-service:8088",
         description="Base URL of report-file-service",
     )
+    GO_REPORT_HEALTH_PATH: str = Field(
+        default="/healthz",
+        description="Health check path for report-file-service",
+    )
+    GO_REPORT_PROXY_FAIL_OPEN: bool = Field(
+        default=True,
+        description="Fallback to local Python reports implementation when Go proxy is unavailable",
+    )
+    ENABLE_GO_PLATFORM_PROXY: bool = Field(
+        default=False,
+        description="Enable proxying /platform/summary API to Go service",
+    )
+    GO_PLATFORM_SERVICE_URL: str = Field(
+        default="http://report-file-service:8088",
+        description="Base URL of Go platform service",
+    )
+    GO_PLATFORM_HEALTH_PATH: str = Field(
+        default="/healthz",
+        description="Health check path for Go platform service",
+    )
+    GO_PLATFORM_PROXY_FAIL_OPEN: bool = Field(
+        default=True,
+        description="Fallback to local Python platform implementation when Go proxy is unavailable",
+    )
     
     # Pydantic Settings Configuration
     model_config = SettingsConfigDict(
