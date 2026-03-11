@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"report-file-service/internal/model"
-	"report-file-service/internal/service"
+	"report-file-service/model"
+	"report-file-service/service"
 )
 
 type Handler struct {

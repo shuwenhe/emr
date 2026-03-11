@@ -3,9 +3,9 @@ package service
 import (
 	"fmt"
 
-	"report-file-service/internal/cache"
-	"report-file-service/internal/model"
-	"report-file-service/internal/repository"
+	"report-file-service/cache"
+	"report-file-service/model"
+	"report-file-service/repository"
 )
 
 type ReportService struct {

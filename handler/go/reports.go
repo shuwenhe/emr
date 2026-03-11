@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"report-file-service/internal/model"
+	"report-file-service/model"
 )
 
 // ListReports gets all reports (current) or reports from specific date

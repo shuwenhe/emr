@@ -8,16 +8,20 @@ import (
 )
 
 type Config struct {
-	Addr       string
-	ReportsDir string
-	CacheTTL   time.Duration
+	Addr            string
+	ReportsDir      string
+	CacheTTL        time.Duration
+	MySQLConfigPath string
+	MySQLDSN        string
 }
 
 func Load() (Config, error) {
 	cfg := Config{
-		Addr:       getEnv("RFS_ADDR", ":8088"),
-		ReportsDir: getEnv("RFS_REPORTS_DIR", "../../storage/reports"),
-		CacheTTL:   5 * time.Minute,
+		Addr:            getEnv("RFS_ADDR", ":8088"),
+		ReportsDir:      getEnv("RFS_REPORTS_DIR", "../../storage/reports"),
+		CacheTTL:        5 * time.Minute,
+		MySQLConfigPath: getEnv("RFS_MYSQL_CONFIG_PATH", "config/mysql.yaml"),
+		MySQLDSN:        getEnv("RFS_MYSQL_DSN", ""),
 	}
 
 	if ttlRaw := os.Getenv("RFS_CACHE_TTL_SECONDS"); ttlRaw != "" {

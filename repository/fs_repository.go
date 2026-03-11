@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	"report-file-service/internal/model"
+	"report-file-service/model"
 )
 
 type FSRepository struct {
