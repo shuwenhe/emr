@@ -40,7 +40,7 @@ def test_imports():
     
     # Test config
     try:
-        from backend.ingestion.app.config import REPORTS_DIR, DATA_DIR
+        from ingestion.app.config import REPORTS_DIR, DATA_DIR
         print(f"✓ Config - REPORTS_DIR={REPORTS_DIR}, DATA_DIR={DATA_DIR}")
         print(f"  REPORTS_DIR exists: {REPORTS_DIR.exists()}")
         print(f"  REPORTS_DIR is_dir: {REPORTS_DIR.is_dir()}")

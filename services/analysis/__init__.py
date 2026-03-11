@@ -12,14 +12,14 @@ import time
 from pathlib import Path
 from typing import Any, Dict
 
-from backend.core.config import settings
-from backend.core.exceptions import AnalysisError
-from backend.core.logging import get_logger
+from core.config import settings
+from core.exceptions import AnalysisError
+from core.logging import get_logger
 
 logger = get_logger(__name__)
 
 
-_LEGACY_BACKEND_DIR = Path(__file__).resolve().parents[3] / "ingestion"
+_LEGACY_BACKEND_DIR = Path(__file__).resolve().parents[2] / "ingestion"
 if str(_LEGACY_BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(_LEGACY_BACKEND_DIR))
 

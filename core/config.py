@@ -71,7 +71,7 @@ class Settings(BaseSettings):
     @property
     def DATA_DIR(self) -> Path:
         """Patient data directory (legacy location for compatibility)."""
-        project_root = Path(__file__).resolve().parents[3]
+        project_root = Path(__file__).resolve().parents[1]
         return project_root / "data"
     
     @property
@@ -180,8 +180,8 @@ class Settings(BaseSettings):
         """Resolve storage root to absolute path."""
         path = Path(v)
         if not path.is_absolute():
-            # Relative to project root
-            project_root = Path(__file__).resolve().parents[3]
+            # Relative to project root (core/config.py is one level deep)
+            project_root = Path(__file__).resolve().parents[1]
             path = project_root / path
         return path
     

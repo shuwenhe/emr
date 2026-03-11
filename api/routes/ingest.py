@@ -7,17 +7,19 @@ from pathlib import Path
 
 from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, UploadFile
 
-from backend.models.schemas.api import AnalyzeRequest, DeviceIngestRequest, DispatchRequest, IngestMetadata
-from backend.services.analysis import AnalysisService
-from backend.services.emr import EMRService
-from backend.services.ingestion import IngestionService
-from backend.services.treatment import TreatmentService
+from models.schemas.api import AnalyzeRequest, DeviceIngestRequest, DispatchRequest, IngestMetadata
+from services.ai import AIService
+from services.analysis import AnalysisService
+from services.emr import EMRService
+from services.ingestion import IngestionService
+from services.treatment import TreatmentService
 
 router = APIRouter(tags=["ingest"])
 logger = logging.getLogger(__name__)
 
 ALLOWED_EXTENSIONS = {".csv", ".dat"}
 MAX_FILE_MB = 100
+ai_service = AIService()
 analysis_service = AnalysisService()
 ingestion_service = IngestionService()
 emr_service = EMRService()
@@ -36,21 +38,59 @@ def _validate_size(file_bytes: bytes) -> None:
         raise HTTPException(status_code=400, detail="file_too_large")
 
 
-def _generate_report_after_ingest(record_id: str) -> None:
+def _generate_report_after_ingest(record_id: str, metadata: dict | None = None) -> None:
+    """完整报告生成流水线：步骤2分析 → 步骤3EMR → 步骤4AI → 步骤5治疗方案"""
+    patient = metadata or {}
+    analysis_result: dict = {}
+    emr_result: dict = {}
+
+    # ---- 步骤2：热成像分析 ----
+    try:
+        logger.info("[步骤2] 热成像分析 开始 record_id=%s", record_id)
+        t0 = time.time()
+        analysis_result = analysis_service.analyze_record(record_id) or {}
+        elapsed = time.time() - t0
+        risk = (analysis_result.get("report") or {}).get("analysis", {}).get("risk_level", "unknown")
+        logger.info("[步骤2] 热成像分析 完成 record_id=%s risk_level=%s 耗时=%.2fs", record_id, risk, elapsed)
+    except Exception as exc:
+        logger.exception("[步骤2] 热成像分析 失败 record_id=%s error=%s", record_id, exc)
+
+    # ---- 步骤3：电子病历生成 ----
     try:
         logger.info("[步骤3] 电子病历生成 开始 record_id=%s", record_id)
         t0 = time.time()
-        result = emr_service.create_emr(record_id)
+        emr_result = emr_service.create_emr(record_id) or {}
         elapsed = time.time() - t0
-        if result:
+        if emr_result:
             logger.info(
                 "[步骤3] 电子病历生成 完成 record_id=%s emr_id=%s 耗时=%.2fs",
-                record_id, result.get("emr_id"), elapsed,
+                record_id, emr_result.get("emr_id"), elapsed,
             )
         else:
             logger.warning("[步骤3] 电子病历生成 返回空结果 record_id=%s", record_id)
     except Exception as exc:
         logger.exception("[步骤3] 电子病历生成 失败 record_id=%s error=%s", record_id, exc)
+
+    # ---- 步骤4：AI报告生成 ----
+    try:
+        logger.info("[步骤4] AI报告生成 开始 record_id=%s", record_id)
+        t0 = time.time()
+        ai_result = ai_service.generate_report_summary(analysis_result, emr_result) or {}
+        elapsed = time.time() - t0
+        logger.info("[步骤4] AI报告生成 完成 record_id=%s keys=%s 耗时=%.2fs", record_id, list(ai_result.keys()), elapsed)
+    except Exception as exc:
+        logger.exception("[步骤4] AI报告生成 失败 record_id=%s error=%s", record_id, exc)
+
+    # ---- 步骤5：治疗方案 ----
+    try:
+        logger.info("[步骤5] 治疗方案生成 开始 record_id=%s", record_id)
+        t0 = time.time()
+        plan = treatment_service.generate_treatment_plan(analysis_result, patient) or {}
+        elapsed = time.time() - t0
+        risk_out = plan.get("risk_level", "unknown")
+        logger.info("[步骤5] 治疗方案生成 完成 record_id=%s risk_level=%s 耗时=%.2fs", record_id, risk_out, elapsed)
+    except Exception as exc:
+        logger.exception("[步骤5] 治疗方案生成 失败 record_id=%s error=%s", record_id, exc)
 
 
 @router.post("/ingest")
@@ -79,7 +119,7 @@ async def ingest(
     tmp_file.write_bytes(file_bytes)
     record_id = ingestion_service.ingest_data(tmp_file, parsed.model_dump(), validate=True)
     result = {"record_id": record_id, "storage_path": None, "matrix_csv_path": None}
-    background_tasks.add_task(_generate_report_after_ingest, result["record_id"])
+    background_tasks.add_task(_generate_report_after_ingest, result["record_id"], parsed.model_dump())
 
     elapsed = time.time() - t0
     logger.info("[步骤1] 数据采集 完成 record_id=%s 耗时=%.2fs EMR生成已后台调度", record_id, elapsed)

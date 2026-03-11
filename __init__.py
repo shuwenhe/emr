@@ -1,1 +1,1 @@
-"""EMR Backend Package"""
+"""Backend services package."""

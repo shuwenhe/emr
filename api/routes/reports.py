@@ -13,9 +13,9 @@ from urllib.parse import quote, urlencode
 from fastapi import APIRouter, HTTPException, Response
 from fastapi.responses import FileResponse
 
-from backend.core.config import settings
-from backend.core.logging import get_logger
-from backend.models.schemas.api import ReportArchiveRequest
+from core.config import settings
+from core.logging import get_logger
+from models.schemas.api import ReportArchiveRequest
 
 router = APIRouter(tags=["reports"])
 REPORTS_DIR = settings.REPORTS_DIR

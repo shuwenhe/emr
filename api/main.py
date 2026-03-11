@@ -13,16 +13,16 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pymysql.err import OperationalError
 
-from backend.core.config import settings
-from backend.core.logging import setup_logging
-from backend.services.platform import PlatformService
+from core.config import settings
+from core.logging import setup_logging
+from services.platform import PlatformService
 from .routes import emr_router, ingest_router, patients_router, platform_router, reports_router
 
 setup_logging(__name__)
 platform_service = PlatformService()
 
 # Use legacy data directory for static file serving (backward compatibility)
-_LEGACY_DATA_DIR = Path(__file__).resolve().parents[3] / "data"
+_LEGACY_DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 _LEGACY_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(title="Device Ingestion Service")

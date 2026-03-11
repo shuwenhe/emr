@@ -21,8 +21,13 @@ COPY requirements/base.txt requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# 复制应用代码 - 包括新的 backend 结构和旧的 ingestion（兼容）
-COPY backend/ ./backend/
+# 复制应用代码 - 模块直接在根目录
+COPY api/ ./api/
+COPY core/ ./core/
+COPY models/ ./models/
+COPY services/ ./services/
+COPY repositories/ ./repositories/
+COPY utils/ ./utils/
 COPY ingestion/ ./ingestion/
 
 # 创建必要的目录
@@ -40,5 +45,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 # 暴露端口
 EXPOSE 8000
 
-# 启动命令 - 使用新的 backend 结构
-CMD ["sh", "-c", "uvicorn backend.api.main:app --host 0.0.0.0 --port 8000 --workers ${UVICORN_WORKERS:-4}"]
+# 启动命令 - 模块直接在根目录
+CMD ["sh", "-c", "uvicorn api.main:app --host 0.0.0.0 --port 8000 --workers ${UVICORN_WORKERS:-4}"]
