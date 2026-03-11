@@ -51,6 +51,20 @@ def generate_emr(record_id: str, force: bool = False) -> Dict[str, Any]:
         existing = get_emr_by_record_id(record_id)
         if existing:
             logging.info("EMR already exists for record %s (emr_id=%s), returning existing", record_id, existing.get("emr_id"))
+            try:
+                docx_updated = _ensure_docx_report(existing)
+                if docx_updated:
+                    emr_id = str(existing.get("emr_id") or "").strip()
+                    if emr_id:
+                        with open(_emr_path(emr_id), "w", encoding="utf-8") as handle:
+                            json.dump(existing, handle, ensure_ascii=False, indent=2, default=str)
+                    save_emr(existing)
+                    report = existing.get("report")
+                    if isinstance(report, dict):
+                        save_report(record_id, report)
+                    logging.info("DOCX backfilled for existing EMR record=%s emr_id=%s", record_id, emr_id)
+            except Exception as exc:
+                logging.warning("DOCX backfill skipped for existing EMR record=%s error=%s", record_id, exc)
             return existing
 
     analyze_result = analyze_record(record_id)

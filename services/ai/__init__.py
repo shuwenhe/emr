@@ -33,6 +33,16 @@ class AIService:
     def is_enabled(self) -> bool:
         """Check if LLM features are enabled."""
         return self.llm_enabled
+
+    @staticmethod
+    def _extract_record_id(report: Dict[str, Any], emr: Dict[str, Any]) -> str:
+        for container in (report, emr):
+            if not isinstance(container, dict):
+                continue
+            value = str(container.get("record_id") or "").strip()
+            if value:
+                return value
+        return "unknown"
     
     def generate_report_summary(
         self,
@@ -54,11 +64,18 @@ class AIService:
         Raises:
             LLMError: If LLM generation fails
         """
+        record_id = self._extract_record_id(report, emr)
+
         if not self.is_enabled():
-            logger.warning("[步骤4-AI] LLM功能已禁用，跳过AI报告生成")
+            logger.warning("[步骤4-AI] LLM功能已禁用，跳过AI报告生成 record_id=%s", record_id)
             return {}
 
-        logger.info("[步骤4-AI] 开始AI报告生成 provider=%s model=%s", self.llm_provider, self.llm_model)
+        logger.info(
+            "[步骤4-AI] 开始AI报告生成 record_id=%s provider=%s model=%s",
+            record_id,
+            self.llm_provider,
+            self.llm_model,
+        )
         t0 = time.time()
         try:
             legacy_llm = importlib.import_module("app.llm_report")
@@ -66,10 +83,21 @@ class AIService:
             elapsed = time.time() - t0
             result = payload if isinstance(payload, dict) else {}
             keys = list(result.keys()) if result else []
-            logger.info("[步骤4-AI] AI报告生成完成 model=%s keys=%s 耗时=%.2fs", self.llm_model, keys, elapsed)
+            logger.info(
+                "[步骤4-AI] AI报告生成完成 record_id=%s model=%s keys=%s 耗时=%.2fs",
+                record_id,
+                self.llm_model,
+                keys,
+                elapsed,
+            )
             return result
         except Exception as exc:
-            logger.exception("[步骤4-AI] AI报告生成失败 model=%s error=%s", self.llm_model, exc)
+            logger.exception(
+                "[步骤4-AI] AI报告生成失败 record_id=%s model=%s error=%s",
+                record_id,
+                self.llm_model,
+                exc,
+            )
             raise LLMError(f"LLM report generation failed: {exc}") from exc
 
 

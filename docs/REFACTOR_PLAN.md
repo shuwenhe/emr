@@ -1,5 +1,8 @@
 # 项目重构计划
 
+> 针对当前代码基线的可执行迁移清单（含文件级步骤与回滚策略）见：
+> `docs/PLATFORM_DEBRIDGE_EXECUTION_PLAN.md`
+
 ## 当前问题总结
 
 ### 🔴 严重问题

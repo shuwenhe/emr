@@ -42,6 +42,23 @@ _SYSTEM_PROMPT = (
 )
 
 
+def _short_text(value: str, limit: int = 160) -> str:
+    text = str(value or "").strip().replace("\n", " ")
+    if len(text) <= limit:
+        return text
+    return text[:limit] + "..."
+
+
+def _extract_record_id(report: Dict[str, Any], emr: Dict[str, Any]) -> str:
+    for container in (report, emr):
+        if not isinstance(container, dict):
+            continue
+        value = str(container.get("record_id") or "").strip()
+        if value:
+            return value
+    return "unknown"
+
+
 def _import_top_level_rag_modules():
     project_root = Path(__file__).resolve().parents[2]
     project_root_str = str(project_root)
@@ -363,12 +380,22 @@ def _retrieve_context_vector(query: str, top_k: int = RAG_TOP_K) -> Optional[Dic
     }
 
 
-def _retrieve_context(query: str, top_k: int = RAG_TOP_K) -> Dict[str, Any]:
+def _retrieve_context(query: str, top_k: int = RAG_TOP_K, record_id: str = "unknown") -> Dict[str, Any]:
     if not RAG_ENABLED:
+        logging.info("[RAG] skipped record_id=%s: disabled (RAG_ENABLED=0)", record_id)
         return {"query": query, "items": [], "context": ""}
 
     vector_result = _retrieve_context_vector(query, top_k=top_k)
     if isinstance(vector_result, dict):
+        items = vector_result.get("items") or []
+        citations = vector_result.get("citations") or []
+        logging.info(
+            "[RAG] record_id=%s mode=vector query=%s hits=%d refs=%s",
+            record_id,
+            _short_text(query),
+            len(items),
+            [str(item.get("id") or "") for item in citations],
+        )
         return vector_result
 
     items = _load_kb_items()
@@ -429,12 +456,20 @@ def _retrieve_context(query: str, top_k: int = RAG_TOP_K) -> Dict[str, Any]:
             f"[{rank}] {item.get('title') or '-'}\n{item.get('content') or ''}"
         )
 
-    return {
+    result = {
         "query": query,
         "items": selected,
         "citations": citations,
         "context": "\n\n".join(context_lines),
     }
+    logging.info(
+        "[RAG] record_id=%s mode=keyword query=%s hits=%d refs=%s",
+        record_id,
+        _short_text(query),
+        len(selected),
+        [str(item.get("id") or "") for item in citations],
+    )
+    return result
 
 
 def _build_llm_context(
@@ -594,12 +629,24 @@ def _generate_llm_plan_text(context: str, plan: Dict[str, Any]) -> Dict[str, Any
 
 
 def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str, Any]:
+    record_id = _extract_record_id(report, emr)
+
     if not OLLAMA_ENABLED:
+        logging.info("[RAG] skipped record_id=%s: llm disabled (OLLAMA_ENABLED=0)", record_id)
         return {}
 
     retrieval_query = _build_retrieval_query(report, emr)
+    logging.info(
+        "[RAG] start record_id=%s enabled=%s vector_enabled=%s top_k=%s query=%s",
+        record_id,
+        RAG_ENABLED,
+        RAG_VECTOR_ENABLED,
+        RAG_TOP_K,
+        _short_text(retrieval_query),
+    )
     common_answer = _handle_common_query(retrieval_query)
     if common_answer:
+        logging.info("[RAG] short-circuit record_id=%s: common query matched, skip retrieval", record_id)
         return {
             "model": OLLAMA_MODEL,
             "retrieved_context": "",
@@ -608,10 +655,11 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
             "evidence_item_ids": [],
         }
 
-    retrieval_result = _retrieve_context(retrieval_query)
+    retrieval_result = _retrieve_context(retrieval_query, record_id=record_id)
     retrieved_context = str(retrieval_result.get("context") or "")
     citations = retrieval_result.get("citations") or []
     if not retrieval_result.get("items"):
+        logging.info("[RAG] completed record_id=%s with 0 hits", record_id)
         return {
             "model": OLLAMA_MODEL,
             "retrieved_context": "",
@@ -619,6 +667,13 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
             "report_note": "知识库未找到依据，无法确认。",
             "evidence_item_ids": [],
         }
+
+    logging.info(
+        "[RAG] completed record_id=%s hits=%d refs=%s",
+        record_id,
+        len(retrieval_result.get("items") or []),
+        [str(item.get("id") or "") for item in citations],
+    )
 
     context = _build_llm_context(report, emr, retrieved_context=retrieved_context)
     diag_payload = _generate_llm_diagnosis_and_opinion(context)

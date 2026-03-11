@@ -36,23 +36,50 @@ class ReportListCache:
         return f"reports:{date or 'all'}"
 
     @staticmethod
-    def get(date: Optional[str]) -> Optional[List[Dict[str, Any]]]:
+    def get(date: Optional[str], state_token: str) -> Optional[List[Dict[str, Any]]]:
         """Get cached report list if valid."""
         key = ReportListCache._cache_key(date)
         if key in _LIST_REPORTS_CACHE:
             entry = _LIST_REPORTS_CACHE[key]
-            if time.time() - entry["timestamp"] < _CACHE_TTL:
+            if (
+                time.time() - entry["timestamp"] < _CACHE_TTL
+                and entry.get("state_token") == state_token
+            ):
                 return entry["data"]
         return None
 
     @staticmethod
-    def set(date: Optional[str], data: List[Dict[str, Any]]) -> None:
+    def set(date: Optional[str], data: List[Dict[str, Any]], state_token: str) -> None:
         """Cache report list with current timestamp."""
         key = ReportListCache._cache_key(date)
         _LIST_REPORTS_CACHE[key] = {
             "data": data,
             "timestamp": time.time(),
+            "state_token": state_token,
         }
+
+
+def _reports_state_token(date: str | None = None) -> str:
+    root = REPORTS_DIR / date if date else REPORTS_DIR
+    if not root.exists() or not root.is_dir():
+        return "missing"
+
+    try:
+        if date:
+            return f"{root.stat().st_mtime_ns}:{sum(1 for _ in root.iterdir())}"
+
+        latest_day_mtime_ns = 0
+        day_count = 0
+        for day_dir in root.iterdir():
+            if not day_dir.is_dir() or day_dir.name.startswith("."):
+                continue
+            if not _DAY_DIR_RE.match(day_dir.name):
+                continue
+            day_count += 1
+            latest_day_mtime_ns = max(latest_day_mtime_ns, day_dir.stat().st_mtime_ns)
+        return f"{day_count}:{latest_day_mtime_ns}"
+    except Exception:
+        return "error"
 
 
 def _proxy_enabled() -> bool:
@@ -156,8 +183,10 @@ def _proxy_file(method: str, path: str, *, query: Dict[str, Any] | None = None) 
 
 
 def _list_reports(date: str | None = None):
+    state_token = _reports_state_token(date)
+
     # Check cache first (5 minute TTL)
-    cached = ReportListCache.get(date)
+    cached = ReportListCache.get(date, state_token)
     if cached is not None:
         return cached
 
@@ -199,7 +228,7 @@ def _list_reports(date: str | None = None):
     reports.sort(key=lambda report: report["updated_at"], reverse=True)
 
     # Cache the result
-    ReportListCache.set(date, reports)
+    ReportListCache.set(date, reports, state_token)
     return reports
 
 

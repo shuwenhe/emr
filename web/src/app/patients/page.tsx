@@ -92,6 +92,8 @@ export default function PatientsPage() {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [emrs, setEmrs] = useState<EmrRecord[]>([]);
   const [reportFiles, setReportFiles] = useState<ReportFile[]>([]);
+  const [allReportFiles, setAllReportFiles] = useState<ReportFile[]>([]);
+  const [reportFallbackToAll, setReportFallbackToAll] = useState(false);
   const [reportLoading, setReportLoading] = useState(false);
   const [reportError, setReportError] = useState<string | null>(null);
   const [reportPatient, setReportPatient] = useState<Patient | null>(null);
@@ -298,16 +300,32 @@ export default function PatientsPage() {
     return `${value.toFixed(value >= 10 || unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
   }
 
-  function filterReportsForPatient(files: ReportFile[], patient: Patient | null) {
-    if (!patient) return [] as ReportFile[];
+  function applyDateRange(files: ReportFile[], from: string, to: string) {
+    return files.filter((file) => {
+      if (!from && !to) return true;
+      const fileDate = parseReportDay(file.date);
+      if (Number.isNaN(fileDate.getTime())) return false;
+      if (from) {
+        const fromDate = new Date(from);
+        if (fileDate < fromDate) return false;
+      }
+      if (to) {
+        const toDate = new Date(to);
+        toDate.setDate(toDate.getDate() + 1);
+        if (fileDate >= toDate) return false;
+      }
+      return true;
+    });
+  }
+
+  function filterReportsForPatient(files: ReportFile[], patient: Patient | null, from: string, to: string) {
+    if (!patient) return applyDateRange(files, from, to);
     const name = patient.name?.trim();
     const id = patient.patient_id?.trim();
-    
-    return files.filter((file) => {
+
+    const matched = files.filter((file) => {
       if (!file.name) return false;
       const lower = file.name.toLowerCase();
-      
-      // 优先按患者名字或ID过滤
       let matchPatient = false;
       if (name && (file.name.startsWith(`${name}_`) || lower.includes(name.toLowerCase()))) {
         matchPatient = true;
@@ -315,36 +333,13 @@ export default function PatientsPage() {
       if (!matchPatient && id && lower.includes(id.toLowerCase())) {
         matchPatient = true;
       }
-      
-      // 如果患者没有名字和ID，或匹配失败，则至少要求文件名以 YYYYMMDD 形式的日期开头
-      // （即有效的报告格式）
-      if (!matchPatient) {
-        if (!name && !id) {
-          // 患者信息不完整，显示所有日期格式正确的报告
-          matchPatient = /^\d{8}/.test(file.date);
-        }
+      if (!matchPatient && !name && !id) {
+        matchPatient = /^\d{8}/.test(file.date);
       }
-      
-      if (!matchPatient) return false;
-      
-      // 按日期范围过滤
-      if (reportDateFrom || reportDateTo) {
-        const fileDate = parseReportDay(file.date);
-        if (Number.isNaN(fileDate.getTime())) return false;
-        if (reportDateFrom) {
-          const fromDate = new Date(reportDateFrom);
-          if (fileDate < fromDate) return false;
-        }
-        if (reportDateTo) {
-          const toDate = new Date(reportDateTo);
-          // 包含结束日期的整个一天
-          toDate.setDate(toDate.getDate() + 1);
-          if (fileDate >= toDate) return false;
-        }
-      }
-      
-      return true;
+      return matchPatient;
     });
+
+    return applyDateRange(matched, from, to);
   }
 
   function buildReportFileUrl(file: ReportFile) {
@@ -362,6 +357,7 @@ export default function PatientsPage() {
   async function handleOpenReportHistory(patient: Patient) {
     setReportLoading(true);
     setReportError(null);
+    setReportFallbackToAll(false);
     setReportPatient(patient);
     setShowReportModal(true);
     // 重置日期范围
@@ -369,28 +365,57 @@ export default function PatientsPage() {
     setReportDateTo("");
     try {
       const response = await fetch(`${API_BASE}/reports`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
       const data = await response.json();
       const files = Array.isArray(data) ? (data as ReportFile[]) : [];
-      const filtered = filterReportsForPatient(files, patient);
+      setAllReportFiles(files);
+      const filtered = filterReportsForPatient(files, patient, "", "");
       console.log(`[报告] 加载成功 total=${files.length} 患者=${patient.name || patient.patient_id} filtered=${filtered.length}`);
-      setReportFiles(filtered);
-      if (response.ok) {
-        flashSuccessButton();
+      if (filtered.length === 0 && files.length > 0) {
+        setReportFallbackToAll(true);
+        setReportFiles(files);
+      } else {
+        setReportFallbackToAll(false);
+        setReportFiles(filtered);
       }
+      flashSuccessButton();
     } catch (error) {
       console.error(`[报告] 加载失败:`, error);
+      setAllReportFiles([]);
       setReportFiles([]);
-      setReportError("获取报告列表失败");
+      setReportError(`获取报告列表失败: ${String(error)}`);
     } finally {
       setReportLoading(false);
     }
   }
 
-  function handleReportDateFilterChange() {
-    if (reportPatient) {
-      setReportFiles(filterReportsForPatient(reportFiles, reportPatient));
+  function handleReportDateFilterChange(nextFrom: string, nextTo: string) {
+    const base = allReportFiles;
+    if (!base.length) {
+      setReportFiles([]);
+      setReportFallbackToAll(false);
       flashSuccessButton();
+      return;
     }
+
+    if (!reportPatient) {
+      setReportFiles(applyDateRange(base, nextFrom, nextTo));
+      setReportFallbackToAll(false);
+      flashSuccessButton();
+      return;
+    }
+
+    const filtered = filterReportsForPatient(base, reportPatient, nextFrom, nextTo);
+    if (filtered.length === 0) {
+      setReportFallbackToAll(true);
+      setReportFiles(applyDateRange(base, nextFrom, nextTo));
+    } else {
+      setReportFallbackToAll(false);
+      setReportFiles(filtered);
+    }
+    flashSuccessButton();
   }
 
   async function handlePreviewReport(file: ReportFile) {
@@ -499,7 +524,15 @@ export default function PatientsPage() {
       if (reportPatient) {
         const refresh = await fetch(`${API_BASE}/reports`).then((r) => r.json());
         const files = Array.isArray(refresh) ? (refresh as ReportFile[]) : [];
-        setReportFiles(filterReportsForPatient(files, reportPatient));
+        setAllReportFiles(files);
+        const filtered = filterReportsForPatient(files, reportPatient, reportDateFrom, reportDateTo);
+        if (filtered.length === 0 && files.length > 0) {
+          setReportFallbackToAll(true);
+          setReportFiles(applyDateRange(files, reportDateFrom, reportDateTo));
+        } else {
+          setReportFallbackToAll(false);
+          setReportFiles(filtered);
+        }
       } else {
         setReportFiles((prev) => prev.filter((item) => item !== file));
       }
@@ -1131,8 +1164,9 @@ export default function PatientsPage() {
                       className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
                       value={reportDateFrom}
                       onChange={(e) => {
-                        setReportDateFrom(e.target.value);
-                        handleReportDateFilterChange();
+                        const nextFrom = e.target.value;
+                        setReportDateFrom(nextFrom);
+                        handleReportDateFilterChange(nextFrom, reportDateTo);
                       }}
                     />
                   </div>
@@ -1145,8 +1179,9 @@ export default function PatientsPage() {
                       className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
                       value={reportDateTo}
                       onChange={(e) => {
-                        setReportDateTo(e.target.value);
-                        handleReportDateFilterChange();
+                        const nextTo = e.target.value;
+                        setReportDateTo(nextTo);
+                        handleReportDateFilterChange(reportDateFrom, nextTo);
                       }}
                     />
                   </div>
@@ -1156,9 +1191,7 @@ export default function PatientsPage() {
                       onClick={() => {
                         setReportDateFrom("");
                         setReportDateTo("");
-                        if (reportPatient) {
-                          setReportFiles(filterReportsForPatient(reportFiles, reportPatient));
-                        }
+                        handleReportDateFilterChange("", "");
                         flashSuccessButton();
                       }}
                     >
@@ -1189,6 +1222,12 @@ export default function PatientsPage() {
               {!reportLoading && !reportError && reportFiles.length > 0 && (
                 <div className="mb-3 text-xs text-slate-500">
                   共找到 {reportFiles.length} 个匹配的报告文件
+                </div>
+              )}
+
+              {!reportLoading && !reportError && reportFallbackToAll && reportFiles.length > 0 && (
+                <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
+                  未匹配到当前患者的文件名，已显示全部历史报告文件。
                 </div>
               )}
 
