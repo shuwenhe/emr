@@ -5,6 +5,6 @@ Primary Python implementation now lives under `api/python/routes/platform.py`.
 
 from __future__ import annotations
 
-from .python.platform import router
+from ..python.routes.platform import router
 
 __all__ = ["router"]

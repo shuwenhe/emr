@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	ginhandler "report-file-service/api/routes/go/handler"
+	ginhandler "report-file-service/api/go/routes/handler"
 	"report-file-service/internal/config"
 )
 

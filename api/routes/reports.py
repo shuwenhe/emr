@@ -5,6 +5,6 @@ Primary Python implementation now lives under `api/python/routes/reports.py`.
 
 from __future__ import annotations
 
-from .python.reports import router
+from ..python.routes.reports import router
 
 __all__ = ["router"]

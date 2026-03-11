@@ -5,6 +5,6 @@ Primary Python implementation now lives under `api/python/routes/patients.py`.
 
 from __future__ import annotations
 
-from .python.patients import router
+from ..python.routes.patients import router
 
 __all__ = ["router"]
