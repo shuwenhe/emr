@@ -86,10 +86,13 @@ CLICKHOUSE_PASSWORD = _clickhouse["password"]
 MAX_FILE_MB = 200
 ALLOWED_EXTENSIONS = {".bin", ".dat", ".npy", ".zip", ".csv", ".png", ".jpg", ".jpeg"}
 
-DEVICE_DROP_DIR = Path("./device-drop")
+DEVICE_ROOT_DIR = Path("./device")
+DEVICE_ROOT_DIR.mkdir(parents=True, exist_ok=True)
+
+DEVICE_DROP_DIR = DEVICE_ROOT_DIR / "device-drop"
 DEVICE_DROP_DIR.mkdir(parents=True, exist_ok=True)
 
-DEVICE_PROCESSED_DIR = Path("./device-processed")
+DEVICE_PROCESSED_DIR = DEVICE_ROOT_DIR / "device-processed"
 DEVICE_PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
 DEVICE_POLL_INTERVAL_SEC = 5
