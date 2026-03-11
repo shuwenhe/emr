@@ -307,10 +307,24 @@ export default function PatientsPage() {
       if (!file.name) return false;
       const lower = file.name.toLowerCase();
       
-      // 按患者名字或ID过滤
-      const matchPatient = (name && file.name.startsWith(`${name}_`)) ||
-                          (name && lower.includes(name.toLowerCase())) ||
-                          (id && lower.includes(id.toLowerCase()));
+      // 优先按患者名字或ID过滤
+      let matchPatient = false;
+      if (name && (file.name.startsWith(`${name}_`) || lower.includes(name.toLowerCase()))) {
+        matchPatient = true;
+      }
+      if (!matchPatient && id && lower.includes(id.toLowerCase())) {
+        matchPatient = true;
+      }
+      
+      // 如果患者没有名字和ID，或匹配失败，则至少要求文件名以 YYYYMMDD 形式的日期开头
+      // （即有效的报告格式）
+      if (!matchPatient) {
+        if (!name && !id) {
+          // 患者信息不完整，显示所有日期格式正确的报告
+          matchPatient = /^\d{8}/.test(file.date);
+        }
+      }
+      
       if (!matchPatient) return false;
       
       // 按日期范围过滤
@@ -357,11 +371,14 @@ export default function PatientsPage() {
       const response = await fetch(`${API_BASE}/reports`);
       const data = await response.json();
       const files = Array.isArray(data) ? (data as ReportFile[]) : [];
-      setReportFiles(filterReportsForPatient(files, patient));
+      const filtered = filterReportsForPatient(files, patient);
+      console.log(`[报告] 加载成功 total=${files.length} 患者=${patient.name || patient.patient_id} filtered=${filtered.length}`);
+      setReportFiles(filtered);
       if (response.ok) {
         flashSuccessButton();
       }
-    } catch {
+    } catch (error) {
+      console.error(`[报告] 加载失败:`, error);
       setReportFiles([]);
       setReportError("获取报告列表失败");
     } finally {

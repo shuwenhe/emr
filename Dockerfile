@@ -15,17 +15,18 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # 复制依赖文件
-COPY device-ingestion/requirements.txt .
+COPY requirements/base.txt requirements.txt
 
 # 安装Python依赖
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# 复制应用代码
-COPY device-ingestion/ .
+# 复制应用代码 - 包括新的 backend 结构和旧的 ingestion（兼容）
+COPY backend/ ./backend/
+COPY ingestion/ ./ingestion/
 
 # 创建必要的目录
-RUN mkdir -p /app/data /app/reports /app/logs
+RUN mkdir -p /app/storage/data /app/storage/reports /app/storage/logs
 
 # 非root用户运行
 RUN useradd -m -u 1000 appuser && \
@@ -39,5 +40,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 # 暴露端口
 EXPOSE 8000
 
-# 启动命令
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers ${UVICORN_WORKERS:-4}"]
+# 启动命令 - 使用新的 backend 结构
+CMD ["sh", "-c", "uvicorn backend.api.main:app --host 0.0.0.0 --port 8000 --workers ${UVICORN_WORKERS:-4}"]

@@ -13,9 +13,9 @@ from urllib.parse import quote, urlencode
 from fastapi import APIRouter, HTTPException, Response
 from fastapi.responses import FileResponse
 
-from src.backend.core.config import settings
-from src.backend.core.logging import get_logger
-from src.backend.models.schemas.api import ReportArchiveRequest
+from backend.core.config import settings
+from backend.core.logging import get_logger
+from backend.models.schemas.api import ReportArchiveRequest
 
 router = APIRouter(tags=["reports"])
 REPORTS_DIR = settings.REPORTS_DIR
@@ -224,17 +224,27 @@ def _resolve_trash_path(date: str, filename: str) -> Path:
     return candidate
 
 
+def _rewrite_report_urls(items):
+    """Rewrite Go-internal /v1/reports/... URLs to public /reports/... URLs."""
+    if not isinstance(items, list):
+        return items
+    for item in items:
+        if isinstance(item, dict) and isinstance(item.get("url"), str):
+            item["url"] = item["url"].replace("/v1/reports/", "/reports/", 1)
+    return items
+
+
 @router.get("/reports")
 def list_reports(date: str | None = None):
     if _proxy_enabled():
-        return _proxy_json("GET", "/v1/reports", query={"date": date})
+        return _rewrite_report_urls(_proxy_json("GET", "/v1/reports", query={"date": date}))
     return _list_reports(date=date)
 
 
 @router.get("/reports/.trash")
 def list_trash_reports():
     if _proxy_enabled():
-        return _proxy_json("GET", "/v1/reports/trash")
+        return _rewrite_report_urls(_proxy_json("GET", "/v1/reports/trash"))
 
     trash_dir = _reports_trash_dir()
     reports = []

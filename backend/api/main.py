@@ -13,9 +13,9 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pymysql.err import OperationalError
 
-from src.backend.core.config import settings
-from src.backend.core.logging import setup_logging
-from src.backend.services.platform import PlatformService
+from backend.core.config import settings
+from backend.core.logging import setup_logging
+from backend.services.platform import PlatformService
 from .routes import emr_router, ingest_router, patients_router, platform_router, reports_router
 
 setup_logging(__name__)

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from src.backend.models.schemas.api import HistoryImportRequest
-from src.backend.services.platform import PlatformService
+from backend.models.schemas.api import HistoryImportRequest
+from backend.services.platform import PlatformService
 
 router = APIRouter(tags=["platform"])
 platform_service = PlatformService()

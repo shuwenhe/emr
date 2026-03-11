@@ -8,17 +8,18 @@ from __future__ import annotations
 
 import importlib
 import sys
+import time
 from pathlib import Path
 from typing import Any, Dict
 
-from src.backend.core.config import settings
-from src.backend.core.exceptions import AnalysisError
-from src.backend.core.logging import get_logger
+from backend.core.config import settings
+from backend.core.exceptions import AnalysisError
+from backend.core.logging import get_logger
 
 logger = get_logger(__name__)
 
 
-_LEGACY_BACKEND_DIR = Path(__file__).resolve().parents[4] / "ingestion"
+_LEGACY_BACKEND_DIR = Path(__file__).resolve().parents[3] / "ingestion"
 if str(_LEGACY_BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(_LEGACY_BACKEND_DIR))
 
@@ -59,12 +60,25 @@ class AnalysisService:
         Raises:
             AnalysisError: If analysis fails
         """
-        logger.info("Analyzing record %s (roi=%s, llm=%s)", record_id, enable_roi, enable_llm)
+        logger.info("[步骤2-分析] 开始热成像分析 record_id=%s roi=%s llm=%s", record_id, enable_roi, enable_llm)
+        t0 = time.time()
         try:
-            return self._legacy_analysis.analyze_record(record_id)
+            result = self._legacy_analysis.analyze_record(record_id)
+            elapsed = time.time() - t0
+            risk = (
+                (result.get("report") or {}).get("analysis", {}).get("risk_level", "unknown")
+                if isinstance(result, dict) else "unknown"
+            )
+            logger.info(
+                "[步骤2-分析] 分析完成 record_id=%s risk_level=%s 耗时=%.2fs",
+                record_id, risk, elapsed,
+            )
+            return result
         except FileNotFoundError:
+            logger.warning("[步骤2-分析] 记录不存在 record_id=%s", record_id)
             raise
         except Exception as exc:
+            logger.exception("[步骤2-分析] 分析失败 record_id=%s error=%s", record_id, exc)
             raise AnalysisError(f"Analysis failed for record {record_id}: {exc}") from exc
 
 

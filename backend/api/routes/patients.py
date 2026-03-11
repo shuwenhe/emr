@@ -5,8 +5,8 @@ from datetime import datetime
 
 from fastapi import APIRouter, HTTPException
 
-from src.backend.models.schemas.api import PatientArchiveRequest, PatientDeleteRequest, PatientUpsertRequest
-from src.backend.services.platform import PlatformService
+from backend.models.schemas.api import PatientArchiveRequest, PatientDeleteRequest, PatientUpsertRequest
+from backend.services.platform import PlatformService
 
 router = APIRouter(tags=["patients"])
 platform_service = PlatformService()

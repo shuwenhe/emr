@@ -11,14 +11,14 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from src.backend.core.config import settings
-from src.backend.core.exceptions import EMRNotFoundError
-from src.backend.core.logging import get_logger
+from backend.core.config import settings
+from backend.core.exceptions import EMRNotFoundError
+from backend.core.logging import get_logger
 
 logger = get_logger(__name__)
 
 
-_LEGACY_BACKEND_DIR = Path(__file__).resolve().parents[4] / "ingestion"
+_LEGACY_BACKEND_DIR = Path(__file__).resolve().parents[3] / "ingestion"
 if str(_LEGACY_BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(_LEGACY_BACKEND_DIR))
 
@@ -52,13 +52,23 @@ class EMRService:
         Returns:
             Created EMR record
         """
-        logger.info("Creating EMR for record %s", record_id)
+        logger.info("[步骤3-EMR] 开始生成电子病历 record_id=%s patient_id=%s", record_id, patient_id)
         try:
             legacy_emr = self._legacy_emr
-            return legacy_emr.generate_emr(record_id, force=False)
+            result = legacy_emr.generate_emr(record_id, force=False)
+            emr_id = result.get("emr_id") if isinstance(result, dict) else None
+            patient = (result.get("patient") or {}).get("name", "") if isinstance(result, dict) else ""
+            report_path = result.get("report_path", "") if isinstance(result, dict) else ""
+            logger.info(
+                "[步骤3-EMR] 病历生成完成 record_id=%s emr_id=%s patient=%s report_path=%s",
+                record_id, emr_id, patient, report_path,
+            )
+            return result
         except FileNotFoundError:
+            logger.warning("[步骤3-EMR] 记录不存在 record_id=%s", record_id)
             raise
         except Exception as exc:
+            logger.exception("[步骤3-EMR] 病历生成失败 record_id=%s error=%s", record_id, exc)
             raise EMRNotFoundError(f"Failed to create EMR for {record_id}: {exc}") from exc
     
     def get_emr(self, emr_id: str) -> Dict[str, Any]:
@@ -74,12 +84,16 @@ class EMRService:
         Raises:
             EMRNotFoundError: If EMR not found
         """
-        logger.info("Retrieving EMR %s", emr_id)
+        logger.info("[步骤3-EMR] 查询病历 emr_id=%s", emr_id)
         legacy_emr = self._legacy_emr
         legacy_not_found = getattr(legacy_emr, "EmrNotFoundError", FileNotFoundError)
         try:
-            return legacy_emr.get_emr(emr_id)
+            result = legacy_emr.get_emr(emr_id)
+            patient = (result.get("patient") or {}).get("name", "") if isinstance(result, dict) else ""
+            logger.info("[步骤3-EMR] 查询完成 emr_id=%s patient=%s", emr_id, patient)
+            return result
         except legacy_not_found as exc:
+            logger.warning("[步骤3-EMR] 病历不存在 emr_id=%s", emr_id)
             raise EMRNotFoundError(str(exc)) from exc
     
     def list_emrs(

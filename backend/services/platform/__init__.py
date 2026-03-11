@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 
-_LEGACY_BACKEND_DIR = Path(__file__).resolve().parents[4] / "backend" / "ingestion"
+_LEGACY_BACKEND_DIR = Path(__file__).resolve().parents[3] / "backend" / "ingestion"
 if str(_LEGACY_BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(_LEGACY_BACKEND_DIR))
 
