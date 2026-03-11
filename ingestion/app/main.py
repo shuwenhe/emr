@@ -15,7 +15,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-_new_api_main = importlib.import_module("api.main")
+_new_api_main = importlib.import_module("route.python.main")
 app = _new_api_main.app
 
 

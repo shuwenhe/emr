@@ -3,8 +3,8 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException
 
 from models.schemas.api import EmrArchiveRequest, EmrGenerateRequest, EmrUpdateRequest
-from services.emr import EMRService
-from services.platform import PlatformService
+from service.emr import EMRService
+from service.platform import PlatformService
 
 router = APIRouter(tags=["emr"])
 emr_service = EMRService()

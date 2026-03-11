@@ -8,11 +8,11 @@ from pathlib import Path
 from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, UploadFile
 
 from models.schemas.api import AnalyzeRequest, DeviceIngestRequest, DispatchRequest, IngestMetadata
-from services.ai import AIService
-from services.analysis import AnalysisService
-from services.emr import EMRService
-from services.ingestion import IngestionService
-from services.treatment import TreatmentService
+from service.ai import AIService
+from service.analysis import AnalysisService
+from service.emr import EMRService
+from service.ingestion import IngestionService
+from service.treatment import TreatmentService
 
 router = APIRouter(tags=["ingest"])
 logger = logging.getLogger(__name__)

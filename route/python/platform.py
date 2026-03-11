@@ -11,7 +11,7 @@ from fastapi import APIRouter
 
 from core.config import settings
 from models.schemas.api import HistoryImportRequest
-from services.platform import PlatformService
+from service.platform import PlatformService
 
 router = APIRouter(tags=["platform"])
 platform_service = PlatformService()
