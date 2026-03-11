@@ -101,7 +101,7 @@ emr/
 │   │       ├── datetime.py
 │   │       └── validators.py
 │   │
-│   └── frontend/               # Next.js 前端应用
+│   └── web/               # Next.js 前端应用
 │       ├── src/
 │       ├── public/
 │       └── package.json
@@ -143,7 +143,7 @@ emr/
 │
 ├── docker/                     # Docker 相关文件
 │   ├── backend.Dockerfile
-│   ├── frontend.Dockerfile
+│   ├── web.Dockerfile
 │   └── nginx.conf
 │
 ├── .env.example                # 环境变量模板

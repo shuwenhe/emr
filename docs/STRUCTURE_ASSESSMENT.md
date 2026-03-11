@@ -148,7 +148,7 @@ src/backend/
 1. ✅ **添加Docker配置**
    - `docker-compose.yml`
    - `Dockerfile`
-   - `frontend/Dockerfile`
+   - `web/Dockerfile`
    - `.env.example`
 
 2. ✅ **添加测试框架**
@@ -176,7 +176,7 @@ src/backend/
 
 5. **前端组件拆分**
    ```bash
-   mkdir -p frontend/src/{components/{ui,features},hooks,lib}
+   mkdir -p web/src/{components/{ui,features},hooks,lib}
    
    # 拆分大组件:
    # patients/page.tsx -> 
@@ -245,11 +245,11 @@ src/backend/
 - [x] `REFACTOR_PLAN.md` - 详细重构计划
 - [x] `docker-compose.yml` - 容器编排
 - [x] `Dockerfile` - 后端镜像  
-- [x] `frontend/Dockerfile` - 前端镜像
+- [x] `web/Dockerfile` - 前端镜像
 - [x] `.env.example` - 环境变量模板
 - [x] `pyproject.toml` - Python项目配置
 - [x] `tests/` - 测试框架
-- [x] `frontend/jest.config.js` - 前端测试配置
+- [x] `web/jest.config.js` - 前端测试配置
 - [x] `.github/workflows/ci.yml` - CI/CD流程
 
 **下一步**: 查看 [REFACTOR_PLAN.md](REFACTOR_PLAN.md) 开始重构

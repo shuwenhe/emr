@@ -16,9 +16,9 @@
 
 ## 实现方案
 
-### 前端实现 (Frontend)
+### 前端实现 (Web)
 
-**文件**: `frontend/src/app/patients/page.tsx`
+**文件**: `web/src/app/patients/page.tsx`
 
 **新增状态**:
 ```typescript

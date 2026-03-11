@@ -338,7 +338,7 @@
   docs/API_SPECIFICATION.md            (API规范)
 
 查看代码:
-  frontend/src/app/patients/page.tsx   (前端代码)
+  web/src/app/patients/page.tsx   (前端代码)
   
 报告问题:
   使用 Ctrl+Shift+I 打开开发者工具

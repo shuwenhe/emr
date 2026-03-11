@@ -26,7 +26,7 @@ src/backend/
 
 ### Prerequisites
 - Python 3.12+
-- Node.js 18+ (for frontend)
+- Node.js 18+ (for web)
 - MySQL 8.0+
 - (Optional) ClickHouse for analytics
 - (Optional) Ollama for AI features
@@ -56,8 +56,8 @@ src/backend/
    # Backend API (terminal 1)
    make run-backend
    
-   # Frontend (terminal 2)
-   make run-frontend
+   # Web (terminal 2)
+   make run-web
    ```
 
 ## 📚 Services
@@ -67,8 +67,8 @@ FastAPI service on port 8000
 - Location: `src/backend/`
 - Docs: http://localhost:8000/docs
 
-## Frontend
-Next.js app lives under [frontend](frontend). EMR page route: /emr
+## Web
+Next.js app lives under [web](web). EMR page route: /emr
 
 ### Endpoints
 - `POST /ingest` upload a data file and metadata JSON

@@ -120,7 +120,7 @@ THEN 显示报告列表和预览选项
 
 ```
 emr/
-├── frontend/                 # Next.js 15 前端应用
+├── web/                 # Next.js 15 前端应用
 │   ├── src/
 │   │   ├── app/             # App Router 路由
 │   │   │   ├── patients/    # 患者管理页面
@@ -204,7 +204,7 @@ emr/
 患者注册 → 设备上传 → 数据分析 → EMR生成 → 诊断分析 → 治疗方案 → 报告生成
 
 数据流向:
-Frontend (React) 
+Web (React) 
   → POST /ingest (上传数据)
     → device_connector (解析设备数据)
       → analysis (分析图像)
@@ -212,7 +212,7 @@ Frontend (React)
           → MySQL (患者、记录、EMR表)
             → File System (报告文件)
               ← GET /reports (获取列表)
-                ← Frontend (前端显示)
+                ← Web (前端显示)
 ```
 
 ### 4. 状态管理设计

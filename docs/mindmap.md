@@ -4,27 +4,27 @@
 graph LR
     Root[医院红外热成像诊断系统]
     
-    Root --> Frontend[前端应用]
+    Root --> Web[前端应用]
     Root --> Backend[后端服务]
     Root --> Core[核心功能模块]
     Root --> Flow[数据流转]
     Root --> Tech[技术栈]
     Root --> Deploy[部署运维]
     
-    Frontend --> F1[患者登记页面]
+    Web --> F1[患者登记页面]
     F1 --> F1_1[新增患者登记]
     F1 --> F1_2[患者列表查询]
     F1 --> F1_3[患者信息展示]
     F1 --> F1_4[病历查看]
     F1 --> F1_5[历史报告]
     
-    Frontend --> F2[数据上传页面]
+    Web --> F2[数据上传页面]
     F2 --> F2_1[文件上传]
     F2 --> F2_2[设备信息录入]
     F2 --> F2_3[患者信息关联]
     F2 --> F2_4[自动跳转诊断]
     
-    Frontend --> F3[诊断分析页面]
+    Web --> F3[诊断分析页面]
     F3 --> F3_1[生成诊断报告]
     F3 --> F3_2[查询病历]
     F3 --> F3_3[导出JSON]
@@ -33,19 +33,19 @@ graph LR
     F3 --> F3_6[温度指标展示]
     F3 --> F3_7[历史报告查看]
     
-    Frontend --> F4[治疗方案页面]
+    Web --> F4[治疗方案页面]
     F4 --> F4_1[患者病历选择]
     F4 --> F4_2[自动读取上下文]
     F4 --> F4_3[生成灸疗方案]
     F4 --> F4_4[穴位推荐]
     F4 --> F4_5[疗程参数设置]
     
-    Frontend --> F5[疗效对比页面]
+    Web --> F5[疗效对比页面]
     F5 --> F5_1[治疗前后对比]
     F5 --> F5_2[温度变化分析]
     F5 --> F5_3[疗效评估]
     
-    Frontend --> F6[状态管理]
+    Web --> F6[状态管理]
     F6 --> F6_1[LocalStorage持久化]
     F6 --> F6_2[患者流程状态]
     F6 --> F6_3[页面数据保留]
@@ -172,7 +172,7 @@ graph LR
     D4 --> D4_3[客户端交互]
     
     style Root fill:#e74c3c,stroke:#fff,stroke-width:4px,color:#fff
-    style Frontend fill:#3498db,stroke:#fff,stroke-width:2px,color:#fff
+    style Web fill:#3498db,stroke:#fff,stroke-width:2px,color:#fff
     style Backend fill:#f39c12,stroke:#fff,stroke-width:2px,color:#fff
     style Core fill:#9b59b6,stroke:#fff,stroke-width:2px,color:#fff
     style Flow fill:#27ae60,stroke:#fff,stroke-width:2px,color:#fff

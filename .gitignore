@@ -24,17 +24,17 @@
 /logs/
 /batch_results/
 
-# ==================== Frontend ====================
-/frontend/node_modules/
-/frontend/.next/
-/frontend/.next/cache/
-/frontend/out/
-/frontend/.turbo/
-/frontend/.cache/
-/frontend/.vercel/
-/frontend/.swc/
-/frontend/dist/
-/frontend/build/
+# ==================== Web ====================
+/web/node_modules/
+/web/.next/
+/web/.next/cache/
+/web/out/
+/web/.turbo/
+/web/.cache/
+/web/.vercel/
+/web/.swc/
+/web/dist/
+/web/build/
 **/__pycache__/
 *.pyc
 *.pyo

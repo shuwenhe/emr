@@ -269,7 +269,7 @@
 
 ## 💻 前端代码位置
 
-**主要文件:** [frontend/src/app/patients/page.tsx](../frontend/src/app/patients/page.tsx)
+**主要文件:** [web/src/app/patients/page.tsx](../web/src/app/patients/page.tsx)
 
 **关键代码片段:**
 

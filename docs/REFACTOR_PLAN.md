@@ -128,7 +128,7 @@ emr/
 
 #### 3.1 目标目录结构
 ```
-frontend/
+web/
 ├── src/
 │   ├── app/                      # Next.js App Router
 │   │   ├── (auth)/              # 认证路由组
@@ -310,8 +310,8 @@ services:
       - ./data:/app/data
       - ./reports:/app/reports
 
-  frontend:
-    build: ./frontend
+  web:
+    build: ./web
     ports:
       - "3000:3000"
     depends_on:
@@ -341,7 +341,7 @@ API_HOST=0.0.0.0
 API_PORT=8000
 API_DEBUG=false
 
-# Frontend
+# Web
 NEXT_PUBLIC_API_URL=http://localhost:8000
 
 # Security

@@ -14,14 +14,14 @@ KB_OVERLAP ?= 100
 KB_BATCH_SIZE ?= 32
 ROI_DIR ?= $(CURDIR)/roi
 
-.PHONY: help install run-backend run-frontend db-check report kb-build kb-build-markdown kb-rebuild kb-clean roi-build roi-benchmark clean
+.PHONY: help install run-backend run-web db-check report kb-build kb-build-markdown kb-rebuild kb-clean roi-build roi-benchmark clean
 
 help:
 	@echo "Available targets:"
 	@echo "  make help     # list available commands"
 	@echo "  make install  # install dependencies"
 	@echo "  make run-backend   # run backend service"
-	@echo "  make run-frontend  # run Next.js frontend (dev)"
+	@echo "  make run-web  # run Next.js web app (dev)"
 	@echo "  make db-check # verify MySQL connectivity and privileges"
 	@echo "  make report   # generate docx reports"
 	@echo "  make kb-build # build vector KB"
@@ -36,14 +36,14 @@ install:
 	$(PYTHON) -m venv $(VENV_DIR)
 	$(VENV_PY) -m pip install -U pip
 	$(VENV_PY) -m pip install -r requirements/base.txt
-	@bash -c 'cd "$(CURDIR)/frontend"; if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" && nvm install 20 && nvm use 20; fi; npm install'
+	@bash -c 'cd "$(CURDIR)/web"; if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" && nvm install 20 && nvm use 20; fi; npm install'
 
 
 run-backend: install
 	exec $(VENV_PY) -m uvicorn src.backend.api.main:app --host 0.0.0.0 --port 8000 --reload
 
-run-frontend:
-	@bash -c 'cd "$(CURDIR)/frontend"; if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" && nvm use 20; fi; npm run dev'
+run-web:
+	@bash -c 'cd "$(CURDIR)/web"; if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" && nvm use 20; fi; npm run dev'
 
 db-check:
 	$(VENV_PY) scripts/db_check.py

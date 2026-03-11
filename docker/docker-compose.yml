@@ -53,12 +53,16 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      report-file-service:
+        condition: service_started
     environment:
       - MYSQL_HOST=mysql
       - MYSQL_PORT=3306
       - MYSQL_DB=${MYSQL_DB:-hospital}
       - MYSQL_USER=${MYSQL_USER:-hospital}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD:-hospital}
+      - ENABLE_GO_REPORT_PROXY=${ENABLE_GO_REPORT_PROXY:-false}
+      - GO_REPORT_SERVICE_URL=${GO_REPORT_SERVICE_URL:-http://report-file-service:8088}
     volumes:
       - ./config:/app/config:ro
       - ./data:/app/data
@@ -73,21 +77,38 @@ services:
       - hospital-network
     restart: unless-stopped
 
-  frontend:
+  report-file-service:
     build:
-      context: ./frontend
+      context: ./go-services/report-file-service
+      dockerfile: Dockerfile
+    container_name: hospital-report-file-service
+    environment:
+      - RFS_ADDR=:8088
+      - RFS_REPORTS_DIR=/app/reports
+      - RFS_CACHE_TTL_SECONDS=300
+    ports:
+      - "${REPORT_FILE_SERVICE_PORT:-8088}:8088"
+    volumes:
+      - ./reports:/app/reports
+    networks:
+      - hospital-network
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./web
       dockerfile: Dockerfile
       args:
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://backend:8000}
-    container_name: hospital-frontend
+    container_name: hospital-web
     ports:
-      - "${FRONTEND_PORT:-3000}:3000"
+      - "${WEB_PORT:-3000}:3000"
     depends_on:
       - backend
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://backend:8000}
     volumes:
-      - ./frontend:/app:delegated  # 开发时热重载
+      - ./web:/app:delegated  # 开发时热重载
       - /app/node_modules
       - /app/.next
     networks:
@@ -98,7 +119,7 @@ services:
     image: nginx:1.27-alpine
     container_name: hospital-nginx
     depends_on:
-      - frontend
+      - web
       - backend
     ports:
       - "${NGINX_PORT:-8080}:80"

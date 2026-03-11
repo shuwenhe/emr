@@ -51,13 +51,13 @@ services:
       - hospital-network
     restart: unless-stopped
 
-  frontend:
+  web:
     build:
-      context: ./frontend
+      context: ./web
       dockerfile: Dockerfile
       args:
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://backend:8000}
-    container_name: hospital-frontend
+    container_name: hospital-web
     depends_on:
       - backend
     environment:
@@ -70,7 +70,7 @@ services:
     image: nginx:1.27-alpine
     container_name: hospital-nginx
     depends_on:
-      - frontend
+      - web
       - backend
     ports:
       - "${NGINX_PORT:-8080}:80"

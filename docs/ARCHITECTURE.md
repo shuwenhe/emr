@@ -7,7 +7,7 @@
 │                    Client Layer                          │
 │                   (Web Browser)                          │
 │  ┌─────────────────────────────────────────────────┐   │
-│  │    Next.js 15 Frontend Application              │   │
+│  │    Next.js 15 Web Application              │   │
 │  │  ├─ React 19 Components                         │   │
 │  │  ├─ TypeScript Type System                      │   │
 │  │  ├─ TailwindCSS Styling                         │   │
@@ -40,12 +40,12 @@
 
 ---
 
-## 二、前端架构 (Frontend Architecture)
+## 二、前端架构 (Web Architecture)
 
 ### 2.1 项目结构
 
 ```
-frontend/
+web/
 ├── public/                 # 静态资源
 ├── src/
 │   ├── app/               # Next.js App Router
@@ -228,7 +228,7 @@ frontend/
 **分类**:
 ```
 ┌─────────────────────────────────────────┐
-│        Frontend State Management         │
+│        Web State Management         │
 ├─────────────────────────────────────────┤
 │ 1. UI State (内存)                      │
 │    └─ 模态框/表单显示状态                 │

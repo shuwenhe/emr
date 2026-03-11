@@ -156,6 +156,16 @@ class Settings(BaseSettings):
     REDIS_HOST: str = Field(default="localhost", description="Redis host")
     REDIS_PORT: int = Field(default=6379, description="Redis port")
     REDIS_DB: int = Field(default=0, description="Redis database")
+
+    # ==================== Go Service Gateway ====================
+    ENABLE_GO_REPORT_PROXY: bool = Field(
+        default=False,
+        description="Enable proxying /reports APIs to Go report-file-service",
+    )
+    GO_REPORT_SERVICE_URL: str = Field(
+        default="http://report-file-service:8088",
+        description="Base URL of report-file-service",
+    )
     
     # Pydantic Settings Configuration
     model_config = SettingsConfigDict(
