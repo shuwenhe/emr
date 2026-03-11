@@ -62,7 +62,20 @@ const THERMAL_PLOT_BOUNDS = {
 
 const HEAD_ROI_NAME_REGEX = /(额头|眼|脸颊|鼻子|鼻|下巴)/;
 
-const API_BASE = "http://localhost:8000";
+function resolveApiBase() {
+  const envBase = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (envBase) {
+    return envBase.replace(/\/$/, "");
+  }
+  if (typeof window !== "undefined") {
+    const { protocol, hostname } = window.location;
+    const backendHost = hostname === "127.0.0.1" ? "localhost" : hostname;
+    return `${protocol}//${backendHost}:8000`;
+  }
+  return "http://localhost:8000";
+}
+
+const API_BASE = resolveApiBase();
 const EMR_STATE_KEY = "patient_flow_state_emr";
 const REPORTS_PAGE_SIZE = 10;
 

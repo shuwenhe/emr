@@ -14,10 +14,12 @@ from fastapi import APIRouter, HTTPException, Response
 from fastapi.responses import FileResponse
 
 from src.backend.core.config import settings
+from src.backend.core.logging import get_logger
 from src.backend.models.schemas.api import ReportArchiveRequest
 
 router = APIRouter(tags=["reports"])
 REPORTS_DIR = settings.REPORTS_DIR
+logger = get_logger(__name__)
 
 # Cache with 5-minute TTL
 _LIST_REPORTS_CACHE: Dict[str, Dict[str, Any]] = {}
@@ -82,14 +84,31 @@ def _proxy_call(
         headers["Content-Type"] = "application/json"
 
     req = urllib_request.Request(url=url, data=body, method=method, headers=headers)
+    logger.info("[reports->go] proxy request %s %s", method, url)
 
     try:
         with urllib_request.urlopen(req, timeout=20) as resp:
-            return resp.getcode(), dict(resp.headers.items()), resp.read()
+            status = resp.getcode()
+            resp_headers = dict(resp.headers.items())
+            marker = resp_headers.get("X-Report-Service", "")
+            logger.info(
+                "[reports->go] proxy response status=%s service=%s",
+                status,
+                marker or "unknown",
+            )
+            return status, resp_headers, resp.read()
     except urllib_error.HTTPError as exc:
         body = exc.read() if hasattr(exc, "read") else b""
-        return exc.code, dict(exc.headers.items()) if exc.headers else {}, body
+        resp_headers = dict(exc.headers.items()) if exc.headers else {}
+        marker = resp_headers.get("X-Report-Service", "")
+        logger.warning(
+            "[reports->go] proxy http error status=%s service=%s",
+            exc.code,
+            marker or "unknown",
+        )
+        return exc.code, resp_headers, body
     except urllib_error.URLError as exc:
+        logger.exception("[reports->go] proxy connection failed: %s", exc)
         raise HTTPException(status_code=502, detail=f"go_report_service_unavailable: {exc}") from exc
 
 

@@ -54,7 +54,29 @@ type NewPatient = {
   chief_complaint: string;
 };
 
-const API_BASE = "http://localhost:8000";
+function resolveApiBase() {
+  const envBase = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (envBase) {
+    return envBase.replace(/\/$/, "");
+  }
+  if (typeof window !== "undefined") {
+    const { protocol, hostname } = window.location;
+    const backendHost = hostname === "127.0.0.1" ? "localhost" : hostname;
+    return `${protocol}//${backendHost}:8000`;
+  }
+  return "http://localhost:8000";
+}
+
+const API_BASE = resolveApiBase();
+
+function parseReportDay(value: string): Date {
+  const raw = String(value || "").trim();
+  if (/^\d{8}$/.test(raw)) {
+    const normalized = `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`;
+    return new Date(`${normalized}T00:00:00`);
+  }
+  return new Date(raw);
+}
 const PATIENTS_STATE_KEY = "patient_flow_state_patients";
 const PATIENT_FLOW_KEYS = [
   "patient_flow_state_patients",
@@ -293,7 +315,8 @@ export default function PatientsPage() {
       
       // 按日期范围过滤
       if (reportDateFrom || reportDateTo) {
-        const fileDate = new Date(file.date);
+        const fileDate = parseReportDay(file.date);
+        if (Number.isNaN(fileDate.getTime())) return false;
         if (reportDateFrom) {
           const fromDate = new Date(reportDateFrom);
           if (fileDate < fromDate) return false;
