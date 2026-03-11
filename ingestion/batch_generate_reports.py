@@ -13,7 +13,7 @@ from datetime import datetime
 sys.path.insert(0, str(Path(__file__).parent))
 
 from app.data_platform import list_emrs as list_db_emrs, get_patient
-from backend.reports import generate_template_report
+from reports import generate_template_report
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -80,7 +80,7 @@ def generate_reports_for_patient(patient_id: str, patient_name: str):
 
 def main():
     """为所有患者生成报告"""
-    project_root = Path(__file__).resolve().parents[2]
+    project_root = Path(__file__).resolve().parents[1]
     reports_dir = project_root / "reports"
     
     print("=" * 70)

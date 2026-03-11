@@ -74,7 +74,7 @@ _CJK_FONT_CANDIDATES = [
 _CJK_FONT_PROP: Optional[fm.FontProperties] = None
 
 # 添加ROI目录用于导入ROI模块（优先新结构 roi/python，兼容旧结构 scripts）
-_BASE_DIR = Path(__file__).resolve().parents[3]
+_BASE_DIR = Path(__file__).resolve().parents[2]
 _ROI_PY_DIR = _BASE_DIR / "roi" / "python"
 _LEGACY_SCRIPTS_DIR = _BASE_DIR / "scripts"
 for _import_dir in (_ROI_PY_DIR, _LEGACY_SCRIPTS_DIR):

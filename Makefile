@@ -46,11 +46,11 @@ run-frontend:
 	@bash -c 'cd "$(CURDIR)/frontend"; if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" && nvm use 20; fi; npm run dev'
 
 db-check:
-	$(VENV_PY) backend/scripts/db_check.py
+	$(VENV_PY) scripts/db_check.py
 
 report: install
 	$(VENV_PY) -m pip install -q python-docx
-	$(VENV_PY) backend/scripts/generate_reports.py --name "张三" --datasets normal_face fever_face hand_normal low_temp
+	$(VENV_PY) scripts/generate_reports.py --name "张三" --datasets normal_face fever_face hand_normal low_temp
 
 kb-build:
 	@mkdir -p "$(KB_OUT_DIR)"

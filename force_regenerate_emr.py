@@ -3,7 +3,7 @@
 Force regenerate EMR and DOCX report for a record.
 """
 import sys
-sys.path.insert(0, "/home/shuwen/emr/backend/ingestion")
+sys.path.insert(0, "/home/shuwen/emr/ingestion")
 sys.path.insert(0, "/home/shuwen/emr/backend")
 
 import json

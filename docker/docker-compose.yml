@@ -45,7 +45,7 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
     container_name: hospital-backend
     ports:
@@ -63,7 +63,7 @@ services:
       - ./config:/app/config:ro
       - ./data:/app/data
       - ./reports:/app/reports
-      - ./backend/ingestion:/app:delegated  # 开发时热重载
+      - ./ingestion:/app:delegated  # 开发时热重载
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s

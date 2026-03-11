@@ -20,7 +20,7 @@ RAG_SCORE_THRESHOLD = float(os.getenv("RAG_SCORE_THRESHOLD", "0"))
 RAG_VECTOR_ENABLED = os.getenv("RAG_VECTOR_ENABLED", "1") != "0"
 RAG_VECTOR_KB_PATH = os.getenv(
     "RAG_VECTOR_KB_PATH",
-    str(Path(__file__).resolve().parents[3] / "rag" / "kb" / "current"),
+    str(Path(__file__).resolve().parents[2] / "rag" / "kb" / "current"),
 )
 RAG_EMBED_PROVIDER = os.getenv("RAG_EMBED_PROVIDER", "ollama")
 RAG_EMBED_MODEL = os.getenv("RAG_EMBED_MODEL", "bge-m3:latest")
@@ -43,7 +43,7 @@ _SYSTEM_PROMPT = (
 
 
 def _import_top_level_rag_modules():
-    project_root = Path(__file__).resolve().parents[3]
+    project_root = Path(__file__).resolve().parents[2]
     project_root_str = str(project_root)
     if project_root_str not in sys.path:
         sys.path.insert(0, project_root_str)

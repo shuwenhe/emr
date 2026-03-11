@@ -3,7 +3,7 @@
 测试 generate_docx_report 和异常处理。
 """
 import sys
-sys.path.insert(0, "/home/shuwen/emr/backend/ingestion")
+sys.path.insert(0, "/home/shuwen/emr/ingestion")
 sys.path.insert(0, "/home/shuwen/emr/backend")
 
 import logging
@@ -20,7 +20,7 @@ print(f"Record dir: {record_dir}")
 
 try:
     # 简化：不加载完整JSON，只测试函数
-    from backend.reports.docx_generator import generate_docx_report
+    from reports.docx_generator import generate_docx_report
     
     # 构造最小化的测试数据
     report = {

@@ -31,11 +31,11 @@ def test_imports():
     print("\n--- Report Module Imports ---")
     
     try:
-        from backend.reports import generate_docx_report, generate_template_report
-        print(f"✓ backend.reports - Report generation functions imported")
+        from reports import generate_docx_report, generate_template_report
+        print(f"✓ reports - Report generation functions imported")
         tests_passed += 1
     except ImportError as e:
-        print(f"✗ backend.reports - Error: {e}")
+        print(f"✗ reports - Error: {e}")
         tests_failed += 1
     
     # Test config
@@ -59,7 +59,7 @@ def test_imports():
 if __name__ == "__main__":
     import sys
     sys.path.insert(0, "/home/shuwen/emr/backend")
-    sys.path.insert(0, "/home/shuwen/emr/backend/ingestion")
+    sys.path.insert(0, "/home/shuwen/emr/ingestion")
     
     success = test_imports()
     sys.exit(0 if success else 1)

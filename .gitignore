@@ -9,16 +9,16 @@
 /storage/uploads/
 
 # Legacy storage paths (to be removed after migration)
-/backend/device-ingestion/data/
-/backend/device-ingestion/device-drop/
-/backend/device-ingestion/device-processed/
-/backend/device-ingestion/output/
-/backend/device-ingestion/outputs/
-/backend/device-ingestion/temp/
-/backend/device-ingestion/tmp/
-/backend/device-ingestion/logs/
-/backend/device-ingestion/exports/
-/backend/device-ingestion/generated/
+/ingestion/data/
+/ingestion/device-drop/
+/ingestion/device-processed/
+/ingestion/output/
+/ingestion/outputs/
+/ingestion/temp/
+/ingestion/tmp/
+/ingestion/logs/
+/ingestion/exports/
+/ingestion/generated/
 /data/
 /reports/
 /logs/

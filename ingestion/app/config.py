@@ -2,7 +2,7 @@ from pathlib import Path
 
 import yaml
 
-BASE_DIR = Path(__file__).resolve().parents[3]
+BASE_DIR = Path(__file__).resolve().parents[2]
 CONFIG_DIR = BASE_DIR / "config"
 MYSQL_CONFIG_PATH = CONFIG_DIR / "mysql.yaml"
 CLICKHOUSE_CONFIG_PATH = CONFIG_DIR / "clickhouse.yaml"

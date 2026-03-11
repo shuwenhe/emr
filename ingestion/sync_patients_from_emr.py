@@ -13,7 +13,7 @@ from datetime import datetime
 sys.path.insert(0, str(Path(__file__).parent))
 
 # 使用项目根目录下的EMR数据目录
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 EMR_DIR = PROJECT_ROOT / "data" / "emr"
 from app.data_platform import upsert_patient, list_emrs as list_db_emrs, get_patient
 

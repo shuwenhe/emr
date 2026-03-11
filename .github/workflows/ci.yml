@@ -44,14 +44,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd backend
-          pip install -r device-ingestion/requirements.txt
+          pip install -r ingestion/requirements.txt
           pip install -r requirements-dev.txt
 
       - name: Run ruff linter
         run: |
-          cd backend
-          ruff check device-ingestion/app
+          ruff check ingestion/app
 
       - name: Run tests with coverage
         env:
@@ -61,13 +59,12 @@ jobs:
           MYSQL_USER: hospital
           MYSQL_PASSWORD: hospital
         run: |
-          cd backend
-          pytest -v --cov=device-ingestion/app --cov-report=xml --cov-report=term
+          pytest -v --cov=ingestion/app --cov-report=xml --cov-report=term
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          file: ./backend/coverage.xml
+          file: ./coverage.xml
           flags: backend
           fail_ci_if_error: false
 
@@ -131,7 +128,7 @@ jobs:
       - name: Build backend image
         uses: docker/build-push-action@v5
         with:
-          context: ./backend
+          context: .
           push: false
           tags: hospital-backend:test
           cache-from: type=gha

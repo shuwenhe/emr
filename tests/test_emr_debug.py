@@ -9,7 +9,7 @@ import logging
 # Setup logging to see all messages
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-sys.path.insert(0, "/home/shuwen/emr/backend/ingestion")
+sys.path.insert(0, "/home/shuwen/emr/ingestion")
 sys.path.insert(0, "/home/shuwen/emr/backend")
 
 from pathlib import Path

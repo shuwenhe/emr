@@ -8,7 +8,7 @@ from pathlib import Path
 
 # 添加路径
 sys.path.insert(0, "/home/shuwen/emr/backend")
-sys.path.insert(0, "/home/shuwen/emr/backend/ingestion")
+sys.path.insert(0, "/home/shuwen/emr/ingestion")
 
 from app.config import DATA_DIR
 from app.emr import upsert_emr_from_analysis
