@@ -257,6 +257,52 @@ export default function EmrPage() {
     return visibleReportFiles.length ? visibleReportFiles : reportFiles;
   }, [reportFiles, visibleReportFiles]);
 
+  const reportEvidence = useMemo(() => {
+    if (!report || typeof report !== "object") {
+      return {
+        reportNote: "",
+        treatmentPlanText: "",
+        citations: [] as Array<Record<string, string>>,
+        retrievedItems: [] as Array<Record<string, string | string[]>>,
+        evidenceItemIds: [] as string[],
+        diagnosisEvidenceIds: [] as string[],
+        planEvidenceIds: [] as string[],
+      };
+    }
+
+    const reportData = report as Record<string, unknown>;
+    const citations = Array.isArray(reportData.citations)
+      ? reportData.citations
+          .filter((item): item is Record<string, unknown> => !!item && typeof item === "object")
+          .map((item) => ({
+            id: String(item.id ?? "").trim(),
+            title: String(item.title ?? "").trim(),
+            source: String(item.source ?? "").trim(),
+          }))
+      : [];
+
+    const retrievedItems = Array.isArray(reportData.retrieved_items)
+      ? reportData.retrieved_items
+          .filter((item): item is Record<string, unknown> => !!item && typeof item === "object")
+          .map((item) => ({
+            id: String(item.id ?? "").trim(),
+            title: String(item.title ?? "").trim(),
+            source: String(item.source ?? "").trim(),
+            tags: toStringArray(item.tags),
+          }))
+      : [];
+
+    return {
+      reportNote: String(reportData.report_note ?? "").trim(),
+      treatmentPlanText: String(reportData.treatment_plan_text ?? "").trim(),
+      citations,
+      retrievedItems,
+      evidenceItemIds: toStringArray(reportData.evidence_item_ids),
+      diagnosisEvidenceIds: toStringArray(reportData.diagnosis_evidence_item_ids),
+      planEvidenceIds: toStringArray(reportData.plan_evidence_item_ids),
+    };
+  }, [report]);
+
   const reportTotalPages = useMemo(() => {
     if (!reportFilesForDisplay.length) {
       return 1;
@@ -728,6 +774,13 @@ export default function EmrPage() {
     if (value === null || value === undefined) return null;
     const num = Number(value);
     return Number.isFinite(num) ? num : null;
+  }
+
+  function toStringArray(value: unknown): string[] {
+    if (!Array.isArray(value)) return [];
+    return value
+      .map((item) => String(item ?? "").trim())
+      .filter(Boolean);
   }
 
   function syncEmrFields(data: EmrResponse) {
@@ -1531,6 +1584,93 @@ export default function EmrPage() {
                   {String(report.doctor_opinion ?? "-")}
                 </p>
               </div>
+
+              {reportEvidence.reportNote && (
+                <div className="rounded-xl border border-slate-200 p-4">
+                  <h3 className="text-sm font-semibold text-slate-900">AI 报告说明</h3>
+                  <p className="mt-2 text-slate-700">{reportEvidence.reportNote}</p>
+                </div>
+              )}
+
+              {reportEvidence.treatmentPlanText && (
+                <div className="rounded-xl border border-slate-200 p-4">
+                  <h3 className="text-sm font-semibold text-slate-900">AI 治疗建议</h3>
+                  <p className="mt-2 text-slate-700">{reportEvidence.treatmentPlanText}</p>
+                </div>
+              )}
+
+              {(reportEvidence.citations.length > 0 ||
+                reportEvidence.evidenceItemIds.length > 0 ||
+                reportEvidence.retrievedItems.length > 0) && (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                  <h3 className="text-sm font-semibold text-emerald-900">证据依据</h3>
+                  <p className="mt-2 text-sm text-emerald-800">
+                    诊断与建议中的引用编号，例如 [1]、[2]，对应下方知识条目。
+                  </p>
+
+                  {reportEvidence.citations.length > 0 && (
+                    <div className="mt-4 space-y-3">
+                      {reportEvidence.citations.map((citation, index) => (
+                        <div key={`${citation.id || citation.title || "citation"}-${index}`} className="rounded-lg bg-white p-3 ring-1 ring-emerald-100">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">
+                              [{index + 1}]
+                            </span>
+                            <span className="text-sm font-semibold text-slate-900">{citation.title || "未命名知识条目"}</span>
+                          </div>
+                          <div className="mt-2 space-y-1 text-sm text-slate-700">
+                            <p>条目 ID：{citation.id || "-"}</p>
+                            <p>来源：{citation.source || "-"}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                    <div className="rounded-lg bg-white p-3 ring-1 ring-emerald-100">
+                      <p className="text-xs font-semibold text-slate-500">全部证据 ID</p>
+                      <p className="mt-2 text-sm text-slate-700">
+                        {reportEvidence.evidenceItemIds.length > 0 ? reportEvidence.evidenceItemIds.join(", ") : "-"}
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-white p-3 ring-1 ring-emerald-100">
+                      <p className="text-xs font-semibold text-slate-500">诊断证据 ID</p>
+                      <p className="mt-2 text-sm text-slate-700">
+                        {reportEvidence.diagnosisEvidenceIds.length > 0 ? reportEvidence.diagnosisEvidenceIds.join(", ") : "-"}
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-white p-3 ring-1 ring-emerald-100">
+                      <p className="text-xs font-semibold text-slate-500">方案证据 ID</p>
+                      <p className="mt-2 text-sm text-slate-700">
+                        {reportEvidence.planEvidenceIds.length > 0 ? reportEvidence.planEvidenceIds.join(", ") : "-"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {reportEvidence.retrievedItems.length > 0 && (
+                    <details className="mt-4 rounded-lg bg-white p-3 ring-1 ring-emerald-100">
+                      <summary className="cursor-pointer text-sm font-semibold text-slate-900">
+                        查看 RAG 命中条目（{reportEvidence.retrievedItems.length}）
+                      </summary>
+                      <div className="mt-3 space-y-3">
+                        {reportEvidence.retrievedItems.map((item, index) => (
+                          <div key={`${String(item.id || item.title || "item")}-${index}`} className="rounded-lg border border-slate-200 p-3">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-sm font-semibold text-slate-900">{String(item.title || "未命名条目")}</span>
+                              <span className="text-xs text-slate-500">{String(item.id || "")}</span>
+                            </div>
+                            <p className="mt-1 text-sm text-slate-700">来源：{String(item.source || "-")}</p>
+                            {Array.isArray(item.tags) && item.tags.length > 0 && (
+                              <p className="mt-1 text-sm text-slate-700">标签：{item.tags.join(", ")}</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  )}
+                </div>
+              )}
 
               {report.analysis && typeof report.analysis === "object" && 
                (report.analysis as Record<string, unknown>).regional_comparison && 

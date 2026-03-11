@@ -38,6 +38,65 @@ def _validate_size(file_bytes: bytes) -> None:
         raise HTTPException(status_code=400, detail="file_too_large")
 
 
+def _persist_ai_result(record_id: str, analysis_result: dict, emr_result: dict, ai_result: dict) -> dict:
+    emr_id = str(emr_result.get("emr_id") or "").strip()
+    if not emr_id:
+        logger.warning("[步骤4] AI结果回写 跳过 record_id=%s: missing emr_id", record_id)
+        return emr_result
+
+    analysis_report = analysis_result.get("report") if isinstance(analysis_result, dict) else {}
+    emr_report = emr_result.get("report") if isinstance(emr_result, dict) else {}
+
+    merged_report = {}
+    if isinstance(analysis_report, dict):
+        merged_report.update(analysis_report)
+    if isinstance(emr_report, dict):
+        merged_report.update(emr_report)
+
+    for field in ("diagnosis", "doctor_opinion", "report_note", "treatment_plan_text", "retrieved_context"):
+        value = ai_result.get(field)
+        if value:
+            merged_report[field] = value
+
+    for field in (
+        "retrieved_items",
+        "citations",
+        "evidence_item_ids",
+        "diagnosis_evidence_item_ids",
+        "plan_evidence_item_ids",
+    ):
+        value = ai_result.get(field)
+        if isinstance(value, list):
+            merged_report[field] = value
+
+    if ai_result.get("model"):
+        merged_report["ai_model"] = ai_result["model"]
+
+    updates = {"report": merged_report}
+    if ai_result.get("diagnosis"):
+        updates["diagnosis"] = ai_result["diagnosis"]
+    if ai_result.get("doctor_opinion"):
+        updates["doctor_opinion"] = ai_result["doctor_opinion"]
+
+    if ai_result.get("treatment_plan_text"):
+        treatment_plan = emr_result.get("treatment_plan") if isinstance(emr_result.get("treatment_plan"), dict) else {}
+        updates["treatment_plan"] = {
+            **treatment_plan,
+            "treatment_plan_text": ai_result["treatment_plan_text"],
+            "evidence_item_ids": ai_result.get("plan_evidence_item_ids") or ai_result.get("evidence_item_ids") or [],
+        }
+
+    updated = emr_service.update_emr(emr_id, updates) or {}
+    logger.info(
+        "[步骤4] AI结果回写 完成 record_id=%s emr_id=%s citations=%d evidence_ids=%d",
+        record_id,
+        emr_id,
+        len(merged_report.get("citations") or []),
+        len(merged_report.get("evidence_item_ids") or []),
+    )
+    return updated or emr_result
+
+
 def _generate_report_after_ingest(record_id: str, metadata: dict | None = None) -> None:
     """完整报告生成流水线：步骤2分析 → 步骤3EMR → 步骤4AI → 步骤5治疗方案"""
     patient = metadata or {}
@@ -76,6 +135,8 @@ def _generate_report_after_ingest(record_id: str, metadata: dict | None = None) 
         logger.info("[步骤4] AI报告生成 开始 record_id=%s", record_id)
         t0 = time.time()
         ai_result = ai_service.generate_report_summary(analysis_result, emr_result) or {}
+        if ai_result and emr_result:
+            emr_result = _persist_ai_result(record_id, analysis_result, emr_result, ai_result)
         elapsed = time.time() - t0
         logger.info("[步骤4] AI报告生成 完成 record_id=%s keys=%s 耗时=%.2fs", record_id, list(ai_result.keys()), elapsed)
     except Exception as exc:

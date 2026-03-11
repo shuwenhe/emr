@@ -1,51 +1,29 @@
 from __future__ import annotations
 
-import importlib
-import sys
-from pathlib import Path
 from typing import Any, Dict, Optional
 
-
-_LEGACY_BACKEND_DIR = Path(__file__).resolve().parents[2] / "ingestion"
-if str(_LEGACY_BACKEND_DIR) not in sys.path:
-    sys.path.insert(0, str(_LEGACY_BACKEND_DIR))
+from .legacy_adapter import LegacyPlatformAdapter
+from .types import PlatformGateway
 
 
 class PlatformService:
-    # Cache imported modules at class level
-    _legacy_data_platform = None
-    _legacy_device_connector = None
-    _legacy_analysis = None
-    
-    def __init__(self):
-        # Lazy load modules on first instance creation
-        if PlatformService._legacy_data_platform is None:
-            PlatformService._legacy_data_platform = importlib.import_module("app.data_platform")
-            PlatformService._legacy_device_connector = importlib.import_module("app.device_connector")
-            PlatformService._legacy_analysis = importlib.import_module("app.analysis")
+    def __init__(self, gateway: PlatformGateway | None = None):
+        self._gateway = gateway or LegacyPlatformAdapter()
     
     def init_db(self) -> None:
-        self._legacy_data_platform.init_db()
+        self._gateway.init_db()
 
     async def poll_device_drop(self, stop_event):
-        await self._legacy_device_connector.poll_device_drop(stop_event)
+        await self._gateway.poll_device_drop(stop_event)
 
     def import_history(self, root_path: str, analyze: bool = True) -> Dict[str, Any]:
-        result = self._legacy_device_connector.import_history_dir(Path(root_path))
-        if analyze:
-            analyzed = []
-            for item in result.get("ingested", []):
-                record_id = item.get("record_id")
-                if record_id:
-                    analyzed.append(self._legacy_analysis.analyze_record(record_id))
-            result["analyzed"] = analyzed
-        return result
+        return self._gateway.import_history(root_path=root_path, analyze=analyze)
 
     def summary(self) -> Dict[str, Any]:
-        return self._legacy_data_platform.summary()
+        return self._gateway.summary()
 
     def list_records(self, patient_id: Optional[str] = None, limit: int = 50):
-        return self._legacy_data_platform.list_records(patient_id=patient_id, limit=limit)
+        return self._gateway.list_records(patient_id=patient_id, limit=limit)
 
     def list_platform_emrs(
         self,
@@ -54,7 +32,7 @@ class PlatformService:
         limit: int = 50,
         include_archived: bool = False,
     ):
-        return self._legacy_data_platform.list_emrs(
+        return self._gateway.list_platform_emrs(
             patient_id=patient_id,
             record_id=record_id,
             limit=limit,
@@ -62,22 +40,22 @@ class PlatformService:
         )
 
     def upsert_patient(self, payload: Dict[str, Any]) -> Optional[str]:
-        return self._legacy_data_platform.upsert_patient(payload)
+        return self._gateway.upsert_patient(payload)
 
     def list_patients(self, limit: int = 20, offset: int = 0, include_archived: bool = False):
-        return self._legacy_data_platform.list_patients(limit=limit, offset=offset, include_archived=include_archived)
+        return self._gateway.list_patients(limit=limit, offset=offset, include_archived=include_archived)
 
     def get_patient(self, patient_id: str):
-        return self._legacy_data_platform.get_patient(patient_id)
+        return self._gateway.get_patient(patient_id)
 
     def update_patient(self, patient_id: str, payload: Dict[str, Any]):
-        return self._legacy_data_platform.update_patient(patient_id, payload)
+        return self._gateway.update_patient(patient_id, payload)
 
     def archive_patient(self, patient_id: str, archived: bool = True):
-        return self._legacy_data_platform.archive_patient(patient_id, archived)
+        return self._gateway.archive_patient(patient_id, archived)
 
     def delete_patient(self, patient_id: str) -> bool:
-        return self._legacy_data_platform.delete_patient(patient_id)
+        return self._gateway.delete_patient(patient_id)
 
 
 __all__ = ["PlatformService"]
