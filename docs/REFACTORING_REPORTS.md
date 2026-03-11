@@ -3,39 +3,39 @@
 ## Changes Made
 
 ### New Module Structure
-Created a dedicated `backend/reports/` module for all report generation functionality:
+Created a dedicated `reports/` module for all report generation functionality:
 
 ```
-emr/backend/reports/
+emr/reports/
 ├── __init__.py              # Public API exports
 ├── docx_generator.py        # DOCX report generation (moved from app/report_docx.py)
 └── template_generator.py    # Template-based PDF generation (moved from app/report_template.py)
 ```
 
 ### Files Created
-1. **backend/__init__.py** - Makes backend a proper Python package
-2. **backend/reports/__init__.py** - Exports `generate_docx_report` and `generate_template_report`
-3. **backend/reports/docx_generator.py** - DOCX report generation with ROI labeling
-4. **backend/reports/template_generator.py** - FastReport template-based PDF generation
+1. **__init__.py** - Makes project root package importable for legacy compatibility
+2. **reports/__init__.py** - Exports `generate_docx_report` and `generate_template_report`
+3. **reports/docx_generator.py** - DOCX report generation with ROI labeling
+4. **reports/template_generator.py** - FastReport template-based PDF generation
 
 ### Import Updates
 Updated all references across the codebase:
 
-1. **backend/device-ingestion/app/emr.py**
+1. **ingestion/app/emr.py**
    - Changed: `from .report_docx import ...` and `from .report_template import ...`
-   - To: `from backend.reports import generate_docx_report, generate_template_report`
+   - To: `from reports import generate_docx_report, generate_template_report`
 
-2. **backend/device-ingestion/batch_generate_reports.py**
+2. **ingestion/batch_generate_reports.py**
    - Changed: `from app.report_template import generate_template_report`
-   - To: `from backend.reports import generate_template_report`
+   - To: `from reports import generate_template_report`
 
-3. **backend/scripts/generate_reports.py**
+3. **scripts/generate_reports.py**
    - Changed: `from app.report_template import generate_template_report`
-   - To: `from backend.reports import generate_template_report`
+   - To: `from reports import generate_template_report`
 
 4. **tests/test_roi_integration.py**
    - Changed: `from app.report_docx import generate_docx_report`
-   - To: `from backend.reports import generate_docx_report`
+   - To: `from reports import generate_docx_report`
 
 ### Dependencies
 The new report modules maintain their dependencies on:

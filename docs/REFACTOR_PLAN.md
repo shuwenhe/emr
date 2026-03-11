@@ -46,7 +46,7 @@
 
 #### 2.1 目标目录结构
 ```
-backend/
+emr/
 ├── src/                          # 源代码
 │   ├── api/                      # API路由层
 │   │   ├── __init__.py
@@ -266,7 +266,7 @@ lib/api/patients.ts (50行)               ← API调用
 
 ```bash
 # 创建后端Dockerfile
-cat > backend/Dockerfile << 'EOF'
+cat > Dockerfile << 'EOF'
 FROM python:3.12-slim
 
 WORKDIR /app
@@ -298,7 +298,7 @@ services:
       - ./database/init_mysql.sql:/docker-entrypoint-initdb.d/init.sql
 
   backend:
-    build: ./backend
+    build: .
     ports:
       - "8000:8000"
     depends_on:

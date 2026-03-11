@@ -235,7 +235,7 @@ def _list_reports():
    - 预期：用户体验大幅提升
 
 6. **遗留代码重构** 🟢
-   - 逐步迁移 `backend/device-ingestion` 代码
+   - 逐步迁移 `ingestion` 代码
    - 完全剥离依赖
 
 ---

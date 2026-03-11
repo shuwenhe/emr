@@ -37,7 +37,7 @@
 
 **当前结构:**
 ```
-backend/device-ingestion/app/
+ingestion/app/
 ├── main.py (484行) ❌
 ├── analysis.py (541行) ❌
 ├── data_platform.py (455行) ❌
@@ -52,7 +52,7 @@ backend/device-ingestion/app/
 
 **应该是:**
 ```
-backend/src/
+src/backend/
 ├── api/routes/          # 路由层
 ├── services/            # 业务逻辑层
 ├── repositories/        # 数据访问层
@@ -147,7 +147,7 @@ backend/src/
 
 1. ✅ **添加Docker配置**
    - `docker-compose.yml`
-   - `backend/Dockerfile`
+   - `Dockerfile`
    - `frontend/Dockerfile`
    - `.env.example`
 
@@ -166,7 +166,7 @@ backend/src/
 4. **后端重构**
    ```bash
    # 创建新目录结构
-   mkdir -p backend/src/{api/v1,services,repositories,models,core,utils}
+   mkdir -p src/backend/{api/v1,services,repositories,models,core,utils}
    
    # 逐步迁移代码
    # 1. 拆分main.py -> api/v1/*.py
@@ -244,11 +244,11 @@ backend/src/
 已创建文件:
 - [x] `REFACTOR_PLAN.md` - 详细重构计划
 - [x] `docker-compose.yml` - 容器编排
-- [x] `backend/Dockerfile` - 后端镜像  
+- [x] `Dockerfile` - 后端镜像  
 - [x] `frontend/Dockerfile` - 前端镜像
 - [x] `.env.example` - 环境变量模板
-- [x] `backend/pyproject.toml` - Python项目配置
-- [x] `backend/tests/` - 测试框架
+- [x] `pyproject.toml` - Python项目配置
+- [x] `tests/` - 测试框架
 - [x] `frontend/jest.config.js` - 前端测试配置
 - [x] `.github/workflows/ci.yml` - CI/CD流程
 

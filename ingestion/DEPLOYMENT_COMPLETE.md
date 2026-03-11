@@ -30,7 +30,7 @@ docker restart device-ingestion-api
 # 方式3：手动停止/启动
 pkill -f "uvicorn.*main:app"
 sleep 2
-cd /home/shuwen/emr/backend/device-ingestion
+cd /home/shuwen/emr/ingestion
 source /home/shuwen/.venv/bin/activate
 uvicorn app.main:app --host 0.0.0.0 --port 8000 &
 
@@ -43,7 +43,7 @@ curl http://localhost:8000/platform/summary
 
 ```bash
 # 切换到项目目录
-cd /home/shuwen/emr/backend/device-ingestion
+cd /home/shuwen/emr/ingestion
 
 # 执行SQL优化脚本
 # 需要MySQL root权限或管理员权限
@@ -256,7 +256,7 @@ netstat -tulpn | grep 3306
 # 强制重启应用
 pkill -f uvicorn
 sleep 2
-cd /home/shuwen/emr/backend/device-ingestion
+cd /home/shuwen/emr/ingestion
 uvicorn app.main:app --host 0.0.0.0 --port 8000 &
 ```
 

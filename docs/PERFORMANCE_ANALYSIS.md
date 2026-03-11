@@ -177,7 +177,7 @@ def _load_fastreport():
 **问题**：
 - MySQL 连接 URL 定义了但没有看到连接池配置
 - 每个数据库操作可能创建新连接
-- 遗留代码（backend/device-ingestion）的査询模式未优化
+- 遗留代码（ingestion）的査询模式未优化
 
 **症状**：
 - 列表操作响应慢（N+1 问题）
@@ -228,7 +228,7 @@ def _generate_report_after_ingest(record_id: str) -> None:
 ### 长期重构（2-3 天）
 | 问题 | 优化方案 | 预期提升 |
 |------|--------|--------|
-| 遗留代码耦合 | 逐步重写，完全剥离 `backend/device-ingestion` | **架构清晰** |
+| 遗留代码耦合 | 逐步重写，完全剥离 `ingestion` | **架构清晰** |
 | FastReport 依赖 | 迁移到纯 Python 方案（`reportlab`/`python-docx`) | **启动 2-3秒** |
 | 数据库连接 | 配置 SQLAlchemy 连接池 | **并发 3-5倍** |
 | 报告异步生成 | 使用任务队列（Celery/RQ) | **用户体验大幅提升** |

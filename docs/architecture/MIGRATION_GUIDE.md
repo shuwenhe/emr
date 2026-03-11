@@ -17,15 +17,14 @@
 ### 旧结构 (Legacy)
 ```
 emr/
-├── backend/
-│   └── device-ingestion/          # 单体应用
-│       ├── app/                   # 所有业务逻辑混在一起
-│       │   ├── analysis.py
-│       │   ├── emr.py
-│       │   ├── config.py
-│       │   └── main.py
-│       ├── batch_generate_reports.py  # 脚本散落
-│       └── fix_emr_patient_ids.py
+├── ingestion/                     # 设备接入应用
+│   ├── app/                       # 业务逻辑
+│   │   ├── analysis.py
+│   │   ├── emr.py
+│   │   ├── config.py
+│   │   └── main.py
+│   ├── batch_generate_reports.py
+│   └── fix_emr_patient_ids.py
 ├── data/                          # 9.2GB 数据在根目录
 ├── reports/                       ❌ 混乱
 ├── config/                        # 配置分散
@@ -111,19 +110,19 @@ emr/
 #### 3.1 迁移 Ingestion 服务
 ```bash
 # 从旧位置迁移
-backend/device-ingestion/app/device_connector.py
+ingestion/app/device_connector.py
   → src/backend/services/ingestion/device_connector.py
 
-backend/device-ingestion/app/qc.py
+ingestion/app/qc.py
   → src/backend/services/ingestion/qc.py
 
-backend/device-ingestion/app/data_loader.py
+ingestion/app/data_loader.py
   → src/backend/services/ingestion/parser.py
 ```
 
 #### 3.2 迁移 Analysis 服务
 ```bash
-backend/device-ingestion/app/analysis.py
+ingestion/app/analysis.py
   → src/backend/services/analysis/analyzer.py
   
 # 将 ROI 相关功能拆分到独立模块
@@ -133,36 +132,36 @@ backend/device-ingestion/app/analysis.py
 
 #### 3.3 迁移 EMR 服务
 ```bash
-backend/device-ingestion/app/emr.py
+ingestion/app/emr.py
   → src/backend/services/emr/manager.py
   
-backend/device-ingestion/app/data_platform.py
+ingestion/app/data_platform.py
   → src/backend/repositories/emr_repository.py
 ```
 
 #### 3.4 迁移 Treatment 服务
 ```bash
-backend/device-ingestion/app/dispatch.py
+ingestion/app/dispatch.py
   → src/backend/services/treatment/planner.py
   → src/backend/services/treatment/dispatcher.py
 ```
 
 #### 3.5 迁移 AI 服务
 ```bash
-backend/device-ingestion/app/llm_report.py
+ingestion/app/llm_report.py
   → src/backend/services/ai/llm_report.py
 ```
 
 #### 3.6 迁移数据模型
 ```bash
-backend/device-ingestion/app/models.py
+ingestion/app/models.py
   → src/backend/models/schemas/
   → src/backend/models/domain/
 ```
 
 #### 3.7 迁移 API 层
 ```bash
-backend/device-ingestion/app/main.py
+ingestion/app/main.py
   → src/backend/api/main.py
   
 # 将路由拆分到独立模块
@@ -211,13 +210,13 @@ ln -s storage/logs logs
 
 ```bash
 # 移动脚本到规范位置
-mv backend/device-ingestion/batch_generate_reports.py \
+mv ingestion/batch_generate_reports.py \
    scripts/data_processing/batch_generate_reports.py
 
-mv backend/device-ingestion/fix_emr_patient_ids.py \
+mv ingestion/fix_emr_patient_ids.py \
    scripts/data_processing/fix_emr_patient_ids.py
 
-mv backend/device-ingestion/sync_patients_from_emr.py \
+mv ingestion/sync_patients_from_emr.py \
    scripts/data_processing/sync_patients_from_emr.py
 ```
 
@@ -227,7 +226,7 @@ mv backend/device-ingestion/sync_patients_from_emr.py \
 
 ### 旧配置方式 ❌
 ```python
-# backend/device-ingestion/app/config.py
+# ingestion/app/config.py
 import os
 from pathlib import Path
 
@@ -292,7 +291,7 @@ pytest tests/e2e/test_full_workflow.py
 
 ## 向后兼容策略
 
-为确保平滑过渡，保留旧的 `backend/` 目录作为兼容层：
+为确保平滑过渡，保留旧导入路径桥接层作为兼容策略：
 
 1. 旧的 API 路径继续可用
 2. 旧的导入路径通过桥接模块重定向

@@ -285,7 +285,7 @@ LAST_EMR_CONTEXT_KEY = "last_emr_context"
 ### 3.1 项目结构
 
 ```
-backend/device-ingestion/
+ingestion/
 ├── app/
 │   ├── main.py                 # 应用入口 + 路由定义
 │   ├── config.py               # 配置管理

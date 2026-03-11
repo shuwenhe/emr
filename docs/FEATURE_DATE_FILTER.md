@@ -125,7 +125,7 @@ async function handleOpenReportHistory(patient: Patient) {
 
 ### 后端支持 (Backend)
 
-**文件**: `backend/device-ingestion/app/main.py`
+**文件**: `ingestion/app/main.py`
 
 **API端点** (已存在):
 ```python

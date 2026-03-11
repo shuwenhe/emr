@@ -5,8 +5,8 @@
 ### 1. 目录结构问题
 - ❌ **数据目录混乱**：`data/`、`reports/`、`logs/`、`batch_results/` 散落在根目录
 - ❌ **配置分散**：根目录 `config/`、backend 内部 `app/config.py` 混用
-- ❌ **脚本杂乱**：`backend/device-ingestion/` 下有多个顶层脚本（`batch_generate_reports.py`、`fix_emr_patient_ids.py` 等）
-- ❌ **测试分散**：`backend/tests/` 和 `tests/` 两处
+- ❌ **脚本杂乱**：`ingestion/` 下有多个顶层脚本（`batch_generate_reports.py`、`fix_emr_patient_ids.py` 等）
+- ❌ **测试分散**：`tests/` 和 `tests/` 两处
 - ❌ **缺少清晰分层**：`device-ingestion` 承担了过多职责
 
 ### 2. 架构问题
@@ -330,7 +330,7 @@ mkdir -p tests/{unit,integration,e2e,fixtures}
 ### 2. 移动现有文件
 ```bash
 # 移动 reports 模块（已完成）
-# backend/reports/ → src/backend/services/reports/
+# reports/ → src/backend/services/reports/
 
 # 移动数据目录
 mv data storage/data
@@ -339,7 +339,7 @@ mv logs storage/logs
 mv batch_results storage/logs/batch_results
 
 # 移动脚本
-mv backend/device-ingestion/*.py scripts/data_processing/
+mv ingestion/*.py scripts/data_processing/
 
 # 合并配置
 mv config config.old

@@ -133,15 +133,14 @@ emr/
 │   │   └── utils/           # 工具函数
 │   └── package.json
 │
-├── backend/                 # FastAPI 后端服务
-│   ├── device-ingestion/
-│   │   └── app/
-│   │       ├── main.py              # 应用入口 + 路由定义
-│   │       ├── config.py            # 配置管理
-│   │       ├── models.py            # 数据模型
-│   │       ├── data_platform.py     # 数据访问层
-│   │       ├── analysis.py          # 业务逻辑层
-│   │       ├── emr.py               # EMR处理
+├── ingestion/               # 设备接入/分析后端
+│   └── app/
+│       ├── main.py              # 应用入口 + 路由定义
+│       ├── config.py            # 配置管理
+│       ├── models.py            # 数据模型
+│       ├── data_platform.py     # 数据访问层
+│       ├── analysis.py          # 业务逻辑层
+│       ├── emr.py               # EMR处理
 │   │       ├── device_connector.py  # 设备连接
 │   │       └── qc.py                # 质量检查
 │   └── requirements.txt
