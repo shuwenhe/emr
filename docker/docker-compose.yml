@@ -66,7 +66,7 @@ services:
     volumes:
       - ./config:/app/config:ro
       - ./data:/app/data
-      - ./reports:/app/reports
+      - ./storage/reports:/app/storage/reports
       - ./ingestion:/app:delegated  # 开发时热重载
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -79,17 +79,17 @@ services:
 
   report-file-service:
     build:
-      context: ./go-services/report-file-service
+      context: ./reports/go
       dockerfile: Dockerfile
     container_name: hospital-report-file-service
     environment:
       - RFS_ADDR=:8088
-      - RFS_REPORTS_DIR=/app/reports
+      - RFS_REPORTS_DIR=/app/storage/reports
       - RFS_CACHE_TTL_SECONDS=300
     ports:
       - "${REPORT_FILE_SERVICE_PORT:-8088}:8088"
     volumes:
-      - ./reports:/app/reports
+      - ./storage/reports:/app/storage/reports
     networks:
       - hospital-network
     restart: unless-stopped

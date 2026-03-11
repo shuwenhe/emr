@@ -13,7 +13,7 @@ backend_dir = Path(__file__).resolve().parent / "backend" / "device-ingestion"
 sys.path.insert(0, str(backend_dir))
 
 from app.analysis import analyze_record
-from reports import generate_docx_report
+from reports.python import generate_docx_report
 
 def test_roi_integration():
     """测试ROI集成"""

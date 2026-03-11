@@ -1,10 +1,8 @@
-"""
-Report generation module.
+"""Deprecated compatibility layer for report generation.
 
-Provides DOCX and template-based PDF report generation capabilities.
+Canonical implementation lives under ``reports.python``.
 """
 
-from .docx_generator import generate_docx_report
-from .template_generator import generate_template_report
+from reports.python import generate_docx_report, generate_template_report
 
 __all__ = ["generate_docx_report", "generate_template_report"]

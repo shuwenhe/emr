@@ -17,7 +17,7 @@ if DEVICE_INGESTION_DIR.exists():
     sys.path.insert(0, str(DEVICE_INGESTION_DIR))
 
 try:
-    from reports import generate_template_report
+    from reports.python import generate_template_report
 except Exception as exc:  # pragma: no cover - optional runtime dependency
     generate_template_report = None
     _TEMPLATE_IMPORT_ERROR = exc

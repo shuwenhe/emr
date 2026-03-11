@@ -10,7 +10,7 @@ sys.path.insert(0, "/home/shuwen/emr/backend")
 sys.path.insert(0, "/home/shuwen/emr/ingestion")
 
 from app.config import DATA_DIR
-from reports import generate_docx_report
+from reports.python import generate_docx_report
 
 # 使用最近的分析记录
 record_id = "de0029fb-a72f-41ff-a8ba-1b38650f63c1"

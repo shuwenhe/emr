@@ -20,7 +20,7 @@ print(f"Record dir: {record_dir}")
 
 try:
     # 简化：不加载完整JSON，只测试函数
-    from reports.docx_generator import generate_docx_report
+    from reports.python.docx_generator import generate_docx_report
     
     # 构造最小化的测试数据
     report = {

@@ -13,7 +13,7 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 EMR_DIR = DATA_DIR / "emr"
 EMR_DIR.mkdir(parents=True, exist_ok=True)
 
-REPORTS_DIR = BASE_DIR / "reports"
+REPORTS_DIR = BASE_DIR / "storage" / "reports"
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
 TEMPLATE_DIR = BASE_DIR / "template"

@@ -31,7 +31,7 @@ def test_imports():
     print("\n--- Report Module Imports ---")
     
     try:
-        from reports import generate_docx_report, generate_template_report
+        from reports.python import generate_docx_report, generate_template_report
         print(f"✓ reports - Report generation functions imported")
         tests_passed += 1
     except ImportError as e:

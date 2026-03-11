@@ -14,14 +14,14 @@ KB_OVERLAP ?= 100
 KB_BATCH_SIZE ?= 32
 ROI_DIR ?= $(CURDIR)/roi
 
-.PHONY: help install run-backend run-web db-check report kb-build kb-build-markdown kb-rebuild kb-clean roi-build roi-benchmark clean
+.PHONY: help install service web db-check report kb-build kb-build-markdown kb-rebuild kb-clean roi-build roi-benchmark clean
 
 help:
 	@echo "Available targets:"
 	@echo "  make help     # list available commands"
 	@echo "  make install  # install dependencies"
-	@echo "  make run-backend   # run backend service"
-	@echo "  make run-web  # run Next.js web app (dev)"
+	@echo "  make service   # run backend service"
+	@echo "  make web      # run Next.js web app (dev)"
 	@echo "  make db-check # verify MySQL connectivity and privileges"
 	@echo "  make report   # generate docx reports"
 	@echo "  make kb-build # build vector KB"
@@ -39,11 +39,11 @@ install:
 	@bash -c 'cd "$(CURDIR)/web"; if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" && nvm install 20 && nvm use 20; fi; npm install'
 
 
-run-backend: install
+service: install
 	exec $(VENV_PY) -m uvicorn src.backend.api.main:app --host 0.0.0.0 --port 8000 --reload
 
-run-web:
-	@bash -c 'cd "$(CURDIR)/web"; if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" && nvm use 20; fi; npm run dev'
+web:
+	@bash -c 'set -e; WEB_DIR="$(CURDIR)/web"; LOCK_FILE="$$WEB_DIR/.next/dev/lock"; if [ -f "$$LOCK_FILE" ]; then echo "Removing stale lock: $$LOCK_FILE"; rm -f "$$LOCK_FILE"; fi; cd "$$WEB_DIR"; if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" && nvm use 20; fi; npm run dev'
 
 db-check:
 	$(VENV_PY) scripts/db_check.py

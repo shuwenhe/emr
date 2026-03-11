@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import time
 from pathlib import Path
@@ -21,6 +22,8 @@ REPORTS_DIR = settings.REPORTS_DIR
 # Cache with 5-minute TTL
 _LIST_REPORTS_CACHE: Dict[str, Dict[str, Any]] = {}
 _CACHE_TTL = 300  # 5 minutes
+_DAY_DIR_RE = re.compile(r"^\d{8}$")
+_REPORT_SUFFIXES = {".pdf", ".docx"}
 
 
 class ReportListCache:
@@ -155,9 +158,13 @@ def _list_reports(date: str | None = None):
             continue
         if day_dir.name.startswith("."):
             continue
+        if not _DAY_DIR_RE.match(day_dir.name):
+            continue
         day = day_dir.name
         for item in day_dir.iterdir():
             if not item.is_file():
+                continue
+            if item.suffix.lower() not in _REPORT_SUFFIXES:
                 continue
             stat_result = item.stat()
             reports.append(
@@ -216,9 +223,13 @@ def list_trash_reports():
     for day_dir in sorted(trash_dir.iterdir() if trash_dir.is_dir() else [], reverse=True):
         if not day_dir.is_dir():
             continue
+        if not _DAY_DIR_RE.match(day_dir.name):
+            continue
         day = day_dir.name
         for item in day_dir.iterdir():
             if not item.is_file():
+                continue
+            if item.suffix.lower() not in _REPORT_SUFFIXES:
                 continue
             reports.append(
                 {
