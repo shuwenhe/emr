@@ -12,6 +12,28 @@ from collections import deque
 from hashlib import sha1
 from typing import Deque, DefaultDict, Dict, Generator, List, Optional, Tuple
 
+# ---------------------------------------------------------------------------
+# Try to load the C++ SimHash extension for ~10-20x speedup.
+# Falls back transparently to pure Python if the .so is not yet built.
+# Build with:  make simhash-build
+# ---------------------------------------------------------------------------
+try:
+    import importlib.util as _ilu
+    import glob as _glob
+    _so_dir = os.path.join(os.path.dirname(__file__), "simhash")
+    _so_paths = _glob.glob(os.path.join(_so_dir, "_simhash*.so"))
+    if _so_paths:
+        _spec = _ilu.spec_from_file_location("_simhash", _so_paths[0])
+        _simhash_ext = _ilu.module_from_spec(_spec)  # type: ignore[arg-type]
+        _spec.loader.exec_module(_simhash_ext)       # type: ignore[union-attr]
+        _USE_CPP = True
+    else:
+        _simhash_ext = None
+        _USE_CPP = False
+except Exception:
+    _simhash_ext = None
+    _USE_CPP = False
+
 
 TOKEN_RE = re.compile(r"[\u4e00-\u9fff]|[A-Za-z0-9_]+")
 
@@ -29,14 +51,20 @@ def iter_jsonl(path: str) -> Generator[Tuple[int, Dict], None, None]:
 
 
 def sha1_text(text: str) -> str:
+    if _USE_CPP:
+        return _simhash_ext.sha1_text(text)  # type: ignore[union-attr]
     return sha1(text.encode("utf-8")).hexdigest()
 
 
 def tokenize(text: str) -> List[str]:
+    if _USE_CPP:
+        return _simhash_ext.tokenize(text)  # type: ignore[union-attr]
     return TOKEN_RE.findall(text.lower())
 
 
 def simhash64(text: str) -> int:
+    if _USE_CPP:
+        return _simhash_ext.simhash64(text)  # type: ignore[union-attr]
     tokens = tokenize(text)
     if not tokens:
         return 0
@@ -63,6 +91,8 @@ def simhash64_worker(text: str) -> int:
 
 
 def hamming_distance(a: int, b: int) -> int:
+    if _USE_CPP:
+        return _simhash_ext.hamming_distance(a, b)  # type: ignore[union-attr]
     return (a ^ b).bit_count()
 
 

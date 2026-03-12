@@ -36,7 +36,7 @@ TCM_WORKERS  ?= 4
 TCM_DOCX_DIR  ?= $(CURDIR)/rag/dataset/docx_corpus
 TCM_DOCX_RPF  ?= 500   # records per docx file
 
-.PHONY: help install service service-precheck web db-check report kb-build kb-build-markdown kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark clean
+.PHONY: help install service service-precheck web db-check report kb-build kb-build-markdown kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build clean
 
 help:
 	@echo "Available targets:"
@@ -47,6 +47,8 @@ help:
 	@echo "  make db-check         # verify MySQL connectivity and privileges"
 	@echo "  make report           # generate docx reports"
 	@echo "  make kb-build         # build vector KB from docx files"
+	@echo "  make go-embedder-build # compile Go concurrent embedder (speeds up kb-build)"
+	@echo "  make simhash-build    # compile C++ SimHash extension (speeds up dedup)" 
 	@echo "  make kb-build-markdown # build KB and print markdown/chunk debug"
 	@echo "  make kb-rebuild       # alias of kb-build"
 	@echo "  make kb-clean         # remove generated KB artifacts"
@@ -81,7 +83,19 @@ report: install
 	$(VENV_PY) -m pip install -q python-docx
 	$(VENV_PY) scripts/generate_reports.py --name "张三" --datasets normal_face fever_face hand_normal low_temp
 
-kb-build:
+go-embedder-build:
+	@echo "Building Go concurrent embedder..."
+	@echo "构建 Go 并发 Embedder 二进制..."
+	cd "$(CURDIR)/rag/go_embedder" && go build -o go_embedder .
+	@echo "Built: rag/go_embedder/go_embedder"
+
+simhash-build:
+	@echo "Building C++ SimHash extension..."
+	@echo "构建 C++ SimHash 扩展..."
+	VENV_PY="$(KB_PY)" bash "$(CURDIR)/rag/simhash/build.sh"
+	@echo "Done: rag/simhash/_simhash*.so"
+
+kb-build: go-embedder-build
 	@mkdir -p "$(KB_OUT_DIR)"
 	@PYTHONPATH="$(CURDIR):$$PYTHONPATH" "$(KB_PY)" -c "from rag.kb_builder import build_kb; build_kb(source_dir='$(KB_SOURCE_DIR)', out_dir='$(KB_OUT_DIR)', provider='$(KB_PROVIDER)', embed_model='$(KB_EMBED_MODEL)', base_url='$(KB_BASE_URL)' or None, api_key='$(KB_API_KEY)' or None, max_len=int('$(KB_MAX_LEN)'), overlap=int('$(KB_OVERLAP)'), batch_size=int('$(KB_BATCH_SIZE)'), show_markdown=False)"
 

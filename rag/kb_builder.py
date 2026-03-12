@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import io
 import json
 import os
 import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from datetime import datetime
 from typing import Dict, Iterable, List, Optional, Tuple
@@ -65,6 +67,95 @@ def _log_step(step: int, total_steps: int, title: str, detail: Optional[str] = N
     if detail:
         zh_message = f"{zh_message} | {detail}"
     print(zh_message)
+
+# ── Go-based concurrent embedder ──────────────────────────────────────────────
+
+GO_EMBEDDER_BIN = os.path.join(os.path.dirname(__file__), "go_embedder", "go_embedder")
+
+
+def _find_go_embedder() -> Optional[str]:
+    """Return path to the compiled Go embedder binary, or None if unavailable."""
+    if os.path.isfile(GO_EMBEDDER_BIN) and os.access(GO_EMBEDDER_BIN, os.X_OK):
+        return GO_EMBEDDER_BIN
+    return None
+
+
+class GoEmbedder:
+    """Drop-in replacement for LangChain embeddings that delegates to the Go
+    concurrent embedder subprocess.  Matches the embed_documents() interface."""
+
+    def __init__(
+        self,
+        binary: str,
+        provider: str,
+        model: str,
+        base_url: Optional[str] = None,
+        api_key: Optional[str] = None,
+        concurrency: int = 8,
+    ) -> None:
+        env = os.environ.copy()
+        env["EMBED_PROVIDER"] = provider
+        env["EMBED_MODEL"] = model
+        env["EMBED_CONCURRENCY"] = str(concurrency)
+        if base_url:
+            if provider == "ollama":
+                env["OLLAMA_BASE_URL"] = base_url
+            else:
+                env["OPENAI_BASE_URL"] = base_url
+        if api_key:
+            env["OPENAI_API_KEY"] = api_key
+
+        self._proc = subprocess.Popen(
+            [binary],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=env,
+        )
+        self._stdin = io.TextIOWrapper(self._proc.stdin, encoding="utf-8")   # type: ignore[arg-type]
+        self._stdout = io.TextIOWrapper(self._proc.stdout, encoding="utf-8") # type: ignore[arg-type]
+        self._lock = threading.Lock()  # serialise stdin/stdout access per call
+        self._next_id = 0
+        self._closed = False
+
+    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+        """Send one batch to Go, return vectors.  Thread-safe."""
+        with self._lock:
+            batch_id = self._next_id
+            self._next_id += 1
+            line = json.dumps({"id": batch_id, "texts": texts}, ensure_ascii=False)
+            self._stdin.write(line + "\n")
+            self._stdin.flush()
+            # Read until we get the matching id (Go outputs results as they finish
+            # but since we hold _lock the protocol is still sequential here).
+            while True:
+                raw = self._stdout.readline()
+                if not raw:
+                    raise RuntimeError("Go embedder process closed unexpectedly")
+                result = json.loads(raw)
+                if result.get("id") == batch_id:
+                    if "error" in result:
+                        raise RuntimeError(f"Go embedder error: {result['error']}")
+                    return result["vectors"]
+
+    def close(self) -> None:
+        if self._closed:
+            return
+        self._closed = True
+        try:
+            self._stdin.write("\n")  # blank line = EOF signal
+            self._stdin.flush()
+            self._stdin.close()
+            self._proc.wait(timeout=10)
+        except Exception:  # noqa: BLE001
+            self._proc.kill()
+
+    def __del__(self) -> None:
+        self.close()
+
+
+# ── document scanning ─────────────────────────────────────────────────────────
+
 
 def scan_documents(source_dir: str) -> Tuple[List[str], List[Dict[str, str]]]:
     included: List[str] = []
@@ -515,8 +606,22 @@ def build_kb(
         if not records:
             raise RuntimeError("No chunks generated; check source directory and parsers.")
 
-        _log_step(5, total_steps, "Initializing embedding model", f"provider={provider}, model={embed_model}")
-        embeddings = build_embeddings(provider, embed_model, base_url=base_url, api_key=api_key)
+        go_bin = _find_go_embedder()
+        if go_bin:
+            _log_step(5, total_steps, "Initializing embedding model",
+                      f"provider={provider}, model={embed_model}, backend=go-concurrent")
+            embeddings = GoEmbedder(
+                binary=go_bin,
+                provider=provider,
+                model=embed_model,
+                base_url=base_url,
+                api_key=api_key,
+                concurrency=8,
+            )
+        else:
+            _log_step(5, total_steps, "Initializing embedding model",
+                      f"provider={provider}, model={embed_model}, backend=python")
+            embeddings = build_embeddings(provider, embed_model, base_url=base_url, api_key=api_key)
         _log_step(6, total_steps, "Embedding chunks", f"chunks={len(records)}, batch_size={batch_size}")
         vectors: List[List[float]] = []
         kept_records: List[ChunkRecord] = []
@@ -624,6 +729,8 @@ def build_kb(
         return manifest
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
+        if "embeddings" in dir() and isinstance(embeddings, GoEmbedder):  # type: ignore[possibly-undefined]
+            embeddings.close()  # type: ignore[possibly-undefined]
 
 
 def _activate_version(out_dir: str, version_dir: str) -> None:
