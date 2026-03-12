@@ -67,3 +67,7 @@ TCM-Pretrain-Data-ShizhenGPT/
 
 # nginx
 nginx.log
+
+# ==================== RAG ====================
+/rag/dataset/
+/rag/kb/

@@ -1,0 +1,326 @@
+"""
+tcm_chunks_to_kb.py
+====================
+Stage 3 of the TCM corpus pipeline: chunks JSONL → FAISS knowledge base.
+
+Reads the chunks produced by docs_to_chunks_jsonl.py (or the one-click
+run_auto_dedup_chunk_pipeline.py), embeds every chunk, and writes a
+knowledge base directory that is fully compatible with kb_loader.py /
+the `make kb-build` KB format:
+
+    <out-dir>/
+        current  -> versions/<kb_version>/     (symlink)
+        versions/
+            <kb_version>/
+                index.faiss
+                chunks.jsonl
+                manifest.json
+                build_log.json
+
+Usage
+-----
+    python rag/tcm_chunks_to_kb.py \\
+        --chunks-input  rag/dataset/TCM_pretrain_book_chunks.jsonl \\
+        --out-dir       rag/kb \\
+        --provider      ollama \\
+        --embed-model   bge-m3:latest \\
+        --batch-size    32
+
+    # test with only the first 500 chunks:
+    python rag/tcm_chunks_to_kb.py \\
+        --chunks-input  rag/dataset/TCM_pretrain_book_chunks.jsonl \\
+        --out-dir       /tmp/kb_tcm_test \\
+        --limit-chunks  500
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+import time
+from datetime import datetime, timezone
+from typing import Dict, Iterator, List, Optional, Tuple
+
+import numpy as np
+import faiss
+from tqdm import tqdm
+
+# Allow running as `python rag/tcm_chunks_to_kb.py` from the project root
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
+from rag.embeddings import build_embeddings
+from rag.kb_utils import sha1_text
+from rag.kb_builder import _activate_version, _embed_documents_with_retry
+from rag.schemas import ChunkRecord, Manifest
+
+
+# ---------------------------------------------------------------------------
+# JSONL helpers
+# ---------------------------------------------------------------------------
+
+def _iter_jsonl(path: str, limit: Optional[int] = None) -> Iterator[dict]:
+    count = 0
+    with open(path, "r", encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            yield json.loads(line)
+            count += 1
+            if limit is not None and count >= limit:
+                return
+
+
+def _count_lines(path: str) -> int:
+    n = 0
+    with open(path, "rb") as fh:
+        for _ in fh:
+            n += 1
+    return n
+
+
+# ---------------------------------------------------------------------------
+# Field mapping: our chunks JSONL → ChunkRecord
+# ---------------------------------------------------------------------------
+
+def _to_chunk_record(row: dict, chunk_index: int) -> ChunkRecord:
+    """Convert one row from docs_to_chunks_jsonl.py output to a ChunkRecord."""
+    # `id` is the unique SHA1 for this chunk; `chunk_id` is an int (per-doc index)
+    chunk_id = row.get("id") or sha1_text(row["text"])
+    return ChunkRecord(
+        vector_id=-1,                                # assigned later
+        chunk_id=chunk_id,
+        file_path=row.get("source", "tcm_corpus"),  # original corpus source name
+        title_path=None,                            # TCM plain-text has no heading tree
+        chunk_type=row.get("record_type", "tcm_pretrain_web_text"),
+        chunk_index=chunk_index,
+        doc_hash=row.get("doc_text_sha1") or sha1_text(row.get("doc_id", "")),
+        text_for_embedding=row["text"],
+        excerpt_markdown=row["text"],
+    )
+
+
+# ---------------------------------------------------------------------------
+# Batch helpers
+# ---------------------------------------------------------------------------
+
+def _iter_batches(items: list, size: int):
+    for i in range(0, len(items), size):
+        yield items[i : i + size]
+
+
+# ---------------------------------------------------------------------------
+# Main build function
+# ---------------------------------------------------------------------------
+
+def build_kb_from_chunks(
+    chunks_input: str,
+    out_dir: str,
+    provider: str,
+    embed_model: str,
+    base_url: Optional[str],
+    api_key: Optional[str],
+    batch_size: int = 32,
+    limit_chunks: Optional[int] = None,
+) -> Manifest:
+    start_time = time.perf_counter()
+
+    # ---- count lines for progress bar ----
+    print(f"Counting chunks in {chunks_input} …")
+    total_lines = _count_lines(chunks_input)
+    if limit_chunks is not None:
+        total_lines = min(total_lines, limit_chunks)
+    print(f"  → {total_lines:,} chunks to embed")
+
+    # ---- read all chunk records ----
+    print("Loading chunk records …")
+    records: List[ChunkRecord] = []
+    with tqdm(total=total_lines, desc="Reading chunks", unit="chunk") as pbar:
+        for idx, row in enumerate(_iter_jsonl(chunks_input, limit=limit_chunks)):
+            records.append(_to_chunk_record(row, chunk_index=idx))
+            pbar.update(1)
+
+    if not records:
+        raise RuntimeError("No chunks found in input file.")
+
+    # ---- embed ----
+    print(f"Embedding {len(records):,} chunks via provider={provider!r} model={embed_model!r} …")
+    embeddings_fn = build_embeddings(provider, embed_model, base_url=base_url, api_key=api_key)
+
+    vectors: List[List[float]] = []
+    kept_records: List[ChunkRecord] = []
+    embedding_failed: List[Dict[str, str]] = []
+
+    with tqdm(total=len(records), desc="Embedding", unit="chunk") as pbar:
+        for batch in _iter_batches(records, batch_size):
+            texts = [r.text_for_embedding for r in batch]
+            try:
+                batch_vecs = _embed_documents_with_retry(embeddings_fn, texts)
+            except Exception as exc:  # noqa: BLE001
+                tqdm.write(f"[WARN] batch embedding failed, falling back per-chunk: {exc}")
+                batch_vecs_fallback: List[Optional[List[float]]] = []
+                for rec in batch:
+                    try:
+                        v = _embed_documents_with_retry(embeddings_fn, [rec.text_for_embedding])[0]
+                        batch_vecs_fallback.append(v)
+                    except Exception as inner:  # noqa: BLE001
+                        embedding_failed.append(
+                            {"chunk_id": rec.chunk_id, "file_path": rec.file_path, "reason": str(inner)}
+                        )
+                        batch_vecs_fallback.append(None)
+                        tqdm.write(f"[WARN] skipped chunk {rec.chunk_id}: {inner}")
+                for rec, vec in zip(batch, batch_vecs_fallback):
+                    if vec is not None:
+                        kept_records.append(rec)
+                        vectors.append(vec)
+                pbar.update(len(batch))
+                continue
+
+            if len(batch_vecs) != len(batch):
+                raise RuntimeError("Embedding batch returned mismatched count.")
+            kept_records.extend(batch)
+            vectors.extend(batch_vecs)
+            pbar.update(len(batch))
+
+    records = kept_records
+    if embedding_failed:
+        tqdm.write(f"[WARN] {len(embedding_failed)} chunk(s) skipped due to embedding errors.")
+
+    if not vectors:
+        raise RuntimeError("Embedding returned no vectors.")
+
+    # ---- build FAISS index ----
+    print("Building FAISS index (cosine / inner-product after L2-norm) …")
+    vector_array = np.array(vectors, dtype="float32")
+    faiss.normalize_L2(vector_array)
+    dim = vector_array.shape[1]
+    index = faiss.IndexFlatIP(dim)
+    index.add(vector_array)
+
+    for i, rec in enumerate(records):
+        rec.vector_id = i
+
+    # ---- write KB artifacts ----
+    kb_version = datetime.now().strftime("%Y%m%d-%H%M%S")
+    versions_dir = os.path.join(out_dir, "versions")
+    version_dir = os.path.join(versions_dir, kb_version)
+    os.makedirs(version_dir, exist_ok=True)
+
+    print(f"Writing KB artifacts → {version_dir}")
+
+    faiss.write_index(index, os.path.join(version_dir, "index.faiss"))
+
+    with open(os.path.join(version_dir, "chunks.jsonl"), "w", encoding="utf-8") as fh:
+        for rec in records:
+            fh.write(json.dumps(rec.model_dump(), ensure_ascii=True))
+            fh.write("\n")
+
+    manifest = Manifest(
+        kb_version=kb_version,
+        source_dir=chunks_input,
+        build_time=datetime.now(timezone.utc).isoformat(),
+        embedding_model=embed_model,
+        llm_provider_default=provider,
+        faiss_metric="cosine",
+        doc_count=len({r.doc_hash for r in records}),
+        chunk_count=len(records),
+        failed_files=[item["chunk_id"] for item in embedding_failed],
+    )
+    with open(os.path.join(version_dir, "manifest.json"), "w", encoding="utf-8") as fh:
+        json.dump(manifest.model_dump(), fh, ensure_ascii=False, indent=2)
+
+    build_log = {
+        "kb_version": kb_version,
+        "chunks_input": chunks_input,
+        "total_read": total_lines,
+        "embedded": len(records),
+        "embedding_failed": embedding_failed,
+    }
+    with open(os.path.join(version_dir, "build_log.json"), "w", encoding="utf-8") as fh:
+        json.dump(build_log, fh, ensure_ascii=False, indent=2)
+
+    print("Activating KB version (atomic symlink switch) …")
+    _activate_version(out_dir, version_dir)
+
+    elapsed = time.perf_counter() - start_time
+    print(
+        f"Done. chunks={len(records):,}, dim={dim}, "
+        f"duration={elapsed:.1f}s, version={kb_version}"
+    )
+    return manifest
+
+
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
+
+def _parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser(
+        description="Build a FAISS knowledge base from TCM chunks JSONL (Stage 3 of TCM pipeline).",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    p.add_argument(
+        "--chunks-input",
+        required=True,
+        help="Path to chunks JSONL produced by docs_to_chunks_jsonl.py (or run_auto_dedup_chunk_pipeline.py).",
+    )
+    p.add_argument(
+        "--out-dir",
+        default="rag/kb",
+        help="Root output directory for the knowledge base.",
+    )
+    p.add_argument(
+        "--provider",
+        default=os.getenv("PROVIDER", "ollama"),
+        choices=["ollama", "openai-compatible"],
+        help="Embedding provider.",
+    )
+    p.add_argument(
+        "--embed-model",
+        default=os.getenv("EMBED_MODEL", "bge-m3:latest"),
+        help="Embedding model name.",
+    )
+    p.add_argument(
+        "--base-url",
+        default=os.getenv("OLLAMA_BASE_URL", os.getenv("OPENAI_BASE_URL")),
+        help="API base URL (Ollama or OpenAI-compatible endpoint).",
+    )
+    p.add_argument(
+        "--api-key",
+        default=os.getenv("OPENAI_API_KEY"),
+        help="API key (for openai-compatible provider).",
+    )
+    p.add_argument(
+        "--batch-size",
+        type=int,
+        default=32,
+        help="Number of chunks per embedding request.",
+    )
+    p.add_argument(
+        "--limit-chunks",
+        type=int,
+        default=None,
+        metavar="N",
+        help="Process only the first N chunks (useful for smoke-tests).",
+    )
+    return p.parse_args()
+
+
+def main() -> None:
+    args = _parse_args()
+    build_kb_from_chunks(
+        chunks_input=args.chunks_input,
+        out_dir=args.out_dir,
+        provider=args.provider,
+        embed_model=args.embed_model,
+        base_url=args.base_url or None,
+        api_key=args.api_key or None,
+        batch_size=args.batch_size,
+        limit_chunks=args.limit_chunks,
+    )
+
+
+if __name__ == "__main__":
+    main()

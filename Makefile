@@ -3,6 +3,16 @@ VENV_DIR := .venv
 VENV_PY := $(VENV_DIR)/bin/python
 KB_PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),$(PYTHON))
 
+# For KB/embedding targets that require faiss + langchain, prefer ~/.venv if it
+# has those packages; otherwise fall back to KB_PY.
+HOME_VENV_PY := $(HOME)/.venv/bin/python
+TCM_PY := $(shell \
+  if [ -x "$(HOME_VENV_PY)" ] && "$(HOME_VENV_PY)" -c "import faiss" 2>/dev/null; then \
+    echo "$(HOME_VENV_PY)"; \
+  else \
+    echo "$(KB_PY)"; \
+  fi)
+
 KB_SOURCE_DIR ?= $(CURDIR)/rag/dataset
 KB_OUT_DIR ?= $(CURDIR)/rag/kb
 KB_PROVIDER ?= ollama
@@ -14,23 +24,39 @@ KB_OVERLAP ?= 100
 KB_BATCH_SIZE ?= 32
 ROI_DIR ?= $(CURDIR)/roi
 
-.PHONY: help install service service-precheck web db-check report kb-build kb-build-markdown kb-rebuild kb-clean roi-build roi-benchmark clean
+# TCM corpus pipeline settings
+TCM_RAW_JSON  ?= $(CURDIR)/rag/dataset/TCM_pretrain_book_corpus.json
+TCM_DOCS_JSONL  ?= $(CURDIR)/rag/dataset/TCM_pretrain_book_docs.jsonl
+TCM_CHUNKS_JSONL ?= $(CURDIR)/rag/dataset/TCM_pretrain_book_chunks.jsonl
+TCM_PIPELINE_DIR ?= $(CURDIR)/rag/dataset/pipeline_out
+TCM_MIN_LEN  ?= 80
+TCM_CHUNK_SIZE ?= 600
+TCM_WORKERS  ?= 4
+
+TCM_DOCX_DIR  ?= $(CURDIR)/rag/dataset/docx_corpus
+TCM_DOCX_RPF  ?= 500   # records per docx file
+
+.PHONY: help install service service-precheck web db-check report kb-build kb-build-markdown kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark clean
 
 help:
 	@echo "Available targets:"
-	@echo "  make help     # list available commands"
-	@echo "  make install  # install dependencies"
-	@echo "  make service   # run backend service"
-	@echo "  make web      # run Next.js web app (dev)"
-	@echo "  make db-check # verify MySQL connectivity and privileges"
-	@echo "  make report   # generate docx reports"
-	@echo "  make kb-build # build vector KB"
+	@echo "  make help             # list available commands"
+	@echo "  make install          # install dependencies"
+	@echo "  make service          # run backend service"
+	@echo "  make web              # run Next.js web app (dev)"
+	@echo "  make db-check         # verify MySQL connectivity and privileges"
+	@echo "  make report           # generate docx reports"
+	@echo "  make kb-build         # build vector KB from docx files"
 	@echo "  make kb-build-markdown # build KB and print markdown/chunk debug"
-	@echo "  make kb-rebuild # alias of kb-build"
-	@echo "  make kb-clean # remove generated KB artifacts"
-	@echo "  make roi-build # build ROI C++ library under roi/cpp"
-	@echo "  make roi-benchmark # run ROI Python/C++ benchmark"
-	@echo "  make clean    # remove generated files"
+	@echo "  make kb-rebuild       # alias of kb-build"
+	@echo "  make kb-clean         # remove generated KB artifacts"
+	@echo "  make tcm-docx         # convert TCM corpus JSON → .docx files (direct path)"
+	@echo "  make tcm-stage1       # Stage 1: TCM raw JSON → docs JSONL"
+	@echo "  make tcm-pipeline     # Stages 1.5-2: dedup + sweep + chunk (needs TCM_DOCS_JSONL)"
+	@echo "  make kb-build-tcm     # Stage 3: embed chunks → FAISS KB  (needs TCM_CHUNKS_JSONL)"
+	@echo "  make roi-build        # build ROI C++ library under roi/cpp"
+	@echo "  make roi-benchmark    # run ROI Python/C++ benchmark"
+	@echo "  make clean            # remove generated files"
 
 install:
 	$(PYTHON) -m venv $(VENV_DIR)
@@ -68,6 +94,54 @@ kb-rebuild: kb-build
 kb-clean:
 	@rm -rf "$(KB_OUT_DIR)/current" "$(KB_OUT_DIR)/versions"
 	@echo "Removed $(KB_OUT_DIR)/current and $(KB_OUT_DIR)/versions"
+
+# ---- TCM corpus pipeline ----
+
+# Direct path: raw JSON → .docx files → kb-build (no JSONL intermediate)
+tcm-docx:
+	@mkdir -p "$(TCM_DOCX_DIR)"
+	PYTHONPATH="$(CURDIR):$$PYTHONPATH" "$(KB_PY)" rag/tcm_corpus_to_docx.py \
+		--input           "$(TCM_RAW_JSON)" \
+		--output-dir      "$(TCM_DOCX_DIR)" \
+		--records-per-docx $(TCM_DOCX_RPF) \
+		--min-len         $(TCM_MIN_LEN)
+	@echo ""
+	@echo "Docx files written to $(TCM_DOCX_DIR)."
+	@echo "Next: make kb-build KB_SOURCE_DIR=$(TCM_DOCX_DIR)"
+
+# Stage 1: raw JSON → cleaned/normalized docs JSONL
+tcm-stage1:
+	@mkdir -p "$(dir $(TCM_DOCS_JSONL))"
+	PYTHONPATH="$(CURDIR):$$PYTHONPATH" "$(TCM_PY)" rag/tcm_to_docs_jsonl.py \
+		--input  "$(TCM_RAW_JSON)" \
+		--output "$(TCM_DOCS_JSONL)" \
+		--min-len $(TCM_MIN_LEN)
+
+# Stages 1.5 + 2: threshold sweep → dedup → report → chunks JSONL
+tcm-pipeline:
+	@mkdir -p "$(TCM_PIPELINE_DIR)"
+	PYTHONPATH="$(CURDIR):$$PYTHONPATH" "$(TCM_PY)" rag/run_auto_dedup_chunk_pipeline.py \
+		--docs-input    "$(TCM_DOCS_JSONL)" \
+		--output-dir    "$(TCM_PIPELINE_DIR)" \
+		--chunk-size    $(TCM_CHUNK_SIZE) \
+		--overlap       $(KB_OVERLAP) \
+		--min-len       $(TCM_MIN_LEN) \
+		--parallel-workers $(TCM_WORKERS)
+	@echo ""
+	@echo "Chunks written to $(TCM_PIPELINE_DIR)."
+	@echo "Set TCM_CHUNKS_JSONL to that file then run  make kb-build-tcm"
+
+# Stage 3: embed chunks JSONL → FAISS knowledge base
+kb-build-tcm:
+	@mkdir -p "$(KB_OUT_DIR)"
+	PYTHONPATH="$(CURDIR):$$PYTHONPATH" "$(TCM_PY)" rag/tcm_chunks_to_kb.py \
+		--chunks-input "$(TCM_CHUNKS_JSONL)" \
+		--out-dir      "$(KB_OUT_DIR)" \
+		--provider     "$(KB_PROVIDER)" \
+		--embed-model  "$(KB_EMBED_MODEL)" \
+		$(if $(KB_BASE_URL),--base-url "$(KB_BASE_URL)",) \
+		$(if $(KB_API_KEY),--api-key  "$(KB_API_KEY)",) \
+		--batch-size   $(KB_BATCH_SIZE)
 
 roi-build:
 	@bash "$(ROI_DIR)/build.sh"

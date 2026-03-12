@@ -1,0 +1,303 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import sys
+from hashlib import sha1
+from typing import Dict, Generator, Iterable, List, Optional
+
+
+# Remove noisy publishing/footer patterns that are common in scanned book corpora.
+NOISE_PATTERNS = [
+    r"中国版本图书馆CIP数据核字",
+    r"图书在版编目\s*\(CIP\)",
+    r"版权专有侵权必究",
+    r"各地新华书店经销",
+    r"服务热线\d{6,}",
+    r"传真\d{6,}",
+    r"网址\s*[a-zA-Z]+://[^\s]+",
+    r"天猫旗舰店网址",
+    r"微商城网址",
+    r"ISBN\s*\d[\d\-Xx]+",
+]
+NOISE_REGEXES = [re.compile(p) for p in NOISE_PATTERNS]
+
+LATEX_CLEANUPS = [
+    (re.compile(r"\$\\textcircled\{\d+\}\$"), " "),
+    (re.compile(r"\$[^$]{1,80}\$"), " "),
+    (re.compile(r"\\[a-zA-Z]+\{[^{}]{0,80}\}"), " "),
+]
+
+WS_RE = re.compile(r"[ \t\u3000]+")
+MULTI_NL_RE = re.compile(r"\n{3,}")
+URL_RE = re.compile(r"https?://\S+|www\.\S+", re.IGNORECASE)
+
+
+def iter_json_array_objects(file_path: str) -> Generator[Dict, None, None]:
+    """Stream JSON objects from a top-level JSON array without loading full file."""
+    decoder = json.JSONDecoder()
+    with open(file_path, "r", encoding="utf-8") as f:
+        buffer = ""
+        in_array = False
+        eof = False
+
+        while True:
+            chunk = f.read(1 << 20)
+            if chunk:
+                buffer += chunk
+            else:
+                eof = True
+
+            if not in_array:
+                stripped = buffer.lstrip()
+                if not stripped:
+                    if eof:
+                        return
+                    continue
+                if stripped[0] != "[":
+                    raise ValueError("Input JSON must be a top-level array")
+                buffer = stripped[1:]
+                in_array = True
+
+            while True:
+                stripped = buffer.lstrip()
+                if not stripped:
+                    break
+                if stripped[0] == "]":
+                    return
+                if stripped[0] == ",":
+                    buffer = stripped[1:]
+                    continue
+
+                try:
+                    obj, idx = decoder.raw_decode(stripped)
+                except json.JSONDecodeError:
+                    if eof:
+                        raise
+                    break
+
+                yield obj
+                buffer = stripped[idx:]
+
+            if eof:
+                break
+
+
+def extract_text_items(record: Dict) -> Iterable[str]:
+    content = record.get("content")
+    if not isinstance(content, list):
+        return
+    for item in content:
+        if not isinstance(item, dict):
+            continue
+        if item.get("type") == "text":
+            text = item.get("text")
+            if isinstance(text, str) and text.strip():
+                yield text
+
+
+def clean_text(text: str, keep_url: bool = False) -> str:
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+
+    for regex, repl in LATEX_CLEANUPS:
+        text = regex.sub(repl, text)
+
+    if not keep_url:
+        text = URL_RE.sub(" ", text)
+
+    for regex in NOISE_REGEXES:
+        text = regex.sub(" ", text)
+
+    # Fix simple OCR/scan spacing around Chinese punctuation and fragmented spaces.
+    text = re.sub(r"\s+([，。；：！？）】》」』])", r"\1", text)
+    text = re.sub(r"([（【《「『])\s+", r"\1", text)
+    text = WS_RE.sub(" ", text)
+    text = re.sub(r" *\n *", "\n", text)
+    text = MULTI_NL_RE.sub("\n\n", text)
+
+    return text.strip()
+
+
+def split_sentences(text: str) -> List[str]:
+    if not text:
+        return []
+    text = text.replace("\n", "\n")
+    parts = re.split(r"(?<=[。！？；!?;])", text)
+    out: List[str] = []
+    for part in parts:
+        p = part.strip()
+        if p:
+            out.append(p)
+    return out
+
+
+def chunk_text(text: str, chunk_size: int, overlap: int) -> List[str]:
+    if chunk_size <= 0:
+        raise ValueError("chunk_size must be > 0")
+    if overlap < 0:
+        raise ValueError("overlap must be >= 0")
+    if overlap >= chunk_size:
+        raise ValueError("overlap must be smaller than chunk_size")
+
+    sents = split_sentences(text)
+    if not sents:
+        return []
+
+    chunks: List[str] = []
+    cur = ""
+    for sent in sents:
+        if len(sent) > chunk_size:
+            if cur:
+                chunks.append(cur.strip())
+                cur = ""
+            start = 0
+            step = chunk_size - overlap
+            while start < len(sent):
+                end = min(len(sent), start + chunk_size)
+                piece = sent[start:end].strip()
+                if piece:
+                    chunks.append(piece)
+                if end == len(sent):
+                    break
+                start += step
+            continue
+
+        if not cur:
+            cur = sent
+            continue
+
+        if len(cur) + len(sent) <= chunk_size:
+            cur += sent
+        else:
+            chunks.append(cur.strip())
+            if overlap > 0 and chunks:
+                tail = chunks[-1][-overlap:]
+                cur = (tail + sent).strip()
+            else:
+                cur = sent
+
+    if cur:
+        chunks.append(cur.strip())
+
+    return [c for c in chunks if c]
+
+
+def build_chunk_id(doc_id: str, chunk_index: int, text: str) -> str:
+    raw = f"{doc_id}:{chunk_index}:{text[:64]}"
+    return sha1(raw.encode("utf-8")).hexdigest()
+
+
+def convert(
+    input_path: str,
+    output_path: str,
+    chunk_size: int,
+    overlap: int,
+    min_len: int,
+    limit_records: Optional[int],
+    keep_url: bool,
+) -> None:
+    os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+
+    processed_records = 0
+    total_chunks = 0
+
+    with open(output_path, "w", encoding="utf-8") as out:
+        for rec_idx, record in enumerate(iter_json_array_objects(input_path)):
+            if limit_records is not None and processed_records >= limit_records:
+                break
+
+            record_type = record.get("type", "") if isinstance(record, dict) else ""
+
+            for text_idx, raw_text in enumerate(extract_text_items(record)):
+                cleaned = clean_text(raw_text, keep_url=keep_url)
+                if len(cleaned) < min_len:
+                    continue
+
+                chunks = chunk_text(cleaned, chunk_size=chunk_size, overlap=overlap)
+                doc_id = f"rec{rec_idx}_txt{text_idx}"
+                for i, chunk in enumerate(chunks):
+                    if len(chunk) < min_len:
+                        continue
+                    row = {
+                        "id": build_chunk_id(doc_id, i, chunk),
+                        "doc_id": doc_id,
+                        "chunk_id": i,
+                        "source": os.path.abspath(input_path),
+                        "record_type": record_type,
+                        "text": chunk,
+                        "char_len": len(chunk),
+                    }
+                    out.write(json.dumps(row, ensure_ascii=False) + "\n")
+                    total_chunks += 1
+
+            processed_records += 1
+            if processed_records % 10000 == 0:
+                print(
+                    f"processed_records={processed_records} total_chunks={total_chunks}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+
+    print(
+        f"done: input={input_path} output={output_path} records={processed_records} chunks={total_chunks}",
+        file=sys.stderr,
+    )
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Clean and chunk TCM pretrain corpus JSON into JSONL chunks."
+    )
+    parser.add_argument("--input", required=True, help="Input JSON file path")
+    parser.add_argument("--output", required=True, help="Output JSONL file path")
+    parser.add_argument(
+        "--chunk-size",
+        type=int,
+        default=600,
+        help="Target chunk size in characters (default: 600)",
+    )
+    parser.add_argument(
+        "--overlap",
+        type=int,
+        default=100,
+        help="Overlap size in characters between adjacent chunks (default: 100)",
+    )
+    parser.add_argument(
+        "--min-len",
+        type=int,
+        default=80,
+        help="Drop cleaned texts/chunks shorter than this length (default: 80)",
+    )
+    parser.add_argument(
+        "--limit-records",
+        type=int,
+        default=None,
+        help="Process only first N records for quick test",
+    )
+    parser.add_argument(
+        "--keep-url",
+        action="store_true",
+        help="Keep URLs in text (default removes URLs)",
+    )
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    convert(
+        input_path=args.input,
+        output_path=args.output,
+        chunk_size=args.chunk_size,
+        overlap=args.overlap,
+        min_len=args.min_len,
+        limit_records=args.limit_records,
+        keep_url=args.keep_url,
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
