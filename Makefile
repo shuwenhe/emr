@@ -22,6 +22,11 @@ KB_API_KEY ?=
 KB_MAX_LEN ?= 800
 KB_OVERLAP ?= 100
 KB_BATCH_SIZE ?= 32
+RAG_USE_GO_EMBEDDER ?= 1
+RAG_GO_EMBED_CONCURRENCY ?= 8
+RAG_EMBED_METRICS_EVERY ?= 20
+RAG_EMBED_PIPELINE_WORKERS ?= 8
+RAG_EMBED_PIPELINE_INFLIGHT ?=
 ROI_DIR ?= $(CURDIR)/roi
 
 # TCM corpus pipeline settings
@@ -47,6 +52,7 @@ help:
 	@echo "  make db-check         # verify MySQL connectivity and privileges"
 	@echo "  make report           # generate docx reports"
 	@echo "  make kb-build         # build vector KB from docx files"
+	@echo "    env: RAG_USE_GO_EMBEDDER=0/1, RAG_GO_EMBED_CONCURRENCY=8"
 	@echo "  make go-embedder-build # compile Go concurrent embedder (speeds up kb-build)"
 	@echo "  make simhash-build    # compile C++ SimHash extension (speeds up dedup)" 
 	@echo "  make kb-build-markdown # build KB and print markdown/chunk debug"
@@ -101,11 +107,23 @@ simhash-build:
 
 kb-build: go-embedder-build
 	@mkdir -p "$(KB_OUT_DIR)"
-	@PYTHONPATH="$(CURDIR):$$PYTHONPATH" "$(KB_PY)" -c "from rag.kb_builder import build_kb; build_kb(source_dir='$(KB_SOURCE_DIR)', out_dir='$(KB_OUT_DIR)', provider='$(KB_PROVIDER)', embed_model='$(KB_EMBED_MODEL)', base_url='$(KB_BASE_URL)' or None, api_key='$(KB_API_KEY)' or None, max_len=int('$(KB_MAX_LEN)'), overlap=int('$(KB_OVERLAP)'), batch_size=int('$(KB_BATCH_SIZE)'), show_markdown=False)"
+	@PYTHONPATH="$(CURDIR):$$PYTHONPATH" \
+	RAG_USE_GO_EMBEDDER="$(RAG_USE_GO_EMBEDDER)" \
+	RAG_GO_EMBED_CONCURRENCY="$(RAG_GO_EMBED_CONCURRENCY)" \
+	RAG_EMBED_METRICS_EVERY="$(RAG_EMBED_METRICS_EVERY)" \
+	RAG_EMBED_PIPELINE_WORKERS="$(RAG_EMBED_PIPELINE_WORKERS)" \
+	$(if $(RAG_EMBED_PIPELINE_INFLIGHT),RAG_EMBED_PIPELINE_INFLIGHT="$(RAG_EMBED_PIPELINE_INFLIGHT)",) \
+	"$(KB_PY)" -c "from rag.kb_builder import build_kb; build_kb(source_dir='$(KB_SOURCE_DIR)', out_dir='$(KB_OUT_DIR)', provider='$(KB_PROVIDER)', embed_model='$(KB_EMBED_MODEL)', base_url='$(KB_BASE_URL)' or None, api_key='$(KB_API_KEY)' or None, max_len=int('$(KB_MAX_LEN)'), overlap=int('$(KB_OVERLAP)'), batch_size=int('$(KB_BATCH_SIZE)'), show_markdown=False)"
 
 kb-build-markdown:
 	@mkdir -p "$(KB_OUT_DIR)"
-	@PYTHONPATH="$(CURDIR):$$PYTHONPATH" "$(KB_PY)" -c "from rag.kb_builder import build_kb; build_kb(source_dir='$(KB_SOURCE_DIR)', out_dir='$(KB_OUT_DIR)', provider='$(KB_PROVIDER)', embed_model='$(KB_EMBED_MODEL)', base_url='$(KB_BASE_URL)' or None, api_key='$(KB_API_KEY)' or None, max_len=int('$(KB_MAX_LEN)'), overlap=int('$(KB_OVERLAP)'), batch_size=int('$(KB_BATCH_SIZE)'), show_markdown=True)"
+	@PYTHONPATH="$(CURDIR):$$PYTHONPATH" \
+	RAG_USE_GO_EMBEDDER="$(RAG_USE_GO_EMBEDDER)" \
+	RAG_GO_EMBED_CONCURRENCY="$(RAG_GO_EMBED_CONCURRENCY)" \
+	RAG_EMBED_METRICS_EVERY="$(RAG_EMBED_METRICS_EVERY)" \
+	RAG_EMBED_PIPELINE_WORKERS="$(RAG_EMBED_PIPELINE_WORKERS)" \
+	$(if $(RAG_EMBED_PIPELINE_INFLIGHT),RAG_EMBED_PIPELINE_INFLIGHT="$(RAG_EMBED_PIPELINE_INFLIGHT)",) \
+	"$(KB_PY)" -c "from rag.kb_builder import build_kb; build_kb(source_dir='$(KB_SOURCE_DIR)', out_dir='$(KB_OUT_DIR)', provider='$(KB_PROVIDER)', embed_model='$(KB_EMBED_MODEL)', base_url='$(KB_BASE_URL)' or None, api_key='$(KB_API_KEY)' or None, max_len=int('$(KB_MAX_LEN)'), overlap=int('$(KB_OVERLAP)'), batch_size=int('$(KB_BATCH_SIZE)'), show_markdown=True)"
 
 kb-rebuild: kb-build
 
@@ -152,7 +170,11 @@ tcm-pipeline:
 # Stage 3: embed chunks JSONL → FAISS knowledge base
 kb-build-tcm:
 	@mkdir -p "$(KB_OUT_DIR)"
-	PYTHONPATH="$(CURDIR):$$PYTHONPATH" "$(TCM_PY)" rag/tcm_chunks_to_kb.py \
+	PYTHONPATH="$(CURDIR):$$PYTHONPATH" \
+	RAG_USE_GO_EMBEDDER="$(RAG_USE_GO_EMBEDDER)" \
+	RAG_GO_EMBED_CONCURRENCY="$(RAG_GO_EMBED_CONCURRENCY)" \
+	RAG_EMBED_METRICS_EVERY="$(RAG_EMBED_METRICS_EVERY)" \
+	"$(TCM_PY)" rag/tcm_chunks_to_kb.py \
 		--chunks-input "$(TCM_CHUNKS_JSONL)" \
 		--out-dir      "$(KB_OUT_DIR)" \
 		--provider     "$(KB_PROVIDER)" \

@@ -10,6 +10,7 @@ import tempfile
 import threading
 import time
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
@@ -73,6 +74,46 @@ def _log_step(step: int, total_steps: int, title: str, detail: Optional[str] = N
 # ── Go-based concurrent embedder ──────────────────────────────────────────────
 
 GO_EMBEDDER_BIN = os.path.join(os.path.dirname(__file__), "go_embedder")
+
+
+def _env_flag(name: str, default: bool = False) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    value = raw.strip().lower()
+    if value in {"1", "true", "yes", "on"}:
+        return True
+    if value in {"0", "false", "no", "off"}:
+        return False
+    return default
+
+
+@dataclass
+class EmbedMetrics:
+    backend: str
+    requested_chunks: int
+    batch_size: int
+    batch_count: int = 0
+    failed_batches: int = 0
+    kept_chunks: int = 0
+    failed_chunks: int = 0
+    total_batch_seconds: float = 0.0
+
+    def to_dict(self) -> Dict[str, Any]:
+        avg_batch_ms = 0.0
+        if self.batch_count > 0:
+            avg_batch_ms = (self.total_batch_seconds / self.batch_count) * 1000
+        return {
+            "backend": self.backend,
+            "requested_chunks": self.requested_chunks,
+            "batch_size": self.batch_size,
+            "batch_count": self.batch_count,
+            "failed_batches": self.failed_batches,
+            "kept_chunks": self.kept_chunks,
+            "failed_chunks": self.failed_chunks,
+            "total_batch_seconds": round(self.total_batch_seconds, 4),
+            "avg_batch_ms": round(avg_batch_ms, 2),
+        }
 
 
 def _find_go_embedder() -> Optional[str]:
@@ -716,7 +757,9 @@ def build_kb(
         if not records:
             raise RuntimeError("No chunks generated; check source directory and parsers.")
 
-        go_bin = _find_go_embedder()
+        use_go_embedder = _env_flag("RAG_USE_GO_EMBEDDER", default=True)
+        go_bin = _find_go_embedder() if use_go_embedder else None
+        go_embed_concurrency = max(1, int(os.getenv("RAG_GO_EMBED_CONCURRENCY", "8")))
         if go_bin:
             _log_step(5, total_steps, "Initializing embedding model",
                       f"provider={provider}, model={embed_model}, backend=go-concurrent")
@@ -726,20 +769,36 @@ def build_kb(
                 model=embed_model,
                 base_url=base_url,
                 api_key=api_key,
-                concurrency=8,
+                concurrency=go_embed_concurrency,
             )
         else:
+            if use_go_embedder:
+                tqdm.write("[WARN] RAG_USE_GO_EMBEDDER=1 but go_embedder binary not found; fallback to python backend")
             _log_step(5, total_steps, "Initializing embedding model",
                       f"provider={provider}, model={embed_model}, backend=python")
             embeddings = build_embeddings(provider, embed_model, base_url=base_url, api_key=api_key)
         _log_step(6, total_steps, "Embedding chunks", f"chunks={len(records)}, batch_size={batch_size}")
+        backend_name = "go-concurrent" if isinstance(embeddings, GoEmbedder) else "python"
+        metrics = EmbedMetrics(backend=backend_name, requested_chunks=len(records), batch_size=batch_size)
+        metrics_every = max(1, int(os.getenv("RAG_EMBED_METRICS_EVERY", "20")))
         vectors: List[List[float]] = []
         kept_records: List[ChunkRecord] = []
         embedding_failed: List[Dict[str, str]] = []
         with tqdm(total=len(records), desc="Embedding chunks") as progress:
             if isinstance(embeddings, GoEmbedder):
-                pipeline_workers = max(1, int(os.getenv("EMBED_PIPELINE_WORKERS", "8")))
-                max_inflight = max(1, int(os.getenv("EMBED_PIPELINE_INFLIGHT", str(pipeline_workers * 2))))
+                pipeline_workers = max(
+                    1,
+                    int(os.getenv("RAG_EMBED_PIPELINE_WORKERS", os.getenv("EMBED_PIPELINE_WORKERS", "8"))),
+                )
+                max_inflight = max(
+                    1,
+                    int(
+                        os.getenv(
+                            "RAG_EMBED_PIPELINE_INFLIGHT",
+                            os.getenv("EMBED_PIPELINE_INFLIGHT", str(pipeline_workers * 2)),
+                        )
+                    ),
+                )
                 batch_iter = iter(iter_batches(records, batch_size))
                 in_flight = {}
 
@@ -750,7 +809,7 @@ def build_kb(
                         except StopIteration:
                             return False
                         future = executor.submit(_embed_batch_with_fallback, embeddings, next_batch)
-                        in_flight[future] = len(next_batch)
+                        in_flight[future] = (len(next_batch), time.perf_counter())
                         return True
 
                     while len(in_flight) < max_inflight and _submit_next():
@@ -759,29 +818,60 @@ def build_kb(
                     while in_flight:
                         done, _ = wait(in_flight.keys(), return_when=FIRST_COMPLETED)
                         for future in done:
-                            input_size = in_flight.pop(future)
+                            input_size, batch_start = in_flight.pop(future)
+                            elapsed = time.perf_counter() - batch_start
                             batch_kept, batch_vectors, batch_failed, warns = future.result()
                             for msg in warns:
                                 tqdm.write(msg)
                             kept_records.extend(batch_kept)
                             vectors.extend(batch_vectors)
                             embedding_failed.extend(batch_failed)
+                            metrics.batch_count += 1
+                            metrics.total_batch_seconds += elapsed
+                            metrics.kept_chunks += len(batch_kept)
+                            metrics.failed_chunks += len(batch_failed)
+                            if batch_failed:
+                                metrics.failed_batches += 1
+                            if metrics.batch_count % metrics_every == 0:
+                                tqdm.write(
+                                    "[EMBED_METRIC] "
+                                    f"backend={backend_name} batch={metrics.batch_count} "
+                                    f"elapsed_ms={elapsed * 1000:.1f} "
+                                    f"kept={len(batch_kept)} failed={len(batch_failed)}"
+                                )
                             progress.update(input_size)
 
                         while len(in_flight) < max_inflight and _submit_next():
                             pass
             else:
                 for batch_records in iter_batches(records, batch_size):
+                    batch_start = time.perf_counter()
                     batch_kept, batch_vectors, batch_failed, warns = _embed_batch_with_fallback(
                         embeddings,
                         batch_records,
                     )
+                    elapsed = time.perf_counter() - batch_start
                     for msg in warns:
                         tqdm.write(msg)
                     kept_records.extend(batch_kept)
                     vectors.extend(batch_vectors)
                     embedding_failed.extend(batch_failed)
+                    metrics.batch_count += 1
+                    metrics.total_batch_seconds += elapsed
+                    metrics.kept_chunks += len(batch_kept)
+                    metrics.failed_chunks += len(batch_failed)
+                    if batch_failed:
+                        metrics.failed_batches += 1
+                    if metrics.batch_count % metrics_every == 0:
+                        tqdm.write(
+                            "[EMBED_METRIC] "
+                            f"backend={backend_name} batch={metrics.batch_count} "
+                            f"elapsed_ms={elapsed * 1000:.1f} "
+                            f"kept={len(batch_kept)} failed={len(batch_failed)}"
+                        )
                     progress.update(len(batch_records))
+
+        tqdm.write(f"[EMBED_SUMMARY] {json.dumps(metrics.to_dict(), ensure_ascii=True)}")
 
         records = kept_records
         if embedding_failed:
@@ -833,6 +923,7 @@ def build_kb(
             "failed_files": failed_files,
             "degraded_files": degraded_files,
             "embedding_failed_chunks": embedding_failed,
+            "embedding_metrics": metrics.to_dict(),
         }
         build_log_path = os.path.join(version_dir, "build_log.json")
         with open(build_log_path, "w", encoding="utf-8") as handle:

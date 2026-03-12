@@ -41,6 +41,7 @@ import os
 import sys
 import time
 from datetime import datetime, timezone
+from dataclasses import dataclass
 from typing import Dict, Iterator, List, Optional, Tuple
 
 import numpy as np
@@ -52,7 +53,13 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from rag.embeddings import build_embeddings
 from rag.kb_utils import sha1_text
-from rag.kb_builder import _activate_version, _embed_documents_with_retry
+from rag.kb_builder import (
+    GoEmbedder,
+    _activate_version,
+    _embed_documents_with_retry,
+    _env_flag,
+    _find_go_embedder,
+)
 from rag.schemas import ChunkRecord, Manifest
 
 
@@ -111,6 +118,34 @@ def _iter_batches(items: list, size: int):
         yield items[i : i + size]
 
 
+@dataclass
+class EmbedMetrics:
+    backend: str
+    requested_chunks: int
+    batch_size: int
+    batch_count: int = 0
+    failed_batches: int = 0
+    kept_chunks: int = 0
+    failed_chunks: int = 0
+    total_batch_seconds: float = 0.0
+
+    def to_dict(self) -> Dict[str, object]:
+        avg_batch_ms = 0.0
+        if self.batch_count > 0:
+            avg_batch_ms = (self.total_batch_seconds / self.batch_count) * 1000
+        return {
+            "backend": self.backend,
+            "requested_chunks": self.requested_chunks,
+            "batch_size": self.batch_size,
+            "batch_count": self.batch_count,
+            "failed_batches": self.failed_batches,
+            "kept_chunks": self.kept_chunks,
+            "failed_chunks": self.failed_chunks,
+            "total_batch_seconds": round(self.total_batch_seconds, 4),
+            "avg_batch_ms": round(avg_batch_ms, 2),
+        }
+
+
 # ---------------------------------------------------------------------------
 # Main build function
 # ---------------------------------------------------------------------------
@@ -147,42 +182,83 @@ def build_kb_from_chunks(
 
     # ---- embed ----
     print(f"Embedding {len(records):,} chunks via provider={provider!r} model={embed_model!r} …")
-    embeddings_fn = build_embeddings(provider, embed_model, base_url=base_url, api_key=api_key)
+    use_go_embedder = _env_flag("RAG_USE_GO_EMBEDDER", default=True)
+    go_bin = _find_go_embedder() if use_go_embedder else None
+    go_embed_concurrency = max(1, int(os.getenv("RAG_GO_EMBED_CONCURRENCY", "8")))
+    if go_bin:
+        embeddings_fn = GoEmbedder(
+            binary=go_bin,
+            provider=provider,
+            model=embed_model,
+            base_url=base_url,
+            api_key=api_key,
+            concurrency=go_embed_concurrency,
+        )
+    else:
+        if use_go_embedder:
+            tqdm.write("[WARN] RAG_USE_GO_EMBEDDER=1 but go_embedder binary not found; fallback to python backend")
+        embeddings_fn = build_embeddings(provider, embed_model, base_url=base_url, api_key=api_key)
+
+    backend_name = "go-concurrent" if isinstance(embeddings_fn, GoEmbedder) else "python"
+    metrics = EmbedMetrics(backend=backend_name, requested_chunks=len(records), batch_size=batch_size)
+    metrics_every = max(1, int(os.getenv("RAG_EMBED_METRICS_EVERY", "20")))
 
     vectors: List[List[float]] = []
     kept_records: List[ChunkRecord] = []
     embedding_failed: List[Dict[str, str]] = []
 
-    with tqdm(total=len(records), desc="Embedding", unit="chunk") as pbar:
-        for batch in _iter_batches(records, batch_size):
-            texts = [r.text_for_embedding for r in batch]
-            try:
-                batch_vecs = _embed_documents_with_retry(embeddings_fn, texts)
-            except Exception as exc:  # noqa: BLE001
-                tqdm.write(f"[WARN] batch embedding failed, falling back per-chunk: {exc}")
-                batch_vecs_fallback: List[Optional[List[float]]] = []
-                for rec in batch:
-                    try:
-                        v = _embed_documents_with_retry(embeddings_fn, [rec.text_for_embedding])[0]
-                        batch_vecs_fallback.append(v)
-                    except Exception as inner:  # noqa: BLE001
-                        embedding_failed.append(
-                            {"chunk_id": rec.chunk_id, "file_path": rec.file_path, "reason": str(inner)}
-                        )
-                        batch_vecs_fallback.append(None)
-                        tqdm.write(f"[WARN] skipped chunk {rec.chunk_id}: {inner}")
-                for rec, vec in zip(batch, batch_vecs_fallback):
-                    if vec is not None:
-                        kept_records.append(rec)
-                        vectors.append(vec)
-                pbar.update(len(batch))
-                continue
+    try:
+        with tqdm(total=len(records), desc="Embedding", unit="chunk") as pbar:
+            for batch in _iter_batches(records, batch_size):
+                batch_start = time.perf_counter()
+                texts = [r.text_for_embedding for r in batch]
+                try:
+                    batch_vecs = _embed_documents_with_retry(embeddings_fn, texts)
+                    if len(batch_vecs) != len(batch):
+                        raise RuntimeError("Embedding batch returned mismatched count.")
+                    kept_records.extend(batch)
+                    vectors.extend(batch_vecs)
+                    batch_failed = 0
+                except Exception as exc:  # noqa: BLE001
+                    tqdm.write(f"[WARN] batch embedding failed, falling back per-chunk: {exc}")
+                    batch_failed = 0
+                    batch_vecs_fallback: List[Optional[List[float]]] = []
+                    for rec in batch:
+                        try:
+                            v = _embed_documents_with_retry(embeddings_fn, [rec.text_for_embedding])[0]
+                            batch_vecs_fallback.append(v)
+                        except Exception as inner:  # noqa: BLE001
+                            embedding_failed.append(
+                                {"chunk_id": rec.chunk_id, "file_path": rec.file_path, "reason": str(inner)}
+                            )
+                            batch_failed += 1
+                            batch_vecs_fallback.append(None)
+                            tqdm.write(f"[WARN] skipped chunk {rec.chunk_id}: {inner}")
+                    for rec, vec in zip(batch, batch_vecs_fallback):
+                        if vec is not None:
+                            kept_records.append(rec)
+                            vectors.append(vec)
 
-            if len(batch_vecs) != len(batch):
-                raise RuntimeError("Embedding batch returned mismatched count.")
-            kept_records.extend(batch)
-            vectors.extend(batch_vecs)
-            pbar.update(len(batch))
+                elapsed = time.perf_counter() - batch_start
+                metrics.batch_count += 1
+                metrics.total_batch_seconds += elapsed
+                metrics.kept_chunks += len(batch) - batch_failed
+                metrics.failed_chunks += batch_failed
+                if batch_failed > 0:
+                    metrics.failed_batches += 1
+                if metrics.batch_count % metrics_every == 0:
+                    tqdm.write(
+                        "[EMBED_METRIC] "
+                        f"backend={backend_name} batch={metrics.batch_count} "
+                        f"elapsed_ms={elapsed * 1000:.1f} "
+                        f"kept={len(batch) - batch_failed} failed={batch_failed}"
+                    )
+                pbar.update(len(batch))
+    finally:
+        if isinstance(embeddings_fn, GoEmbedder):
+            embeddings_fn.close()
+
+    tqdm.write(f"[EMBED_SUMMARY] {json.dumps(metrics.to_dict(), ensure_ascii=True)}")
 
     records = kept_records
     if embedding_failed:
@@ -237,6 +313,7 @@ def build_kb_from_chunks(
         "total_read": total_lines,
         "embedded": len(records),
         "embedding_failed": embedding_failed,
+        "embedding_metrics": metrics.to_dict(),
     }
     with open(os.path.join(version_dir, "build_log.json"), "w", encoding="utf-8") as fh:
         json.dump(build_log, fh, ensure_ascii=False, indent=2)
