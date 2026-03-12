@@ -15,13 +15,13 @@ from pymysql.err import OperationalError
 from core.config import settings
 from core.logging import setup_logging
 from service.platform import PlatformService
-from route.python import emr_router, ingest_router, patients_router, platform_router, reports_router
+from route import emr_router, ingest_router, patients_router, platform_router, reports_router
 
 setup_logging(__name__)
 platform_service = PlatformService()
 
 # Use project-root data directory for static file serving
-_LEGACY_DATA_DIR = Path(__file__).resolve().parents[2] / "data"
+_LEGACY_DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 _LEGACY_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(title="Device Ingestion Service")

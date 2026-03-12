@@ -1,4 +1,4 @@
-package ginroutes
+package route
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"report-file-service/config"
-	ginhandler "report-file-service/handler/go"
+	ginhandler "report-file-service/handler"
 )
 
 // requestIDMiddleware propagates or generates a X-Request-ID for log correlation.

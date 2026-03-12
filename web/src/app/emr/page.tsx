@@ -271,6 +271,14 @@ export default function EmrPage() {
     }
 
     const reportData = report as Record<string, unknown>;
+    const aiData =
+      reportData.ai && typeof reportData.ai === "object"
+        ? (reportData.ai as Record<string, unknown>)
+        : null;
+    const treatmentPlan =
+      reportData.treatment_plan && typeof reportData.treatment_plan === "object"
+        ? (reportData.treatment_plan as Record<string, unknown>)
+        : null;
     const citations = Array.isArray(reportData.citations)
       ? reportData.citations
           .filter((item): item is Record<string, unknown> => !!item && typeof item === "object")
@@ -293,8 +301,13 @@ export default function EmrPage() {
       : [];
 
     return {
-      reportNote: String(reportData.report_note ?? "").trim(),
-      treatmentPlanText: String(reportData.treatment_plan_text ?? "").trim(),
+      reportNote: String(reportData.report_note ?? aiData?.report_note ?? "").trim(),
+      treatmentPlanText: String(
+        reportData.treatment_plan_text ??
+          aiData?.treatment_plan_text ??
+          treatmentPlan?.ai_recommendation ??
+          "",
+      ).trim(),
       citations,
       retrievedItems,
       evidenceItemIds: toStringArray(reportData.evidence_item_ids),
@@ -1497,7 +1510,7 @@ export default function EmrPage() {
                     {String(report.created_at ?? "-")}
                   </p>
                 </div>
-                {report.analysis && typeof report.analysis === "object" && (
+                {Boolean(report.analysis && typeof report.analysis === "object") && (
                   <div className="rounded-xl border border-slate-200 bg-blue-50 p-4">
                     <p className="text-xs font-medium uppercase tracking-wide text-blue-600">风险等级</p>
                     <p className="mt-1 text-lg font-bold uppercase text-blue-900">
@@ -1507,7 +1520,7 @@ export default function EmrPage() {
                 )}
               </div>
 
-              {report.analysis && typeof report.analysis === "object" && (report.analysis as Record<string, unknown>).temperature_metrics && (
+              {Boolean(report.analysis && typeof report.analysis === "object" && (report.analysis as Record<string, unknown>).temperature_metrics) && (
                 <div className="rounded-xl border border-slate-200 p-4">
                   <h3 className="text-sm font-semibold text-slate-900">温度指标</h3>
                   <div className="mt-3 grid gap-3 sm:grid-cols-4">
@@ -1521,55 +1534,59 @@ export default function EmrPage() {
                 </div>
               )}
 
-              {report.analysis && typeof report.analysis === "object" &&
-               Boolean((report.analysis as Record<string, unknown>).roi_analysis) &&
-               typeof (report.analysis as Record<string, unknown>).roi_analysis === "object" &&
-               Boolean(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).roi_list) &&
-               Array.isArray(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).roi_list) &&
-               (((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).roi_list as unknown[]).length > 0 && (
-                <div className="rounded-xl border border-slate-200 p-4">
-                  <h3 className="text-sm font-semibold text-slate-900">姿态分区温度（ROI）</h3>
-                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                    <div className="rounded-lg bg-slate-50 p-3">
-                      <p className="text-xs text-slate-500">识别区域数</p>
-                      <p className="mt-1 text-base font-semibold text-slate-900">
-                        {String(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).total_rois ?? "-")}
-                      </p>
-                    </div>
-                    <div className="rounded-lg bg-slate-50 p-3">
-                      <p className="text-xs text-slate-500">最热区域</p>
-                      <p className="mt-1 text-base font-semibold text-slate-900">
-                        {formatRoiLabel(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).hottest_region)}
-                        {" "}
-                        ({String(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).hottest_temp ?? "-")}°C)
-                      </p>
-                    </div>
-                    <div className="rounded-lg bg-slate-50 p-3">
-                      <p className="text-xs text-slate-500">最冷区域</p>
-                      <p className="mt-1 text-base font-semibold text-slate-900">
-                        {formatRoiLabel(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).coolest_region)}
-                        {" "}
-                        ({String(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).coolest_temp ?? "-")}°C)
-                      </p>
-                    </div>
-                  </div>
-                  <div className="mt-3 space-y-2">
-                    {(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).roi_list as Record<string, unknown>[]).map((roi, idx) => (
-                      <div
-                        key={`${String(roi.name || "roi")}-${idx}`}
-                        className="grid gap-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-700 sm:grid-cols-6"
-                      >
-                        <div className="font-medium text-slate-900">{formatRoiLabel(roi.name)}</div>
-                        <div>均值 {String(roi.mean_c ?? "-")}°C</div>
-                        <div>最低 {String(roi.min_c ?? "-")}°C</div>
-                        <div>最高 {String(roi.max_c ?? "-")}°C</div>
-                        <div>标准差 {String(roi.std_c ?? "-")}</div>
-                        <div>样本 {String(roi.count ?? "-")}</div>
+              <div className="rounded-xl border border-slate-200 p-4">
+                <h3 className="text-sm font-semibold text-slate-900">姿态分区温度（ROI）</h3>
+                {report.analysis && typeof report.analysis === "object" &&
+                Boolean((report.analysis as Record<string, unknown>).roi_analysis) &&
+                typeof (report.analysis as Record<string, unknown>).roi_analysis === "object" &&
+                Boolean(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).roi_list) &&
+                Array.isArray(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).roi_list) &&
+                (((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).roi_list as unknown[]).length > 0 ? (
+                  <>
+                    <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                      <div className="rounded-lg bg-slate-50 p-3">
+                        <p className="text-xs text-slate-500">识别区域数</p>
+                        <p className="mt-1 text-base font-semibold text-slate-900">
+                          {String(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).total_rois ?? "-")}
+                        </p>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+                      <div className="rounded-lg bg-slate-50 p-3">
+                        <p className="text-xs text-slate-500">最热区域</p>
+                        <p className="mt-1 text-base font-semibold text-slate-900">
+                          {formatRoiLabel(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).hottest_region)}
+                          {" "}
+                          ({String(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).hottest_temp ?? "-")}°C)
+                        </p>
+                      </div>
+                      <div className="rounded-lg bg-slate-50 p-3">
+                        <p className="text-xs text-slate-500">最冷区域</p>
+                        <p className="mt-1 text-base font-semibold text-slate-900">
+                          {formatRoiLabel(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).coolest_region)}
+                          {" "}
+                          ({String(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).coolest_temp ?? "-")}°C)
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-3 space-y-2">
+                      {(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).roi_list as Record<string, unknown>[]).map((roi, idx) => (
+                        <div
+                          key={`${String(roi.name || "roi")}-${idx}`}
+                          className="grid gap-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-700 sm:grid-cols-6"
+                        >
+                          <div className="font-medium text-slate-900">{formatRoiLabel(roi.name)}</div>
+                          <div>均值 {String(roi.mean_c ?? "-")}°C</div>
+                          <div>最低 {String(roi.min_c ?? "-")}°C</div>
+                          <div>最高 {String(roi.max_c ?? "-")}°C</div>
+                          <div>标准差 {String(roi.std_c ?? "-")}</div>
+                          <div>样本 {String(roi.count ?? "-")}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <p className="mt-2 text-slate-500">暂无姿态分区温度数据</p>
+                )}
+              </div>
 
               <div className="rounded-xl border border-slate-200 p-4">
                 <h3 className="text-sm font-semibold text-slate-900">诊断结论</h3>
@@ -1585,101 +1602,95 @@ export default function EmrPage() {
                 </p>
               </div>
 
-              {reportEvidence.reportNote && (
-                <div className="rounded-xl border border-slate-200 p-4">
-                  <h3 className="text-sm font-semibold text-slate-900">AI 报告说明</h3>
-                  <p className="mt-2 text-slate-700">{reportEvidence.reportNote}</p>
-                </div>
-              )}
+              <div className="rounded-xl border border-slate-200 p-4">
+                <h3 className="text-sm font-semibold text-slate-900">AI 报告说明</h3>
+                <p className="mt-2 text-slate-700">{reportEvidence.reportNote || "-"}</p>
+              </div>
 
-              {reportEvidence.treatmentPlanText && (
-                <div className="rounded-xl border border-slate-200 p-4">
-                  <h3 className="text-sm font-semibold text-slate-900">AI 治疗建议</h3>
-                  <p className="mt-2 text-slate-700">{reportEvidence.treatmentPlanText}</p>
-                </div>
-              )}
+              <div className="rounded-xl border border-slate-200 p-4">
+                <h3 className="text-sm font-semibold text-slate-900">AI 治疗建议</h3>
+                <p className="mt-2 text-slate-700">{reportEvidence.treatmentPlanText || "-"}</p>
+              </div>
 
-              {(reportEvidence.citations.length > 0 ||
-                reportEvidence.evidenceItemIds.length > 0 ||
-                reportEvidence.retrievedItems.length > 0) && (
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-                  <h3 className="text-sm font-semibold text-emerald-900">证据依据</h3>
-                  <p className="mt-2 text-sm text-emerald-800">
-                    诊断与建议中的引用编号，例如 [1]、[2]，对应下方知识条目。
-                  </p>
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                <h3 className="text-sm font-semibold text-emerald-900">证据依据</h3>
+                <p className="mt-2 text-sm text-emerald-800">
+                  诊断与建议中的引用编号，例如 [1]、[2]，对应下方知识条目。
+                </p>
 
-                  {reportEvidence.citations.length > 0 && (
-                    <div className="mt-4 space-y-3">
-                      {reportEvidence.citations.map((citation, index) => (
-                        <div key={`${citation.id || citation.title || "citation"}-${index}`} className="rounded-lg bg-white p-3 ring-1 ring-emerald-100">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">
-                              [{index + 1}]
-                            </span>
-                            <span className="text-sm font-semibold text-slate-900">{citation.title || "未命名知识条目"}</span>
-                          </div>
-                          <div className="mt-2 space-y-1 text-sm text-slate-700">
-                            <p>条目 ID：{citation.id || "-"}</p>
-                            <p>来源：{citation.source || "-"}</p>
-                          </div>
+                {reportEvidence.citations.length > 0 ? (
+                  <div className="mt-4 space-y-3">
+                    {reportEvidence.citations.map((citation, index) => (
+                      <div key={`${citation.id || citation.title || "citation"}-${index}`} className="rounded-lg bg-white p-3 ring-1 ring-emerald-100">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">
+                            [{index + 1}]
+                          </span>
+                          <span className="text-sm font-semibold text-slate-900">{citation.title || "未命名知识条目"}</span>
                         </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="mt-4 grid gap-3 lg:grid-cols-3">
-                    <div className="rounded-lg bg-white p-3 ring-1 ring-emerald-100">
-                      <p className="text-xs font-semibold text-slate-500">全部证据 ID</p>
-                      <p className="mt-2 text-sm text-slate-700">
-                        {reportEvidence.evidenceItemIds.length > 0 ? reportEvidence.evidenceItemIds.join(", ") : "-"}
-                      </p>
-                    </div>
-                    <div className="rounded-lg bg-white p-3 ring-1 ring-emerald-100">
-                      <p className="text-xs font-semibold text-slate-500">诊断证据 ID</p>
-                      <p className="mt-2 text-sm text-slate-700">
-                        {reportEvidence.diagnosisEvidenceIds.length > 0 ? reportEvidence.diagnosisEvidenceIds.join(", ") : "-"}
-                      </p>
-                    </div>
-                    <div className="rounded-lg bg-white p-3 ring-1 ring-emerald-100">
-                      <p className="text-xs font-semibold text-slate-500">方案证据 ID</p>
-                      <p className="mt-2 text-sm text-slate-700">
-                        {reportEvidence.planEvidenceIds.length > 0 ? reportEvidence.planEvidenceIds.join(", ") : "-"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {reportEvidence.retrievedItems.length > 0 && (
-                    <details className="mt-4 rounded-lg bg-white p-3 ring-1 ring-emerald-100">
-                      <summary className="cursor-pointer text-sm font-semibold text-slate-900">
-                        查看 RAG 命中条目（{reportEvidence.retrievedItems.length}）
-                      </summary>
-                      <div className="mt-3 space-y-3">
-                        {reportEvidence.retrievedItems.map((item, index) => (
-                          <div key={`${String(item.id || item.title || "item")}-${index}`} className="rounded-lg border border-slate-200 p-3">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="text-sm font-semibold text-slate-900">{String(item.title || "未命名条目")}</span>
-                              <span className="text-xs text-slate-500">{String(item.id || "")}</span>
-                            </div>
-                            <p className="mt-1 text-sm text-slate-700">来源：{String(item.source || "-")}</p>
-                            {Array.isArray(item.tags) && item.tags.length > 0 && (
-                              <p className="mt-1 text-sm text-slate-700">标签：{item.tags.join(", ")}</p>
-                            )}
-                          </div>
-                        ))}
+                        <div className="mt-2 space-y-1 text-sm text-slate-700">
+                          <p>条目 ID：{citation.id || "-"}</p>
+                          <p>来源：{citation.source || "-"}</p>
+                        </div>
                       </div>
-                    </details>
-                  )}
-                </div>
-              )}
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-3 text-sm text-slate-600">暂无证据条目</p>
+                )}
 
-              {report.analysis && typeof report.analysis === "object" && 
-               (report.analysis as Record<string, unknown>).regional_comparison && 
-               typeof (report.analysis as Record<string, unknown>).regional_comparison === "object" &&
-               ((report.analysis as Record<string, unknown>).regional_comparison as Record<string, unknown>).abnormal_regions &&
-               Array.isArray(((report.analysis as Record<string, unknown>).regional_comparison as Record<string, unknown>).abnormal_regions) &&
-               (((report.analysis as Record<string, unknown>).regional_comparison as Record<string, unknown>).abnormal_regions as unknown[]).length > 0 && (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-                  <h3 className="text-sm font-semibold text-amber-900">异常区域</h3>
+                <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                  <div className="rounded-lg bg-white p-3 ring-1 ring-emerald-100">
+                    <p className="text-xs font-semibold text-slate-500">全部证据 ID</p>
+                    <p className="mt-2 text-sm text-slate-700">
+                      {reportEvidence.evidenceItemIds.length > 0 ? reportEvidence.evidenceItemIds.join(", ") : "-"}
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-white p-3 ring-1 ring-emerald-100">
+                    <p className="text-xs font-semibold text-slate-500">诊断证据 ID</p>
+                    <p className="mt-2 text-sm text-slate-700">
+                      {reportEvidence.diagnosisEvidenceIds.length > 0 ? reportEvidence.diagnosisEvidenceIds.join(", ") : "-"}
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-white p-3 ring-1 ring-emerald-100">
+                    <p className="text-xs font-semibold text-slate-500">方案证据 ID</p>
+                    <p className="mt-2 text-sm text-slate-700">
+                      {reportEvidence.planEvidenceIds.length > 0 ? reportEvidence.planEvidenceIds.join(", ") : "-"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                <h3 className="text-sm font-semibold text-emerald-900">RAG 命中条目</h3>
+                {reportEvidence.retrievedItems.length > 0 ? (
+                  <div className="mt-3 space-y-3">
+                    {reportEvidence.retrievedItems.map((item, index) => (
+                      <div key={`${String(item.id || item.title || "item")}-${index}`} className="rounded-lg bg-white p-3 ring-1 ring-emerald-100">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-sm font-semibold text-slate-900">{String(item.title || "未命名条目")}</span>
+                          <span className="text-xs text-slate-500">{String(item.id || "")}</span>
+                        </div>
+                        <p className="mt-1 text-sm text-slate-700">来源：{String(item.source || "-")}</p>
+                        {Array.isArray(item.tags) && item.tags.length > 0 && (
+                          <p className="mt-1 text-sm text-slate-700">标签：{item.tags.join(", ")}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-3 text-sm text-slate-600">暂无 RAG 命中条目</p>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <h3 className="text-sm font-semibold text-amber-900">异常区域</h3>
+                {report.analysis && typeof report.analysis === "object" &&
+                (report.analysis as Record<string, unknown>).regional_comparison &&
+                typeof (report.analysis as Record<string, unknown>).regional_comparison === "object" &&
+                ((report.analysis as Record<string, unknown>).regional_comparison as Record<string, unknown>).abnormal_regions &&
+                Array.isArray(((report.analysis as Record<string, unknown>).regional_comparison as Record<string, unknown>).abnormal_regions) &&
+                (((report.analysis as Record<string, unknown>).regional_comparison as Record<string, unknown>).abnormal_regions as unknown[]).length > 0 ? (
                   <div className="mt-3 space-y-2">
                     {(((report.analysis as Record<string, unknown>).regional_comparison as Record<string, unknown>).abnormal_regions as Record<string, unknown>[]).map((region, idx) => (
                       <div key={idx} className="flex items-center justify-between rounded-lg bg-white p-3">
@@ -1696,8 +1707,10 @@ export default function EmrPage() {
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <p className="mt-3 text-sm text-slate-600">未发现明显异常区域</p>
+                )}
+              </div>
             </div>
           ) : (
             <p className="mt-4 text-sm text-slate-500">暂无报告数据</p>

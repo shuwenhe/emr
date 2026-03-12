@@ -13,26 +13,26 @@ import (
 	"report-file-service/service"
 )
 
-type Handler struct {
+type HTTPHandler struct {
 	svc *service.ReportService
 }
 
-func NewHandler(svc *service.ReportService) *Handler {
-	return &Handler{svc: svc}
+func NewHTTPHandler(svc *service.ReportService) *HTTPHandler {
+	return &HTTPHandler{svc: svc}
 }
 
-func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
+func (h *HTTPHandler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/healthz", h.handleHealth)
 	mux.HandleFunc("/v1/reports", h.handleListReports)
 	mux.HandleFunc("/v1/reports/", h.handleReportRoutes)
 }
 
-func (h *Handler) handleHealth(w http.ResponseWriter, _ *http.Request) {
+func (h *HTTPHandler) handleHealth(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("X-Report-Service", "report-file-service")
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
-func (h *Handler) handleListReports(w http.ResponseWriter, r *http.Request) {
+func (h *HTTPHandler) handleListReports(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[go-reports] list reports date=%q", r.URL.Query().Get("date"))
 	if r.Method != http.MethodGet {
 		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed")
@@ -49,7 +49,7 @@ func (h *Handler) handleListReports(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, reports)
 }
 
-func (h *Handler) handleReportRoutes(w http.ResponseWriter, r *http.Request) {
+func (h *HTTPHandler) handleReportRoutes(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/v1/reports/")
 	if path == "archive" {
 		h.handleArchiveReport(w, r)
@@ -66,7 +66,7 @@ func (h *Handler) handleReportRoutes(w http.ResponseWriter, r *http.Request) {
 	h.handleDownloadReport(w, r, false)
 }
 
-func (h *Handler) handleListTrashReports(w http.ResponseWriter, r *http.Request) {
+func (h *HTTPHandler) handleListTrashReports(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[go-reports] list trash reports")
 	if r.Method != http.MethodGet {
 		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed")
@@ -82,7 +82,7 @@ func (h *Handler) handleListTrashReports(w http.ResponseWriter, r *http.Request)
 	writeJSON(w, http.StatusOK, reports)
 }
 
-func (h *Handler) handleArchiveReport(w http.ResponseWriter, r *http.Request) {
+func (h *HTTPHandler) handleArchiveReport(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[go-reports] archive request")
 	if r.Method != http.MethodPost {
 		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed")
@@ -107,7 +107,7 @@ func (h *Handler) handleArchiveReport(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, resp)
 }
 
-func (h *Handler) handleDownloadReport(w http.ResponseWriter, r *http.Request, trash bool) {
+func (h *HTTPHandler) handleDownloadReport(w http.ResponseWriter, r *http.Request, trash bool) {
 	log.Printf("[go-reports] download report path=%q trash=%t", r.URL.Path, trash)
 	if r.Method != http.MethodGet {
 		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed")
@@ -161,7 +161,7 @@ func (h *Handler) handleDownloadReport(w http.ResponseWriter, r *http.Request, t
 	http.ServeFile(w, r, filePath)
 }
 
-func (h *Handler) writeMappedError(w http.ResponseWriter, err error) {
+func (h *HTTPHandler) writeMappedError(w http.ResponseWriter, err error) {
 	switch err.Error() {
 	case "report_not_found", "report_not_archived":
 		writeError(w, http.StatusNotFound, err.Error())
