@@ -42,6 +42,30 @@ class UserAbort(Exception):
 def _is_word_lock(name: str) -> bool:
     return name.startswith("~$")
 
+
+_STEP_TITLE_ZH = {
+    "Scanning source documents": "扫描源文档",
+    "Confirming rebuild": "确认是否重建知识库",
+    "Preparing output directories": "准备输出目录",
+    "Parsing documents into chunks": "解析文档并切分为分块",
+    "Initializing embedding model": "初始化嵌入模型",
+    "Embedding chunks": "为分块生成向量",
+    "Building FAISS index": "构建 FAISS 索引",
+    "Writing KB artifacts and activating version": "写入知识库产物并激活版本",
+}
+
+
+def _log_step(step: int, total_steps: int, title: str, detail: Optional[str] = None) -> None:
+    message = f"Step {step}/{total_steps}: {title}"
+    if detail:
+        message = f"{message} | {detail}"
+    print(message)
+    zh_title = _STEP_TITLE_ZH.get(title, title)
+    zh_message = f"第 {step}/{total_steps} 步：{zh_title}"
+    if detail:
+        zh_message = f"{zh_message} | {detail}"
+    print(zh_message)
+
 def scan_documents(source_dir: str) -> Tuple[List[str], List[Dict[str, str]]]:
     included: List[str] = []
     skipped: List[Dict[str, str]] = []
@@ -369,7 +393,9 @@ def build_kb(
     batch_size: int = 32,
     show_markdown: bool = False,
 ) -> Manifest:
+    total_steps = 8
     start_time = time.perf_counter()
+    _log_step(1, total_steps, "Scanning source documents", f"source_dir={source_dir}")
     included, skipped = scan_documents(source_dir)
     suspicious_count = sum(1 for item in skipped if item["reason"] in ("empty_file", "stat_failed"))
     total_count = len(included) + len(skipped)
@@ -377,11 +403,12 @@ def build_kb(
         "Scan summary: "
         f"total={total_count}, included={len(included)}, skipped={len(skipped)}, suspicious={suspicious_count}"
     )
-    print("About to parse documents.")
+    _log_step(2, total_steps, "Confirming rebuild")
     if sys.stdin.isatty():
         answer = input("Proceed with rebuild? (y/n): ").strip().lower()
         if answer not in ("y", "yes"):
             raise UserAbort("KB rebuild aborted by user.")
+    _log_step(3, total_steps, "Preparing output directories", f"out_dir={out_dir}")
     os.makedirs(out_dir, exist_ok=True)
     versions_dir = os.path.join(out_dir, "versions")
     os.makedirs(versions_dir, exist_ok=True)
@@ -396,7 +423,7 @@ def build_kb(
     temp_dir = tempfile.mkdtemp(prefix="kb_docx_")
 
     try:
-        print("Starting document parsing...")
+        _log_step(4, total_steps, "Parsing documents into chunks", f"documents={len(included)}")
         progress = tqdm(included, desc="Parsing documents")
         for path in progress:
             progress.set_postfix_str(safe_relpath(path, source_dir))
@@ -488,8 +515,9 @@ def build_kb(
         if not records:
             raise RuntimeError("No chunks generated; check source directory and parsers.")
 
-        print(f"Starting embedding: chunks={len(records)}")
+        _log_step(5, total_steps, "Initializing embedding model", f"provider={provider}, model={embed_model}")
         embeddings = build_embeddings(provider, embed_model, base_url=base_url, api_key=api_key)
+        _log_step(6, total_steps, "Embedding chunks", f"chunks={len(records)}, batch_size={batch_size}")
         vectors: List[List[float]] = []
         kept_records: List[ChunkRecord] = []
         embedding_failed: List[Dict[str, str]] = []
@@ -534,7 +562,7 @@ def build_kb(
         if not vectors:
             raise RuntimeError("Embedding returned no vectors.")
 
-        print("Building FAISS index...")
+        _log_step(7, total_steps, "Building FAISS index", f"vectors={len(vectors)}")
         vector_array = np.array(vectors, dtype="float32")
         faiss.normalize_L2(vector_array)
         dim = vector_array.shape[1]
@@ -544,7 +572,7 @@ def build_kb(
         for idx, record in enumerate(records):
             record.vector_id = idx
 
-        print("Writing KB artifacts...")
+        _log_step(8, total_steps, "Writing KB artifacts and activating version", f"kb_version={kb_version}")
         index_path = os.path.join(version_dir, "index.faiss")
         faiss.write_index(index, index_path)
 
@@ -582,9 +610,9 @@ def build_kb(
         with open(build_log_path, "w", encoding="utf-8") as handle:
             json.dump(build_log, handle, ensure_ascii=False, indent=2)
 
-        print("Activating KB version (atomic switch)...")
         _activate_version(out_dir, version_dir)
-        print("Atomic switch completed.")
+        print("Activation completed.")
+        print("版本激活完成。")
         elapsed = time.perf_counter() - start_time
         success_count = max(len(included) - len(failed_files), 0)
         print(
