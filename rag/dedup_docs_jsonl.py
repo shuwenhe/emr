@@ -22,7 +22,8 @@ try:
     import glob as _glob
     _rag_dir = os.path.dirname(__file__)
     _so_paths = []
-    # Prefer future flat layout under rag/, fall back to legacy rag/simhash/.
+    # Prefer rag/so layout, then fall back to older locations.
+    _so_paths.extend(_glob.glob(os.path.join(_rag_dir, "so", "_simhash*.so")))
     _so_paths.extend(_glob.glob(os.path.join(_rag_dir, "_simhash*.so")))
     _so_paths.extend(_glob.glob(os.path.join(_rag_dir, "simhash", "_simhash*.so")))
     if _so_paths:

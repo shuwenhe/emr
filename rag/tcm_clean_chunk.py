@@ -4,41 +4,14 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import sys
 from hashlib import sha1
 from typing import Dict, Generator, Iterable, List, Optional
 
 try:
-    from rag.kb_utils import chunk_text
+    from rag.kb_utils import chunk_text, clean_text
 except ImportError:
-    from kb_utils import chunk_text  # type: ignore[no-redef]
-
-
-# Remove noisy publishing/footer patterns that are common in scanned book corpora.
-NOISE_PATTERNS = [
-    r"中国版本图书馆CIP数据核字",
-    r"图书在版编目\s*\(CIP\)",
-    r"版权专有侵权必究",
-    r"各地新华书店经销",
-    r"服务热线\d{6,}",
-    r"传真\d{6,}",
-    r"网址\s*[a-zA-Z]+://[^\s]+",
-    r"天猫旗舰店网址",
-    r"微商城网址",
-    r"ISBN\s*\d[\d\-Xx]+",
-]
-NOISE_REGEXES = [re.compile(p) for p in NOISE_PATTERNS]
-
-LATEX_CLEANUPS = [
-    (re.compile(r"\$\\textcircled\{\d+\}\$"), " "),
-    (re.compile(r"\$[^$]{1,80}\$"), " "),
-    (re.compile(r"\\[a-zA-Z]+\{[^{}]{0,80}\}"), " "),
-]
-
-WS_RE = re.compile(r"[ \t\u3000]+")
-MULTI_NL_RE = re.compile(r"\n{3,}")
-URL_RE = re.compile(r"https?://\S+|www\.\S+", re.IGNORECASE)
+    from kb_utils import chunk_text, clean_text  # type: ignore[no-redef]
 
 
 def iter_json_array_objects(file_path: str) -> Generator[Dict, None, None]:
@@ -102,28 +75,6 @@ def extract_text_items(record: Dict) -> Iterable[str]:
             text = item.get("text")
             if isinstance(text, str) and text.strip():
                 yield text
-
-
-def clean_text(text: str, keep_url: bool = False) -> str:
-    text = text.replace("\r\n", "\n").replace("\r", "\n")
-
-    for regex, repl in LATEX_CLEANUPS:
-        text = regex.sub(repl, text)
-
-    if not keep_url:
-        text = URL_RE.sub(" ", text)
-
-    for regex in NOISE_REGEXES:
-        text = regex.sub(" ", text)
-
-    # Fix simple OCR/scan spacing around Chinese punctuation and fragmented spaces.
-    text = re.sub(r"\s+([，。；：！？）】》」』])", r"\1", text)
-    text = re.sub(r"([（【《「『])\s+", r"\1", text)
-    text = WS_RE.sub(" ", text)
-    text = re.sub(r" *\n *", "\n", text)
-    text = MULTI_NL_RE.sub("\n\n", text)
-
-    return text.strip()
 
 
 def build_chunk_id(doc_id: str, chunk_index: int, text: str) -> str:

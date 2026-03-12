@@ -4,11 +4,13 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 VENV_PY="${VENV_PY:-python3}"
+SO_DIR="${SCRIPT_DIR}/so"
 
 PY_INCLUDE="$($VENV_PY -c 'import sysconfig; print(sysconfig.get_paths()["include"])')"
 PB_INCLUDE="$($VENV_PY -c 'import pybind11; print(pybind11.get_include())')"
 EXT_SUFFIX="$($VENV_PY -c 'import sysconfig; print(sysconfig.get_config_var("EXT_SUFFIX"))')"
-OUTPUT="${SCRIPT_DIR}/_text_ops${EXT_SUFFIX}"
+mkdir -p "$SO_DIR"
+OUTPUT="${SO_DIR}/_text_ops${EXT_SUFFIX}"
 
 echo "  PY_INCLUDE : $PY_INCLUDE"
 echo "  PB_INCLUDE : $PB_INCLUDE"

@@ -22,7 +22,9 @@ _ITEM_MARKER_RE = re.compile(r"(?:^|\s)[0-9一二三四五六七八九十]{1,3}[
 
 try:
     _rag_dir = os.path.dirname(__file__)
-    _so_paths = glob.glob(os.path.join(_rag_dir, "_text_ops*.so"))
+    _so_paths = []
+    _so_paths.extend(glob.glob(os.path.join(_rag_dir, "so", "_text_ops*.so")))
+    _so_paths.extend(glob.glob(os.path.join(_rag_dir, "_text_ops*.so")))
     if _so_paths:
         _spec = importlib.util.spec_from_file_location("_text_ops", _so_paths[0])
         _text_ops_ext = importlib.util.module_from_spec(_spec)  # type: ignore[arg-type]
@@ -184,6 +186,57 @@ def chunk_text(text: str, chunk_size: int, overlap: int) -> List[str]:
         except Exception:
             return _chunk_text_py(text, chunk_size, overlap)
     return _chunk_text_py(text, chunk_size, overlap)
+
+
+# Pre-compiled patterns for the Python fallback of clean_text.
+_CT_LATEX_CIRCLE_RE = re.compile(r"\$\\textcircled\{\d+\}\$")
+_CT_LATEX_INLINE_RE = re.compile(r"\$[^$]{1,80}\$")
+_CT_LATEX_CMD_RE = re.compile(r"\\[a-zA-Z]+\{[^{}]{0,80}\}")
+_CT_URL_RE = re.compile(r"https?://\S+|www\.\S+", re.IGNORECASE)
+_CT_NOISE_RES = [re.compile(p) for p in [
+    r"中国版本图书馆CIP数据核字",
+    r"图书在版编目\s*\(CIP\)",
+    r"版权专有侵权必究",
+    r"各地新华书店经销",
+    r"服务热线\d{6,}",
+    r"传真\d{6,}",
+    r"网址\s*[a-zA-Z]+://[^\s]+",
+    r"天猫旗舰店网址",
+    r"微商城网址",
+    r"ISBN\s*\d[\d\-Xx]+",
+]]
+_CT_WS_RE = re.compile(r"[ \t\u3000]+")
+_CT_MULTI_NL_RE = re.compile(r"\n{3,}")
+_CT_CJK_CLOSE_RE = re.compile(r"\s+([，。；：！？）】》」』])")
+_CT_CJK_OPEN_RE = re.compile(r"([（【《「『])\s+")
+_CT_TRAIL_NL_RE = re.compile(r" *\n *")
+
+
+def _clean_text_py(text: str, keep_url: bool = False) -> str:
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    text = _CT_LATEX_CIRCLE_RE.sub(" ", text)
+    text = _CT_LATEX_INLINE_RE.sub(" ", text)
+    text = _CT_LATEX_CMD_RE.sub(" ", text)
+    if not keep_url:
+        text = _CT_URL_RE.sub(" ", text)
+    for r in _CT_NOISE_RES:
+        text = r.sub(" ", text)
+    text = _CT_CJK_CLOSE_RE.sub(r"\1", text)
+    text = _CT_CJK_OPEN_RE.sub(r"\1", text)
+    text = _CT_WS_RE.sub(" ", text)
+    text = _CT_TRAIL_NL_RE.sub("\n", text)
+    text = _CT_MULTI_NL_RE.sub("\n\n", text)
+    return text.strip()
+
+
+def clean_text(text: str, keep_url: bool = False) -> str:
+    """Clean corpus text: remove LaTeX, URLs, publisher noise, normalise whitespace."""
+    if _USE_CPP_TEXT_OPS:
+        try:
+            return str(_text_ops_ext.clean_text(text, keep_url))  # type: ignore[union-attr]
+        except Exception:
+            return _clean_text_py(text, keep_url)
+    return _clean_text_py(text, keep_url)
 
 
 def split_text(text: str, max_len: int, overlap: int) -> List[str]:

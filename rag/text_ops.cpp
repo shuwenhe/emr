@@ -434,6 +434,223 @@ static std::vector<std::string> chunk_text_cpp(const std::string& text, int chun
     return out;
 }
 
+// ── clean_text ────────────────────────────────────────────────────────────────
+// C++ equivalent of tcm_clean_chunk.py::clean_text().
+// Applies in order:
+//   1. \r\n  → \n normalisation
+//   2. LaTeX math removal ($\textcircled{N}$, $...$, \cmd{...})
+//   3. URL removal  (https?://... | www....)
+//   4. Chinese publisher noise patterns (fixed-string fast-path + regex)
+//   5. CJK punctuation spacing fix
+//   6. Horizontal whitespace (HWS) collapse → single space
+//   7. Trailing space on line
+//   8. 3+ consecutive newlines → 2 newlines
+//   9. Trim
+
+// Compiled once at module load.
+struct CleanPatterns {
+    // LaTeX
+    std::regex textcircled;   // $\textcircled{N}$
+    std::regex latex_inline;  // $...$  (up to 80 non-$ chars)
+    std::regex latex_cmd;     // \cmd{...}
+    // URL
+    std::regex url;
+    // Noise (regex patterns from NOISE_PATTERNS)
+    std::vector<std::regex> noise;
+    // CJK punctuation spacing
+    std::regex space_before_cjk_close;  // \s+([，。；：！？）】》」』])
+    std::regex space_after_cjk_open;    // ([（【《「『])\s+
+    // Horizontal whitespace
+    std::regex hws;           // [ \t\u3000]+
+    // trailing space on line
+    std::regex trail_space;   // [ \t]+\n
+    // multi newline
+    std::regex multi_nl;      // \n{3,}
+
+    CleanPatterns()
+        : textcircled(R"(\$\\textcircled\{[0-9]+\}\$)", std::regex::ECMAScript | std::regex::optimize)
+        , latex_inline(R"(\$[^$]{1,80}\$)", std::regex::ECMAScript | std::regex::optimize)
+        , latex_cmd(R"(\\[A-Za-z]+\{[^{}]{0,80}\})", std::regex::ECMAScript | std::regex::optimize)
+        , url(R"((?:https?://|www\.)\S+)", std::regex::ECMAScript | std::regex::icase | std::regex::optimize)
+        , space_before_cjk_close(
+            "\\s+([\\xef\\xbc\\x8c\\xe3\\x80\\x82\\xef\\xbc\\x9b\\xef\\xbc\\x9a"
+            "\\xef\\xbc\\x81\\xef\\xbc\\x9f\\xef\\xbc\\x89\\xe3\\x80\\x8b\\xe3\\x80\\x8b"
+            "\\xe3\\x80\\x8f\\xe3\\x80\\x95])")   // placeholder — handled via UTF-8 scan below
+        , space_after_cjk_open(
+            "([\\xef\\xbc\\x88\\xe3\\x80\\x8a\\xe3\\x80\\x8a"
+            "\\xe3\\x80\\x8e\\xe3\\x80\\x94])\\s+")
+        , hws("[ \\t\\xe3\\x80\\x80]+", std::regex::ECMAScript | std::regex::optimize)
+        , trail_space("[ \\t]+\\n", std::regex::ECMAScript | std::regex::optimize)
+        , multi_nl("\\n{3,}", std::regex::ECMAScript | std::regex::optimize)
+    {
+        // NOISE_PATTERNS from tcm_clean_chunk.py (fixed strings first, then regex)
+        noise.emplace_back(R"(中国版本图书馆CIP数据核字)", std::regex::ECMAScript | std::regex::optimize);
+        noise.emplace_back(R"(图书在版编目\s*\(CIP\))", std::regex::ECMAScript | std::regex::optimize);
+        noise.emplace_back(R"(版权专有侵权必究)", std::regex::ECMAScript | std::regex::optimize);
+        noise.emplace_back(R"(各地新华书店经销)", std::regex::ECMAScript | std::regex::optimize);
+        noise.emplace_back(R"(服务热线[0-9]{6,})", std::regex::ECMAScript | std::regex::optimize);
+        noise.emplace_back(R"(传真[0-9]{6,})", std::regex::ECMAScript | std::regex::optimize);
+        noise.emplace_back(R"(网址\s*[a-zA-Z]+://\S+)", std::regex::ECMAScript | std::regex::optimize);
+        noise.emplace_back(R"(天猫旗舰店网址)", std::regex::ECMAScript | std::regex::optimize);
+        noise.emplace_back(R"(微商城网址)", std::regex::ECMAScript | std::regex::optimize);
+        noise.emplace_back(R"(ISBN\s*[0-9][\d\-Xx]+)", std::regex::ECMAScript | std::regex::optimize);
+    }
+};
+
+static const CleanPatterns& get_patterns() {
+    static CleanPatterns p;
+    return p;
+}
+
+// CJK close / open punctuation codepoints for spacing fix (UTF-8 scan).
+static bool is_cjk_close_punct(uint32_t cp) {
+    return cp == 0xFF0C || cp == 0x3002 || cp == 0xFF1B || cp == 0xFF1A ||
+           cp == 0xFF01 || cp == 0xFF1F || cp == 0xFF09 || cp == 0x300B ||
+           cp == 0x300F || cp == 0x3015 || cp == 0x300D || cp == 0x3011 ||
+           cp == 0xFF0E;
+}
+static bool is_cjk_open_punct(uint32_t cp) {
+    return cp == 0xFF08 || cp == 0x300A || cp == 0x300E || cp == 0x3014 ||
+           cp == 0x300C || cp == 0x3010;
+}
+
+// Remove whitespace before CJK-close and after CJK-open using UTF-8 scanner.
+static std::string fix_cjk_spacing(const std::string& s) {
+    auto cps = decode_all(s);
+    // Build a set of byte positions to skip (spaces adjacent to CJK punct)
+    std::vector<bool> skip(s.size(), false);
+
+    for (std::size_t i = 0; i < cps.size(); i++) {
+        uint32_t cp = cps[i].cp;
+        // Remove space(s) immediately before a CJK-close punctuation
+        if (is_cjk_close_punct(cp) && i > 0) {
+            std::size_t j = i;
+            while (j > 0 && is_space_cp(cps[j - 1].cp)) {
+                --j;
+                // mark the space bytes as skip
+                for (std::size_t b = cps[j].byte_pos; b < cps[j].byte_pos + cps[j].byte_len; b++) {
+                    skip[b] = true;
+                }
+            }
+        }
+        // Remove space(s) immediately after a CJK-open punctuation
+        if (is_cjk_open_punct(cp)) {
+            std::size_t j = i + 1;
+            while (j < cps.size() && is_space_cp(cps[j].cp)) {
+                for (std::size_t b = cps[j].byte_pos; b < cps[j].byte_pos + cps[j].byte_len; b++) {
+                    skip[b] = true;
+                }
+                j++;
+            }
+        }
+    }
+
+    std::string out;
+    out.reserve(s.size());
+    for (std::size_t i = 0; i < s.size(); i++) {
+        if (!skip[i]) out.push_back(s[i]);
+    }
+    return out;
+}
+
+static std::string clean_text_cpp(const std::string& text, bool keep_url = false) {
+    const auto& pat = get_patterns();
+    std::string s = text;
+
+    // 1. Line endings
+    {
+        std::string t;
+        t.reserve(s.size());
+        for (std::size_t i = 0; i < s.size(); i++) {
+            if (s[i] == '\r') {
+                if (i + 1 < s.size() && s[i + 1] == '\n') {
+                    i++;  // skip \r of \r\n
+                }
+                t.push_back('\n');
+            } else {
+                t.push_back(s[i]);
+            }
+        }
+        s = std::move(t);
+    }
+
+    // 2. LaTeX
+    s = std::regex_replace(s, pat.textcircled, " ");
+    s = std::regex_replace(s, pat.latex_inline, " ");
+    s = std::regex_replace(s, pat.latex_cmd, " ");
+
+    // 3. URL
+    if (!keep_url) {
+        s = std::regex_replace(s, pat.url, " ");
+    }
+
+    // 4. Noise patterns
+    for (const auto& r : pat.noise) {
+        s = std::regex_replace(s, r, " ");
+    }
+
+    // 5. CJK punctuation spacing
+    s = fix_cjk_spacing(s);
+
+    // 6. Collapse horizontal whitespace (space/tab/ideographic space) within lines
+    {
+        // Replace runs of [ \t\xe3\x80\x80] with single space
+        // We handle the ideographic space (\xe3\x80\x80, UTF-8 for U+3000) manually
+        // because std::regex ECMAScript doesn't match multi-byte chars by byte.
+        auto cps = decode_all(s);
+        std::string t;
+        t.reserve(s.size());
+        bool prev_hws = false;
+        for (const auto& c : cps) {
+            if (c.cp == ' ' || c.cp == '\t' || c.cp == 0x3000) {
+                if (!prev_hws) {
+                    t.push_back(' ');
+                    prev_hws = true;
+                }
+            } else {
+                prev_hws = false;
+                t.append(s, c.byte_pos, c.byte_len);
+            }
+        }
+        s = std::move(t);
+    }
+
+    // 7. Trailing space before newline
+    {
+        std::string t;
+        t.reserve(s.size());
+        std::size_t i = 0;
+        while (i < s.size()) {
+            if (s[i] == ' ' || s[i] == '\t') {
+                std::size_t j = i;
+                while (j < s.size() && (s[j] == ' ' || s[j] == '\t')) j++;
+                if (j < s.size() && s[j] == '\n') {
+                    i = j; // skip the spaces; the '\n' will be appended next iter
+                } else {
+                    t.append(s, i, j - i);
+                    i = j;
+                }
+            } else {
+                t.push_back(s[i++]);
+            }
+        }
+        s = std::move(t);
+    }
+
+    // 8. 3+ newlines → 2
+    s = std::regex_replace(s, pat.multi_nl, "\n\n");
+
+    // 9. Trim
+    {
+        std::size_t l = 0, r = s.size();
+        while (l < r && (s[l] == ' ' || s[l] == '\n' || s[l] == '\t' || s[l] == '\r')) l++;
+        while (r > l && (s[r - 1] == ' ' || s[r - 1] == '\n' || s[r - 1] == '\t' || s[r - 1] == '\r')) r--;
+        s = s.substr(l, r - l);
+    }
+
+    return s;
+}
+
 } // namespace
 
 PYBIND11_MODULE(_text_ops, m) {
@@ -455,5 +672,14 @@ PYBIND11_MODULE(_text_ops, m) {
         },
         py::arg("text"), py::arg("chunk_size"), py::arg("overlap"),
         "Split text into overlapping sentence-aware chunks"
+    );
+
+    m.def(
+        "clean_text",
+        [](const std::string& text, bool keep_url) {
+            return clean_text_cpp(text, keep_url);
+        },
+        py::arg("text"), py::arg("keep_url") = false,
+        "Clean TCM corpus text: remove LaTeX, URLs, noise, normalise whitespace"
     );
 }

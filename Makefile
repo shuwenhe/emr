@@ -104,13 +104,13 @@ simhash-build:
 	else \
 		VENV_PY="$(KB_PY)" bash "$(CURDIR)/rag/simhash/build.sh"; \
 	fi
-	@echo "Done: rag/_simhash*.so or rag/simhash/_simhash*.so"
+	@echo "Done: rag/so/_simhash*.so"
 
 text-ops-build:
 	@echo "Building C++ text ops extension..."
 	@echo "构建 C++ 文本处理扩展..."
 	@VENV_PY="$(KB_PY)" bash "$(CURDIR)/rag/build_text_ops.sh"
-	@echo "Done: rag/_text_ops*.so"
+	@echo "Done: rag/so/_text_ops*.so"
 
 kb-build: go-embedder-build
 	@mkdir -p "$(KB_OUT_DIR)"

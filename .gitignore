@@ -72,6 +72,7 @@ nginx.log
 # ==================== RAG ====================
 /rag/dataset/
 /rag/kb/
+rag/so/
 rag/go_embedder
 rag/_simhash*.so
 rag/_text_ops*.so
