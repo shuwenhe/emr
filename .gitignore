@@ -40,6 +40,7 @@
 *.pyc
 *.pyo
 *.pyd
+*.so
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -73,6 +74,7 @@ nginx.log
 /rag/kb/
 rag/go_embedder
 rag/_simhash*.so
+rag/_text_ops*.so
 rag/simhash/_simhash*.so
 rag/simhash/*.o
 rag/simhash/build/

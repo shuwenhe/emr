@@ -30,12 +30,15 @@ try:
         _simhash_ext = _ilu.module_from_spec(_spec)  # type: ignore[arg-type]
         _spec.loader.exec_module(_simhash_ext)       # type: ignore[union-attr]
         _USE_CPP = True
+        _USE_CPP_DEDUP = hasattr(_simhash_ext, "DedupEngine")
     else:
         _simhash_ext = None
         _USE_CPP = False
+        _USE_CPP_DEDUP = False
 except Exception:
     _simhash_ext = None
     _USE_CPP = False
+    _USE_CPP_DEDUP = False
 
 
 TOKEN_RE = re.compile(r"[\u4e00-\u9fff]|[A-Za-z0-9_]+")
@@ -152,12 +155,17 @@ def dedup(
     if dup_output_path:
         os.makedirs(os.path.dirname(dup_output_path) or ".", exist_ok=True)
 
-    seen_sha1: set[str] = set()
-
-    kept_doc_ids: List[str] = []
-    kept_sha1: List[str] = []
-    kept_fp: List[int] = []
-    buckets: DefaultDict[Tuple[int, int], List[int]] = defaultdict(list)
+    # Use the C++ DedupEngine when available — eliminates Python-level dict/set
+    # overhead for seen_sha1, kept_fp, buckets on every processed record.
+    if _USE_CPP_DEDUP:
+        _engine = _simhash_ext.DedupEngine(bands, simhash_threshold)  # type: ignore[union-attr]
+    else:
+        _engine = None
+        seen_sha1: set[str] = set()
+        kept_doc_ids: List[str] = []
+        kept_sha1: List[str] = []
+        kept_fp: List[int] = []
+        buckets: DefaultDict[Tuple[int, int], List[int]] = defaultdict(list)
 
     total = 0
     kept = 0
@@ -171,65 +179,75 @@ def dedup(
     def process_record(row: Dict, text: str, text_hash: str, fp: int, out_fh) -> None:
         nonlocal kept, exact_dup, near_dup
 
-        if text_hash in seen_sha1:
-            exact_dup += 1
-            write_dup(
-                dup_fh,
-                "exact",
-                row,
-                text_hash,
-                canonical_doc_id="",
-                canonical_sha1=text_hash,
-                fp=0,
-                distance=None,
+        if _engine is not None:
+            # Fast path: all state lives in C++
+            status, canonical_doc_id, canonical_sha1, dist = _engine.process(
+                fp, text_hash, row.get("doc_id") or ""
             )
-            return
+            if status == "exact":
+                exact_dup += 1
+                write_dup(dup_fh, "exact", row, text_hash,
+                          canonical_doc_id="", canonical_sha1=text_hash, fp=0, distance=None)
+                return
+            if status == "near":
+                near_dup += 1
+                write_dup(dup_fh, "near", row, text_hash,
+                          canonical_doc_id=canonical_doc_id,
+                          canonical_sha1=canonical_sha1, fp=fp, distance=dist)
+                return
+            # status == "keep"
+            doc_id = canonical_doc_id  # engine returns the assigned doc_id here
+        else:
+            # Pure-Python fallback path (no C++ DedupEngine built yet)
+            if text_hash in seen_sha1:
+                exact_dup += 1
+                write_dup(
+                    dup_fh, "exact", row, text_hash,
+                    canonical_doc_id="", canonical_sha1=text_hash, fp=0, distance=None,
+                )
+                return
 
-        candidates: set[int] = set()
-        for key in band_keys(fp, bands):
-            for idx in buckets.get(key, []):
-                candidates.add(idx)
+            candidates: set[int] = set()
+            for key in band_keys(fp, bands):
+                for idx in buckets.get(key, []):
+                    candidates.add(idx)
 
-        canonical_idx = -1
-        canonical_dist = None
-        for idx in candidates:
-            dist = hamming_distance(fp, kept_fp[idx])
-            if dist <= simhash_threshold:
-                canonical_idx = idx
-                canonical_dist = dist
-                break
+            canonical_idx = -1
+            canonical_dist = None
+            for idx in candidates:
+                dist = hamming_distance(fp, kept_fp[idx])
+                if dist <= simhash_threshold:
+                    canonical_idx = idx
+                    canonical_dist = dist
+                    break
 
-        if canonical_idx >= 0:
-            near_dup += 1
-            write_dup(
-                dup_fh,
-                "near",
-                row,
-                text_hash,
-                canonical_doc_id=kept_doc_ids[canonical_idx],
-                canonical_sha1=kept_sha1[canonical_idx],
-                fp=fp,
-                distance=canonical_dist,
-            )
-            return
+            if canonical_idx >= 0:
+                near_dup += 1
+                write_dup(
+                    dup_fh, "near", row, text_hash,
+                    canonical_doc_id=kept_doc_ids[canonical_idx],
+                    canonical_sha1=kept_sha1[canonical_idx],
+                    fp=fp, distance=canonical_dist,
+                )
+                return
 
-        seen_sha1.add(text_hash)
-        doc_id = row.get("doc_id")
-        if not isinstance(doc_id, str) or not doc_id:
-            doc_id = f"doc_{kept}"
+            seen_sha1.add(text_hash)
+            doc_id = row.get("doc_id")
+            if not isinstance(doc_id, str) or not doc_id:
+                doc_id = f"doc_{kept}"
+
+            idx = len(kept_fp)
+            kept_doc_ids.append(doc_id)
+            kept_sha1.append(text_hash)
+            kept_fp.append(fp)
+            for key in band_keys(fp, bands):
+                buckets[key].append(idx)
 
         row["text"] = text
         row["text_sha1"] = text_hash
         row["simhash64_hex"] = f"{fp:016x}"
         row["dedup_stage"] = "deduped_doc"
         out_fh.write(json.dumps(row, ensure_ascii=False) + "\n")
-
-        idx = len(kept_fp)
-        kept_doc_ids.append(doc_id)
-        kept_sha1.append(text_hash)
-        kept_fp.append(fp)
-        for key in band_keys(fp, bands):
-            buckets[key].append(idx)
         kept += 1
 
     dup_fh = open(dup_output_path, "w", encoding="utf-8") if dup_output_path else None

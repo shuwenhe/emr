@@ -7,6 +7,7 @@
 //   hamming_distance(a, b) → int
 //   band_keys(fp, bands)   → List[(int,int)]
 //   sha1_text(text)        → hex str  (same as Python sha1_text)
+//   DedupEngine            → stateful dedup engine (exact + near-dup via LSH)
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -17,7 +18,9 @@
 #include <cstring>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
+#include <tuple>
 #include <stdexcept>
 
 namespace py = pybind11;
@@ -163,10 +166,113 @@ static std::vector<std::pair<int, uint64_t>> band_keys(uint64_t fp, int bands) {
     return keys;
 }
 
-// ── pybind11 module ───────────────────────────────────────────────────────────
+// ── DedupEngine ───────────────────────────────────────────────────────────────
+// Stateful dedup engine holding all mutable per-run state.
+// Replaces the Python-level seen_sha1 / kept_fp / buckets data structures.
+// Each call to process() returns a tuple:
+//   ("keep",  assigned_doc_id, text_hash, -1)
+//   ("exact", "",              canonical_sha1, -1)
+//   ("near",  canonical_doc_id, canonical_sha1, dist)
+
+struct BucketKey {
+    int   band;
+    uint64_t val;
+    bool operator==(const BucketKey& o) const noexcept {
+        return band == o.band && val == o.val;
+    }
+};
+struct BucketKeyHash {
+    std::size_t operator()(const BucketKey& k) const noexcept {
+        // Mix band index into high bits.
+        return std::hash<uint64_t>()((static_cast<uint64_t>(k.band) << 56) ^ k.val);
+    }
+};
+
+class DedupEngine {
+    std::unordered_set<std::string> seen_sha1_;
+    std::vector<std::string>        kept_doc_ids_;
+    std::vector<std::string>        kept_sha1_;
+    std::vector<uint64_t>           kept_fp_;
+    std::unordered_map<BucketKey, std::vector<int>, BucketKeyHash> buckets_;
+
+    int bands_;
+    int threshold_;
+
+    std::vector<BucketKey> make_keys(uint64_t fp) const {
+        int width = 64 / bands_;
+        uint64_t mask = (1ULL << width) - 1;
+        std::vector<BucketKey> keys;
+        keys.reserve(bands_);
+        for (int b = 0; b < bands_; b++) {
+            keys.push_back({b, (fp >> (b * width)) & mask});
+        }
+        return keys;
+    }
+
+public:
+    DedupEngine(int bands, int threshold) : bands_(bands), threshold_(threshold) {
+        if (bands <= 0 || 64 % bands != 0)
+            throw std::invalid_argument("bands must be a positive divisor of 64");
+    }
+
+    // Returns (status, doc_id_or_canonical, canonical_sha1, distance_or_-1)
+    std::tuple<std::string, std::string, std::string, int>
+    process(uint64_t fp, const std::string& text_hash, const std::string& doc_id_hint) {
+        // 1. Exact duplicate
+        if (seen_sha1_.count(text_hash)) {
+            return {"exact", std::string(), text_hash, -1};
+        }
+
+        // 2. Near-duplicate via LSH bands
+        auto keys = make_keys(fp);
+        std::unordered_set<int> candidates;
+        for (const auto& key : keys) {
+            auto it = buckets_.find(key);
+            if (it != buckets_.end()) {
+                for (int idx : it->second) {
+                    candidates.insert(idx);
+                }
+            }
+        }
+
+        for (int idx : candidates) {
+            int dist = hamming_distance(fp, kept_fp_[idx]);
+            if (dist <= threshold_) {
+                return {"near", kept_doc_ids_[idx], kept_sha1_[idx], dist};
+            }
+        }
+
+        // 3. Keep — update state
+        std::string doc_id = doc_id_hint;
+        if (doc_id.empty()) {
+            doc_id = "doc_" + std::to_string(kept_fp_.size());
+        }
+
+        seen_sha1_.insert(text_hash);
+        int new_idx = static_cast<int>(kept_fp_.size());
+        kept_doc_ids_.push_back(doc_id);
+        kept_sha1_.push_back(text_hash);
+        kept_fp_.push_back(fp);
+        for (const auto& key : keys) {
+            buckets_[key].push_back(new_idx);
+        }
+
+        return {"keep", doc_id, text_hash, -1};
+    }
+
+    std::size_t size() const noexcept { return kept_fp_.size(); }
+
+    void reserve(std::size_t n) {
+        seen_sha1_.reserve(n);
+        kept_doc_ids_.reserve(n);
+        kept_sha1_.reserve(n);
+        kept_fp_.reserve(n);
+        buckets_.reserve(n * bands_);
+    }
+};
 
 PYBIND11_MODULE(_simhash, m) {
-    m.doc() = "High-performance SimHash-64 (C++ + OpenSSL)";
+    m.doc() = "High-performance SimHash-64 + DedupEngine (C++ + OpenSSL)";
 
     m.def("simhash64", [](const std::string& text) -> uint64_t {
         return simhash64(text);
@@ -198,4 +304,20 @@ PYBIND11_MODULE(_simhash, m) {
         return tokenize(text);
     }, py::arg("text"),
     "Tokenize text into CJK single chars + ASCII words (lowercased).");
+
+    py::class_<DedupEngine>(m, "DedupEngine")
+        .def(py::init<int, int>(), py::arg("bands"), py::arg("threshold"),
+             "Create a DedupEngine.\n"
+             "  bands     – number of LSH bands (must divide 64)\n"
+             "  threshold – max Hamming distance for near-dup")
+        .def("process",
+             &DedupEngine::process,
+             py::arg("fp"), py::arg("text_hash"), py::arg("doc_id_hint") = "",
+             "Process one document fingerprint.\n"
+             "Returns (status, doc_id, sha1, dist) where status is "
+             "'keep', 'exact', or 'near'.")
+        .def("reserve", &DedupEngine::reserve, py::arg("n"),
+             "Pre-allocate internal hash tables for n documents.")
+        .def("__len__", &DedupEngine::size,
+             "Number of kept (non-duplicate) documents.");
 }
