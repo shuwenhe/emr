@@ -11,6 +11,11 @@ _DOT_LEADER_RE = re.compile(r"[\.·•‧⋯…]{3,}")
 _PAGE_REF_RE = re.compile(r"[\(（]\s*\d{1,4}\s*[\)）]")
 _ENUM_MARKER_RE = re.compile(r"(?:^|\s)[0-9一二三四五六七八九十]+[、\.．:：)]")
 _USEFUL_CHAR_RE = re.compile(r"[A-Za-z0-9\u4e00-\u9fff]")
+_TOC_HINT_RE = re.compile(r"(?:目\s*录|目录|第[一二三四五六七八九十百0-9]+章)")
+_PAGE_NOISE_RE = re.compile(r"(?:^|[\s/·\.\-_])\d{1,4}(?=$|[\s/·\.\-_])")
+_SYMBOL_RE = re.compile(r"[·\./\\\-_+*=~:：\(\)（）]")
+_EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+")
+_ITEM_MARKER_RE = re.compile(r"(?:^|\s)[0-9一二三四五六七八九十]{1,3}[、\.．)]")
 
 
 def sha1_file(path: str) -> str:
@@ -43,6 +48,17 @@ def sanitize_embedding_text(text: str) -> str:
     return normalize_text(text)
 
 
+def sanitize_embedding_text_aggressive(text: str) -> str:
+    """Stronger sanitizer used only when embedding retries keep failing."""
+    text = sanitize_embedding_text(text)
+    text = _PAGE_REF_RE.sub(" ", text)
+    text = _PAGE_NOISE_RE.sub(" ", text)
+    text = re.sub(r"[+*=~]{2,}", " ", text)
+    text = re.sub(r"[/\\|]{2,}", " ", text)
+    text = re.sub(r"\.{2,}", " ", text)
+    return normalize_text(text)
+
+
 def is_low_signal_text(text: str) -> bool:
     normalized = normalize_text(_CONTROL_CHAR_RE.sub(" ", text))
     if not normalized:
@@ -51,9 +67,24 @@ def is_low_signal_text(text: str) -> bool:
     has_dot_leader = bool(_DOT_LEADER_RE.search(text))
     page_refs = len(_PAGE_REF_RE.findall(text))
     enum_refs = len(_ENUM_MARKER_RE.findall(text))
+    page_noise = len(_PAGE_NOISE_RE.findall(normalized))
+    symbol_ratio = len(_SYMBOL_RE.findall(normalized)) / max(len(normalized), 1)
+    toc_hint = bool(_TOC_HINT_RE.search(normalized))
+    has_email = bool(_EMAIL_RE.search(normalized))
+    item_markers = len(_ITEM_MARKER_RE.findall(normalized))
     if len(normalized) <= 120 and has_dot_leader and useful_ratio < 0.62:
         return True
     if len(normalized) <= 160 and has_dot_leader and page_refs >= 1 and enum_refs >= 1 and useful_ratio < 0.68:
+        return True
+    if len(normalized) <= 90 and toc_hint and page_noise >= 1:
+        return True
+    if len(normalized) <= 110 and page_noise >= 2 and enum_refs >= 1 and symbol_ratio >= 0.12:
+        return True
+    if len(normalized) <= 120 and item_markers >= 2 and page_noise >= 1:
+        return True
+    if len(normalized) <= 120 and item_markers >= 3 and symbol_ratio >= 0.08:
+        return True
+    if len(normalized) <= 80 and has_email and enum_refs >= 1:
         return True
     return False
 

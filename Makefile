@@ -86,8 +86,8 @@ report: install
 go-embedder-build:
 	@echo "Building Go concurrent embedder..."
 	@echo "构建 Go 并发 Embedder 二进制..."
-	cd "$(CURDIR)/rag/go_embedder" && go build -o go_embedder .
-	@echo "Built: rag/go_embedder/go_embedder"
+	cd "$(CURDIR)/rag" && rm -rf go_embedder && go build -o go_embedder embedder.go
+	@echo "Built: rag/go_embedder"
 
 simhash-build:
 	@echo "Building C++ SimHash extension..."

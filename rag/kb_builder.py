@@ -9,8 +9,9 @@ import sys
 import tempfile
 import threading
 import time
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from datetime import datetime
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import numpy as np
 import faiss
@@ -23,6 +24,7 @@ from .kb_utils import (
     iter_batches,
     normalize_text,
     safe_relpath,
+    sanitize_embedding_text_aggressive,
     sanitize_embedding_text,
     sha1_file,
     sha1_text,
@@ -70,7 +72,7 @@ def _log_step(step: int, total_steps: int, title: str, detail: Optional[str] = N
 
 # ── Go-based concurrent embedder ──────────────────────────────────────────────
 
-GO_EMBEDDER_BIN = os.path.join(os.path.dirname(__file__), "go_embedder", "go_embedder")
+GO_EMBEDDER_BIN = os.path.join(os.path.dirname(__file__), "go_embedder")
 
 
 def _find_go_embedder() -> Optional[str]:
@@ -109,46 +111,99 @@ class GoEmbedder:
             [binary],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
             env=env,
         )
         self._stdin = io.TextIOWrapper(self._proc.stdin, encoding="utf-8")   # type: ignore[arg-type]
         self._stdout = io.TextIOWrapper(self._proc.stdout, encoding="utf-8") # type: ignore[arg-type]
-        self._lock = threading.Lock()  # serialise stdin/stdout access per call
+        self._write_lock = threading.Lock()
+        self._pending_lock = threading.Lock()
+        self._pending: Dict[int, Dict[str, Any]] = {}
         self._next_id = 0
         self._closed = False
+        self._reader = threading.Thread(target=self._reader_loop, daemon=True)
+        self._reader.start()
 
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        """Send one batch to Go, return vectors.  Thread-safe."""
-        with self._lock:
-            batch_id = self._next_id
-            self._next_id += 1
-            line = json.dumps({"id": batch_id, "texts": texts}, ensure_ascii=False)
-            self._stdin.write(line + "\n")
-            self._stdin.flush()
-            # Read until we get the matching id (Go outputs results as they finish
-            # but since we hold _lock the protocol is still sequential here).
+    def _reader_loop(self) -> None:
+        try:
             while True:
                 raw = self._stdout.readline()
                 if not raw:
-                    raise RuntimeError("Go embedder process closed unexpectedly")
-                result = json.loads(raw)
-                if result.get("id") == batch_id:
-                    if "error" in result:
-                        raise RuntimeError(f"Go embedder error: {result['error']}")
-                    return result["vectors"]
+                    break
+                try:
+                    result = json.loads(raw)
+                except json.JSONDecodeError:
+                    continue
+                batch_id = result.get("id")
+                if not isinstance(batch_id, int):
+                    continue
+                with self._pending_lock:
+                    slot = self._pending.get(batch_id)
+                    if not slot:
+                        continue
+                    slot["payload"] = result
+                    slot["event"].set()
+        finally:
+            self._fail_all_pending("Go embedder process closed unexpectedly")
+
+    def _fail_all_pending(self, message: str) -> None:
+        with self._pending_lock:
+            for slot in self._pending.values():
+                if "payload" not in slot:
+                    slot["payload"] = {"error": message}
+                slot["event"].set()
+
+    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+        """Send one batch and wait for the matching response. Thread-safe and concurrent."""
+        if self._closed:
+            raise RuntimeError("Go embedder is closed")
+
+        event = threading.Event()
+        with self._pending_lock:
+            batch_id = self._next_id
+            self._next_id += 1
+            self._pending[batch_id] = {"event": event}
+
+        try:
+            line = json.dumps({"id": batch_id, "texts": texts}, ensure_ascii=False)
+            with self._write_lock:
+                self._stdin.write(line + "\n")
+                self._stdin.flush()
+        except Exception:  # noqa: BLE001
+            with self._pending_lock:
+                self._pending.pop(batch_id, None)
+            raise
+
+        while not event.wait(timeout=0.5):
+            if self._proc.poll() is not None:
+                self._fail_all_pending("Go embedder process terminated")
+                break
+
+        with self._pending_lock:
+            slot = self._pending.pop(batch_id, None)
+        if not slot or "payload" not in slot:
+            raise RuntimeError("Go embedder returned no response for batch")
+        payload = slot["payload"]
+        if "error" in payload:
+            raise RuntimeError(f"Go embedder error: {payload['error']}")
+        return payload["vectors"]
 
     def close(self) -> None:
         if self._closed:
             return
         self._closed = True
         try:
-            self._stdin.write("\n")  # blank line = EOF signal
-            self._stdin.flush()
-            self._stdin.close()
+            with self._write_lock:
+                self._stdin.write("\n")  # blank line = EOF signal
+                self._stdin.flush()
+                self._stdin.close()
             self._proc.wait(timeout=10)
         except Exception:  # noqa: BLE001
             self._proc.kill()
+        finally:
+            self._fail_all_pending("Go embedder closed")
+            if hasattr(self, "_reader") and self._reader.is_alive():
+                self._reader.join(timeout=1)
 
     def __del__(self) -> None:
         self.close()
@@ -379,6 +434,61 @@ def _embed_documents_with_retry(embeddings, texts: List[str], max_retries: int =
             time.sleep(delay)
             delay *= 2
     raise RuntimeError(f"Embedding failed after retries: {last_exc}") from last_exc
+
+
+def _embed_batch_with_fallback(
+    embeddings,
+    batch_records: List[ChunkRecord],
+) -> Tuple[List[ChunkRecord], List[List[float]], List[Dict[str, str]], List[str]]:
+    """Embed one batch; on failure fallback to per-chunk with aggressive repair retry."""
+    batch_texts = [record.text_for_embedding for record in batch_records]
+    try:
+        batch_vectors = _embed_documents_with_retry(embeddings, batch_texts)
+        if len(batch_vectors) != len(batch_records):
+            raise RuntimeError("Embedding batch returned mismatched vector count.")
+        return batch_records, batch_vectors, [], []
+    except Exception as exc:  # noqa: BLE001
+        warnings: List[str] = [f"[WARN] embedding batch failed; fallback to per-chunk: {exc}"]
+        kept_records: List[ChunkRecord] = []
+        vectors: List[List[float]] = []
+        failed: List[Dict[str, str]] = []
+        for record in batch_records:
+            try:
+                vector = _embed_documents_with_retry(embeddings, [record.text_for_embedding])[0]
+            except Exception as inner_exc:  # noqa: BLE001
+                repaired_text = sanitize_embedding_text_aggressive(record.text_for_embedding)
+                if repaired_text and repaired_text != record.text_for_embedding:
+                    try:
+                        vector = _embed_documents_with_retry(embeddings, [repaired_text])[0]
+                        # Persist repaired text to keep embedding/query consistency.
+                        record.text_for_embedding = repaired_text
+                    except Exception as final_exc:  # noqa: BLE001
+                        failed.append(
+                            {
+                                "chunk_id": record.chunk_id,
+                                "file_path": record.file_path,
+                                "reason": str(final_exc),
+                            }
+                        )
+                        warnings.append(
+                            f"[WARN] embedding failed; skipped chunk: {record.file_path}#{record.chunk_index}"
+                        )
+                        continue
+                else:
+                    failed.append(
+                        {
+                            "chunk_id": record.chunk_id,
+                            "file_path": record.file_path,
+                            "reason": str(inner_exc),
+                        }
+                    )
+                    warnings.append(
+                        f"[WARN] embedding failed; skipped chunk: {record.file_path}#{record.chunk_index}"
+                    )
+                    continue
+            kept_records.append(record)
+            vectors.append(vector)
+        return kept_records, vectors, failed, warnings
 
 
 def _collect_chunks(
@@ -627,38 +737,51 @@ def build_kb(
         kept_records: List[ChunkRecord] = []
         embedding_failed: List[Dict[str, str]] = []
         with tqdm(total=len(records), desc="Embedding chunks") as progress:
-            for batch_records in iter_batches(records, batch_size):
-                batch_texts = [record.text_for_embedding for record in batch_records]
-                try:
-                    batch_vectors = _embed_documents_with_retry(embeddings, batch_texts)
-                except Exception as exc:  # noqa: BLE001
-                    tqdm.write(f"[WARN] embedding batch failed; fallback to per-chunk: {exc}")
-                    batch_vectors = []
-                    for record in batch_records:
+            if isinstance(embeddings, GoEmbedder):
+                pipeline_workers = max(1, int(os.getenv("EMBED_PIPELINE_WORKERS", "8")))
+                max_inflight = max(1, int(os.getenv("EMBED_PIPELINE_INFLIGHT", str(pipeline_workers * 2))))
+                batch_iter = iter(iter_batches(records, batch_size))
+                in_flight = {}
+
+                with ThreadPoolExecutor(max_workers=pipeline_workers) as executor:
+                    def _submit_next() -> bool:
                         try:
-                            vector = _embed_documents_with_retry(embeddings, [record.text_for_embedding])[0]
-                        except Exception as inner_exc:  # noqa: BLE001
-                            embedding_failed.append(
-                                {
-                                    "chunk_id": record.chunk_id,
-                                    "file_path": record.file_path,
-                                    "reason": str(inner_exc),
-                                }
-                            )
-                            tqdm.write(
-                                f"[WARN] embedding failed; skipped chunk: {record.file_path}#{record.chunk_index}"
-                            )
-                            progress.update(1)
-                            continue
-                        kept_records.append(record)
-                        vectors.append(vector)
-                        progress.update(1)
-                    continue
-                if len(batch_vectors) != len(batch_records):
-                    raise RuntimeError("Embedding batch returned mismatched vector count.")
-                kept_records.extend(batch_records)
-                vectors.extend(batch_vectors)
-                progress.update(len(batch_records))
+                            next_batch = next(batch_iter)
+                        except StopIteration:
+                            return False
+                        future = executor.submit(_embed_batch_with_fallback, embeddings, next_batch)
+                        in_flight[future] = len(next_batch)
+                        return True
+
+                    while len(in_flight) < max_inflight and _submit_next():
+                        pass
+
+                    while in_flight:
+                        done, _ = wait(in_flight.keys(), return_when=FIRST_COMPLETED)
+                        for future in done:
+                            input_size = in_flight.pop(future)
+                            batch_kept, batch_vectors, batch_failed, warns = future.result()
+                            for msg in warns:
+                                tqdm.write(msg)
+                            kept_records.extend(batch_kept)
+                            vectors.extend(batch_vectors)
+                            embedding_failed.extend(batch_failed)
+                            progress.update(input_size)
+
+                        while len(in_flight) < max_inflight and _submit_next():
+                            pass
+            else:
+                for batch_records in iter_batches(records, batch_size):
+                    batch_kept, batch_vectors, batch_failed, warns = _embed_batch_with_fallback(
+                        embeddings,
+                        batch_records,
+                    )
+                    for msg in warns:
+                        tqdm.write(msg)
+                    kept_records.extend(batch_kept)
+                    vectors.extend(batch_vectors)
+                    embedding_failed.extend(batch_failed)
+                    progress.update(len(batch_records))
 
         records = kept_records
         if embedding_failed:
