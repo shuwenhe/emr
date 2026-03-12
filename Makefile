@@ -92,8 +92,12 @@ go-embedder-build:
 simhash-build:
 	@echo "Building C++ SimHash extension..."
 	@echo "构建 C++ SimHash 扩展..."
-	VENV_PY="$(KB_PY)" bash "$(CURDIR)/rag/simhash/build.sh"
-	@echo "Done: rag/simhash/_simhash*.so"
+	@if [ -f "$(CURDIR)/rag/build_simhash.sh" ]; then \
+		VENV_PY="$(KB_PY)" bash "$(CURDIR)/rag/build_simhash.sh"; \
+	else \
+		VENV_PY="$(KB_PY)" bash "$(CURDIR)/rag/simhash/build.sh"; \
+	fi
+	@echo "Done: rag/_simhash*.so or rag/simhash/_simhash*.so"
 
 kb-build: go-embedder-build
 	@mkdir -p "$(KB_OUT_DIR)"
