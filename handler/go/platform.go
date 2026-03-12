@@ -46,6 +46,37 @@ func (h *Handler) PlatformRecords(c *gin.Context) {
 	c.JSON(http.StatusOK, out)
 }
 
+// PlatformProxyHealth reports health status of the Go platform service.
+func (h *Handler) PlatformProxyHealth(c *gin.Context) {
+	rid, _ := c.Get("request_id")
+	h.log.InfoContext(c.Request.Context(), "[go-handler] PlatformProxyHealth", "req_id", rid)
+
+	healthy := h.platformSvc != nil
+	detail := "ok"
+	if !healthy {
+		detail = "platform_service_unavailable"
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"enabled":     true,
+		"using_proxy": false,
+		"healthy":     healthy,
+		"detail":      detail,
+		"service":     "report-file-service",
+	})
+}
+
+// ImportHistory proxies the request to the Python backend which performs
+// legacy directory ingestion and optional ML analysis.
+// Requires RFS_PYTHON_BACKEND_URL to be configured; returns 501 otherwise.
+// ImportHistory proxies legacy directory ingestion + optional ML analysis to the Python backend.
+// POST /v1/import/history  →  JSON(root_path, analyze?)  →  Python POST /import/history
+func (h *Handler) ImportHistory(c *gin.Context) {
+	rid, _ := c.Get("request_id")
+	h.log.InfoContext(c.Request.Context(), "[go-handler] ImportHistory", "req_id", rid)
+	h.proxyToPython(c, http.MethodPost, "/import/history")
+}
+
 func (h *Handler) PlatformEMRs(c *gin.Context) {
 	rid, _ := c.Get("request_id")
 	patientID := c.Query("patient_id")

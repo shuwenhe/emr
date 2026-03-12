@@ -177,6 +177,66 @@ func (h *Handler) ArchiveReport(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// PreviewReport serves a report file inline (for browser preview).
+// Query params: date, filename
+func (h *Handler) PreviewReport(c *gin.Context) {
+	rid, _ := c.Get("request_id")
+	date := c.Query("date")
+	filename := c.Query("filename")
+
+	h.log.InfoContext(c.Request.Context(), "[go-handler] PreviewReport",
+		"req_id", rid, "date", date, "filename", filename)
+
+	if h.svc == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"detail": "internal_error"})
+		return
+	}
+
+	if date == "" || filename == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"detail": "date_and_filename_required"})
+		return
+	}
+
+	filePath, err := h.svc.ResolveReportPath(date, filename, false)
+	if err != nil {
+		h.log.WarnContext(c.Request.Context(), "resolve report path failed", "error", err, "req_id", rid)
+		mapError(c, err, rid)
+		return
+	}
+
+	contentType := mime.TypeByExtension(filepath.Ext(filename))
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+
+	c.Header("X-Report-Service", "report-file-service")
+	c.Header("Content-Type", contentType)
+	c.Header("Content-Disposition", `inline; filename="`+filepath.Base(filename)+`"`)
+	c.File(filePath)
+}
+
+// ReportsProxyHealth reports health status of the Go report service.
+func (h *Handler) ReportsProxyHealth(c *gin.Context) {
+	rid, _ := c.Get("request_id")
+	h.log.InfoContext(c.Request.Context(), "[go-handler] ReportsProxyHealth", "req_id", rid)
+
+	healthy := h.svc != nil
+	detail := "ok"
+	if !healthy {
+		detail = "report_service_unavailable"
+	}
+
+	c.Header("X-Report-Service", "report-file-service")
+	c.JSON(http.StatusOK, gin.H{
+		"enabled":     true,
+		"using_proxy": false,
+		"healthy":     healthy,
+		"detail":      detail,
+		"service":     "report-file-service",
+		"reports_dir": h.cfg.ReportsDir,
+	})
+}
+
 // mapError maps service errors to HTTP status codes and detail strings
 func mapError(c *gin.Context, err error, rid interface{}) {
 	switch err.Error() {

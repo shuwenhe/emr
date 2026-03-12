@@ -7,8 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	ginhandler "report-file-service/handler/go"
 	"report-file-service/config"
+	ginhandler "report-file-service/handler/go"
 )
 
 // requestIDMiddleware propagates or generates a X-Request-ID for log correlation.
@@ -79,6 +79,8 @@ func NewRouter(cfg config.Config) *gin.Engine {
 		{
 			reports.GET("", h.ListReports)
 			reports.GET("/trash", h.ListTrashReports)
+			reports.GET("/preview", h.PreviewReport)
+			reports.GET("/proxy-health", h.ReportsProxyHealth)
 			reports.GET("/:date/:filename", h.DownloadReport)
 			reports.GET("/trash/:date/:filename", h.DownloadTrashReport)
 			reports.POST("/archive", h.ArchiveReport)
@@ -89,7 +91,15 @@ func NewRouter(cfg config.Config) *gin.Engine {
 			platform.GET("/summary", h.PlatformSummary)
 			platform.GET("/records", h.PlatformRecords)
 			platform.GET("/emrs", h.PlatformEMRs)
+			platform.GET("/proxy-health", h.PlatformProxyHealth)
 		}
+
+		v1.POST("/import/history", h.ImportHistory)
+
+		v1.POST("/ingest", h.Ingest)
+		v1.POST("/device/ingest", h.DeviceIngest)
+		v1.POST("/analyze", h.Analyze)
+		v1.POST("/dispatch", h.Dispatch)
 	}
 
 	return router
