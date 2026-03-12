@@ -4,10 +4,14 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import sys
 from hashlib import sha1
 from typing import Dict, Generator, List, Optional
+
+try:
+    from rag.kb_utils import chunk_text
+except ImportError:
+    from kb_utils import chunk_text  # type: ignore[no-redef]
 
 
 def iter_jsonl(path: str) -> Generator[Dict, None, None]:
@@ -20,67 +24,6 @@ def iter_jsonl(path: str) -> Generator[Dict, None, None]:
                 yield json.loads(s)
             except json.JSONDecodeError as exc:
                 raise ValueError(f"Invalid JSONL at line {line_no}: {exc}") from exc
-
-
-def split_sentences(text: str) -> List[str]:
-    parts = re.split(r"(?<=[。！？；!?;])", text)
-    out: List[str] = []
-    for part in parts:
-        p = part.strip()
-        if p:
-            out.append(p)
-    return out
-
-
-def chunk_text(text: str, chunk_size: int, overlap: int) -> List[str]:
-    if chunk_size <= 0:
-        raise ValueError("chunk_size must be > 0")
-    if overlap < 0:
-        raise ValueError("overlap must be >= 0")
-    if overlap >= chunk_size:
-        raise ValueError("overlap must be smaller than chunk_size")
-
-    sents = split_sentences(text)
-    if not sents:
-        return []
-
-    chunks: List[str] = []
-    cur = ""
-    for sent in sents:
-        if len(sent) > chunk_size:
-            if cur:
-                chunks.append(cur.strip())
-                cur = ""
-            start = 0
-            step = chunk_size - overlap
-            while start < len(sent):
-                end = min(len(sent), start + chunk_size)
-                piece = sent[start:end].strip()
-                if piece:
-                    chunks.append(piece)
-                if end == len(sent):
-                    break
-                start += step
-            continue
-
-        if not cur:
-            cur = sent
-            continue
-
-        if len(cur) + len(sent) <= chunk_size:
-            cur += sent
-        else:
-            chunks.append(cur.strip())
-            if overlap > 0 and chunks:
-                tail = chunks[-1][-overlap:]
-                cur = (tail + sent).strip()
-            else:
-                cur = sent
-
-    if cur:
-        chunks.append(cur.strip())
-
-    return [c for c in chunks if c]
 
 
 def chunk_id(doc_id: str, idx: int, text: str) -> str:

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import glob
 import hashlib
+import importlib.util
 import os
 import re
 from typing import Iterable, List
@@ -16,6 +18,22 @@ _PAGE_NOISE_RE = re.compile(r"(?:^|[\s/·\.\-_])\d{1,4}(?=$|[\s/·\.\-_])")
 _SYMBOL_RE = re.compile(r"[·\./\\\-_+*=~:：\(\)（）]")
 _EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+")
 _ITEM_MARKER_RE = re.compile(r"(?:^|\s)[0-9一二三四五六七八九十]{1,3}[、\.．)]")
+
+
+try:
+    _rag_dir = os.path.dirname(__file__)
+    _so_paths = glob.glob(os.path.join(_rag_dir, "_text_ops*.so"))
+    if _so_paths:
+        _spec = importlib.util.spec_from_file_location("_text_ops", _so_paths[0])
+        _text_ops_ext = importlib.util.module_from_spec(_spec)  # type: ignore[arg-type]
+        _spec.loader.exec_module(_text_ops_ext)  # type: ignore[union-attr]
+        _USE_CPP_TEXT_OPS = True
+    else:
+        _text_ops_ext = None
+        _USE_CPP_TEXT_OPS = False
+except Exception:
+    _text_ops_ext = None
+    _USE_CPP_TEXT_OPS = False
 
 
 def sha1_file(path: str) -> str:
@@ -59,7 +77,7 @@ def sanitize_embedding_text_aggressive(text: str) -> str:
     return normalize_text(text)
 
 
-def is_low_signal_text(text: str) -> bool:
+def _is_low_signal_text_py(text: str) -> bool:
     normalized = normalize_text(_CONTROL_CHAR_RE.sub(" ", text))
     if not normalized:
         return True
@@ -87,6 +105,85 @@ def is_low_signal_text(text: str) -> bool:
     if len(normalized) <= 80 and has_email and enum_refs >= 1:
         return True
     return False
+
+
+def is_low_signal_text(text: str) -> bool:
+    if _USE_CPP_TEXT_OPS:
+        try:
+            return bool(_text_ops_ext.is_low_signal_text(text))  # type: ignore[union-attr]
+        except Exception:
+            return _is_low_signal_text_py(text)
+    return _is_low_signal_text_py(text)
+
+
+def _split_sentences_py(text: str) -> List[str]:
+    parts = re.split(r"(?<=[。！？；!?;])", text)
+    out: List[str] = []
+    for part in parts:
+        p = part.strip()
+        if p:
+            out.append(p)
+    return out
+
+
+def _chunk_text_py(text: str, chunk_size: int, overlap: int) -> List[str]:
+    sents = _split_sentences_py(text)
+    if not sents:
+        return []
+
+    chunks: List[str] = []
+    cur = ""
+    for sent in sents:
+        if len(sent) > chunk_size:
+            if cur:
+                chunks.append(cur.strip())
+                cur = ""
+            start = 0
+            step = chunk_size - overlap
+            while start < len(sent):
+                end = min(len(sent), start + chunk_size)
+                piece = sent[start:end].strip()
+                if piece:
+                    chunks.append(piece)
+                if end == len(sent):
+                    break
+                start += step
+            continue
+
+        if not cur:
+            cur = sent
+            continue
+
+        if len(cur) + len(sent) <= chunk_size:
+            cur += sent
+        else:
+            chunks.append(cur.strip())
+            if overlap > 0 and chunks:
+                tail = chunks[-1][-overlap:]
+                cur = (tail + sent).strip()
+            else:
+                cur = sent
+
+    if cur:
+        chunks.append(cur.strip())
+
+    return [c for c in chunks if c]
+
+
+def chunk_text(text: str, chunk_size: int, overlap: int) -> List[str]:
+    if chunk_size <= 0:
+        raise ValueError("chunk_size must be > 0")
+    if overlap < 0:
+        raise ValueError("overlap must be >= 0")
+    if overlap >= chunk_size:
+        raise ValueError("overlap must be smaller than chunk_size")
+
+    if _USE_CPP_TEXT_OPS:
+        try:
+            return list(_text_ops_ext.chunk_text(text, chunk_size, overlap))  # type: ignore[union-attr]
+        except Exception:
+            return _chunk_text_py(text, chunk_size, overlap)
+    return _chunk_text_py(text, chunk_size, overlap)
 
 
 def split_text(text: str, max_len: int, overlap: int) -> List[str]:

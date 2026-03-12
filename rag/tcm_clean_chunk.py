@@ -9,6 +9,11 @@ import sys
 from hashlib import sha1
 from typing import Dict, Generator, Iterable, List, Optional
 
+try:
+    from rag.kb_utils import chunk_text
+except ImportError:
+    from kb_utils import chunk_text  # type: ignore[no-redef]
+
 
 # Remove noisy publishing/footer patterns that are common in scanned book corpora.
 NOISE_PATTERNS = [
@@ -119,70 +124,6 @@ def clean_text(text: str, keep_url: bool = False) -> str:
     text = MULTI_NL_RE.sub("\n\n", text)
 
     return text.strip()
-
-
-def split_sentences(text: str) -> List[str]:
-    if not text:
-        return []
-    text = text.replace("\n", "\n")
-    parts = re.split(r"(?<=[。！？；!?;])", text)
-    out: List[str] = []
-    for part in parts:
-        p = part.strip()
-        if p:
-            out.append(p)
-    return out
-
-
-def chunk_text(text: str, chunk_size: int, overlap: int) -> List[str]:
-    if chunk_size <= 0:
-        raise ValueError("chunk_size must be > 0")
-    if overlap < 0:
-        raise ValueError("overlap must be >= 0")
-    if overlap >= chunk_size:
-        raise ValueError("overlap must be smaller than chunk_size")
-
-    sents = split_sentences(text)
-    if not sents:
-        return []
-
-    chunks: List[str] = []
-    cur = ""
-    for sent in sents:
-        if len(sent) > chunk_size:
-            if cur:
-                chunks.append(cur.strip())
-                cur = ""
-            start = 0
-            step = chunk_size - overlap
-            while start < len(sent):
-                end = min(len(sent), start + chunk_size)
-                piece = sent[start:end].strip()
-                if piece:
-                    chunks.append(piece)
-                if end == len(sent):
-                    break
-                start += step
-            continue
-
-        if not cur:
-            cur = sent
-            continue
-
-        if len(cur) + len(sent) <= chunk_size:
-            cur += sent
-        else:
-            chunks.append(cur.strip())
-            if overlap > 0 and chunks:
-                tail = chunks[-1][-overlap:]
-                cur = (tail + sent).strip()
-            else:
-                cur = sent
-
-    if cur:
-        chunks.append(cur.strip())
-
-    return [c for c in chunks if c]
 
 
 def build_chunk_id(doc_id: str, chunk_index: int, text: str) -> str:

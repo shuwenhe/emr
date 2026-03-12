@@ -41,7 +41,7 @@ TCM_WORKERS  ?= 4
 TCM_DOCX_DIR  ?= $(CURDIR)/rag/dataset/docx_corpus
 TCM_DOCX_RPF  ?= 500   # records per docx file
 
-.PHONY: help install service service-precheck web db-check report kb-build kb-build-markdown kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build clean
+.PHONY: help install service service-precheck web db-check report kb-build kb-build-markdown kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build clean
 
 help:
 	@echo "Available targets:"
@@ -55,6 +55,7 @@ help:
 	@echo "    env: RAG_USE_GO_EMBEDDER=0/1, RAG_GO_EMBED_CONCURRENCY=8"
 	@echo "  make go-embedder-build # compile Go concurrent embedder (speeds up kb-build)"
 	@echo "  make simhash-build    # compile C++ SimHash extension (speeds up dedup)" 
+	@echo "  make text-ops-build   # compile C++ text ops extension (chunk_text + low-signal)"
 	@echo "  make kb-build-markdown # build KB and print markdown/chunk debug"
 	@echo "  make kb-rebuild       # alias of kb-build"
 	@echo "  make kb-clean         # remove generated KB artifacts"
@@ -104,6 +105,12 @@ simhash-build:
 		VENV_PY="$(KB_PY)" bash "$(CURDIR)/rag/simhash/build.sh"; \
 	fi
 	@echo "Done: rag/_simhash*.so or rag/simhash/_simhash*.so"
+
+text-ops-build:
+	@echo "Building C++ text ops extension..."
+	@echo "构建 C++ 文本处理扩展..."
+	@VENV_PY="$(KB_PY)" bash "$(CURDIR)/rag/build_text_ops.sh"
+	@echo "Done: rag/_text_ops*.so"
 
 kb-build: go-embedder-build
 	@mkdir -p "$(KB_OUT_DIR)"
