@@ -260,6 +260,28 @@ public:
         return {"keep", doc_id, text_hash, -1};
     }
 
+    std::vector<std::tuple<std::string, std::string, std::string, int>>
+    process_batch(
+        const std::vector<uint64_t>& fps,
+        const std::vector<std::string>& text_hashes,
+        const std::vector<std::string>& doc_id_hints
+    ) {
+        if (fps.size() != text_hashes.size()) {
+            throw std::invalid_argument("fps and text_hashes must have the same length");
+        }
+        if (!doc_id_hints.empty() && doc_id_hints.size() != fps.size()) {
+            throw std::invalid_argument("doc_id_hints must be empty or same length as fps");
+        }
+
+        std::vector<std::tuple<std::string, std::string, std::string, int>> out;
+        out.reserve(fps.size());
+        for (std::size_t i = 0; i < fps.size(); i++) {
+            const std::string& hint = doc_id_hints.empty() ? std::string() : doc_id_hints[i];
+            out.push_back(process(fps[i], text_hashes[i], hint));
+        }
+        return out;
+    }
+
     std::size_t size() const noexcept { return kept_fp_.size(); }
 
     void reserve(std::size_t n) {
@@ -316,6 +338,12 @@ PYBIND11_MODULE(_simhash, m) {
              "Process one document fingerprint.\n"
              "Returns (status, doc_id, sha1, dist) where status is "
              "'keep', 'exact', or 'near'.")
+           .def("process_batch",
+               &DedupEngine::process_batch,
+               py::arg("fps"), py::arg("text_hashes"),
+               py::arg("doc_id_hints") = std::vector<std::string>{},
+               "Process a batch of document fingerprints.\n"
+               "Returns a list of (status, doc_id, sha1, dist) tuples.")
         .def("reserve", &DedupEngine::reserve, py::arg("n"),
              "Pre-allocate internal hash tables for n documents.")
         .def("__len__", &DedupEngine::size,

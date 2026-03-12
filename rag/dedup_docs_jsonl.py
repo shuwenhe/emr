@@ -32,14 +32,17 @@ try:
         _spec.loader.exec_module(_simhash_ext)       # type: ignore[union-attr]
         _USE_CPP = True
         _USE_CPP_DEDUP = hasattr(_simhash_ext, "DedupEngine")
+        _USE_CPP_DEDUP_BATCH = _USE_CPP_DEDUP and hasattr(_simhash_ext.DedupEngine, "process_batch")
     else:
         _simhash_ext = None
         _USE_CPP = False
         _USE_CPP_DEDUP = False
+        _USE_CPP_DEDUP_BATCH = False
 except Exception:
     _simhash_ext = None
     _USE_CPP = False
     _USE_CPP_DEDUP = False
+    _USE_CPP_DEDUP_BATCH = False
 
 
 TOKEN_RE = re.compile(r"[\u4e00-\u9fff]|[A-Za-z0-9_]+")
@@ -176,6 +179,8 @@ def dedup(
 
     max_pending = max(1, parallel_workers * 8)
     pending: Deque[Tuple[Dict, str, str, Future[int]]] = deque()
+    dedup_batch_size = int(os.getenv("RAG_DEDUP_DECISION_BATCH", "256"))
+    dedup_batch_size = max(1, dedup_batch_size)
 
     def process_record(row: Dict, text: str, text_hash: str, fp: int, out_fh) -> None:
         nonlocal kept, exact_dup, near_dup
@@ -251,10 +256,53 @@ def dedup(
         out_fh.write(json.dumps(row, ensure_ascii=False) + "\n")
         kept += 1
 
+    def process_records_batch(records: List[Tuple[Dict, str, str, int]], out_fh) -> None:
+        nonlocal kept, exact_dup, near_dup
+        if not records:
+            return
+        if _engine is None:
+            for row, text, text_hash, fp in records:
+                process_record(row, text, text_hash, fp, out_fh)
+            return
+
+        if _USE_CPP_DEDUP_BATCH and len(records) > 1:
+            fps = [fp for _, _, _, fp in records]
+            text_hashes = [text_hash for _, _, text_hash, _ in records]
+            doc_ids = [row.get("doc_id") or "" for row, _, _, _ in records]
+            decisions = _engine.process_batch(fps, text_hashes, doc_ids)
+            for (row, text, text_hash, fp), (status, canonical_doc_id, canonical_sha1, dist) in zip(records, decisions):
+                if status == "exact":
+                    exact_dup += 1
+                    write_dup(
+                        dup_fh, "exact", row, text_hash,
+                        canonical_doc_id="", canonical_sha1=canonical_sha1, fp=0, distance=None,
+                    )
+                    continue
+                if status == "near":
+                    near_dup += 1
+                    write_dup(
+                        dup_fh, "near", row, text_hash,
+                        canonical_doc_id=canonical_doc_id,
+                        canonical_sha1=canonical_sha1, fp=fp, distance=dist,
+                    )
+                    continue
+
+                row["text"] = text
+                row["text_sha1"] = text_hash
+                row["simhash64_hex"] = f"{fp:016x}"
+                row["dedup_stage"] = "deduped_doc"
+                out_fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+                kept += 1
+            return
+
+        for row, text, text_hash, fp in records:
+            process_record(row, text, text_hash, fp, out_fh)
+
     dup_fh = open(dup_output_path, "w", encoding="utf-8") if dup_output_path else None
     try:
         with open(output_path, "w", encoding="utf-8") as out:
             if parallel_workers <= 1:
+                decision_batch: List[Tuple[Dict, str, str, int]] = []
                 for _, row in iter_jsonl(input_path):
                     if limit_docs is not None and total >= limit_docs:
                         break
@@ -272,7 +320,10 @@ def dedup(
                     if not isinstance(text_hash, str) or not text_hash:
                         text_hash = sha1_text(text)
 
-                    process_record(row, text, text_hash, simhash64(text), out)
+                    decision_batch.append((row, text, text_hash, simhash64(text)))
+                    if len(decision_batch) >= dedup_batch_size:
+                        process_records_batch(decision_batch, out)
+                        decision_batch.clear()
 
                     if progress_every > 0 and total % progress_every == 0:
                         print(
@@ -280,8 +331,11 @@ def dedup(
                             file=sys.stderr,
                             flush=True,
                         )
+                if decision_batch:
+                    process_records_batch(decision_batch, out)
             else:
                 with ProcessPoolExecutor(max_workers=parallel_workers) as executor:
+                    decision_batch: List[Tuple[Dict, str, str, int]] = []
                     for _, row in iter_jsonl(input_path):
                         if limit_docs is not None and total >= limit_docs:
                             break
@@ -303,7 +357,10 @@ def dedup(
 
                         while len(pending) >= max_pending:
                             prow, ptext, psha1, pfut = pending.popleft()
-                            process_record(prow, ptext, psha1, pfut.result(), out)
+                            decision_batch.append((prow, ptext, psha1, pfut.result()))
+                            if len(decision_batch) >= dedup_batch_size:
+                                process_records_batch(decision_batch, out)
+                                decision_batch.clear()
 
                         if progress_every > 0 and total % progress_every == 0:
                             print(
@@ -314,7 +371,12 @@ def dedup(
 
                     while pending:
                         prow, ptext, psha1, pfut = pending.popleft()
-                        process_record(prow, ptext, psha1, pfut.result(), out)
+                        decision_batch.append((prow, ptext, psha1, pfut.result()))
+                        if len(decision_batch) >= dedup_batch_size:
+                            process_records_batch(decision_batch, out)
+                            decision_batch.clear()
+                    if decision_batch:
+                        process_records_batch(decision_batch, out)
     finally:
         if dup_fh is not None:
             dup_fh.close()
