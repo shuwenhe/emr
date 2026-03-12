@@ -17,9 +17,11 @@ from tqdm import tqdm
 from .docx_parser import blocks_from_text, parse_docx, parse_docx_with_markdown
 from .embeddings import build_embeddings
 from .kb_utils import (
+    is_low_signal_text,
     iter_batches,
     normalize_text,
     safe_relpath,
+    sanitize_embedding_text,
     sha1_file,
     sha1_text,
     split_list_items,
@@ -243,7 +245,18 @@ def _embed_documents_with_retry(embeddings, texts: List[str], max_retries: int =
     last_exc: Optional[BaseException] = None
     for attempt in range(max_retries + 1):
         try:
-            return embeddings.embed_documents(texts)
+            vectors = embeddings.embed_documents(texts)
+            if len(vectors) != len(texts):
+                raise RuntimeError(
+                    f"Embedding batch returned mismatched vector count: expected {len(texts)}, got {len(vectors)}"
+                )
+            for index, vector in enumerate(vectors):
+                vector_array = np.asarray(vector, dtype="float32")
+                if vector_array.ndim != 1 or vector_array.size == 0:
+                    raise RuntimeError(f"Embedding returned invalid vector at index {index}")
+                if not np.all(np.isfinite(vector_array)):
+                    raise RuntimeError(f"Embedding returned NaN/Inf vector at index {index}")
+            return vectors
         except Exception as exc:  # noqa: BLE001
             last_exc = exc
             if attempt >= max_retries:
@@ -274,7 +287,12 @@ def _collect_chunks(
             for item in items:
                 pieces = split_text(item, max_len=max_len, overlap=overlap)
                 for piece in pieces:
-                    embedding_text = _attach_title_prefix(block.title_path, piece)
+                    raw_embedding_text = _attach_title_prefix(block.title_path, piece)
+                    if is_low_signal_text(raw_embedding_text):
+                        continue
+                    embedding_text = sanitize_embedding_text(raw_embedding_text)
+                    if not embedding_text:
+                        continue
                     chunks.append(
                         {
                             "chunk_id": _build_chunk_id(file_path, doc_hash, chunk_index, "paragraph"),
@@ -296,7 +314,12 @@ def _collect_chunks(
                     table_text = table_to_linearized_text(table_rows)
                     if not table_markdown and not table_text:
                         continue
-                    embedding_text = _attach_title_prefix(block.title_path, table_text or table_markdown)
+                    raw_embedding_text = _attach_title_prefix(block.title_path, table_text or table_markdown)
+                    if is_low_signal_text(raw_embedding_text):
+                        continue
+                    embedding_text = sanitize_embedding_text(raw_embedding_text)
+                    if not embedding_text:
+                        continue
                     chunks.append(
                         {
                             "chunk_id": _build_chunk_id(file_path, doc_hash, chunk_index, "table"),
@@ -314,6 +337,12 @@ def _collect_chunks(
             table_text = block.table_linearized_text or ""
             if not table_markdown and not table_text:
                 continue
+            raw_embedding_text = _attach_title_prefix(block.title_path, table_text or table_markdown)
+            if is_low_signal_text(raw_embedding_text):
+                continue
+            embedding_text = sanitize_embedding_text(raw_embedding_text)
+            if not embedding_text:
+                continue
             chunks.append(
                 {
                     "chunk_id": _build_chunk_id(file_path, doc_hash, chunk_index, "table"),
@@ -321,7 +350,7 @@ def _collect_chunks(
                     "chunk_index": chunk_index,
                     "file_path": file_path,
                     "title_path": block.title_path,
-                    "text_for_embedding": _attach_title_prefix(block.title_path, table_text or table_markdown),
+                    "text_for_embedding": embedding_text,
                     "excerpt_markdown": table_markdown or table_text,
                 }
             )

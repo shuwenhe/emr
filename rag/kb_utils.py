@@ -6,6 +6,13 @@ import re
 from typing import Iterable, List
 
 
+_CONTROL_CHAR_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+_DOT_LEADER_RE = re.compile(r"[\.·•‧⋯…]{3,}")
+_PAGE_REF_RE = re.compile(r"[\(（]\s*\d{1,4}\s*[\)）]")
+_ENUM_MARKER_RE = re.compile(r"(?:^|\s)[0-9一二三四五六七八九十]+[、\.．:：)]")
+_USEFUL_CHAR_RE = re.compile(r"[A-Za-z0-9\u4e00-\u9fff]")
+
+
 def sha1_file(path: str) -> str:
     digest = hashlib.sha1()
     with open(path, "rb") as handle:
@@ -27,6 +34,28 @@ def safe_relpath(path: str, base: str) -> str:
 
 def normalize_text(text: str) -> str:
     return " ".join(text.replace("\u00a0", " ").split())
+
+
+def sanitize_embedding_text(text: str) -> str:
+    text = text.replace("\u3000", " ").replace("\u00a0", " ")
+    text = _CONTROL_CHAR_RE.sub(" ", text)
+    text = _DOT_LEADER_RE.sub(" ", text)
+    return normalize_text(text)
+
+
+def is_low_signal_text(text: str) -> bool:
+    normalized = normalize_text(_CONTROL_CHAR_RE.sub(" ", text))
+    if not normalized:
+        return True
+    useful_ratio = len(_USEFUL_CHAR_RE.findall(normalized)) / max(len(normalized), 1)
+    has_dot_leader = bool(_DOT_LEADER_RE.search(text))
+    page_refs = len(_PAGE_REF_RE.findall(text))
+    enum_refs = len(_ENUM_MARKER_RE.findall(text))
+    if len(normalized) <= 120 and has_dot_leader and useful_ratio < 0.62:
+        return True
+    if len(normalized) <= 160 and has_dot_leader and page_refs >= 1 and enum_refs >= 1 and useful_ratio < 0.68:
+        return True
+    return False
 
 
 def split_text(text: str, max_len: int, overlap: int) -> List[str]:
