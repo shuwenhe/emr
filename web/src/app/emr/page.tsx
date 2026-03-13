@@ -79,6 +79,51 @@ const API_BASE = resolveApiBase();
 const EMR_STATE_KEY = "patient_flow_state_emr";
 const REPORTS_PAGE_SIZE = 10;
 
+function extractSourceDocPath(source: string) {
+  const raw = String(source || "").trim();
+  if (!raw || raw === "-") {
+    return "";
+  }
+  let normalized = raw;
+  for (const prefix of ["来源：", "来源:", "source:", "Source:"]) {
+    if (normalized.startsWith(prefix)) {
+      normalized = normalized.slice(prefix.length).trim();
+      break;
+    }
+  }
+  const match = normalized.match(/([A-Za-z0-9_./\\-]+\.(?:docx?|DOCX?))/);
+  if (match?.[1]) {
+    normalized = match[1];
+  }
+  return normalized.replaceAll("\\", "/").trim().replace(/^\.\//, "");
+}
+
+function buildSourceFileUrl(source: string) {
+  const normalized = extractSourceDocPath(source);
+  if (!normalized) {
+    return "";
+  }
+  return `${API_BASE}/reports/source-file?source=${encodeURIComponent(normalized)}&inline=true`;
+}
+
+function SourceFileLink({ source, onOpen }: { source: string; onOpen: (source: string) => void }) {
+  const label = String(source || "").trim() || "-";
+  const url = buildSourceFileUrl(label);
+  if (!url) {
+    return <span>{label}</span>;
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(label)}
+      className="break-all text-blue-600 hover:text-blue-700 hover:underline"
+      title={url}
+    >
+      {label}
+    </button>
+  );
+}
+
 export default function EmrPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -1212,7 +1257,11 @@ export default function EmrPage() {
 
   async function handleViewDocx(url: string) {
     try {
-      const response = await fetch(`${API_BASE}${url}`);
+      const requestUrl = /^https?:\/\//i.test(url) ? url : `${API_BASE}${url}`;
+      const response = await fetch(requestUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
       const arrayBuffer = await response.arrayBuffer();
       const result = await mammoth.convertToHtml({ arrayBuffer });
       setPreviewHtml(result.value);
@@ -1225,7 +1274,11 @@ export default function EmrPage() {
 
   async function handlePrintDocx(url: string) {
     try {
-      const response = await fetch(`${API_BASE}${url}`);
+      const requestUrl = /^https?:\/\//i.test(url) ? url : `${API_BASE}${url}`;
+      const response = await fetch(requestUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
       const arrayBuffer = await response.arrayBuffer();
       const result = await mammoth.convertToHtml({ arrayBuffer });
       printHtmlInIframe(`
@@ -1248,6 +1301,19 @@ export default function EmrPage() {
     } catch (error) {
       setOutput({ error: `打印失败: ${String(error)}` });
     }
+  }
+
+  async function handleOpenSourceFile(source: string) {
+    const normalized = extractSourceDocPath(source);
+    const url = buildSourceFileUrl(source);
+    if (!normalized || !url) {
+      return;
+    }
+    if (/\.docx$/i.test(normalized)) {
+      await handleViewDocx(url);
+      return;
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
   }
 
   return (
@@ -1630,7 +1696,7 @@ export default function EmrPage() {
                         </div>
                         <div className="mt-2 space-y-1 text-sm text-slate-700">
                           <p>条目 ID：{citation.id || "-"}</p>
-                          <p>来源：{citation.source || "-"}</p>
+                          <p>来源：<SourceFileLink source={citation.source || "-"} onOpen={handleOpenSourceFile} /></p>
                         </div>
                       </div>
                     ))}
@@ -1671,7 +1737,7 @@ export default function EmrPage() {
                           <span className="text-sm font-semibold text-slate-900">{String(item.title || "未命名条目")}</span>
                           <span className="text-xs text-slate-500">{String(item.id || "")}</span>
                         </div>
-                        <p className="mt-1 text-sm text-slate-700">来源：{String(item.source || "-")}</p>
+                        <p className="mt-1 text-sm text-slate-700">来源：<SourceFileLink source={String(item.source || "-")} onOpen={handleOpenSourceFile} /></p>
                         {Array.isArray(item.tags) && item.tags.length > 0 && (
                           <p className="mt-1 text-sm text-slate-700">标签：{item.tags.join(", ")}</p>
                         )}

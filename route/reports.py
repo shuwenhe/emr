@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 import time
@@ -303,6 +304,75 @@ def _resolve_trash_path(date: str, filename: str) -> Path:
     return candidate
 
 
+def _extract_source_doc_relative_path(source: str) -> str:
+    raw = str(source or "").strip()
+    if not raw or raw == "-":
+        return ""
+    normalized = raw
+    for prefix in ("来源：", "来源:", "source:", "Source:"):
+        if normalized.startswith(prefix):
+            normalized = normalized[len(prefix):].strip()
+            break
+    match = re.search(r"([A-Za-z0-9_./\\-]+\.(?:docx?|DOCX?))", normalized)
+    if match:
+        normalized = match.group(1)
+    normalized = normalized.replace("\\", "/").strip().lstrip("./")
+    return normalized
+
+
+def _resolve_source_doc_path(source: str) -> Path:
+    normalized = _extract_source_doc_relative_path(source)
+    if not normalized:
+        raise HTTPException(status_code=404, detail="source_file_not_found")
+
+    project_root = Path(__file__).resolve().parents[1]
+    rag_dataset_root = project_root / "rag" / "dataset"
+    allowed_roots: List[Path] = [project_root.resolve(), rag_dataset_root.resolve()]
+
+    env_source_root = os.getenv("RAG_SOURCE_ROOT", "").strip()
+    if env_source_root:
+        try:
+            allowed_roots.append(Path(env_source_root).resolve())
+        except Exception:
+            pass
+
+    env_kb_source_dir = os.getenv("KB_SOURCE_DIR", "").strip()
+    if env_kb_source_dir:
+        try:
+            allowed_roots.append(Path(env_kb_source_dir).resolve())
+        except Exception:
+            pass
+
+    path = Path(normalized)
+    candidates: List[Path] = []
+    if normalized.startswith("tcm/"):
+        candidates.append(rag_dataset_root / normalized)
+
+    if path.is_absolute():
+        candidates.append(path)
+    else:
+        for root in allowed_roots:
+            candidates.append(root / path)
+
+    checked: set[Path] = set()
+    for candidate in candidates:
+        try:
+            resolved = candidate.resolve()
+        except Exception:
+            continue
+        if resolved in checked:
+            continue
+        checked.add(resolved)
+        if resolved.suffix.lower() not in {".doc", ".docx"}:
+            continue
+        if not resolved.exists() or not resolved.is_file():
+            continue
+        if any(resolved.is_relative_to(root) for root in allowed_roots):
+            return resolved
+
+    raise HTTPException(status_code=404, detail="source_file_not_found")
+
+
 def _rewrite_report_urls(items):
     """Rewrite Go-internal /v1/reports/... URLs to public /reports/... URLs."""
     if not isinstance(items, list):
@@ -398,6 +468,19 @@ def archive_report(request: ReportArchiveRequest):
     _LIST_REPORTS_CACHE.pop(ReportListCache._cache_key(None), None)
     _LIST_REPORTS_CACHE.pop(ReportListCache._cache_key(request.date), None)
     return {"status": "restored", "date": request.date, "filename": request.filename}
+
+
+@router.get("/reports/source-file")
+def download_source_file(source: str, inline: bool = True):
+    candidate = _resolve_source_doc_path(source)
+    disposition = "inline" if inline else "attachment"
+    ascii_name = "source" + candidate.suffix
+    quoted_name = quote(candidate.name)
+    content_disposition = (
+        f"{disposition}; filename=\"{ascii_name}\"; filename*=UTF-8''{quoted_name}"
+    )
+    headers = {"Content-Disposition": content_disposition}
+    return FileResponse(candidate, headers=headers)
 
 
 @router.get("/reports/{date}/{filename}")
