@@ -849,6 +849,64 @@ def _activate_partial_link(out_dir: str, partial_dir: str) -> None:
     os.replace(tmp_link, current_path)
 
 
+def _publish_partial_snapshot_from_index(
+    out_dir: str,
+    version_dir: str,
+    snapshot_name: str,
+    index: Optional[faiss.Index],
+    chunks_path: str,
+    kb_version: str,
+    source_dir: str,
+    embed_model: str,
+    provider: str,
+    failed_items: List[Dict[str, str]],
+    chunk_count: int,
+) -> str:
+    if index is None or chunk_count <= 0:
+        return ""
+    partial_dir = os.path.join(version_dir, "partial_snapshots", snapshot_name)
+    _write_partial_snapshot_from_index(
+        partial_dir=partial_dir,
+        index=index,
+        chunks_src_path=chunks_path,
+        kb_version=kb_version,
+        source_dir=source_dir,
+        embed_model=embed_model,
+        provider=provider,
+        failed_items=failed_items,
+        chunk_count=chunk_count,
+    )
+    _activate_partial_link(out_dir, partial_dir)
+    return partial_dir
+
+
+def _publish_final_partial_snapshot(
+    out_dir: str,
+    version_dir: str,
+    index: Optional[faiss.Index],
+    chunks_path: str,
+    kb_version: str,
+    source_dir: str,
+    embed_model: str,
+    provider: str,
+    failed_items: List[Dict[str, str]],
+    chunk_count: int,
+) -> None:
+    _publish_partial_snapshot_from_index(
+        out_dir=out_dir,
+        version_dir=version_dir,
+        snapshot_name="final",
+        index=index,
+        chunks_path=chunks_path,
+        kb_version=kb_version,
+        source_dir=source_dir,
+        embed_model=embed_model,
+        provider=provider,
+        failed_items=failed_items,
+        chunk_count=chunk_count,
+    )
+
+
 def _split_table_rows(rows: List[List[str]], max_len: int) -> List[List[List[str]]]:
     if not rows or len(rows) <= 1 or max_len <= 0:
         return [rows]
@@ -1240,11 +1298,12 @@ def build_kb(
                 if partial_every > 0 and next_batch_count % partial_every == 0 and next_vector_id > 0:
                     chunks_handle.flush()
                     os.fsync(chunks_handle.fileno())
-                    partial_dir = os.path.join(version_dir, "partial")
-                    _write_partial_snapshot_from_index(
-                        partial_dir=partial_dir,
+                    _publish_partial_snapshot_from_index(
+                        out_dir=out_dir,
+                        version_dir=version_dir,
+                        snapshot_name=f"batch-{next_batch_count:06d}",
                         index=index,
-                        chunks_src_path=chunks_tmp_path,
+                        chunks_path=chunks_tmp_path,
                         kb_version=kb_version,
                         source_dir=source_dir,
                         embed_model=embed_model,
@@ -1252,7 +1311,6 @@ def build_kb(
                         failed_items=embedding_failed,
                         chunk_count=next_vector_id,
                     )
-                    _activate_partial_link(out_dir, partial_dir)
 
             def _process_batch(batch_records: List[ChunkRecord]) -> None:
                 if not batch_records:
@@ -1463,6 +1521,18 @@ def build_kb(
         with open(build_log_path, "w", encoding="utf-8") as handle:
             json.dump(build_log, handle, ensure_ascii=False, indent=2)
 
+        _publish_final_partial_snapshot(
+            out_dir=out_dir,
+            version_dir=version_dir,
+            index=index,
+            chunks_path=jsonl_path,
+            kb_version=kb_version,
+            source_dir=source_dir,
+            embed_model=embed_model,
+            provider=provider,
+            failed_items=embedding_failed,
+            chunk_count=next_vector_id,
+        )
         _activate_version(out_dir, version_dir)
         if resume_enabled and os.path.exists(checkpoint_dir):
             shutil.rmtree(checkpoint_dir, ignore_errors=True)

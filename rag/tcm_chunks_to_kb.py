@@ -57,16 +57,16 @@ from rag.kb_utils import sha1_text
 from rag.kb_builder import (
     GoEmbedder,
     _activate_version,
-    _activate_partial_link,
     _append_checkpoint_rows,
     _checkpoint_signature,
     _embed_batch_with_fallback,
     _env_flag,
     _find_go_embedder,
     _load_embedding_checkpoint,
+    _publish_partial_snapshot_from_index,
     _start_resource_monitor,
     _write_checkpoint_state,
-    _write_partial_snapshot_from_index,
+    _publish_final_partial_snapshot,
 )
 from rag.schemas import ChunkRecord, Manifest
 
@@ -329,11 +329,12 @@ def build_kb_from_chunks(
                 if partial_every > 0 and next_batch_count % partial_every == 0 and next_vector_id > 0:
                     chunks_handle.flush()
                     os.fsync(chunks_handle.fileno())
-                    partial_dir = os.path.join(version_dir, "partial")
-                    _write_partial_snapshot_from_index(
-                        partial_dir=partial_dir,
+                    _publish_partial_snapshot_from_index(
+                        out_dir=out_dir,
+                        version_dir=version_dir,
+                        snapshot_name=f"batch-{next_batch_count:06d}",
                         index=index,
-                        chunks_src_path=chunks_tmp_path,
+                        chunks_path=chunks_tmp_path,
                         kb_version=kb_version,
                         source_dir=chunks_input,
                         embed_model=embed_model,
@@ -341,7 +342,6 @@ def build_kb_from_chunks(
                         failed_items=embedding_failed,
                         chunk_count=next_vector_id,
                     )
-                    _activate_partial_link(out_dir, partial_dir)
 
             def _process_batch(batch: List[ChunkRecord]) -> None:
                 if not batch:
@@ -484,6 +484,18 @@ def build_kb_from_chunks(
     with open(os.path.join(version_dir, "build_log.json"), "w", encoding="utf-8") as fh:
         json.dump(build_log, fh, ensure_ascii=False, indent=2)
 
+    _publish_final_partial_snapshot(
+        out_dir=out_dir,
+        version_dir=version_dir,
+        index=index,
+        chunks_path=os.path.join(version_dir, "chunks.jsonl"),
+        kb_version=kb_version,
+        source_dir=chunks_input,
+        embed_model=embed_model,
+        provider=provider,
+        failed_items=embedding_failed,
+        chunk_count=next_vector_id,
+    )
     print("Activating KB version (atomic symlink switch) …")
     _activate_version(out_dir, version_dir)
     if resume_enabled and os.path.exists(checkpoint_dir):

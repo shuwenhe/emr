@@ -22,6 +22,8 @@ RAG_ENABLED = os.getenv("RAG_ENABLED", "1") != "0"
 RAG_TOP_K = max(1, int(os.getenv("RAG_TOP_K", "5")))
 RAG_SCORE_THRESHOLD = float(os.getenv("RAG_SCORE_THRESHOLD", "0"))
 RAG_VECTOR_ENABLED = os.getenv("RAG_VECTOR_ENABLED", "1") != "0"
+RAG_VECTOR_LOAD_RETRIES = max(0, int(os.getenv("RAG_VECTOR_LOAD_RETRIES", "5")))
+RAG_VECTOR_LOAD_RETRY_DELAY_SEC = max(0.1, float(os.getenv("RAG_VECTOR_LOAD_RETRY_DELAY_SEC", "0.5")))
 RAG_VECTOR_KB_PATH = os.getenv(
     "RAG_VECTOR_KB_PATH",
     str(Path(__file__).resolve().parents[2] / "rag" / "kb" / "current_partial"),
@@ -310,14 +312,24 @@ def _load_vector_kb() -> Optional[Any]:
 
         last_exc: Optional[Exception] = None
         for candidate in candidates:
-            try:
-                _VECTOR_KB_CACHE = load_kb(candidate)
-                if candidate != primary:
-                    logging.warning("vector kb fallback activated: %s", candidate)
-                return _VECTOR_KB_CACHE
-            except Exception as exc:  # noqa: BLE001
-                last_exc = exc
-                continue
+            for attempt in range(RAG_VECTOR_LOAD_RETRIES + 1):
+                try:
+                    _VECTOR_KB_CACHE = load_kb(candidate)
+                    if candidate != primary:
+                        logging.warning("vector kb fallback activated: %s", candidate)
+                    return _VECTOR_KB_CACHE
+                except Exception as exc:  # noqa: BLE001
+                    last_exc = exc
+                    if attempt >= RAG_VECTOR_LOAD_RETRIES:
+                        break
+                    logging.warning(
+                        "vector kb load retrying: candidate=%s attempt=%d/%d err=%s",
+                        candidate,
+                        attempt + 1,
+                        RAG_VECTOR_LOAD_RETRIES,
+                        exc,
+                    )
+                    time.sleep(RAG_VECTOR_LOAD_RETRY_DELAY_SEC)
 
         if last_exc is not None:
             raise last_exc
