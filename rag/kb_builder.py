@@ -88,16 +88,21 @@ def _read_proc_stat_total_idle() -> Tuple[int, int]:
     return total, idle
 
 
-def _read_process_cpu_ticks() -> int:
+def _read_process_cpu_ticks() -> Tuple[int, int]:
     with open("/proc/self/stat", "r", encoding="utf-8") as handle:
         data = handle.read().strip()
-    # /proc/self/stat: fields after ')' are space-separated; utime/stime are 14/15.
+    # /proc/self/stat: fields after ')' are space-separated.
+    # utime/stime are 14/15, cutime/cstime are 16/17.
     right = data.rsplit(")", 1)[-1].strip().split()
     if len(right) < 15:
         raise RuntimeError("invalid /proc/self/stat format")
     utime = int(right[11])
     stime = int(right[12])
-    return utime + stime
+    cutime = int(right[13])
+    cstime = int(right[14])
+    self_ticks = utime + stime
+    total_ticks = self_ticks + cutime + cstime
+    return self_ticks, total_ticks
 
 
 def _read_memory_stats() -> Tuple[int, int, int]:
@@ -177,20 +182,23 @@ def _start_resource_monitor(tag: str) -> Callable[[], None]:
         cpu_count = max(1, os.cpu_count() or 1)
         try:
             prev_total, prev_idle = _read_proc_stat_total_idle()
-            prev_proc = _read_process_cpu_ticks()
+            prev_self, prev_proc_total = _read_process_cpu_ticks()
         except Exception:
-            prev_total, prev_idle, prev_proc = 0, 0, 0
+            prev_total, prev_idle, prev_self, prev_proc_total = 0, 0, 0, 0
 
         while not stop.wait(interval):
             try:
                 now_total, now_idle = _read_proc_stat_total_idle()
-                now_proc = _read_process_cpu_ticks()
+                now_self, now_proc_total = _read_process_cpu_ticks()
                 delta_total = max(now_total - prev_total, 1)
                 delta_idle = max(now_idle - prev_idle, 0)
-                delta_proc = max(now_proc - prev_proc, 0)
+                delta_self = max(now_self - prev_self, 0)
+                delta_proc_total = max(now_proc_total - prev_proc_total, 0)
 
                 cpu_pct = max(0.0, min(100.0, (1.0 - (delta_idle / delta_total)) * 100.0))
-                proc_cpu_pct = max(0.0, (delta_proc / delta_total) * 100.0 * cpu_count)
+                proc_cpu_self_pct = max(0.0, (delta_self / delta_total) * 100.0 * cpu_count)
+                proc_cpu_total_pct = max(0.0, (delta_proc_total / delta_total) * 100.0 * cpu_count)
+                proc_cpu_total_of_host_pct = max(0.0, proc_cpu_total_pct / cpu_count)
 
                 total_mem_b, used_mem_b, rss_b = _read_memory_stats()
                 mem_pct = 0.0
@@ -199,7 +207,9 @@ def _start_resource_monitor(tag: str) -> Callable[[], None]:
 
                 msg = (
                     f"[RESOURCE_METRIC] tag={tag} "
-                    f"cpu={cpu_pct:.1f}% proc_cpu={proc_cpu_pct:.1f}% "
+                    f"cpu={cpu_pct:.1f}% "
+                    f"proc_cpu_self={proc_cpu_self_pct:.1f}% proc_cpu_total={proc_cpu_total_pct:.1f}% "
+                    f"proc_cpu_total_of_host={proc_cpu_total_of_host_pct:.1f}% "
                     f"mem={_format_bytes_gib(used_mem_b)}/{_format_bytes_gib(total_mem_b)}({mem_pct:.1f}%) "
                     f"proc_mem={_format_bytes_gib(rss_b)}"
                 )
@@ -217,7 +227,8 @@ def _start_resource_monitor(tag: str) -> Callable[[], None]:
                         msg = msg + " | gpu=unavailable"
 
                 tqdm.write(msg)
-                prev_total, prev_idle, prev_proc = now_total, now_idle, now_proc
+                prev_total, prev_idle = now_total, now_idle
+                prev_self, prev_proc_total = now_self, now_proc_total
             except Exception as exc:  # noqa: BLE001
                 tqdm.write(f"[RESOURCE_METRIC] tag={tag} monitor_error={exc}")
 
@@ -313,7 +324,7 @@ class GoEmbedder:
             [binary],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
+            stderr=None,
             env=env,
         )
         self._stdin = io.TextIOWrapper(self._proc.stdin, encoding="utf-8")   # type: ignore[arg-type]
@@ -944,6 +955,7 @@ def build_kb(
 ) -> Manifest:
     total_steps = 8
     start_time = time.perf_counter()
+    stop_resource_monitor: Callable[[], None] = _start_resource_monitor("kb-build")
     _log_step(1, total_steps, "Scanning source documents", f"source_dir={source_dir}")
     included, skipped = scan_documents(source_dir)
     suspicious_count = sum(1 for item in skipped if item["reason"] in ("empty_file", "stat_failed"))
@@ -969,7 +981,6 @@ def build_kb(
     failed_files: List[Dict[str, str]] = []
     degraded_files: List[Dict[str, str]] = []
     records: List[ChunkRecord] = []
-    stop_resource_monitor: Callable[[], None] = lambda: None
     temp_dir = tempfile.mkdtemp(prefix="kb_docx_")
 
     try:
@@ -1124,7 +1135,6 @@ def build_kb(
             )
 
         use_go_embedder = _env_flag("RAG_USE_GO_EMBEDDER", default=True)
-        stop_resource_monitor = _start_resource_monitor("kb-build")
         go_bin = _find_go_embedder() if use_go_embedder else None
         go_embed_concurrency = max(1, int(os.getenv("RAG_GO_EMBED_CONCURRENCY", "8")))
         if go_bin:

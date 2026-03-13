@@ -4,7 +4,9 @@ import json
 import logging
 import os
 import re
+import socket
 import sys
+import time
 from datetime import datetime
 import urllib.error
 import urllib.request
@@ -14,13 +16,15 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:1.7b")
 OLLAMA_ENABLED = os.getenv("OLLAMA_ENABLED", "1") != "0"
+OLLAMA_TIMEOUT_SEC = max(5, int(os.getenv("OLLAMA_TIMEOUT_SEC", "60")))
+OLLAMA_MAX_RETRIES = max(0, int(os.getenv("OLLAMA_MAX_RETRIES", "2")))
 RAG_ENABLED = os.getenv("RAG_ENABLED", "1") != "0"
 RAG_TOP_K = max(1, int(os.getenv("RAG_TOP_K", "5")))
 RAG_SCORE_THRESHOLD = float(os.getenv("RAG_SCORE_THRESHOLD", "0"))
 RAG_VECTOR_ENABLED = os.getenv("RAG_VECTOR_ENABLED", "1") != "0"
 RAG_VECTOR_KB_PATH = os.getenv(
     "RAG_VECTOR_KB_PATH",
-    str(Path(__file__).resolve().parents[2] / "rag" / "kb" / "current"),
+    str(Path(__file__).resolve().parents[2] / "rag" / "kb" / "current_partial"),
 )
 RAG_EMBED_PROVIDER = os.getenv("RAG_EMBED_PROVIDER", "ollama")
 RAG_EMBED_MODEL = os.getenv("RAG_EMBED_MODEL", "bge-m3:latest")
@@ -116,15 +120,39 @@ def _ollama_generate(prompt: str, *, temperature: float = 0.2, max_tokens: int =
         data=data,
         headers={"Content-Type": "application/json"},
     )
-    try:
-        with urllib.request.urlopen(request, timeout=20) as response:
-            body = response.read().decode("utf-8")
-        result = json.loads(body)
-        return str(result.get("response") or "").strip()
-    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as exc:
-        logging.error("Ollama generate error: %s: %s", type(exc).__name__, exc)
-        logging.error("Model: %s, URL: %s", OLLAMA_MODEL, OLLAMA_BASE_URL)
-        return ""
+    delay = 0.8
+    last_exc: Optional[Exception] = None
+    for attempt in range(OLLAMA_MAX_RETRIES + 1):
+        try:
+            with urllib.request.urlopen(request, timeout=OLLAMA_TIMEOUT_SEC) as response:
+                body = response.read().decode("utf-8")
+            result = json.loads(body)
+            return str(result.get("response") or "").strip()
+        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, socket.timeout, json.JSONDecodeError) as exc:
+            last_exc = exc
+            if attempt < OLLAMA_MAX_RETRIES:
+                logging.warning(
+                    "Ollama generate retrying attempt=%d/%d timeout=%ss model=%s err=%s",
+                    attempt + 1,
+                    OLLAMA_MAX_RETRIES,
+                    OLLAMA_TIMEOUT_SEC,
+                    OLLAMA_MODEL,
+                    exc,
+                )
+                time.sleep(delay)
+                delay = min(delay * 2.0, 5.0)
+                continue
+
+    if last_exc is not None:
+        logging.error("Ollama generate error: %s: %s", type(last_exc).__name__, last_exc)
+    logging.error(
+        "Model: %s, URL: %s, timeout=%ss, retries=%s",
+        OLLAMA_MODEL,
+        OLLAMA_BASE_URL,
+        OLLAMA_TIMEOUT_SEC,
+        OLLAMA_MAX_RETRIES,
+    )
+    return ""
 
 
 def _to_list_of_str(value: Any) -> List[str]:
@@ -270,9 +298,30 @@ def _load_vector_kb() -> Optional[Any]:
 
     try:
         load_kb, _ = _import_top_level_rag_modules()
+        candidates: List[str] = []
+        primary = str(RAG_VECTOR_KB_PATH).strip()
+        if primary:
+            candidates.append(primary)
 
-        _VECTOR_KB_CACHE = load_kb(RAG_VECTOR_KB_PATH)
-        return _VECTOR_KB_CACHE
+        project_root = Path(__file__).resolve().parents[2]
+        fallback_partial = str(project_root / "rag" / "kb" / "current_partial")
+        if fallback_partial not in candidates:
+            candidates.append(fallback_partial)
+
+        last_exc: Optional[Exception] = None
+        for candidate in candidates:
+            try:
+                _VECTOR_KB_CACHE = load_kb(candidate)
+                if candidate != primary:
+                    logging.warning("vector kb fallback activated: %s", candidate)
+                return _VECTOR_KB_CACHE
+            except Exception as exc:  # noqa: BLE001
+                last_exc = exc
+                continue
+
+        if last_exc is not None:
+            raise last_exc
+        raise RuntimeError("vector kb candidates are empty")
     except Exception as exc:
         _VECTOR_DISABLED_REASON = str(exc)
         logging.warning("vector kb unavailable: %s", exc)

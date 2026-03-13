@@ -34,7 +34,10 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
+	"strings"
+	"syscall"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -125,6 +128,88 @@ type runtimeMetrics struct {
 	runningBatches   int64
 	totalLatencyNs   int64
 	lastLatencyNs    int64
+}
+
+type cpuBatchCounters struct {
+	start sync.Map // map[int]*int64
+	done  sync.Map // map[int]*int64
+	err   sync.Map // map[int]*int64
+}
+
+func (c *cpuBatchCounters) add(counter *sync.Map, cpu int, delta int64) {
+	if cpu < 0 {
+		return
+	}
+	if ptr, ok := counter.Load(cpu); ok {
+		atomic.AddInt64(ptr.(*int64), delta)
+		return
+	}
+	initVal := new(int64)
+	*initVal = delta
+	actual, loaded := counter.LoadOrStore(cpu, initVal)
+	if loaded {
+		atomic.AddInt64(actual.(*int64), delta)
+	}
+}
+
+func (c *cpuBatchCounters) addStart(cpu int) {
+	c.add(&c.start, cpu, 1)
+}
+
+func (c *cpuBatchCounters) addDone(cpu int) {
+	c.add(&c.done, cpu, 1)
+}
+
+func (c *cpuBatchCounters) addErr(cpu int) {
+	c.add(&c.err, cpu, 1)
+}
+
+func _snapshotSyncMapInt64(m *sync.Map) map[int]int64 {
+	out := map[int]int64{}
+	m.Range(func(k, v any) bool {
+		cpu, ok1 := k.(int)
+		ptr, ok2 := v.(*int64)
+		if ok1 && ok2 {
+			out[cpu] = atomic.LoadInt64(ptr)
+		}
+		return true
+	})
+	return out
+}
+
+func (c *cpuBatchCounters) summaryLines() []string {
+	starts := _snapshotSyncMapInt64(&c.start)
+	dones := _snapshotSyncMapInt64(&c.done)
+	errs := _snapshotSyncMapInt64(&c.err)
+
+	cpuSet := map[int]struct{}{}
+	for cpu := range starts {
+		cpuSet[cpu] = struct{}{}
+	}
+	for cpu := range dones {
+		cpuSet[cpu] = struct{}{}
+	}
+	for cpu := range errs {
+		cpuSet[cpu] = struct{}{}
+	}
+
+	cpus := make([]int, 0, len(cpuSet))
+	for cpu := range cpuSet {
+		cpus = append(cpus, cpu)
+	}
+	sort.Ints(cpus)
+
+	lines := make([]string, 0, len(cpus))
+	for _, cpu := range cpus {
+		lines = append(lines,
+			fmt.Sprintf("[GO_EMBED_CPU_SUMMARY] cpu=%d start=%d done=%d error=%d",
+				cpu, starts[cpu], dones[cpu], errs[cpu]),
+		)
+	}
+	if len(lines) == 0 {
+		lines = append(lines, "[GO_EMBED_CPU_SUMMARY] no_cpu_samples")
+	}
+	return lines
 }
 
 func (m *runtimeMetrics) onStart(textCount int) {
@@ -348,6 +433,30 @@ func validateVectors(vecs [][]float32, want int) error {
 	return nil
 }
 
+func currentCPUForTID(tid int) int {
+	path := fmt.Sprintf("/proc/self/task/%d/stat", tid)
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		return -1
+	}
+	line := strings.TrimSpace(string(raw))
+	idx := strings.LastIndex(line, ")")
+	if idx < 0 || idx+1 >= len(line) {
+		return -1
+	}
+	fields := strings.Fields(strings.TrimSpace(line[idx+1:]))
+	// In /proc/[pid]/stat, processor is field 39 (1-based).
+	// fields here start from original field 3 (state), so index is 39-3=36.
+	if len(fields) <= 36 {
+		return -1
+	}
+	cpu, err := strconv.Atoi(fields[36])
+	if err != nil {
+		return -1
+	}
+	return cpu
+}
+
 // ── main loop ─────────────────────────────────────────────────────────────────
 
 func main() {
@@ -356,8 +465,12 @@ func main() {
 		Timeout: time.Duration(cfg.timeoutSec+10) * time.Second,
 	}
 	metrics := &runtimeMetrics{}
+	cpuCounters := &cpuBatchCounters{}
 	stopMetricsReporter := startMetricsReporter(cfg, metrics)
 	defer stopMetricsReporter()
+	if cfg.connLog {
+		fmt.Fprintf(os.Stderr, "go_embedder start pid=%d concurrency=%d\n", os.Getpid(), cfg.concurrency)
+	}
 
 	sem := make(chan struct{}, cfg.concurrency)
 	slots := make(chan int, cfg.concurrency)
@@ -406,27 +519,41 @@ func main() {
 			metrics.onStart(len(b.Texts))
 			startedAt := time.Now()
 			if cfg.connLog {
-				fmt.Fprintf(os.Stderr, "go_embedder %d start batch_id=%d texts=%d\n", slotID, b.ID, len(b.Texts))
+				tid := syscall.Gettid()
+				cpu := currentCPUForTID(tid)
+				cpuCounters.addStart(cpu)
+				fmt.Fprintf(os.Stderr, "go_embedder slot=%d event=start batch_id=%d texts=%d pid=%d tid=%d cpu=%d\n", slotID, b.ID, len(b.Texts), os.Getpid(), tid, cpu)
 			}
 
 			vecs, err := embedWithRetry(cfg, client, b.Texts)
 			if err != nil {
 				metrics.onFinish(len(b.Texts), time.Since(startedAt), true)
 				if cfg.connLog {
-					fmt.Fprintf(os.Stderr, "go_embedder %d error batch_id=%d elapsed_ms=%.1f\n", slotID, b.ID, float64(time.Since(startedAt))/float64(time.Millisecond))
+					tid := syscall.Gettid()
+					cpu := currentCPUForTID(tid)
+					cpuCounters.addErr(cpu)
+					fmt.Fprintf(os.Stderr, "go_embedder slot=%d event=error batch_id=%d elapsed_ms=%.1f pid=%d tid=%d cpu=%d\n", slotID, b.ID, float64(time.Since(startedAt))/float64(time.Millisecond), os.Getpid(), tid, cpu)
 				}
 				writeLine(outputBatch{ID: b.ID, Error: err.Error()})
 				return
 			}
 			metrics.onFinish(len(b.Texts), time.Since(startedAt), false)
 			if cfg.connLog {
-				fmt.Fprintf(os.Stderr, "go_embedder %d done batch_id=%d elapsed_ms=%.1f\n", slotID, b.ID, float64(time.Since(startedAt))/float64(time.Millisecond))
+				tid := syscall.Gettid()
+				cpu := currentCPUForTID(tid)
+				cpuCounters.addDone(cpu)
+				fmt.Fprintf(os.Stderr, "go_embedder slot=%d event=done batch_id=%d elapsed_ms=%.1f pid=%d tid=%d cpu=%d\n", slotID, b.ID, float64(time.Since(startedAt))/float64(time.Millisecond), os.Getpid(), tid, cpu)
 			}
 			writeLine(outputBatch{ID: b.ID, Vectors: vecs})
 		}(batch)
 	}
 
 	wg.Wait()
+	if cfg.connLog {
+		for _, line := range cpuCounters.summaryLines() {
+			fmt.Fprintln(os.Stderr, line)
+		}
+	}
 
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintf(os.Stderr, "stdin read error: %v\n", err)
