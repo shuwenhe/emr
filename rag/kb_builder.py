@@ -9,7 +9,6 @@ import sys
 import tempfile
 import threading
 import time
-from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
@@ -732,6 +731,41 @@ def _write_partial_snapshot(
         json.dump(manifest.model_dump(), handle, ensure_ascii=False, indent=2)
 
 
+def _write_partial_snapshot_from_index(
+    partial_dir: str,
+    index: Optional[faiss.Index],
+    chunks_src_path: str,
+    kb_version: str,
+    source_dir: str,
+    embed_model: str,
+    provider: str,
+    failed_items: List[Dict[str, str]],
+    chunk_count: int,
+) -> None:
+    if index is None or chunk_count <= 0:
+        return
+    if not os.path.exists(chunks_src_path):
+        return
+
+    os.makedirs(partial_dir, exist_ok=True)
+    faiss.write_index(index, os.path.join(partial_dir, "index.faiss"))
+    shutil.copyfile(chunks_src_path, os.path.join(partial_dir, "chunks.jsonl"))
+
+    manifest = Manifest(
+        kb_version=kb_version,
+        source_dir=source_dir,
+        build_time=datetime.utcnow().isoformat() + "Z",
+        embedding_model=embed_model,
+        llm_provider_default=provider,
+        faiss_metric="cosine",
+        doc_count=0,
+        chunk_count=chunk_count,
+        failed_files=[item.get("chunk_id") or item.get("path") or "" for item in failed_items if item],
+    )
+    with open(os.path.join(partial_dir, "manifest.json"), "w", encoding="utf-8") as handle:
+        json.dump(manifest.model_dump(), handle, ensure_ascii=False, indent=2)
+
+
 def _activate_partial_link(out_dir: str, partial_dir: str) -> None:
     current_path = os.path.join(out_dir, "current_partial")
     tmp_link = os.path.join(out_dir, "current_partial_tmp")
@@ -980,101 +1014,13 @@ def build_kb(
 
     failed_files: List[Dict[str, str]] = []
     degraded_files: List[Dict[str, str]] = []
-    records: List[ChunkRecord] = []
+    embeddings = None
+    chunks_tmp_path = os.path.join(version_dir, "chunks.jsonl.tmp")
+    chunks_handle = None
     temp_dir = tempfile.mkdtemp(prefix="kb_docx_")
 
     try:
-        _log_step(4, total_steps, "Parsing documents into chunks", f"documents={len(included)}")
-        progress = tqdm(included, desc="Parsing documents")
-        for path in progress:
-            progress.set_postfix_str(safe_relpath(path, source_dir))
-            try:
-                doc_hash = sha1_file(path)
-                ext = os.path.splitext(path)[1].lower()
-                blocks = None
-                if ext == ".doc":
-                    converted, reason = convert_doc_to_docx(path, temp_dir)
-                    if converted:
-                        if show_markdown:
-                            markdown, blocks = parse_docx_with_markdown(converted)
-                            tqdm.write(f"[MARKDOWN] {safe_relpath(path, source_dir)}")
-                            tqdm.write(markdown or "(empty)")
-                        else:
-                            blocks = parse_docx(converted)
-                    else:
-                        text, text_reason = _extract_doc_text_with_antiword(path)
-                        if text:
-                            degrade_reason = reason or "antiword_fallback"
-                            blocks = blocks_from_text(text)
-                            degraded_files.append(
-                                {
-                                    "path": path,
-                                    "reason": text_reason or degrade_reason,
-                                }
-                            )
-                            msg = safe_relpath(path, source_dir)
-                            if text_reason or degrade_reason:
-                                msg = f"{msg} ({text_reason or degrade_reason})"
-                            tqdm.write(f"[WARN] degraded parse: {msg}")
-                        else:
-                            failed_files.append({"path": path, "reason": reason or "doc_convert_failed"})
-                            msg = safe_relpath(path, source_dir)
-                            if reason:
-                                msg = f"{msg} ({reason})"
-                            tqdm.write(f"[WARN] convert failed: {msg}")
-                            continue
-                else:
-                    if show_markdown:
-                        markdown, blocks = parse_docx_with_markdown(path)
-                        tqdm.write(f"[MARKDOWN] {safe_relpath(path, source_dir)}")
-                        tqdm.write(markdown or "(empty)")
-                    else:
-                        blocks = parse_docx(path)
-                if not blocks:
-                    failed_files.append({"path": path, "reason": "parse_empty"})
-                    tqdm.write(f"[WARN] parse empty: {safe_relpath(path, source_dir)}")
-                    continue
-                chunks = _collect_chunks(
-                    file_path=safe_relpath(path, source_dir),
-                    doc_hash=doc_hash,
-                    blocks=blocks,
-                    max_len=max_len,
-                    overlap=overlap,
-                )
-                if show_markdown:
-                    for chunk in chunks:
-                        title_path = chunk.get("title_path") or []
-                        title_label = " > ".join([part for part in title_path if part])
-                        excerpt = str(chunk.get("excerpt_markdown") or "")
-                        excerpt = _shorten(excerpt.replace("\n", "\\n"))
-                        tqdm.write(
-                            "[CHUNK] "
-                            f"{chunk['chunk_index']} "
-                            f"type={chunk['chunk_type']} "
-                            f"len={len(str(chunk.get('text_for_embedding') or ''))} "
-                            f"title={title_label or '-'} "
-                            f"text={excerpt}"
-                        )
-                for chunk in chunks:
-                    records.append(
-                        ChunkRecord(
-                            vector_id=-1,
-                            chunk_id=chunk["chunk_id"],
-                            file_path=chunk["file_path"] if "file_path" in chunk else safe_relpath(path, source_dir),
-                            title_path=chunk["title_path"],
-                            chunk_type=chunk["chunk_type"],
-                            chunk_index=chunk["chunk_index"],
-                            doc_hash=doc_hash,
-                            text_for_embedding=chunk["text_for_embedding"],
-                            excerpt_markdown=chunk["excerpt_markdown"],
-                        )
-                    )
-            except Exception:
-                failed_files.append({"path": path, "reason": "parse_error"})
-                tqdm.write(f"[WARN] parse failed: {safe_relpath(path, source_dir)}")
-
-        if not records:
-            raise RuntimeError("No chunks generated; check source directory and parsers.")
+        _log_step(4, total_steps, "Parsing documents into chunks", f"documents={len(included)}, mode=streaming")
 
         resume_enabled = _env_flag("RAG_EMBED_RESUME", default=True)
         checkpoint_every = max(1, int(os.getenv("RAG_CHECKPOINT_EVERY_BATCHES", "20")))
@@ -1101,24 +1047,34 @@ def build_kb(
                 checkpoint_dir,
                 checkpoint_signature,
             )
-        vectors: List[List[float]] = []
-        kept_records: List[ChunkRecord] = []
         pending_records: List[ChunkRecord] = []
-        for record in records:
-            resumed = resumed_map.get(record.chunk_id)
-            if resumed:
-                resumed_record, resumed_vector = resumed
-                record.text_for_embedding = resumed_record.text_for_embedding
-                kept_records.append(record)
-                vectors.append(resumed_vector)
-            else:
-                pending_records.append(record)
-
         embedding_failed: List[Dict[str, str]] = list(resumed_failed)
+        index: Optional[faiss.Index] = None
+        next_vector_id = 0
+        chunks_handle = open(chunks_tmp_path, "w", encoding="utf-8")
+        total_discovered = 0
+        resumed_applied = 0
+
+        def _append_embedded_record(record: ChunkRecord, vector: List[float]) -> None:
+            nonlocal index, next_vector_id
+            vec = np.asarray(vector, dtype="float32")
+            if vec.ndim != 1 or vec.size == 0:
+                raise RuntimeError("invalid embedding vector shape")
+            arr = vec.reshape(1, -1)
+            faiss.normalize_L2(arr)
+            if index is None:
+                index = faiss.IndexFlatIP(arr.shape[1])
+            elif index.d != arr.shape[1]:
+                raise RuntimeError(f"embedding dim mismatch: expected {index.d}, got {arr.shape[1]}")
+            index.add(arr)
+
+            record.vector_id = next_vector_id
+            next_vector_id += 1
+            chunks_handle.write(json.dumps(record.model_dump(), ensure_ascii=True))
+            chunks_handle.write("\n")
+
         if resumed_loaded > 0:
-            tqdm.write(
-                f"[RESUME] loaded {resumed_loaded} embedded chunk(s) from checkpoint; pending={len(pending_records)}"
-            )
+            tqdm.write(f"[RESUME] checkpoint entries loaded={resumed_loaded}")
         elif resume_enabled:
             _write_checkpoint_state(
                 checkpoint_dir,
@@ -1128,7 +1084,7 @@ def build_kb(
                     "phase": "embedding",
                     "created_at": datetime.utcnow().isoformat() + "Z",
                     "updated_at": datetime.utcnow().isoformat() + "Z",
-                    "total_chunks": len(records),
+                    "total_chunks": 0,
                     "embedded_chunks": 0,
                     "failed_chunks": len(embedding_failed),
                 },
@@ -1154,24 +1110,23 @@ def build_kb(
             _log_step(5, total_steps, "Initializing embedding model",
                       f"provider={provider}, model={embed_model}, backend=python")
             embeddings = build_embeddings(provider, embed_model, base_url=base_url, api_key=api_key)
-        _log_step(6, total_steps, "Embedding chunks", f"chunks={len(records)}, batch_size={batch_size}")
+        _log_step(6, total_steps, "Embedding chunks", f"mode=streaming, batch_size={batch_size}")
         backend_name = "go-concurrent" if isinstance(embeddings, GoEmbedder) else "python"
-        metrics = EmbedMetrics(backend=backend_name, requested_chunks=len(records), batch_size=batch_size)
+        metrics = EmbedMetrics(backend=backend_name, requested_chunks=0, batch_size=batch_size)
         metrics_every = max(1, int(os.getenv("RAG_EMBED_METRICS_EVERY", "20")))
-        with tqdm(total=len(records), desc="Embedding chunks") as progress:
-            if resumed_loaded > 0:
-                progress.update(resumed_loaded)
+        with tqdm(included, desc="Parsing documents") as parse_progress, tqdm(total=0, desc="Embedding chunks") as progress:
 
             def _after_batch(
                 batch_kept: List[ChunkRecord],
                 batch_vectors: List[List[float]],
                 batch_failed: List[Dict[str, str]],
             ) -> None:
-                nonlocal vectors, kept_records, embedding_failed
+                nonlocal embedding_failed
                 next_batch_count = metrics.batch_count + 1
-                kept_records.extend(batch_kept)
-                vectors.extend(batch_vectors)
+                for rec, vec in zip(batch_kept, batch_vectors):
+                    _append_embedded_record(rec, vec)
                 embedding_failed.extend(batch_failed)
+                metrics.requested_chunks = total_discovered
                 if not resume_enabled:
                     return
 
@@ -1198,107 +1153,166 @@ def build_kb(
                             "phase": "embedding",
                             "created_at": datetime.utcnow().isoformat() + "Z",
                             "updated_at": datetime.utcnow().isoformat() + "Z",
-                            "total_chunks": len(records),
-                            "embedded_chunks": len(kept_records),
+                            "total_chunks": total_discovered,
+                            "embedded_chunks": next_vector_id,
                             "failed_chunks": len(embedding_failed),
                         },
                     )
 
-                if partial_every > 0 and next_batch_count % partial_every == 0 and kept_records:
+                if partial_every > 0 and next_batch_count % partial_every == 0 and next_vector_id > 0:
+                    chunks_handle.flush()
+                    os.fsync(chunks_handle.fileno())
                     partial_dir = os.path.join(version_dir, "partial")
-                    _write_partial_snapshot(
+                    _write_partial_snapshot_from_index(
                         partial_dir=partial_dir,
-                        records=kept_records,
-                        vectors=vectors,
+                        index=index,
+                        chunks_src_path=chunks_tmp_path,
                         kb_version=kb_version,
                         source_dir=source_dir,
                         embed_model=embed_model,
                         provider=provider,
                         failed_items=embedding_failed,
+                        chunk_count=next_vector_id,
                     )
                     _activate_partial_link(out_dir, partial_dir)
 
-            if isinstance(embeddings, GoEmbedder):
-                pipeline_workers = max(
-                    1,
-                    int(os.getenv("RAG_EMBED_PIPELINE_WORKERS", os.getenv("EMBED_PIPELINE_WORKERS", "8"))),
+            def _process_batch(batch_records: List[ChunkRecord]) -> None:
+                if not batch_records:
+                    return
+                batch_start = time.perf_counter()
+                batch_kept, batch_vectors, batch_failed, warns = _embed_batch_with_fallback(
+                    embeddings,
+                    batch_records,
                 )
-                max_inflight = max(
-                    1,
-                    int(
-                        os.getenv(
-                            "RAG_EMBED_PIPELINE_INFLIGHT",
-                            os.getenv("EMBED_PIPELINE_INFLIGHT", str(pipeline_workers * 2)),
-                        )
-                    ),
-                )
-                batch_iter = iter(iter_batches(pending_records, batch_size))
-                in_flight = {}
-
-                with ThreadPoolExecutor(max_workers=pipeline_workers) as executor:
-                    def _submit_next() -> bool:
-                        try:
-                            next_batch = next(batch_iter)
-                        except StopIteration:
-                            return False
-                        future = executor.submit(_embed_batch_with_fallback, embeddings, next_batch)
-                        in_flight[future] = (len(next_batch), time.perf_counter())
-                        return True
-
-                    while len(in_flight) < max_inflight and _submit_next():
-                        pass
-
-                    while in_flight:
-                        done, _ = wait(in_flight.keys(), return_when=FIRST_COMPLETED)
-                        for future in done:
-                            input_size, batch_start = in_flight.pop(future)
-                            elapsed = time.perf_counter() - batch_start
-                            batch_kept, batch_vectors, batch_failed, warns = future.result()
-                            for msg in warns:
-                                tqdm.write(msg)
-                            _after_batch(batch_kept, batch_vectors, batch_failed)
-                            metrics.batch_count += 1
-                            metrics.total_batch_seconds += elapsed
-                            metrics.kept_chunks += len(batch_kept)
-                            metrics.failed_chunks += len(batch_failed)
-                            if batch_failed:
-                                metrics.failed_batches += 1
-                            if metrics.batch_count % metrics_every == 0:
-                                tqdm.write(
-                                    "[EMBED_METRIC] "
-                                    f"backend={backend_name} batch={metrics.batch_count} "
-                                    f"elapsed_ms={elapsed * 1000:.1f} "
-                                    f"kept={len(batch_kept)} failed={len(batch_failed)}"
-                                )
-                            progress.update(input_size)
-
-                        while len(in_flight) < max_inflight and _submit_next():
-                            pass
-            else:
-                for batch_records in iter_batches(pending_records, batch_size):
-                    batch_start = time.perf_counter()
-                    batch_kept, batch_vectors, batch_failed, warns = _embed_batch_with_fallback(
-                        embeddings,
-                        batch_records,
+                elapsed = time.perf_counter() - batch_start
+                for msg in warns:
+                    tqdm.write(msg)
+                _after_batch(batch_kept, batch_vectors, batch_failed)
+                metrics.batch_count += 1
+                metrics.total_batch_seconds += elapsed
+                metrics.kept_chunks += len(batch_kept)
+                metrics.failed_chunks += len(batch_failed)
+                if batch_failed:
+                    metrics.failed_batches += 1
+                if metrics.batch_count % metrics_every == 0:
+                    tqdm.write(
+                        "[EMBED_METRIC] "
+                        f"backend={backend_name} batch={metrics.batch_count} "
+                        f"elapsed_ms={elapsed * 1000:.1f} "
+                        f"kept={len(batch_kept)} failed={len(batch_failed)}"
                     )
-                    elapsed = time.perf_counter() - batch_start
-                    for msg in warns:
-                        tqdm.write(msg)
-                    _after_batch(batch_kept, batch_vectors, batch_failed)
-                    metrics.batch_count += 1
-                    metrics.total_batch_seconds += elapsed
-                    metrics.kept_chunks += len(batch_kept)
-                    metrics.failed_chunks += len(batch_failed)
-                    if batch_failed:
-                        metrics.failed_batches += 1
-                    if metrics.batch_count % metrics_every == 0:
-                        tqdm.write(
-                            "[EMBED_METRIC] "
-                            f"backend={backend_name} batch={metrics.batch_count} "
-                            f"elapsed_ms={elapsed * 1000:.1f} "
-                            f"kept={len(batch_kept)} failed={len(batch_failed)}"
+                progress.update(len(batch_records))
+
+            for path in parse_progress:
+                parse_progress.set_postfix_str(safe_relpath(path, source_dir))
+                try:
+                    doc_hash = sha1_file(path)
+                    ext = os.path.splitext(path)[1].lower()
+                    blocks = None
+                    if ext == ".doc":
+                        converted, reason = convert_doc_to_docx(path, temp_dir)
+                        if converted:
+                            if show_markdown:
+                                markdown, blocks = parse_docx_with_markdown(converted)
+                                tqdm.write(f"[MARKDOWN] {safe_relpath(path, source_dir)}")
+                                tqdm.write(markdown or "(empty)")
+                            else:
+                                blocks = parse_docx(converted)
+                        else:
+                            text, text_reason = _extract_doc_text_with_antiword(path)
+                            if text:
+                                degrade_reason = reason or "antiword_fallback"
+                                blocks = blocks_from_text(text)
+                                degraded_files.append(
+                                    {
+                                        "path": path,
+                                        "reason": text_reason or degrade_reason,
+                                    }
+                                )
+                                msg = safe_relpath(path, source_dir)
+                                if text_reason or degrade_reason:
+                                    msg = f"{msg} ({text_reason or degrade_reason})"
+                                tqdm.write(f"[WARN] degraded parse: {msg}")
+                            else:
+                                failed_files.append({"path": path, "reason": reason or "doc_convert_failed"})
+                                msg = safe_relpath(path, source_dir)
+                                if reason:
+                                    msg = f"{msg} ({reason})"
+                                tqdm.write(f"[WARN] convert failed: {msg}")
+                                continue
+                    else:
+                        if show_markdown:
+                            markdown, blocks = parse_docx_with_markdown(path)
+                            tqdm.write(f"[MARKDOWN] {safe_relpath(path, source_dir)}")
+                            tqdm.write(markdown or "(empty)")
+                        else:
+                            blocks = parse_docx(path)
+
+                    if not blocks:
+                        failed_files.append({"path": path, "reason": "parse_empty"})
+                        tqdm.write(f"[WARN] parse empty: {safe_relpath(path, source_dir)}")
+                        continue
+
+                    chunks = _collect_chunks(
+                        file_path=safe_relpath(path, source_dir),
+                        doc_hash=doc_hash,
+                        blocks=blocks,
+                        max_len=max_len,
+                        overlap=overlap,
+                    )
+                    if show_markdown:
+                        for chunk in chunks:
+                            title_path = chunk.get("title_path") or []
+                            title_label = " > ".join([part for part in title_path if part])
+                            excerpt = str(chunk.get("excerpt_markdown") or "")
+                            excerpt = _shorten(excerpt.replace("\n", "\\n"))
+                            tqdm.write(
+                                "[CHUNK] "
+                                f"{chunk['chunk_index']} "
+                                f"type={chunk['chunk_type']} "
+                                f"len={len(str(chunk.get('text_for_embedding') or ''))} "
+                                f"title={title_label or '-'} "
+                                f"text={excerpt}"
+                            )
+
+                    for chunk in chunks:
+                        total_discovered += 1
+                        record = ChunkRecord(
+                            vector_id=-1,
+                            chunk_id=chunk["chunk_id"],
+                            file_path=chunk["file_path"] if "file_path" in chunk else safe_relpath(path, source_dir),
+                            title_path=chunk["title_path"],
+                            chunk_type=chunk["chunk_type"],
+                            chunk_index=chunk["chunk_index"],
+                            doc_hash=doc_hash,
+                            text_for_embedding=chunk["text_for_embedding"],
+                            excerpt_markdown=chunk["excerpt_markdown"],
                         )
-                    progress.update(len(batch_records))
+                        resumed = resumed_map.get(record.chunk_id)
+                        if resumed:
+                            resumed_record, resumed_vector = resumed
+                            record.text_for_embedding = resumed_record.text_for_embedding
+                            _append_embedded_record(record, resumed_vector)
+                            resumed_applied += 1
+                            progress.update(1)
+                            continue
+
+                        pending_records.append(record)
+                        if len(pending_records) >= batch_size:
+                            _process_batch(pending_records)
+                            pending_records = []
+                except Exception:
+                    failed_files.append({"path": path, "reason": "parse_error"})
+                    tqdm.write(f"[WARN] parse failed: {safe_relpath(path, source_dir)}")
+
+            if pending_records:
+                _process_batch(pending_records)
+
+        metrics.requested_chunks = total_discovered
+        if resumed_applied > 0:
+            tqdm.write(f"[RESUME] applied {resumed_applied} chunk(s) from checkpoint during streaming parse")
+        if total_discovered == 0:
+            raise RuntimeError("No chunks generated; check source directory and parsers.")
 
         if resume_enabled:
             _write_checkpoint_state(
@@ -1309,40 +1323,31 @@ def build_kb(
                     "phase": "embedding_finished",
                     "created_at": datetime.utcnow().isoformat() + "Z",
                     "updated_at": datetime.utcnow().isoformat() + "Z",
-                    "total_chunks": len(records),
-                    "embedded_chunks": len(kept_records),
+                    "total_chunks": total_discovered,
+                    "embedded_chunks": next_vector_id,
                     "failed_chunks": len(embedding_failed),
                 },
             )
 
         tqdm.write(f"[EMBED_SUMMARY] {json.dumps(metrics.to_dict(), ensure_ascii=True)}")
-
-        records = kept_records
         if embedding_failed:
             tqdm.write(f"[WARN] embedding failures: {len(embedding_failed)} chunk(s) skipped.")
 
-        if not vectors:
+        if index is None or next_vector_id == 0:
             raise RuntimeError("Embedding returned no vectors.")
 
-        _log_step(7, total_steps, "Building FAISS index", f"vectors={len(vectors)}")
-        vector_array = np.array(vectors, dtype="float32")
-        faiss.normalize_L2(vector_array)
-        dim = vector_array.shape[1]
-        index = faiss.IndexFlatIP(dim)
-        index.add(vector_array)
+        chunks_handle.flush()
+        os.fsync(chunks_handle.fileno())
+        chunks_handle.close()
 
-        for idx, record in enumerate(records):
-            record.vector_id = idx
+        _log_step(7, total_steps, "Building FAISS index", f"vectors={next_vector_id}")
 
         _log_step(8, total_steps, "Writing KB artifacts and activating version", f"kb_version={kb_version}")
         index_path = os.path.join(version_dir, "index.faiss")
         faiss.write_index(index, index_path)
 
         jsonl_path = os.path.join(version_dir, "chunks.jsonl")
-        with open(jsonl_path, "w", encoding="utf-8") as handle:
-            for record in records:
-                handle.write(json.dumps(record.model_dump(), ensure_ascii=True))
-                handle.write("\n")
+        os.replace(chunks_tmp_path, jsonl_path)
 
         manifest = Manifest(
             kb_version=kb_version,
@@ -1352,7 +1357,7 @@ def build_kb(
             llm_provider_default=provider,
             faiss_metric="cosine",
             doc_count=len(included),
-            chunk_count=len(records),
+            chunk_count=next_vector_id,
             failed_files=[item["path"] for item in failed_files],
         )
         manifest_path = os.path.join(version_dir, "manifest.json")
@@ -1392,6 +1397,17 @@ def build_kb(
         print(f"Build summary: kb_version={kb_version}")
         return manifest
     finally:
+        if "chunks_handle" in locals():
+            try:
+                if not chunks_handle.closed:
+                    chunks_handle.close()
+            except Exception:
+                pass
+        if "chunks_tmp_path" in locals() and os.path.exists(chunks_tmp_path):
+            try:
+                os.remove(chunks_tmp_path)
+            except Exception:
+                pass
         shutil.rmtree(temp_dir, ignore_errors=True)
         if "embeddings" in dir() and isinstance(embeddings, GoEmbedder):  # type: ignore[possibly-undefined]
             embeddings.close()  # type: ignore[possibly-undefined]
