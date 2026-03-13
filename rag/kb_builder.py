@@ -87,6 +87,30 @@ def _read_proc_stat_total_idle() -> Tuple[int, int]:
     return total, idle
 
 
+def _read_proc_stat_per_core() -> List[Tuple[int, int]]:
+    cores: List[Tuple[int, int]] = []
+    with open("/proc/stat", "r", encoding="utf-8") as handle:
+        for line in handle:
+            parts = line.strip().split()
+            if not parts:
+                continue
+            name = parts[0]
+            if not name.startswith("cpu") or name == "cpu":
+                continue
+            suffix = name[3:]
+            if not suffix.isdigit():
+                continue
+            if len(parts) < 8:
+                continue
+            values = [int(item) for item in parts[1:]]
+            total = sum(values)
+            idle = values[3] + values[4]
+            cores.append((total, idle))
+    if not cores:
+        raise RuntimeError("no cpu core stats found in /proc/stat")
+    return cores
+
+
 def _read_process_cpu_ticks() -> Tuple[int, int]:
     with open("/proc/self/stat", "r", encoding="utf-8") as handle:
         data = handle.read().strip()
@@ -178,26 +202,24 @@ def _start_resource_monitor(tag: str) -> Callable[[], None]:
     done = threading.Event()
 
     def _loop() -> None:
-        cpu_count = max(1, os.cpu_count() or 1)
         try:
-            prev_total, prev_idle = _read_proc_stat_total_idle()
-            prev_self, prev_proc_total = _read_process_cpu_ticks()
+            prev_cores = _read_proc_stat_per_core()
         except Exception:
-            prev_total, prev_idle, prev_self, prev_proc_total = 0, 0, 0, 0
+            prev_cores = []
 
         while not stop.wait(interval):
             try:
-                now_total, now_idle = _read_proc_stat_total_idle()
-                now_self, now_proc_total = _read_process_cpu_ticks()
-                delta_total = max(now_total - prev_total, 1)
-                delta_idle = max(now_idle - prev_idle, 0)
-                delta_self = max(now_self - prev_self, 0)
-                delta_proc_total = max(now_proc_total - prev_proc_total, 0)
+                now_cores = _read_proc_stat_per_core()
+                if not prev_cores or len(prev_cores) != len(now_cores):
+                    prev_cores = now_cores
+                    continue
 
-                cpu_pct = max(0.0, min(100.0, (1.0 - (delta_idle / delta_total)) * 100.0))
-                proc_cpu_self_pct = max(0.0, (delta_self / delta_total) * 100.0 * cpu_count)
-                proc_cpu_total_pct = max(0.0, (delta_proc_total / delta_total) * 100.0 * cpu_count)
-                proc_cpu_total_of_host_pct = max(0.0, proc_cpu_total_pct / cpu_count)
+                core_parts: List[str] = []
+                for idx, ((prev_total, prev_idle), (now_total, now_idle)) in enumerate(zip(prev_cores, now_cores)):
+                    delta_total = max(now_total - prev_total, 1)
+                    delta_idle = max(now_idle - prev_idle, 0)
+                    core_pct = max(0.0, min(100.0, (1.0 - (delta_idle / delta_total)) * 100.0))
+                    core_parts.append(f"cpu{idx}:{core_pct:.1f}%")
 
                 total_mem_b, used_mem_b, rss_b = _read_memory_stats()
                 mem_pct = 0.0
@@ -206,9 +228,7 @@ def _start_resource_monitor(tag: str) -> Callable[[], None]:
 
                 msg = (
                     f"[RESOURCE_METRIC] tag={tag} "
-                    f"cpu={cpu_pct:.1f}% "
-                    f"proc_cpu_self={proc_cpu_self_pct:.1f}% proc_cpu_total={proc_cpu_total_pct:.1f}% "
-                    f"proc_cpu_total_of_host={proc_cpu_total_of_host_pct:.1f}% "
+                    f"cpu_cores={'|'.join(core_parts)} "
                     f"mem={_format_bytes_gib(used_mem_b)}/{_format_bytes_gib(total_mem_b)}({mem_pct:.1f}%) "
                     f"proc_mem={_format_bytes_gib(rss_b)}"
                 )
@@ -226,8 +246,7 @@ def _start_resource_monitor(tag: str) -> Callable[[], None]:
                         msg = msg + " | gpu=unavailable"
 
                 tqdm.write(msg)
-                prev_total, prev_idle = now_total, now_idle
-                prev_self, prev_proc_total = now_self, now_proc_total
+                prev_cores = now_cores
             except Exception as exc:  # noqa: BLE001
                 tqdm.write(f"[RESOURCE_METRIC] tag={tag} monitor_error={exc}")
 
