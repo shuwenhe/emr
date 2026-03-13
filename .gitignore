@@ -1,4 +1,6 @@
 /.venv/
+/rag/.venv/
+**/.venv/
 
 # ==================== Storage (Runtime Data) ====================
 # New unified storage directory
