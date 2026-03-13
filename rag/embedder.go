@@ -52,6 +52,7 @@ type config struct {
 	timeoutSec  int
 	maxRetries  int
 	metricsSec  int
+	connLog     bool
 }
 
 func loadConfig() config {
@@ -65,6 +66,7 @@ func loadConfig() config {
 		timeoutSec:  getEnvInt("EMBED_TIMEOUT_SEC", 120),
 		maxRetries:  getEnvInt("EMBED_MAX_RETRIES", 3),
 		metricsSec:  getEnvInt("EMBED_METRICS_SEC", 5),
+		connLog:     getEnvBool("EMBED_CONN_LOG", true),
 	}
 	return c
 }
@@ -83,6 +85,21 @@ func getEnvInt(key string, def int) int {
 		}
 	}
 	return def
+}
+
+func getEnvBool(key string, def bool) bool {
+	v := os.Getenv(key)
+	if v == "" {
+		return def
+	}
+	switch v {
+	case "1", "true", "TRUE", "True", "yes", "YES", "on", "ON":
+		return true
+	case "0", "false", "FALSE", "False", "no", "NO", "off", "OFF":
+		return false
+	default:
+		return def
+	}
 }
 
 // ── I/O types ─────────────────────────────────────────────────────────────────
@@ -343,6 +360,10 @@ func main() {
 	defer stopMetricsReporter()
 
 	sem := make(chan struct{}, cfg.concurrency)
+	slots := make(chan int, cfg.concurrency)
+	for i := 1; i <= cfg.concurrency; i++ {
+		slots <- i
+	}
 	var wg sync.WaitGroup
 
 	out := bufio.NewWriter(os.Stdout)
@@ -375,19 +396,32 @@ func main() {
 
 		wg.Add(1)
 		sem <- struct{}{}
+		slotID := <-slots
 		go func(b inputBatch) {
 			defer wg.Done()
-			defer func() { <-sem }()
+			defer func() {
+				slots <- slotID
+				<-sem
+			}()
 			metrics.onStart(len(b.Texts))
 			startedAt := time.Now()
+			if cfg.connLog {
+				fmt.Fprintf(os.Stderr, "go_embedder %d start batch_id=%d texts=%d\n", slotID, b.ID, len(b.Texts))
+			}
 
 			vecs, err := embedWithRetry(cfg, client, b.Texts)
 			if err != nil {
 				metrics.onFinish(len(b.Texts), time.Since(startedAt), true)
+				if cfg.connLog {
+					fmt.Fprintf(os.Stderr, "go_embedder %d error batch_id=%d elapsed_ms=%.1f\n", slotID, b.ID, float64(time.Since(startedAt))/float64(time.Millisecond))
+				}
 				writeLine(outputBatch{ID: b.ID, Error: err.Error()})
 				return
 			}
 			metrics.onFinish(len(b.Texts), time.Since(startedAt), false)
+			if cfg.connLog {
+				fmt.Fprintf(os.Stderr, "go_embedder %d done batch_id=%d elapsed_ms=%.1f\n", slotID, b.ID, float64(time.Since(startedAt))/float64(time.Millisecond))
+			}
 			writeLine(outputBatch{ID: b.ID, Vectors: vecs})
 		}(batch)
 	}

@@ -39,6 +39,7 @@ import argparse
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 import json
 import os
+import shutil
 import sys
 import time
 from datetime import datetime, timezone
@@ -57,10 +58,17 @@ from rag.kb_utils import sha1_text
 from rag.kb_builder import (
     GoEmbedder,
     _activate_version,
+    _activate_partial_link,
+    _append_checkpoint_rows,
+    _checkpoint_signature,
     _embed_batch_with_fallback,
     _embed_documents_with_retry,
     _env_flag,
     _find_go_embedder,
+    _load_embedding_checkpoint,
+    _start_resource_monitor,
+    _write_checkpoint_state,
+    _write_partial_snapshot,
 )
 from rag.schemas import ChunkRecord, Manifest
 
@@ -163,6 +171,7 @@ def build_kb_from_chunks(
     limit_chunks: Optional[int] = None,
 ) -> Manifest:
     start_time = time.perf_counter()
+    stop_resource_monitor = lambda: None
 
     # ---- count lines for progress bar ----
     print(f"Counting chunks in {chunks_input} …")
@@ -182,7 +191,69 @@ def build_kb_from_chunks(
     if not records:
         raise RuntimeError("No chunks found in input file.")
 
+    kb_version = datetime.now().strftime("%Y%m%d-%H%M%S")
+    versions_dir = os.path.join(out_dir, "versions")
+    version_dir = os.path.join(versions_dir, kb_version)
+    os.makedirs(version_dir, exist_ok=True)
+
+    resume_enabled = _env_flag("RAG_EMBED_RESUME", default=True)
+    checkpoint_every = max(1, int(os.getenv("RAG_CHECKPOINT_EVERY_BATCHES", "20")))
+    partial_every = max(0, int(os.getenv("RAG_PARTIAL_KB_EVERY_BATCHES", "50")))
+    checkpoint_dir = os.path.join(out_dir, ".kb_checkpoint_tcm")
+    checkpoint_signature = _checkpoint_signature(
+        {
+            "chunks_input": chunks_input,
+            "provider": provider,
+            "embed_model": embed_model,
+            "batch_size": batch_size,
+            "limit_chunks": limit_chunks,
+        }
+    )
+    checkpoint_embedded_path = os.path.join(checkpoint_dir, "embedded.jsonl")
+    checkpoint_failed_path = os.path.join(checkpoint_dir, "failed.jsonl")
+
+    resumed_map: Dict[str, Tuple[ChunkRecord, List[float]]] = {}
+    resumed_failed: List[Dict[str, str]] = []
+    resumed_loaded = 0
+    if resume_enabled:
+        resumed_map, resumed_failed, resumed_loaded = _load_embedding_checkpoint(
+            checkpoint_dir,
+            checkpoint_signature,
+        )
+
+    vectors: List[List[float]] = []
+    kept_records: List[ChunkRecord] = []
+    pending_records: List[ChunkRecord] = []
+    for record in records:
+        resumed = resumed_map.get(record.chunk_id)
+        if resumed:
+            resumed_record, resumed_vector = resumed
+            record.text_for_embedding = resumed_record.text_for_embedding
+            kept_records.append(record)
+            vectors.append(resumed_vector)
+        else:
+            pending_records.append(record)
+
+    embedding_failed: List[Dict[str, str]] = list(resumed_failed)
+    if resumed_loaded > 0:
+        tqdm.write(f"[RESUME] loaded {resumed_loaded} chunk(s), pending={len(pending_records)}")
+    elif resume_enabled:
+        _write_checkpoint_state(
+            checkpoint_dir,
+            checkpoint_signature,
+            {
+                "kb_version": kb_version,
+                "phase": "embedding",
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "total_chunks": len(records),
+                "embedded_chunks": 0,
+                "failed_chunks": len(embedding_failed),
+            },
+        )
+
     # ---- embed ----
+    stop_resource_monitor = _start_resource_monitor("kb-build-tcm")
     print(f"Embedding {len(records):,} chunks via provider={provider!r} model={embed_model!r} …")
     use_go_embedder = _env_flag("RAG_USE_GO_EMBEDDER", default=True)
     go_bin = _find_go_embedder() if use_go_embedder else None
@@ -205,12 +276,67 @@ def build_kb_from_chunks(
     metrics = EmbedMetrics(backend=backend_name, requested_chunks=len(records), batch_size=batch_size)
     metrics_every = max(1, int(os.getenv("RAG_EMBED_METRICS_EVERY", "20")))
 
-    vectors: List[List[float]] = []
-    kept_records: List[ChunkRecord] = []
-    embedding_failed: List[Dict[str, str]] = []
-
     try:
         with tqdm(total=len(records), desc="Embedding", unit="chunk") as pbar:
+            if resumed_loaded > 0:
+                pbar.update(resumed_loaded)
+
+            def _after_batch(
+                batch_kept: List[ChunkRecord],
+                batch_vectors: List[List[float]],
+                batch_failed: List[Dict[str, str]],
+            ) -> None:
+                nonlocal vectors, kept_records, embedding_failed
+                next_batch_count = metrics.batch_count + 1
+                kept_records.extend(batch_kept)
+                vectors.extend(batch_vectors)
+                embedding_failed.extend(batch_failed)
+                if not resume_enabled:
+                    return
+
+                embed_rows = [
+                    {"chunk_id": rec.chunk_id, "record": rec.model_dump(), "vector": vec}
+                    for rec, vec in zip(batch_kept, batch_vectors)
+                ]
+                _append_checkpoint_rows(checkpoint_embedded_path, embed_rows)
+                failed_rows = [
+                    {
+                        "chunk_id": str(item.get("chunk_id") or ""),
+                        "file_path": str(item.get("file_path") or ""),
+                        "reason": str(item.get("reason") or ""),
+                    }
+                    for item in batch_failed
+                ]
+                _append_checkpoint_rows(checkpoint_failed_path, failed_rows)
+                if next_batch_count % checkpoint_every == 0:
+                    _write_checkpoint_state(
+                        checkpoint_dir,
+                        checkpoint_signature,
+                        {
+                            "kb_version": kb_version,
+                            "phase": "embedding",
+                            "created_at": datetime.now(timezone.utc).isoformat(),
+                            "updated_at": datetime.now(timezone.utc).isoformat(),
+                            "total_chunks": len(records),
+                            "embedded_chunks": len(kept_records),
+                            "failed_chunks": len(embedding_failed),
+                        },
+                    )
+
+                if partial_every > 0 and next_batch_count % partial_every == 0 and kept_records:
+                    partial_dir = os.path.join(version_dir, "partial")
+                    _write_partial_snapshot(
+                        partial_dir=partial_dir,
+                        records=kept_records,
+                        vectors=vectors,
+                        kb_version=kb_version,
+                        source_dir=chunks_input,
+                        embed_model=embed_model,
+                        provider=provider,
+                        failed_items=embedding_failed,
+                    )
+                    _activate_partial_link(out_dir, partial_dir)
+
             if isinstance(embeddings_fn, GoEmbedder):
                 pipeline_workers = max(
                     1,
@@ -225,7 +351,7 @@ def build_kb_from_chunks(
                         )
                     ),
                 )
-                batch_iter = iter(_iter_batches(records, batch_size))
+                batch_iter = iter(_iter_batches(pending_records, batch_size))
                 in_flight = {}
 
                 with ThreadPoolExecutor(max_workers=pipeline_workers) as executor:
@@ -249,9 +375,7 @@ def build_kb_from_chunks(
                             batch_kept, batch_vectors, batch_failed, warns = future.result()
                             for msg in warns:
                                 tqdm.write(msg)
-                            kept_records.extend(batch_kept)
-                            vectors.extend(batch_vectors)
-                            embedding_failed.extend(batch_failed)
+                            _after_batch(batch_kept, batch_vectors, batch_failed)
                             metrics.batch_count += 1
                             metrics.total_batch_seconds += elapsed
                             metrics.kept_chunks += len(batch_kept)
@@ -270,7 +394,7 @@ def build_kb_from_chunks(
                         while len(in_flight) < max_inflight and _submit_next():
                             pass
             else:
-                for batch in _iter_batches(records, batch_size):
+                for batch in _iter_batches(pending_records, batch_size):
                     batch_start = time.perf_counter()
                     batch_kept, batch_vectors, batch_failed, warns = _embed_batch_with_fallback(
                         embeddings_fn,
@@ -279,9 +403,7 @@ def build_kb_from_chunks(
                     elapsed = time.perf_counter() - batch_start
                     for msg in warns:
                         tqdm.write(msg)
-                    kept_records.extend(batch_kept)
-                    vectors.extend(batch_vectors)
-                    embedding_failed.extend(batch_failed)
+                    _after_batch(batch_kept, batch_vectors, batch_failed)
                     metrics.batch_count += 1
                     metrics.total_batch_seconds += elapsed
                     metrics.kept_chunks += len(batch_kept)
@@ -296,9 +418,25 @@ def build_kb_from_chunks(
                             f"kept={len(batch_kept)} failed={len(batch_failed)}"
                         )
                     pbar.update(len(batch))
+
+        if resume_enabled:
+            _write_checkpoint_state(
+                checkpoint_dir,
+                checkpoint_signature,
+                {
+                    "kb_version": kb_version,
+                    "phase": "embedding_finished",
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "updated_at": datetime.now(timezone.utc).isoformat(),
+                    "total_chunks": len(records),
+                    "embedded_chunks": len(kept_records),
+                    "failed_chunks": len(embedding_failed),
+                },
+            )
     finally:
         if isinstance(embeddings_fn, GoEmbedder):
             embeddings_fn.close()
+        stop_resource_monitor()
 
     tqdm.write(f"[EMBED_SUMMARY] {json.dumps(metrics.to_dict(), ensure_ascii=True)}")
 
@@ -321,11 +459,6 @@ def build_kb_from_chunks(
         rec.vector_id = i
 
     # ---- write KB artifacts ----
-    kb_version = datetime.now().strftime("%Y%m%d-%H%M%S")
-    versions_dir = os.path.join(out_dir, "versions")
-    version_dir = os.path.join(versions_dir, kb_version)
-    os.makedirs(version_dir, exist_ok=True)
-
     print(f"Writing KB artifacts → {version_dir}")
 
     faiss.write_index(index, os.path.join(version_dir, "index.faiss"))
@@ -356,12 +489,18 @@ def build_kb_from_chunks(
         "embedded": len(records),
         "embedding_failed": embedding_failed,
         "embedding_metrics": metrics.to_dict(),
+        "resume_enabled": resume_enabled,
+        "checkpoint_every_batches": checkpoint_every,
+        "partial_snapshot_every_batches": partial_every,
+        "resumed_chunks": resumed_loaded,
     }
     with open(os.path.join(version_dir, "build_log.json"), "w", encoding="utf-8") as fh:
         json.dump(build_log, fh, ensure_ascii=False, indent=2)
 
     print("Activating KB version (atomic symlink switch) …")
     _activate_version(out_dir, version_dir)
+    if resume_enabled and os.path.exists(checkpoint_dir):
+        shutil.rmtree(checkpoint_dir, ignore_errors=True)
 
     elapsed = time.perf_counter() - start_time
     print(

@@ -12,7 +12,7 @@ import time
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 
 import numpy as np
 import faiss
@@ -70,6 +70,167 @@ def _log_step(step: int, total_steps: int, title: str, detail: Optional[str] = N
     if detail:
         zh_message = f"{zh_message} | {detail}"
     print(zh_message)
+
+
+def _format_bytes_gib(value_bytes: int) -> str:
+    gib = float(value_bytes) / float(1024**3)
+    return f"{gib:.2f}GiB"
+
+
+def _read_proc_stat_total_idle() -> Tuple[int, int]:
+    with open("/proc/stat", "r", encoding="utf-8") as handle:
+        first = handle.readline().strip().split()
+    if len(first) < 8 or first[0] != "cpu":
+        raise RuntimeError("invalid /proc/stat format")
+    values = [int(item) for item in first[1:]]
+    total = sum(values)
+    idle = values[3] + values[4]
+    return total, idle
+
+
+def _read_process_cpu_ticks() -> int:
+    with open("/proc/self/stat", "r", encoding="utf-8") as handle:
+        data = handle.read().strip()
+    # /proc/self/stat: fields after ')' are space-separated; utime/stime are 14/15.
+    right = data.rsplit(")", 1)[-1].strip().split()
+    if len(right) < 15:
+        raise RuntimeError("invalid /proc/self/stat format")
+    utime = int(right[11])
+    stime = int(right[12])
+    return utime + stime
+
+
+def _read_memory_stats() -> Tuple[int, int, int]:
+    total_kb = 0
+    available_kb = 0
+    with open("/proc/meminfo", "r", encoding="utf-8") as handle:
+        for line in handle:
+            if line.startswith("MemTotal:"):
+                total_kb = int(line.split()[1])
+            elif line.startswith("MemAvailable:"):
+                available_kb = int(line.split()[1])
+            if total_kb and available_kb:
+                break
+    if total_kb <= 0:
+        raise RuntimeError("MemTotal missing in /proc/meminfo")
+    used_kb = max(total_kb - available_kb, 0)
+
+    with open("/proc/self/statm", "r", encoding="utf-8") as handle:
+        parts = handle.readline().strip().split()
+    rss_pages = int(parts[1]) if len(parts) > 1 else 0
+    page_size = os.sysconf("SC_PAGE_SIZE")
+    rss_bytes = rss_pages * page_size
+    return total_kb * 1024, used_kb * 1024, rss_bytes
+
+
+def _read_gpu_stats() -> List[Dict[str, Any]]:
+    cmd = [
+        "nvidia-smi",
+        "--query-gpu=index,name,utilization.gpu,memory.used,memory.total",
+        "--format=csv,noheader,nounits",
+    ]
+    try:
+        proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=2)
+    except Exception:
+        return []
+    if proc.returncode != 0:
+        return []
+
+    out: List[Dict[str, Any]] = []
+    for raw in proc.stdout.splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        parts = [p.strip() for p in line.split(",")]
+        if len(parts) < 5:
+            continue
+        try:
+            mem_used_mib = int(float(parts[3]))
+            mem_total_mib = int(float(parts[4]))
+            mem_pct = 0.0
+            if mem_total_mib > 0:
+                mem_pct = (mem_used_mib * 100.0) / mem_total_mib
+            out.append(
+                {
+                    "index": parts[0],
+                    "name": parts[1],
+                    "util_pct": float(parts[2]),
+                    "mem_used_mib": mem_used_mib,
+                    "mem_total_mib": mem_total_mib,
+                    "mem_pct": mem_pct,
+                }
+            )
+        except ValueError:
+            continue
+    return out
+
+
+def _start_resource_monitor(tag: str) -> Callable[[], None]:
+    interval = max(0, int(os.getenv("RAG_RESOURCE_METRICS_SEC", "5")))
+    if interval <= 0:
+        return lambda: None
+    gpu_enabled = _env_flag("RAG_RESOURCE_LOG_GPU", default=True)
+    stop = threading.Event()
+    done = threading.Event()
+
+    def _loop() -> None:
+        cpu_count = max(1, os.cpu_count() or 1)
+        try:
+            prev_total, prev_idle = _read_proc_stat_total_idle()
+            prev_proc = _read_process_cpu_ticks()
+        except Exception:
+            prev_total, prev_idle, prev_proc = 0, 0, 0
+
+        while not stop.wait(interval):
+            try:
+                now_total, now_idle = _read_proc_stat_total_idle()
+                now_proc = _read_process_cpu_ticks()
+                delta_total = max(now_total - prev_total, 1)
+                delta_idle = max(now_idle - prev_idle, 0)
+                delta_proc = max(now_proc - prev_proc, 0)
+
+                cpu_pct = max(0.0, min(100.0, (1.0 - (delta_idle / delta_total)) * 100.0))
+                proc_cpu_pct = max(0.0, (delta_proc / delta_total) * 100.0 * cpu_count)
+
+                total_mem_b, used_mem_b, rss_b = _read_memory_stats()
+                mem_pct = 0.0
+                if total_mem_b > 0:
+                    mem_pct = (used_mem_b * 100.0) / total_mem_b
+
+                msg = (
+                    f"[RESOURCE_METRIC] tag={tag} "
+                    f"cpu={cpu_pct:.1f}% proc_cpu={proc_cpu_pct:.1f}% "
+                    f"mem={_format_bytes_gib(used_mem_b)}/{_format_bytes_gib(total_mem_b)}({mem_pct:.1f}%) "
+                    f"proc_mem={_format_bytes_gib(rss_b)}"
+                )
+                if gpu_enabled:
+                    gpus = _read_gpu_stats()
+                    if gpus:
+                        gpu_parts = []
+                        for gpu in gpus:
+                            gpu_parts.append(
+                                f"gpu{gpu['index']}:{gpu['util_pct']:.1f}% "
+                                f"mem={gpu['mem_used_mib']}MiB/{gpu['mem_total_mib']}MiB({gpu['mem_pct']:.1f}%)"
+                            )
+                        msg = msg + " | " + " ; ".join(gpu_parts)
+                    else:
+                        msg = msg + " | gpu=unavailable"
+
+                tqdm.write(msg)
+                prev_total, prev_idle, prev_proc = now_total, now_idle, now_proc
+            except Exception as exc:  # noqa: BLE001
+                tqdm.write(f"[RESOURCE_METRIC] tag={tag} monitor_error={exc}")
+
+        done.set()
+
+    thread = threading.Thread(target=_loop, daemon=True)
+    thread.start()
+
+    def _stop() -> None:
+        stop.set()
+        done.wait(timeout=1.0)
+
+    return _stop
 
 # ── Go-based concurrent embedder ──────────────────────────────────────────────
 
@@ -427,6 +588,152 @@ def _shorten(text: str, limit: int = 200) -> str:
     return text[:limit].rstrip() + "..."
 
 
+def _checkpoint_signature(payload: Dict[str, Any]) -> str:
+    raw = json.dumps(payload, ensure_ascii=True, sort_keys=True)
+    return sha1_text(raw)
+
+
+def _load_embedding_checkpoint(
+    checkpoint_dir: str,
+    signature: str,
+) -> Tuple[Dict[str, Tuple[ChunkRecord, List[float]]], List[Dict[str, str]], int]:
+    state_path = os.path.join(checkpoint_dir, "state.json")
+    embedded_path = os.path.join(checkpoint_dir, "embedded.jsonl")
+    failed_path = os.path.join(checkpoint_dir, "failed.jsonl")
+    if not os.path.exists(state_path) or not os.path.exists(embedded_path):
+        return {}, [], 0
+
+    try:
+        with open(state_path, "r", encoding="utf-8") as handle:
+            state = json.load(handle)
+    except Exception:
+        return {}, [], 0
+
+    if str(state.get("signature") or "") != signature:
+        return {}, [], 0
+
+    embedded_map: Dict[str, Tuple[ChunkRecord, List[float]]] = {}
+    loaded = 0
+    try:
+        with open(embedded_path, "r", encoding="utf-8") as handle:
+            for line in handle:
+                line = line.strip()
+                if not line:
+                    continue
+                row = json.loads(line)
+                record = ChunkRecord.model_validate(row.get("record") or {})
+                vector = row.get("vector")
+                if not isinstance(vector, list) or not vector:
+                    continue
+                embedded_map[record.chunk_id] = (record, vector)
+                loaded += 1
+    except Exception:
+        return {}, [], 0
+
+    failed: List[Dict[str, str]] = []
+    if os.path.exists(failed_path):
+        try:
+            with open(failed_path, "r", encoding="utf-8") as handle:
+                for line in handle:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    row = json.loads(line)
+                    if isinstance(row, dict):
+                        failed.append({
+                            "chunk_id": str(row.get("chunk_id") or ""),
+                            "file_path": str(row.get("file_path") or ""),
+                            "reason": str(row.get("reason") or ""),
+                        })
+        except Exception:
+            failed = []
+    return embedded_map, failed, loaded
+
+
+def _write_checkpoint_state(
+    checkpoint_dir: str,
+    signature: str,
+    payload: Dict[str, Any],
+) -> None:
+    os.makedirs(checkpoint_dir, exist_ok=True)
+    state_path = os.path.join(checkpoint_dir, "state.json")
+    tmp_path = state_path + ".tmp"
+    body = {"signature": signature, **payload}
+    with open(tmp_path, "w", encoding="utf-8") as handle:
+        json.dump(body, handle, ensure_ascii=False, indent=2)
+    os.replace(tmp_path, state_path)
+
+
+def _append_checkpoint_rows(path: str, rows: List[Dict[str, Any]]) -> None:
+    if not rows:
+        return
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "a", encoding="utf-8") as handle:
+        for row in rows:
+            handle.write(json.dumps(row, ensure_ascii=True))
+            handle.write("\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+
+
+def _write_partial_snapshot(
+    partial_dir: str,
+    records: List[ChunkRecord],
+    vectors: List[List[float]],
+    kb_version: str,
+    source_dir: str,
+    embed_model: str,
+    provider: str,
+    failed_items: List[Dict[str, str]],
+) -> None:
+    if not records or not vectors:
+        return
+    os.makedirs(partial_dir, exist_ok=True)
+
+    for idx, record in enumerate(records):
+        record.vector_id = idx
+
+    vector_array = np.array(vectors, dtype="float32")
+    faiss.normalize_L2(vector_array)
+    dim = vector_array.shape[1]
+    index = faiss.IndexFlatIP(dim)
+    index.add(vector_array)
+    faiss.write_index(index, os.path.join(partial_dir, "index.faiss"))
+
+    chunks_path = os.path.join(partial_dir, "chunks.jsonl")
+    with open(chunks_path, "w", encoding="utf-8") as handle:
+        for record in records:
+            handle.write(json.dumps(record.model_dump(), ensure_ascii=True))
+            handle.write("\n")
+
+    manifest = Manifest(
+        kb_version=kb_version,
+        source_dir=source_dir,
+        build_time=datetime.utcnow().isoformat() + "Z",
+        embedding_model=embed_model,
+        llm_provider_default=provider,
+        faiss_metric="cosine",
+        doc_count=0,
+        chunk_count=len(records),
+        failed_files=[item.get("chunk_id") or item.get("path") or "" for item in failed_items if item],
+    )
+    with open(os.path.join(partial_dir, "manifest.json"), "w", encoding="utf-8") as handle:
+        json.dump(manifest.model_dump(), handle, ensure_ascii=False, indent=2)
+
+
+def _activate_partial_link(out_dir: str, partial_dir: str) -> None:
+    current_path = os.path.join(out_dir, "current_partial")
+    tmp_link = os.path.join(out_dir, "current_partial_tmp")
+    relative_target = os.path.relpath(partial_dir, out_dir)
+    if os.path.islink(tmp_link) or os.path.exists(tmp_link):
+        if os.path.isdir(tmp_link) and not os.path.islink(tmp_link):
+            shutil.rmtree(tmp_link)
+        else:
+            os.unlink(tmp_link)
+    os.symlink(relative_target, tmp_link)
+    os.replace(tmp_link, current_path)
+
+
 def _split_table_rows(rows: List[List[str]], max_len: int) -> List[List[List[str]]]:
     if not rows or len(rows) <= 1 or max_len <= 0:
         return [rows]
@@ -662,6 +969,7 @@ def build_kb(
     failed_files: List[Dict[str, str]] = []
     degraded_files: List[Dict[str, str]] = []
     records: List[ChunkRecord] = []
+    stop_resource_monitor: Callable[[], None] = lambda: None
     temp_dir = tempfile.mkdtemp(prefix="kb_docx_")
 
     try:
@@ -757,7 +1065,66 @@ def build_kb(
         if not records:
             raise RuntimeError("No chunks generated; check source directory and parsers.")
 
+        resume_enabled = _env_flag("RAG_EMBED_RESUME", default=True)
+        checkpoint_every = max(1, int(os.getenv("RAG_CHECKPOINT_EVERY_BATCHES", "20")))
+        partial_every = max(0, int(os.getenv("RAG_PARTIAL_KB_EVERY_BATCHES", "50")))
+        checkpoint_dir = os.path.join(out_dir, ".kb_checkpoint")
+        checkpoint_signature = _checkpoint_signature(
+            {
+                "source_dir": source_dir,
+                "provider": provider,
+                "embed_model": embed_model,
+                "max_len": max_len,
+                "overlap": overlap,
+                "batch_size": batch_size,
+            }
+        )
+        checkpoint_embedded_path = os.path.join(checkpoint_dir, "embedded.jsonl")
+        checkpoint_failed_path = os.path.join(checkpoint_dir, "failed.jsonl")
+
+        resumed_map: Dict[str, Tuple[ChunkRecord, List[float]]] = {}
+        resumed_failed: List[Dict[str, str]] = []
+        resumed_loaded = 0
+        if resume_enabled:
+            resumed_map, resumed_failed, resumed_loaded = _load_embedding_checkpoint(
+                checkpoint_dir,
+                checkpoint_signature,
+            )
+        vectors: List[List[float]] = []
+        kept_records: List[ChunkRecord] = []
+        pending_records: List[ChunkRecord] = []
+        for record in records:
+            resumed = resumed_map.get(record.chunk_id)
+            if resumed:
+                resumed_record, resumed_vector = resumed
+                record.text_for_embedding = resumed_record.text_for_embedding
+                kept_records.append(record)
+                vectors.append(resumed_vector)
+            else:
+                pending_records.append(record)
+
+        embedding_failed: List[Dict[str, str]] = list(resumed_failed)
+        if resumed_loaded > 0:
+            tqdm.write(
+                f"[RESUME] loaded {resumed_loaded} embedded chunk(s) from checkpoint; pending={len(pending_records)}"
+            )
+        elif resume_enabled:
+            _write_checkpoint_state(
+                checkpoint_dir,
+                checkpoint_signature,
+                {
+                    "kb_version": kb_version,
+                    "phase": "embedding",
+                    "created_at": datetime.utcnow().isoformat() + "Z",
+                    "updated_at": datetime.utcnow().isoformat() + "Z",
+                    "total_chunks": len(records),
+                    "embedded_chunks": 0,
+                    "failed_chunks": len(embedding_failed),
+                },
+            )
+
         use_go_embedder = _env_flag("RAG_USE_GO_EMBEDDER", default=True)
+        stop_resource_monitor = _start_resource_monitor("kb-build")
         go_bin = _find_go_embedder() if use_go_embedder else None
         go_embed_concurrency = max(1, int(os.getenv("RAG_GO_EMBED_CONCURRENCY", "8")))
         if go_bin:
@@ -781,10 +1148,66 @@ def build_kb(
         backend_name = "go-concurrent" if isinstance(embeddings, GoEmbedder) else "python"
         metrics = EmbedMetrics(backend=backend_name, requested_chunks=len(records), batch_size=batch_size)
         metrics_every = max(1, int(os.getenv("RAG_EMBED_METRICS_EVERY", "20")))
-        vectors: List[List[float]] = []
-        kept_records: List[ChunkRecord] = []
-        embedding_failed: List[Dict[str, str]] = []
         with tqdm(total=len(records), desc="Embedding chunks") as progress:
+            if resumed_loaded > 0:
+                progress.update(resumed_loaded)
+
+            def _after_batch(
+                batch_kept: List[ChunkRecord],
+                batch_vectors: List[List[float]],
+                batch_failed: List[Dict[str, str]],
+            ) -> None:
+                nonlocal vectors, kept_records, embedding_failed
+                next_batch_count = metrics.batch_count + 1
+                kept_records.extend(batch_kept)
+                vectors.extend(batch_vectors)
+                embedding_failed.extend(batch_failed)
+                if not resume_enabled:
+                    return
+
+                embed_rows = [
+                    {"chunk_id": rec.chunk_id, "record": rec.model_dump(), "vector": vec}
+                    for rec, vec in zip(batch_kept, batch_vectors)
+                ]
+                _append_checkpoint_rows(checkpoint_embedded_path, embed_rows)
+                failed_rows = [
+                    {
+                        "chunk_id": str(item.get("chunk_id") or ""),
+                        "file_path": str(item.get("file_path") or ""),
+                        "reason": str(item.get("reason") or ""),
+                    }
+                    for item in batch_failed
+                ]
+                _append_checkpoint_rows(checkpoint_failed_path, failed_rows)
+                if next_batch_count % checkpoint_every == 0:
+                    _write_checkpoint_state(
+                        checkpoint_dir,
+                        checkpoint_signature,
+                        {
+                            "kb_version": kb_version,
+                            "phase": "embedding",
+                            "created_at": datetime.utcnow().isoformat() + "Z",
+                            "updated_at": datetime.utcnow().isoformat() + "Z",
+                            "total_chunks": len(records),
+                            "embedded_chunks": len(kept_records),
+                            "failed_chunks": len(embedding_failed),
+                        },
+                    )
+
+                if partial_every > 0 and next_batch_count % partial_every == 0 and kept_records:
+                    partial_dir = os.path.join(version_dir, "partial")
+                    _write_partial_snapshot(
+                        partial_dir=partial_dir,
+                        records=kept_records,
+                        vectors=vectors,
+                        kb_version=kb_version,
+                        source_dir=source_dir,
+                        embed_model=embed_model,
+                        provider=provider,
+                        failed_items=embedding_failed,
+                    )
+                    _activate_partial_link(out_dir, partial_dir)
+
             if isinstance(embeddings, GoEmbedder):
                 pipeline_workers = max(
                     1,
@@ -799,7 +1222,7 @@ def build_kb(
                         )
                     ),
                 )
-                batch_iter = iter(iter_batches(records, batch_size))
+                batch_iter = iter(iter_batches(pending_records, batch_size))
                 in_flight = {}
 
                 with ThreadPoolExecutor(max_workers=pipeline_workers) as executor:
@@ -823,9 +1246,7 @@ def build_kb(
                             batch_kept, batch_vectors, batch_failed, warns = future.result()
                             for msg in warns:
                                 tqdm.write(msg)
-                            kept_records.extend(batch_kept)
-                            vectors.extend(batch_vectors)
-                            embedding_failed.extend(batch_failed)
+                            _after_batch(batch_kept, batch_vectors, batch_failed)
                             metrics.batch_count += 1
                             metrics.total_batch_seconds += elapsed
                             metrics.kept_chunks += len(batch_kept)
@@ -844,7 +1265,7 @@ def build_kb(
                         while len(in_flight) < max_inflight and _submit_next():
                             pass
             else:
-                for batch_records in iter_batches(records, batch_size):
+                for batch_records in iter_batches(pending_records, batch_size):
                     batch_start = time.perf_counter()
                     batch_kept, batch_vectors, batch_failed, warns = _embed_batch_with_fallback(
                         embeddings,
@@ -853,9 +1274,7 @@ def build_kb(
                     elapsed = time.perf_counter() - batch_start
                     for msg in warns:
                         tqdm.write(msg)
-                    kept_records.extend(batch_kept)
-                    vectors.extend(batch_vectors)
-                    embedding_failed.extend(batch_failed)
+                    _after_batch(batch_kept, batch_vectors, batch_failed)
                     metrics.batch_count += 1
                     metrics.total_batch_seconds += elapsed
                     metrics.kept_chunks += len(batch_kept)
@@ -870,6 +1289,21 @@ def build_kb(
                             f"kept={len(batch_kept)} failed={len(batch_failed)}"
                         )
                     progress.update(len(batch_records))
+
+        if resume_enabled:
+            _write_checkpoint_state(
+                checkpoint_dir,
+                checkpoint_signature,
+                {
+                    "kb_version": kb_version,
+                    "phase": "embedding_finished",
+                    "created_at": datetime.utcnow().isoformat() + "Z",
+                    "updated_at": datetime.utcnow().isoformat() + "Z",
+                    "total_chunks": len(records),
+                    "embedded_chunks": len(kept_records),
+                    "failed_chunks": len(embedding_failed),
+                },
+            )
 
         tqdm.write(f"[EMBED_SUMMARY] {json.dumps(metrics.to_dict(), ensure_ascii=True)}")
 
@@ -924,12 +1358,18 @@ def build_kb(
             "degraded_files": degraded_files,
             "embedding_failed_chunks": embedding_failed,
             "embedding_metrics": metrics.to_dict(),
+            "resume_enabled": resume_enabled,
+            "checkpoint_every_batches": checkpoint_every,
+            "partial_snapshot_every_batches": partial_every,
+            "resumed_chunks": resumed_loaded,
         }
         build_log_path = os.path.join(version_dir, "build_log.json")
         with open(build_log_path, "w", encoding="utf-8") as handle:
             json.dump(build_log, handle, ensure_ascii=False, indent=2)
 
         _activate_version(out_dir, version_dir)
+        if resume_enabled and os.path.exists(checkpoint_dir):
+            shutil.rmtree(checkpoint_dir, ignore_errors=True)
         print("Activation completed.")
         print("版本激活完成。")
         elapsed = time.perf_counter() - start_time
@@ -945,6 +1385,7 @@ def build_kb(
         shutil.rmtree(temp_dir, ignore_errors=True)
         if "embeddings" in dir() and isinstance(embeddings, GoEmbedder):  # type: ignore[possibly-undefined]
             embeddings.close()  # type: ignore[possibly-undefined]
+        stop_resource_monitor()
 
 
 def _activate_version(out_dir: str, version_dir: str) -> None:
