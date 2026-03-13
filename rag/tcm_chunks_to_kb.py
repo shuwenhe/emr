@@ -194,11 +194,12 @@ def build_kb_from_chunks(
     checkpoint_embedded_path = os.path.join(checkpoint_dir, "embedded.jsonl")
     checkpoint_failed_path = os.path.join(checkpoint_dir, "failed.jsonl")
 
-    resumed_map: Dict[str, Tuple[ChunkRecord, List[float]]] = {}
+    resumed_map: Dict[str, Tuple[str, np.ndarray]] = {}
     resumed_failed: List[Dict[str, str]] = []
     resumed_loaded = 0
+    resume_checkpoint_meta: Dict[str, object] = {}
     if resume_enabled:
-        resumed_map, resumed_failed, resumed_loaded = _load_embedding_checkpoint(
+        resumed_map, resumed_failed, resumed_loaded, resume_checkpoint_meta = _load_embedding_checkpoint(
             checkpoint_dir,
             checkpoint_signature,
         )
@@ -233,6 +234,13 @@ def build_kb_from_chunks(
 
     if resumed_loaded > 0:
         tqdm.write(f"[RESUME] checkpoint entries loaded={resumed_loaded}")
+        if bool(resume_checkpoint_meta.get("over_limit")):
+            tqdm.write(
+                "[RESUME_WARN] checkpoint resume map hit memory cap; "
+                f"strategy={resume_checkpoint_meta.get('strategy')} "
+                f"cap_gib={resume_checkpoint_meta.get('cap_gib')} "
+                f"loaded={resumed_loaded}"
+            )
     elif resume_enabled:
         _write_checkpoint_state(
             checkpoint_dir,
@@ -367,10 +375,11 @@ def build_kb_from_chunks(
                 total_discovered += 1
                 seen_doc_hashes.add(record.doc_hash)
 
-                resumed = resumed_map.get(record.chunk_id)
+                resumed = resumed_map.pop(record.chunk_id, None)
                 if resumed:
-                    resumed_record, resumed_vector = resumed
-                    record.text_for_embedding = resumed_record.text_for_embedding
+                    resumed_text, resumed_vector = resumed
+                    if resumed_text:
+                        record.text_for_embedding = resumed_text
                     _append_embedded_record(record, resumed_vector)
                     resumed_applied += 1
                     pbar.update(1)
@@ -385,6 +394,7 @@ def build_kb_from_chunks(
                 _process_batch(pending_records)
 
         metrics.requested_chunks = total_discovered
+        resumed_map.clear()
         if resumed_applied > 0:
             tqdm.write(f"[RESUME] applied {resumed_applied} chunk(s) from checkpoint during streaming parse")
         if total_discovered == 0:
@@ -469,6 +479,7 @@ def build_kb_from_chunks(
         "partial_snapshot_every_batches": partial_every,
         "resumed_chunks": resumed_applied,
         "resumed_checkpoint_entries_loaded": resumed_loaded,
+        "resume_checkpoint_meta": resume_checkpoint_meta,
     }
     with open(os.path.join(version_dir, "build_log.json"), "w", encoding="utf-8") as fh:
         json.dump(build_log, fh, ensure_ascii=False, indent=2)

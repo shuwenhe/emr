@@ -228,9 +228,9 @@ def _start_resource_monitor(tag: str) -> Callable[[], None]:
 
                 msg = (
                     f"[RESOURCE_METRIC] tag={tag} "
-                    f"cpu_cores={'|'.join(core_parts)} "
-                    f"mem={_format_bytes_gib(used_mem_b)}/{_format_bytes_gib(total_mem_b)}({mem_pct:.1f}%) "
-                    f"proc_mem={_format_bytes_gib(rss_b)}"
+                    f"CPU={'|'.join(core_parts)} "
+                    f"MEM={_format_bytes_gib(used_mem_b)}/{_format_bytes_gib(total_mem_b)}({mem_pct:.1f}%) "
+                    f"PROC_MEM={_format_bytes_gib(rss_b)}"
                 )
                 if gpu_enabled:
                     gpus = _read_gpu_stats()
@@ -241,9 +241,9 @@ def _start_resource_monitor(tag: str) -> Callable[[], None]:
                                 f"gpu{gpu['index']}:{gpu['util_pct']:.1f}% "
                                 f"mem={gpu['mem_used_mib']}MiB/{gpu['mem_total_mib']}MiB({gpu['mem_pct']:.1f}%)"
                             )
-                        msg = msg + " | " + " ; ".join(gpu_parts)
+                        msg = msg + " | GPU=" + " ; ".join(gpu_parts)
                     else:
-                        msg = msg + " | gpu=unavailable"
+                        msg = msg + " | GPU=unavailable"
 
                 tqdm.write(msg)
                 prev_cores = now_cores
@@ -625,24 +625,49 @@ def _checkpoint_signature(payload: Dict[str, Any]) -> str:
 def _load_embedding_checkpoint(
     checkpoint_dir: str,
     signature: str,
-) -> Tuple[Dict[str, Tuple[ChunkRecord, List[float]]], List[Dict[str, str]], int]:
+) -> Tuple[Dict[str, Tuple[str, np.ndarray]], List[Dict[str, str]], int, Dict[str, Any]]:
+    cap_gib_raw = os.getenv("RAG_RESUME_MAP_MAX_GIB", "0").strip()
+    try:
+        cap_gib = float(cap_gib_raw)
+    except ValueError:
+        cap_gib = 0.0
+    cap_bytes = int(cap_gib * (1024**3)) if cap_gib > 0 else 0
+    strategy = os.getenv("RAG_RESUME_MAP_OVERLIMIT_STRATEGY", "truncate").strip().lower()
+    if strategy not in {"truncate", "disable"}:
+        strategy = "truncate"
+
+    resume_meta: Dict[str, Any] = {
+        "cap_enabled": cap_bytes > 0,
+        "cap_gib": cap_gib,
+        "cap_bytes": cap_bytes,
+        "strategy": strategy,
+        "estimated_bytes": 0,
+        "over_limit": False,
+        "truncated": False,
+        "disabled": False,
+    }
+
     state_path = os.path.join(checkpoint_dir, "state.json")
     embedded_path = os.path.join(checkpoint_dir, "embedded.jsonl")
     failed_path = os.path.join(checkpoint_dir, "failed.jsonl")
     if not os.path.exists(state_path) or not os.path.exists(embedded_path):
-        return {}, [], 0
+        return {}, [], 0, resume_meta
 
     try:
         with open(state_path, "r", encoding="utf-8") as handle:
             state = json.load(handle)
     except Exception:
-        return {}, [], 0
+        return {}, [], 0, resume_meta
 
     if str(state.get("signature") or "") != signature:
-        return {}, [], 0
+        return {}, [], 0, resume_meta
 
-    embedded_map: Dict[str, Tuple[ChunkRecord, List[float]]] = {}
+    resume_vec_dtype = os.getenv("RAG_RESUME_VECTOR_DTYPE", "float32").strip().lower()
+    vec_dtype = np.float16 if resume_vec_dtype == "float16" else np.float32
+
+    embedded_map: Dict[str, Tuple[str, np.ndarray]] = {}
     loaded = 0
+    estimated_bytes = 0
     try:
         with open(embedded_path, "r", encoding="utf-8") as handle:
             for line in handle:
@@ -650,14 +675,40 @@ def _load_embedding_checkpoint(
                 if not line:
                     continue
                 row = json.loads(line)
-                record = ChunkRecord.model_validate(row.get("record") or {})
+                record = row.get("record") or {}
+                chunk_id = str(record.get("chunk_id") or "")
+                text_for_embedding = str(record.get("text_for_embedding") or "")
                 vector = row.get("vector")
                 if not isinstance(vector, list) or not vector:
                     continue
-                embedded_map[record.chunk_id] = (record, vector)
+                if not chunk_id:
+                    continue
+                vec = np.asarray(vector, dtype=vec_dtype)
+                if vec.ndim != 1 or vec.size == 0:
+                    continue
+                if not np.all(np.isfinite(vec)):
+                    continue
+
+                approx_entry_bytes = len(chunk_id) + len(text_for_embedding) + int(vec.nbytes) + 96
+                next_estimated = estimated_bytes + approx_entry_bytes
+                if cap_bytes > 0 and next_estimated > cap_bytes:
+                    resume_meta["over_limit"] = True
+                    resume_meta["estimated_bytes"] = estimated_bytes
+                    if strategy == "disable":
+                        embedded_map.clear()
+                        loaded = 0
+                        resume_meta["disabled"] = True
+                    else:
+                        resume_meta["truncated"] = True
+                    break
+
+                embedded_map[chunk_id] = (text_for_embedding, vec)
+                estimated_bytes = next_estimated
                 loaded += 1
     except Exception:
-        return {}, [], 0
+        return {}, [], 0, resume_meta
+
+    resume_meta["estimated_bytes"] = estimated_bytes
 
     failed: List[Dict[str, str]] = []
     if os.path.exists(failed_path):
@@ -676,7 +727,7 @@ def _load_embedding_checkpoint(
                         })
         except Exception:
             failed = []
-    return embedded_map, failed, loaded
+    return embedded_map, failed, loaded, resume_meta
 
 
 def _write_checkpoint_state(
@@ -1058,11 +1109,12 @@ def build_kb(
         checkpoint_embedded_path = os.path.join(checkpoint_dir, "embedded.jsonl")
         checkpoint_failed_path = os.path.join(checkpoint_dir, "failed.jsonl")
 
-        resumed_map: Dict[str, Tuple[ChunkRecord, List[float]]] = {}
+        resumed_map: Dict[str, Tuple[str, np.ndarray]] = {}
         resumed_failed: List[Dict[str, str]] = []
         resumed_loaded = 0
+        resume_checkpoint_meta: Dict[str, Any] = {}
         if resume_enabled:
-            resumed_map, resumed_failed, resumed_loaded = _load_embedding_checkpoint(
+            resumed_map, resumed_failed, resumed_loaded, resume_checkpoint_meta = _load_embedding_checkpoint(
                 checkpoint_dir,
                 checkpoint_signature,
             )
@@ -1094,6 +1146,13 @@ def build_kb(
 
         if resumed_loaded > 0:
             tqdm.write(f"[RESUME] checkpoint entries loaded={resumed_loaded}")
+            if resume_checkpoint_meta.get("over_limit"):
+                tqdm.write(
+                    "[RESUME_WARN] checkpoint resume map hit memory cap; "
+                    f"strategy={resume_checkpoint_meta.get('strategy')} "
+                    f"cap_gib={resume_checkpoint_meta.get('cap_gib')} "
+                    f"loaded={resumed_loaded}"
+                )
         elif resume_enabled:
             _write_checkpoint_state(
                 checkpoint_dir,
@@ -1307,10 +1366,11 @@ def build_kb(
                             text_for_embedding=chunk["text_for_embedding"],
                             excerpt_markdown=chunk["excerpt_markdown"],
                         )
-                        resumed = resumed_map.get(record.chunk_id)
+                        resumed = resumed_map.pop(record.chunk_id, None)
                         if resumed:
-                            resumed_record, resumed_vector = resumed
-                            record.text_for_embedding = resumed_record.text_for_embedding
+                            resumed_text, resumed_vector = resumed
+                            if resumed_text:
+                                record.text_for_embedding = resumed_text
                             _append_embedded_record(record, resumed_vector)
                             resumed_applied += 1
                             progress.update(1)
@@ -1328,6 +1388,7 @@ def build_kb(
                 _process_batch(pending_records)
 
         metrics.requested_chunks = total_discovered
+        resumed_map.clear()
         if resumed_applied > 0:
             tqdm.write(f"[RESUME] applied {resumed_applied} chunk(s) from checkpoint during streaming parse")
         if total_discovered == 0:
@@ -1396,6 +1457,7 @@ def build_kb(
             "checkpoint_every_batches": checkpoint_every,
             "partial_snapshot_every_batches": partial_every,
             "resumed_chunks": resumed_loaded,
+            "resume_checkpoint_meta": resume_checkpoint_meta,
         }
         build_log_path = os.path.join(version_dir, "build_log.json")
         with open(build_log_path, "w", encoding="utf-8") as handle:
