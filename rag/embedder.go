@@ -36,6 +36,7 @@ import (
 	"os"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -50,6 +51,7 @@ type config struct {
 	concurrency int
 	timeoutSec  int
 	maxRetries  int
+	metricsSec  int
 }
 
 func loadConfig() config {
@@ -62,6 +64,7 @@ func loadConfig() config {
 		concurrency: getEnvInt("EMBED_CONCURRENCY", 8),
 		timeoutSec:  getEnvInt("EMBED_TIMEOUT_SEC", 120),
 		maxRetries:  getEnvInt("EMBED_MAX_RETRIES", 3),
+		metricsSec:  getEnvInt("EMBED_METRICS_SEC", 5),
 	}
 	return c
 }
@@ -93,6 +96,111 @@ type outputBatch struct {
 	ID      int         `json:"id"`
 	Vectors [][]float32 `json:"vectors,omitempty"`
 	Error   string      `json:"error,omitempty"`
+}
+
+type runtimeMetrics struct {
+	submittedBatches int64
+	completedBatches int64
+	failedBatches    int64
+	submittedTexts   int64
+	completedTexts   int64
+	failedTexts      int64
+	runningBatches   int64
+	totalLatencyNs   int64
+	lastLatencyNs    int64
+}
+
+func (m *runtimeMetrics) onStart(textCount int) {
+	atomic.AddInt64(&m.submittedBatches, 1)
+	atomic.AddInt64(&m.submittedTexts, int64(textCount))
+	atomic.AddInt64(&m.runningBatches, 1)
+}
+
+func (m *runtimeMetrics) onFinish(textCount int, elapsed time.Duration, failed bool) {
+	atomic.AddInt64(&m.completedBatches, 1)
+	atomic.AddInt64(&m.completedTexts, int64(textCount))
+	if failed {
+		atomic.AddInt64(&m.failedBatches, 1)
+		atomic.AddInt64(&m.failedTexts, int64(textCount))
+	}
+	atomic.StoreInt64(&m.lastLatencyNs, elapsed.Nanoseconds())
+	atomic.AddInt64(&m.totalLatencyNs, elapsed.Nanoseconds())
+	atomic.AddInt64(&m.runningBatches, -1)
+}
+
+func (m *runtimeMetrics) snapshot() map[string]any {
+	submittedBatches := atomic.LoadInt64(&m.submittedBatches)
+	completedBatches := atomic.LoadInt64(&m.completedBatches)
+	failedBatches := atomic.LoadInt64(&m.failedBatches)
+	submittedTexts := atomic.LoadInt64(&m.submittedTexts)
+	completedTexts := atomic.LoadInt64(&m.completedTexts)
+	failedTexts := atomic.LoadInt64(&m.failedTexts)
+	runningBatches := atomic.LoadInt64(&m.runningBatches)
+	totalLatencyNs := atomic.LoadInt64(&m.totalLatencyNs)
+	lastLatencyNs := atomic.LoadInt64(&m.lastLatencyNs)
+	pendingBatches := submittedBatches - completedBatches
+	queuedBatches := pendingBatches - runningBatches
+	if queuedBatches < 0 {
+		queuedBatches = 0
+	}
+	avgLatencyMs := 0.0
+	if completedBatches > 0 {
+		avgLatencyMs = float64(totalLatencyNs) / float64(completedBatches) / float64(time.Millisecond)
+	}
+	errorRatePct := 0.0
+	if completedBatches > 0 {
+		errorRatePct = float64(failedBatches) * 100.0 / float64(completedBatches)
+	}
+	textErrorRatePct := 0.0
+	if completedTexts > 0 {
+		textErrorRatePct = float64(failedTexts) * 100.0 / float64(completedTexts)
+	}
+	return map[string]any{
+		"submitted_batches":    submittedBatches,
+		"completed_batches":    completedBatches,
+		"failed_batches":       failedBatches,
+		"submitted_texts":      submittedTexts,
+		"completed_texts":      completedTexts,
+		"failed_texts":         failedTexts,
+		"running_batches":      runningBatches,
+		"pending_batches":      pendingBatches,
+		"queued_batches":       queuedBatches,
+		"avg_latency_ms":       avgLatencyMs,
+		"last_latency_ms":      float64(lastLatencyNs) / float64(time.Millisecond),
+		"batch_error_rate_pct": errorRatePct,
+		"text_error_rate_pct":  textErrorRatePct,
+	}
+}
+
+func startMetricsReporter(cfg config, metrics *runtimeMetrics) func() {
+	if cfg.metricsSec <= 0 {
+		return func() {}
+	}
+	interval := time.Duration(cfg.metricsSec) * time.Second
+	stop := make(chan struct{})
+	reporterDone := make(chan struct{})
+	go func() {
+		defer close(reporterDone)
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				payload, _ := json.Marshal(metrics.snapshot())
+				fmt.Fprintf(os.Stderr, "[GO_EMBED_METRIC] provider=%s model=%s concurrency=%d %s\n",
+					cfg.provider, cfg.model, cfg.concurrency, string(payload))
+			case <-stop:
+				payload, _ := json.Marshal(metrics.snapshot())
+				fmt.Fprintf(os.Stderr, "[GO_EMBED_SUMMARY] provider=%s model=%s concurrency=%d %s\n",
+					cfg.provider, cfg.model, cfg.concurrency, string(payload))
+				return
+			}
+		}
+	}()
+	return func() {
+		close(stop)
+		<-reporterDone
+	}
 }
 
 // ── embedding providers ───────────────────────────────────────────────────────
@@ -230,6 +338,9 @@ func main() {
 	client := &http.Client{
 		Timeout: time.Duration(cfg.timeoutSec+10) * time.Second,
 	}
+	metrics := &runtimeMetrics{}
+	stopMetricsReporter := startMetricsReporter(cfg, metrics)
+	defer stopMetricsReporter()
 
 	sem := make(chan struct{}, cfg.concurrency)
 	var wg sync.WaitGroup
@@ -267,12 +378,16 @@ func main() {
 		go func(b inputBatch) {
 			defer wg.Done()
 			defer func() { <-sem }()
+			metrics.onStart(len(b.Texts))
+			startedAt := time.Now()
 
 			vecs, err := embedWithRetry(cfg, client, b.Texts)
 			if err != nil {
+				metrics.onFinish(len(b.Texts), time.Since(startedAt), true)
 				writeLine(outputBatch{ID: b.ID, Error: err.Error()})
 				return
 			}
+			metrics.onFinish(len(b.Texts), time.Since(startedAt), false)
 			writeLine(outputBatch{ID: b.ID, Vectors: vecs})
 		}(batch)
 	}

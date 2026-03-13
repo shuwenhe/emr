@@ -16,6 +16,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <map>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -188,6 +189,22 @@ struct BucketKeyHash {
     }
 };
 
+struct SweepState {
+    std::unordered_set<std::string> seen_sha1;
+    std::vector<uint64_t> kept_fp;
+    std::unordered_map<BucketKey, std::vector<int>, BucketKeyHash> buckets;
+    std::map<int, int> near_dist;
+    std::size_t kept = 0;
+    std::size_t exact_dup = 0;
+    std::size_t near_dup = 0;
+
+    void reserve(std::size_t n, int bands) {
+        seen_sha1.reserve(n);
+        kept_fp.reserve(n);
+        buckets.reserve(n * bands);
+    }
+};
+
 class DedupEngine {
     std::unordered_set<std::string> seen_sha1_;
     std::vector<std::string>        kept_doc_ids_;
@@ -293,6 +310,130 @@ public:
     }
 };
 
+class ThresholdSweepEngine {
+    std::vector<int> thresholds_;
+    int bands_;
+    std::vector<SweepState> states_;
+
+    std::vector<BucketKey> make_keys(uint64_t fp) const {
+        int width = 64 / bands_;
+        uint64_t mask = (1ULL << width) - 1;
+        std::vector<BucketKey> keys;
+        keys.reserve(bands_);
+        for (int b = 0; b < bands_; b++) {
+            keys.push_back({b, (fp >> (b * width)) & mask});
+        }
+        return keys;
+    }
+
+public:
+    ThresholdSweepEngine(const std::vector<int>& thresholds, int bands)
+        : thresholds_(thresholds), bands_(bands) {
+        if (bands <= 0 || 64 % bands != 0) {
+            throw std::invalid_argument("bands must be a positive divisor of 64");
+        }
+        if (thresholds_.empty()) {
+            throw std::invalid_argument("thresholds must not be empty");
+        }
+        for (int t : thresholds_) {
+            if (t < 0) {
+                throw std::invalid_argument("thresholds must be >= 0");
+            }
+        }
+        states_.resize(thresholds_.size());
+    }
+
+    void process(uint64_t fp, const std::string& text_hash) {
+        auto keys = make_keys(fp);
+
+        for (std::size_t i = 0; i < thresholds_.size(); i++) {
+            int threshold = thresholds_[i];
+            SweepState& st = states_[i];
+
+            if (st.seen_sha1.count(text_hash)) {
+                st.exact_dup += 1;
+                continue;
+            }
+
+            std::unordered_set<int> candidates;
+            for (const auto& key : keys) {
+                auto it = st.buckets.find(key);
+                if (it == st.buckets.end()) {
+                    continue;
+                }
+                for (int idx : it->second) {
+                    candidates.insert(idx);
+                }
+            }
+
+            bool is_near = false;
+            int best_dist = -1;
+            for (int idx : candidates) {
+                int dist = hamming_distance(fp, st.kept_fp[idx]);
+                if (best_dist < 0 || dist < best_dist) {
+                    best_dist = dist;
+                }
+                if (dist <= threshold) {
+                    is_near = true;
+                    break;
+                }
+            }
+
+            if (is_near) {
+                st.near_dup += 1;
+                if (best_dist >= 0) {
+                    st.near_dist[best_dist] += 1;
+                }
+                continue;
+            }
+
+            int keep_idx = static_cast<int>(st.kept_fp.size());
+            st.seen_sha1.insert(text_hash);
+            st.kept_fp.push_back(fp);
+            for (const auto& key : keys) {
+                st.buckets[key].push_back(keep_idx);
+            }
+            st.kept += 1;
+        }
+    }
+
+    void process_batch(const std::vector<uint64_t>& fps,
+                       const std::vector<std::string>& text_hashes) {
+        if (fps.size() != text_hashes.size()) {
+            throw std::invalid_argument("fps and text_hashes must have the same length");
+        }
+        for (std::size_t i = 0; i < fps.size(); i++) {
+            process(fps[i], text_hashes[i]);
+        }
+    }
+
+    py::list snapshot() const {
+        py::list out;
+        for (std::size_t i = 0; i < thresholds_.size(); i++) {
+            const SweepState& st = states_[i];
+            py::dict row;
+            row["threshold"] = thresholds_[i];
+            row["kept"] = py::int_(st.kept);
+            row["exact_dup"] = py::int_(st.exact_dup);
+            row["near_dup"] = py::int_(st.near_dup);
+
+            py::dict near_dist;
+            for (const auto& [dist, count] : st.near_dist) {
+                near_dist[py::str(std::to_string(dist))] = py::int_(count);
+            }
+            row["near_distance_distribution"] = near_dist;
+            out.append(row);
+        }
+        return out;
+    }
+
+    void reserve(std::size_t n) {
+        for (auto& st : states_) {
+            st.reserve(n, bands_);
+        }
+    }
+};
+
 PYBIND11_MODULE(_simhash, m) {
     m.doc() = "High-performance SimHash-64 + DedupEngine (C++ + OpenSSL)";
 
@@ -348,4 +489,26 @@ PYBIND11_MODULE(_simhash, m) {
              "Pre-allocate internal hash tables for n documents.")
         .def("__len__", &DedupEngine::size,
              "Number of kept (non-duplicate) documents.");
+
+        py::class_<ThresholdSweepEngine>(m, "ThresholdSweepEngine")
+           .def(py::init<const std::vector<int>&, int>(),
+               py::arg("thresholds"), py::arg("bands"),
+               "Create a multi-threshold SimHash sweep engine.\n"
+               "  thresholds – list of Hamming-distance thresholds to compare\n"
+               "  bands      – number of LSH bands (must divide 64)")
+           .def("process",
+               &ThresholdSweepEngine::process,
+               py::arg("fp"), py::arg("text_hash"),
+               "Process one fingerprint + SHA-1 text hash across all thresholds.")
+           .def("process_batch",
+               &ThresholdSweepEngine::process_batch,
+               py::arg("fps"), py::arg("text_hashes"),
+               "Process a batch of fingerprints + SHA-1 text hashes across all thresholds.")
+           .def("snapshot",
+               &ThresholdSweepEngine::snapshot,
+               "Return current per-threshold stats as a list of dicts.")
+           .def("reserve",
+               &ThresholdSweepEngine::reserve,
+               py::arg("n"),
+               "Pre-allocate internal hash tables for n documents per threshold.");
 }

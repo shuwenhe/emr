@@ -5,11 +5,35 @@ import argparse
 import json
 import os
 import re
+import glob
+import importlib.util
 from concurrent.futures import Future, ProcessPoolExecutor
 from collections import Counter, defaultdict
 from collections import deque
 from hashlib import sha1
 from typing import Deque, DefaultDict, Dict, Generator, List, Optional, Tuple
+
+
+try:
+    _rag_dir = os.path.dirname(__file__)
+    _so_paths = []
+    _so_paths.extend(glob.glob(os.path.join(_rag_dir, "so", "_simhash*.so")))
+    _so_paths.extend(glob.glob(os.path.join(_rag_dir, "_simhash*.so")))
+    _so_paths.extend(glob.glob(os.path.join(_rag_dir, "simhash", "_simhash*.so")))
+    if _so_paths:
+        _spec = importlib.util.spec_from_file_location("_simhash", _so_paths[0])
+        _simhash_ext = importlib.util.module_from_spec(_spec)  # type: ignore[arg-type]
+        _spec.loader.exec_module(_simhash_ext)  # type: ignore[union-attr]
+        _USE_CPP = True
+        _USE_CPP_SWEEP = hasattr(_simhash_ext, "ThresholdSweepEngine")
+    else:
+        _simhash_ext = None
+        _USE_CPP = False
+        _USE_CPP_SWEEP = False
+except Exception:
+    _simhash_ext = None
+    _USE_CPP = False
+    _USE_CPP_SWEEP = False
 
 
 TOKEN_RE = re.compile(r"[\u4e00-\u9fff]|[A-Za-z0-9_]+")
@@ -28,10 +52,14 @@ def iter_jsonl(path: str) -> Generator[Dict, None, None]:
 
 
 def tokenize(text: str) -> List[str]:
+    if _USE_CPP:
+        return _simhash_ext.tokenize(text)  # type: ignore[union-attr]
     return TOKEN_RE.findall(text.lower())
 
 
 def simhash64(text: str) -> int:
+    if _USE_CPP:
+        return _simhash_ext.simhash64(text)  # type: ignore[union-attr]
     tokens = tokenize(text)
     if not tokens:
         return 0
@@ -54,10 +82,14 @@ def simhash64(text: str) -> int:
 
 
 def simhash64_worker(text: str) -> int:
+    if _USE_CPP:
+        return _simhash_ext.simhash64_worker(text)  # type: ignore[union-attr]
     return simhash64(text)
 
 
 def hamming_distance(a: int, b: int) -> int:
+    if _USE_CPP:
+        return _simhash_ext.hamming_distance(a, b)  # type: ignore[union-attr]
     return (a ^ b).bit_count()
 
 
@@ -169,6 +201,114 @@ def sweep(
     progress_every: int,
     parallel_workers: int,
 ) -> Dict:
+    total = 0
+    too_short = 0
+
+    if _USE_CPP_SWEEP:
+        engine = _simhash_ext.ThresholdSweepEngine(thresholds, bands)  # type: ignore[union-attr]
+        if limit_docs is not None and limit_docs > 0:
+            engine.reserve(limit_docs)
+
+        max_pending = max(1, parallel_workers * 8)
+        pending: Deque[Tuple[str, Future[int]]] = deque()
+
+        def process_ready(text_sha1: str, fp: int) -> None:
+            engine.process(fp, text_sha1)
+
+        if parallel_workers <= 1:
+            for idx, row in enumerate(iter_jsonl(input_path), start=1):
+                if limit_docs is not None and idx > limit_docs:
+                    break
+
+                total += 1
+
+                text = row.get("text")
+                if not isinstance(text, str):
+                    continue
+                text = text.strip()
+
+                if len(text) < min_len:
+                    too_short += 1
+                    continue
+
+                text_sha1 = row.get("text_sha1")
+                if not isinstance(text_sha1, str) or not text_sha1:
+                    text_sha1 = sha1(text.encode("utf-8")).hexdigest()
+
+                process_ready(text_sha1, simhash64(text))
+
+                if progress_every > 0 and idx % progress_every == 0:
+                    print(f"processed_docs={idx}", flush=True)
+        else:
+            with ProcessPoolExecutor(max_workers=parallel_workers) as executor:
+                for idx, row in enumerate(iter_jsonl(input_path), start=1):
+                    if limit_docs is not None and idx > limit_docs:
+                        break
+
+                    total += 1
+
+                    text = row.get("text")
+                    if not isinstance(text, str):
+                        continue
+                    text = text.strip()
+
+                    if len(text) < min_len:
+                        too_short += 1
+                        continue
+
+                    text_sha1 = row.get("text_sha1")
+                    if not isinstance(text_sha1, str) or not text_sha1:
+                        text_sha1 = sha1(text.encode("utf-8")).hexdigest()
+
+                    pending.append((text_sha1, executor.submit(simhash64_worker, text)))
+
+                    while len(pending) >= max_pending:
+                        psha1, pfut = pending.popleft()
+                        process_ready(psha1, pfut.result())
+
+                    if progress_every > 0 and idx % progress_every == 0:
+                        print(f"processed_docs={idx}", flush=True)
+
+                while pending:
+                    psha1, pfut = pending.popleft()
+                    process_ready(psha1, pfut.result())
+
+        rows: List[Dict] = []
+        for raw in engine.snapshot():
+            near_dist = Counter({int(k): int(v) for k, v in raw["near_distance_distribution"].items()})
+            near_p50 = percentile(near_dist, 0.50)
+            near_p90 = percentile(near_dist, 0.90)
+            near_p95 = percentile(near_dist, 0.95)
+            dup_total = int(raw["exact_dup"]) + int(raw["near_dup"])
+
+            rows.append(
+                {
+                    "threshold": int(raw["threshold"]),
+                    "total": total,
+                    "kept": int(raw["kept"]),
+                    "exact_dup": int(raw["exact_dup"]),
+                    "near_dup": int(raw["near_dup"]),
+                    "too_short": too_short,
+                    "duplicated_docs": dup_total,
+                    "duplicated_rate_pct": pct(dup_total, total),
+                    "near_p50": near_p50,
+                    "near_p90": near_p90,
+                    "near_p95": near_p95,
+                    "near_distance_distribution": {str(k): near_dist[k] for k in sorted(near_dist)},
+                }
+            )
+
+        rows.sort(key=lambda row: row["threshold"])
+        recommended = choose_recommended(rows)
+        return {
+            "input": os.path.abspath(input_path),
+            "bands": bands,
+            "min_len": min_len,
+            "thresholds": thresholds,
+            "recommended_threshold": recommended,
+            "results": rows,
+        }
+
     states: Dict[int, State] = {t: State(bands) for t in thresholds}
     max_pending = max(1, parallel_workers * 8)
     pending: Deque[Tuple[str, str, Future[int]]] = deque()
@@ -216,6 +356,7 @@ def sweep(
             if limit_docs is not None and idx > limit_docs:
                 break
 
+            total += 1
             for st in states.values():
                 st.total += 1
 
@@ -225,6 +366,7 @@ def sweep(
             text = text.strip()
 
             if len(text) < min_len:
+                too_short += 1
                 for st in states.values():
                     st.too_short += 1
                 continue
@@ -247,6 +389,7 @@ def sweep(
                 if limit_docs is not None and idx > limit_docs:
                     break
 
+                total += 1
                 for st in states.values():
                     st.total += 1
 
@@ -256,6 +399,7 @@ def sweep(
                 text = text.strip()
 
                 if len(text) < min_len:
+                    too_short += 1
                     for st in states.values():
                         st.too_short += 1
                     continue
