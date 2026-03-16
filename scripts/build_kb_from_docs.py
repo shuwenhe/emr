@@ -11,12 +11,12 @@ Output record schema (one JSON per line):
 Examples:
   python scripts/build_kb_from_docs.py \
       --input-dir ./docs/guidelines \
-      --output-file ./config/knowledge_base.jsonl \
+      --output-file ./rag/kb/knowledge_base.jsonl \
       --id-prefix KB-HT
 
   python scripts/build_kb_from_docs.py \
       --input-dir ./docs \
-      --output-file ./config/knowledge_base.jsonl \
+      --output-file ./rag/kb/knowledge_base.jsonl \
       --append
 """
 
@@ -205,6 +205,7 @@ def build_jsonl(
     max_chars: int,
     min_chars: int,
     append: bool,
+    upsert: bool,
 ) -> int:
     docs = list(_iter_docs(input_dir, include_exts=(".docx", ".pdf")))
     if not docs:
@@ -236,6 +237,51 @@ def build_jsonl(
         return 0
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
+
+    if upsert and output_file.exists():
+        existing_rows: List[dict] = []
+        with output_file.open("r", encoding="utf-8") as f:
+            for line_no, line in enumerate(f, start=1):
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError as exc:
+                    print(f"[WARN] Skip malformed existing row line={line_no}: {exc}")
+                    continue
+                if isinstance(row, dict):
+                    existing_rows.append(row)
+
+        index_by_id = {
+            str(row.get("id") or "").strip(): idx
+            for idx, row in enumerate(existing_rows)
+            if str(row.get("id") or "").strip()
+        }
+
+        replaced = 0
+        added = 0
+        for item in all_entries:
+            item_id = str(item.get("id") or "").strip()
+            if item_id and item_id in index_by_id:
+                existing_rows[index_by_id[item_id]] = item
+                replaced += 1
+            else:
+                existing_rows.append(item)
+                if item_id:
+                    index_by_id[item_id] = len(existing_rows) - 1
+                added += 1
+
+        with output_file.open("w", encoding="utf-8") as f:
+            for row in existing_rows:
+                f.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+        print(
+            f"[DONE] Upserted {len(all_entries)} entries to: {output_file} "
+            f"(added={added}, replaced={replaced}, total={len(existing_rows)})"
+        )
+        return len(all_entries)
+
     mode = "a" if append and output_file.exists() else "w"
     with output_file.open(mode, encoding="utf-8") as f:
         for item in all_entries:
@@ -250,13 +296,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--input-dir", required=True, help="Directory containing .docx/.pdf guidelines")
     parser.add_argument(
         "--output-file",
-        default="./config/knowledge_base.jsonl",
-        help="Output JSONL file path (default: ./config/knowledge_base.jsonl)",
+        default="./rag/kb/knowledge_base.jsonl",
+        help="Output JSONL file path (default: ./rag/kb/knowledge_base.jsonl)",
     )
     parser.add_argument("--id-prefix", default="KB-HT", help="ID prefix (default: KB-HT)")
     parser.add_argument("--max-chars", type=int, default=700, help="Max chars per chunk (default: 700)")
     parser.add_argument("--min-chars", type=int, default=80, help="Min chars per chunk (default: 80)")
     parser.add_argument("--append", action="store_true", help="Append to existing output file")
+    parser.add_argument(
+        "--upsert",
+        action="store_true",
+        help="Upsert by id into existing output file (replace same id, append new id)",
+    )
     return parser.parse_args()
 
 
@@ -276,6 +327,7 @@ def main() -> int:
         max_chars=max(200, int(args.max_chars)),
         min_chars=max(20, int(args.min_chars)),
         append=bool(args.append),
+        upsert=bool(args.upsert),
     )
     return 0 if written >= 0 else 1
 

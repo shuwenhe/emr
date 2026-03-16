@@ -396,7 +396,7 @@ def _kb_source_preview_entries(source: str) -> List[Dict[str, Any]]:
 
     project_root = Path(__file__).resolve().parents[1]
     kb_candidates = [
-        project_root / "config" / "knowledge_base.jsonl",
+        project_root / "rag" / "kb" / "knowledge_base.jsonl",
         project_root / "rag" / "kb" / "current_partial" / "chunks.jsonl",
     ]
 

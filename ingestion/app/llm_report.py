@@ -22,6 +22,7 @@ OLLAMA_MAX_RETRIES = max(0, int(os.getenv("OLLAMA_MAX_RETRIES", "2")))
 RAG_ENABLED = os.getenv("RAG_ENABLED", "1") != "0"
 RAG_TOP_K = max(1, int(os.getenv("RAG_TOP_K", "5")))
 RAG_SCORE_THRESHOLD = float(os.getenv("RAG_SCORE_THRESHOLD", "0"))
+RAG_CONTEXT_ITEM_MAX_CHARS = max(120, int(os.getenv("RAG_CONTEXT_ITEM_MAX_CHARS", "260")))
 RAG_VECTOR_ENABLED = os.getenv("RAG_VECTOR_ENABLED", "1") != "0"
 RAG_VECTOR_LOAD_RETRIES = max(0, int(os.getenv("RAG_VECTOR_LOAD_RETRIES", "5")))
 RAG_VECTOR_LOAD_RETRY_DELAY_SEC = max(0.1, float(os.getenv("RAG_VECTOR_LOAD_RETRY_DELAY_SEC", "0.5")))
@@ -35,7 +36,7 @@ RAG_OPENAI_BASE_URL = os.getenv("RAG_OPENAI_BASE_URL")
 RAG_OPENAI_API_KEY = os.getenv("RAG_OPENAI_API_KEY")
 RAG_KB_PATH = os.getenv(
     "RAG_KB_PATH",
-    str(Path(__file__).resolve().parents[2] / "config" / "knowledge_base.jsonl"),
+    str(Path(__file__).resolve().parents[2] / "rag" / "kb" / "knowledge_base.jsonl"),
 )
 
 _KB_ITEMS_CACHE: Optional[List[Dict[str, Any]]] = None
@@ -54,6 +55,13 @@ def _short_text(value: str, limit: int = 160) -> str:
     if len(text) <= limit:
         return text
     return text[:limit] + "..."
+
+
+def _truncate_context_item(value: str) -> str:
+    text = str(value or "").strip()
+    if len(text) <= RAG_CONTEXT_ITEM_MAX_CHARS:
+        return text
+    return text[:RAG_CONTEXT_ITEM_MAX_CHARS] + "..."
 
 
 def _extract_record_id(report: Dict[str, Any], emr: Dict[str, Any]) -> str:
@@ -87,10 +95,10 @@ _KEYWORD_RULES: Dict[str, List[str]] = {
 }
 _REPORT_SECTIONS = ("diagnosis", "doctor_opinion", "report_note", "treatment_plan_text")
 _SECTION_TOP_K = {
-    "diagnosis": 4,
-    "doctor_opinion": 5,
-    "report_note": 3,
-    "treatment_plan_text": 5,
+    "diagnosis": 3,
+    "doctor_opinion": 3,
+    "report_note": 2,
+    "treatment_plan_text": 3,
 }
 _RISK_ALIASES = {
     "low": {"low", "低", "低风险"},
@@ -539,7 +547,7 @@ def _retrieve_context_vector(query: str, top_k: int = RAG_TOP_K) -> Optional[Dic
                 "score": float(score),
             }
         )
-        context_lines.append(f"[{rank}] {item['title'] or '-'}\n{item['content']}")
+        context_lines.append(f"[{rank}] {item['title'] or '-'}\n{_truncate_context_item(item['content'])}")
 
     return {
         "query": query,
@@ -782,7 +790,7 @@ def _retrieve_context_for_section(
                 "score": score,
             }
         )
-        context_lines.append(f"[{rank}] {item.get('title') or '-'}\n{item.get('content') or ''}")
+        context_lines.append(f"[{rank}] {item.get('title') or '-'}\n{_truncate_context_item(item.get('content') or '')}")
 
     result = {
         "query": query,
@@ -838,7 +846,7 @@ def retrieve_context_by_section(
     merged_items = list(merged_by_id.values())
     merged_context_lines = []
     for rank, item in enumerate(merged_items, start=1):
-        merged_context_lines.append(f"[{rank}] {item.get('title') or '-'}\n{item.get('content') or ''}")
+        merged_context_lines.append(f"[{rank}] {item.get('title') or '-'}\n{_truncate_context_item(item.get('content') or '')}")
     merged = {
         "items": merged_items,
         "citations": merged_citations,
@@ -1020,20 +1028,22 @@ def _generate_llm_diagnosis_and_opinion(context: str) -> Dict[str, Any]:
 
 
 def _generate_llm_field_text(section: str, context: str) -> Dict[str, Any]:
+    started_at = time.time()
+    retried = False
     field_prompts = {
         "diagnosis": (
             "请返回严格JSON，包含字段：diagnosis, evidence_item_ids。"
-            "输出 3-5 句中文，不少于 80 字，需包含风险等级与温度范围信息，"
+            "输出 3-5 句中文，不少于 60 字，需包含风险等级与温度范围信息，"
             "仅输出谨慎、客观的诊断结论，并使用引用编号（如[1]）。"
         ),
         "doctor_opinion": (
             "请返回严格JSON，包含字段：doctor_opinion, evidence_item_ids。"
-            "输出 3-5 句中文，不少于 80 字，需包含可执行建议与复评提示，"
+            "输出 3-5 句中文，不少于 60 字，需包含可执行建议与复评提示，"
             "并明确写出‘仅供参考’，使用引用编号（如[1]）。"
         ),
         "report_note": (
             "请返回严格JSON，包含字段：report_note, evidence_item_ids。"
-            "输出 2-4 句中文，不少于 60 字，强调报告适用边界、检查前提或谨慎解释要求，"
+            "输出 2-4 句中文，不少于 45 字，强调报告适用边界、检查前提或谨慎解释要求，"
             "并明确写出‘仅供参考’，使用引用编号（如[1]）。"
         ),
     }
@@ -1047,14 +1057,15 @@ def _generate_llm_field_text(section: str, context: str) -> Dict[str, Any]:
         "evidence_item_ids": _parse_evidence_ids(data.get("evidence_item_ids")),
     }
 
-    min_len = 80 if section in ("diagnosis", "doctor_opinion") else 60
+    min_len = 60 if section in ("diagnosis", "doctor_opinion") else 45
     if len(value) < min_len:
+        retried = True
         retry_prompt = (
             _SYSTEM_PROMPT
             + "\n\n"
             + context
             + field_prompts[section]
-            + f"请进一步展开，{output_field} 不少于 {max(min_len, 120 if section != 'report_note' else 80)} 字。"
+            + f"请进一步展开，{output_field} 不少于 {max(min_len, 90 if section != 'report_note' else 70)} 字。"
         )
         text = _ollama_generate(retry_prompt, temperature=0.2, max_tokens=900)
         data = _extract_json_block(text) or {}
@@ -1062,10 +1073,18 @@ def _generate_llm_field_text(section: str, context: str) -> Dict[str, Any]:
             output_field: str(data.get(output_field) or value).strip(),
             "evidence_item_ids": _parse_evidence_ids(data.get("evidence_item_ids") or result["evidence_item_ids"]),
         }
+    result["_metrics"] = {
+        "section": section,
+        "retried": retried,
+        "input_chars": len(context),
+        "output_chars": len(str(result.get(output_field) or "")),
+        "elapsed_sec": round(time.time() - started_at, 3),
+    }
     return result
 
 
 def _generate_llm_plan_text(context: str, plan: Dict[str, Any]) -> Dict[str, Any]:
+    started_at = time.time()
     plan_summary = {
         "intensity_level": plan.get("intensity_level"),
         "sessions": plan.get("sessions"),
@@ -1084,10 +1103,18 @@ def _generate_llm_plan_text(context: str, plan: Dict[str, Any]) -> Dict[str, Any
     )
     text = _ollama_generate(prompt, temperature=0.3, max_tokens=700)
     data = _extract_json_block(text) or {}
-    return {
+    result = {
         "treatment_plan_text": str(data.get("treatment_plan_text") or text or "").strip(),
         "evidence_item_ids": _parse_evidence_ids(data.get("evidence_item_ids")),
     }
+    result["_metrics"] = {
+        "section": "treatment_plan_text",
+        "retried": False,
+        "input_chars": len(context),
+        "output_chars": len(str(result.get("treatment_plan_text") or "")),
+        "elapsed_sec": round(time.time() - started_at, 3),
+    }
+    return result
 
 
 def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str, Any]:
@@ -1117,7 +1144,9 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
             "evidence_item_ids": [],
         }
 
+    retrieval_started_at = time.time()
     section_retrieval_result = retrieve_context_by_section(report, emr)
+    retrieval_elapsed = time.time() - retrieval_started_at
     retrieval_result = section_retrieval_result.get("merged") or {}
     retrieved_context = str(retrieval_result.get("context") or "")
     citations = retrieval_result.get("citations") or []
@@ -1134,10 +1163,11 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
         }
 
     logging.info(
-        "[RAG] completed record_id=%s hits=%d refs=%s",
+        "[RAG] completed record_id=%s hits=%d refs=%s retrieval_elapsed=%.2fs",
         record_id,
         len(retrieval_result.get("items") or []),
         [str(item.get("id") or "") for item in citations],
+        retrieval_elapsed,
     )
 
     merged_ref_by_id = {
@@ -1193,16 +1223,37 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
         "report_note": _run_note,
         "treatment_plan_text": _run_plan,
     }
+    llm_started_at = time.time()
     _results: Dict[str, Any] = {}
     with ThreadPoolExecutor(max_workers=4) as _executor:
         _futures = {_executor.submit(fn): name for name, fn in _tasks.items()}
         for _future in as_completed(_futures):
             _results[_futures[_future]] = _future.result()
+    llm_elapsed = time.time() - llm_started_at
 
     diag_payload = _results.get("diagnosis") or {}
     opinion_payload = _results.get("doctor_opinion") or {}
     note_payload = _results.get("report_note") or {}
     plan_payload = _results.get("treatment_plan_text") or {}
+
+    for section_name, section_payload in (
+        ("diagnosis", diag_payload),
+        ("doctor_opinion", opinion_payload),
+        ("report_note", note_payload),
+        ("treatment_plan_text", plan_payload),
+    ):
+        metrics = section_payload.get("_metrics") if isinstance(section_payload, dict) else None
+        if isinstance(metrics, dict):
+            logging.info(
+                "[RAG-LLM] record_id=%s section=%s retried=%s input_chars=%s output_chars=%s elapsed=%.2fs",
+                record_id,
+                section_name,
+                metrics.get("retried"),
+                metrics.get("input_chars"),
+                metrics.get("output_chars"),
+                float(metrics.get("elapsed_sec") or 0.0),
+            )
+    logging.info("[RAG-LLM] record_id=%s overall_elapsed=%.2fs", record_id, llm_elapsed)
     if isinstance(plan, dict):
         plan_text = str(plan_payload.get("treatment_plan_text") or "").strip()
         plan_evidence_ids = _parse_evidence_ids(plan_payload.get("evidence_item_ids"))

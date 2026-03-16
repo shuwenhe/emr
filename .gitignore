@@ -1,6 +1,5 @@
-/.venv/
-/rag/.venv/
 **/.venv/
+**/venv/
 
 # ==================== Storage (Runtime Data) ====================
 # New unified storage directory
@@ -28,8 +27,8 @@
 /batch_results/
 
 # ==================== Web ====================
-/web/node_modules/
-/web/.next/
+**/node_modules/
+**/.next/
 /web/.next/cache/
 /web/out/
 /web/.turbo/
@@ -73,7 +72,8 @@ nginx.log
 
 # ==================== RAG ====================
 /rag/dataset/
-/rag/kb/
+/rag/kb/*
+!/rag/kb/knowledge_base.jsonl
 rag/so/
 rag/go_embedder
 rag/_simhash*.so

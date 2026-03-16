@@ -22,6 +22,18 @@ KB_API_KEY ?=
 KB_MAX_LEN ?= 800
 KB_OVERLAP ?= 100
 KB_BATCH_SIZE ?= 32
+STRUCTURED_KB_JSONL ?= $(CURDIR)/rag/kb/knowledge_base.jsonl
+STRUCTURED_KB_OUT_DIR ?= $(CURDIR)/rag/kb/current_partial
+KB_DOC_IMPORT_DIR ?= $(CURDIR)/docs/guidelines
+KB_DOC_ID_PREFIX ?= KB-DOC
+KB_DOC_MAX_CHARS ?= 700
+KB_DOC_MIN_CHARS ?= 80
+KB_MD_IMPORT_DIR ?= $(CURDIR)/docs
+KB_MD_ID_PREFIX ?= KB-MD
+KB_MD_MAX_CHARS ?= 700
+KB_MD_MIN_CHARS ?= 80
+KB_MD_INCLUDE_REGEX ?=
+KB_MD_EXCLUDE_REGEX ?=
 RAG_USE_GO_EMBEDDER ?= 1
 RAG_GO_EMBED_CONCURRENCY ?= 8
 RAG_EMBED_METRICS_EVERY ?= 20
@@ -43,7 +55,7 @@ TCM_WORKERS  ?= 4
 TCM_DOCX_DIR  ?= $(CURDIR)/rag/dataset/docx_corpus
 TCM_DOCX_RPF  ?= 500   # records per docx file
 
-.PHONY: help install service service-precheck web db-check report kb-build kb-build-markdown kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build clean
+.PHONY: help install service service-precheck web db-check report kb-build kb-build-markdown kb-build-structured kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build clean
 
 help:
 	@echo "Available targets:"
@@ -60,6 +72,11 @@ help:
 	@echo "  make simhash-build    # compile C++ SimHash extension (speeds up dedup)" 
 	@echo "  make text-ops-build   # compile C++ text ops extension (chunk_text + low-signal)"
 	@echo "  make kb-build-markdown # build KB and print markdown/chunk debug"
+	@echo "  make kb-build-structured # build vector KB from rag/kb/knowledge_base.jsonl"
+	@echo "  make kb-import-docs    # batch import .docx/.pdf into knowledge_base.jsonl (upsert by id)"
+	@echo "  make kb-import-docs-build # import docs then rebuild structured vector KB"
+	@echo "  make kb-import-md      # batch import .md into knowledge_base.jsonl (upsert by id)"
+	@echo "  make kb-import-md-build # import markdown then rebuild structured vector KB"
 	@echo "  make kb-rebuild       # alias of kb-build"
 	@echo "  make kb-clean         # remove generated KB artifacts"
 	@echo "  make tcm-docx         # convert TCM corpus JSON → .docx files (direct path)"
@@ -138,6 +155,41 @@ kb-build-markdown:
 	RAG_RESOURCE_LOG_GPU="$(RAG_RESOURCE_LOG_GPU)" \
 	$(if $(RAG_EMBED_PIPELINE_INFLIGHT),RAG_EMBED_PIPELINE_INFLIGHT="$(RAG_EMBED_PIPELINE_INFLIGHT)",) \
 	"$(KB_PY)" -c "from rag.kb_builder import build_kb; build_kb(source_dir='$(KB_SOURCE_DIR)', out_dir='$(KB_OUT_DIR)', provider='$(KB_PROVIDER)', embed_model='$(KB_EMBED_MODEL)', base_url='$(KB_BASE_URL)' or None, api_key='$(KB_API_KEY)' or None, max_len=int('$(KB_MAX_LEN)'), overlap=int('$(KB_OVERLAP)'), batch_size=int('$(KB_BATCH_SIZE)'), show_markdown=True)"
+
+kb-build-structured:
+	@PYTHONPATH="$(CURDIR):$$PYTHONPATH" \
+	"$(KB_PY)" -m rag.build_kb_from_structured \
+		--kb "$(STRUCTURED_KB_JSONL)" \
+		--out "$(STRUCTURED_KB_OUT_DIR)" \
+		--provider "$(KB_PROVIDER)" \
+		--model "$(KB_EMBED_MODEL)" \
+		$(if $(KB_BASE_URL),--base-url "$(KB_BASE_URL)",)
+
+kb-import-docs:
+	@PYTHONPATH="$(CURDIR):$$PYTHONPATH" \
+	"$(KB_PY)" scripts/build_kb_from_docs.py \
+		--input-dir "$(KB_DOC_IMPORT_DIR)" \
+		--output-file "$(STRUCTURED_KB_JSONL)" \
+		--id-prefix "$(KB_DOC_ID_PREFIX)" \
+		--max-chars $(KB_DOC_MAX_CHARS) \
+		--min-chars $(KB_DOC_MIN_CHARS) \
+		--upsert
+
+kb-import-docs-build: kb-import-docs kb-build-structured
+
+kb-import-md:
+	@PYTHONPATH="$(CURDIR):$$PYTHONPATH" \
+	"$(KB_PY)" scripts/build_kb_from_md.py \
+		--input-dir "$(KB_MD_IMPORT_DIR)" \
+		--output-file "$(STRUCTURED_KB_JSONL)" \
+		--id-prefix "$(KB_MD_ID_PREFIX)" \
+		--max-chars $(KB_MD_MAX_CHARS) \
+		--min-chars $(KB_MD_MIN_CHARS) \
+		$(if $(KB_MD_INCLUDE_REGEX),--include-regex "$(KB_MD_INCLUDE_REGEX)",) \
+		$(if $(KB_MD_EXCLUDE_REGEX),--exclude-regex "$(KB_MD_EXCLUDE_REGEX)",) \
+		--upsert
+
+kb-import-md-build: kb-import-md kb-build-structured
 
 kb-rebuild: kb-build
 

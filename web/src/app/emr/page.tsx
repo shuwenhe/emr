@@ -54,10 +54,10 @@ const ROI_LABEL_POSITIONS: Record<string, { x: number; y: number }> = {
 };
 
 const THERMAL_PLOT_BOUNDS = {
-  left: 3,
-  right: 72,
-  top: 8,
-  bottom: 97,
+  left: 2,
+  right: 98,
+  top: 2,
+  bottom: 98,
 };
 
 const HEAD_ROI_NAME_REGEX = /(额头|眼|脸颊|鼻子|鼻|下巴)/;
@@ -469,15 +469,11 @@ export default function EmrPage() {
       const centerXPct = toNumber(item.center_x_pct);
       const centerYPct = toNumber(item.center_y_pct);
       if (centerXPct !== null && centerYPct !== null) {
-        const clampedX = Math.max(0, Math.min(100, centerXPct));
-        const clampedY = Math.max(0, Math.min(100, centerYPct));
+        const clampedX = Math.max(2, Math.min(98, centerXPct));
+        const clampedY = Math.max(2, Math.min(98, centerYPct));
         pos = {
-          x:
-            THERMAL_PLOT_BOUNDS.left
-            + (clampedX / 100) * (THERMAL_PLOT_BOUNDS.right - THERMAL_PLOT_BOUNDS.left),
-          y:
-            THERMAL_PLOT_BOUNDS.top
-            + (clampedY / 100) * (THERMAL_PLOT_BOUNDS.bottom - THERMAL_PLOT_BOUNDS.top),
+          x: clampedX,
+          y: clampedY,
         };
       }
 
@@ -636,9 +632,9 @@ export default function EmrPage() {
     };
   }, [currentSearchPatient, report]);
 
-  const thermalImageUrl = useMemo(() => {
+  const thermalImageInfo = useMemo(() => {
     if (!report || typeof report !== "object") {
-      return "";
+      return { url: "", preLabeled: false };
     }
 
     const normalizeImagePath = (value: unknown) => {
@@ -651,8 +647,15 @@ export default function EmrPage() {
       return `${API_BASE}/data/${stripped}`;
     };
 
+    const roiLabeled = normalizeImagePath(report.thermal_roi_labeled_image);
+    if (roiLabeled) {
+      return { url: roiLabeled, preLabeled: true };
+    }
+
     const direct = normalizeImagePath(report.thermal_marked_image);
-    if (direct) return direct;
+    if (direct) {
+      return { url: direct, preLabeled: false };
+    }
 
     if (Array.isArray(report.thermal_images)) {
       for (const item of report.thermal_images) {
@@ -660,12 +663,17 @@ export default function EmrPage() {
           continue;
         }
         const candidate = normalizeImagePath(item);
-        if (candidate) return candidate;
+        if (candidate) {
+          return { url: candidate, preLabeled: false };
+        }
       }
     }
 
-    return "";
+    return { url: "", preLabeled: false };
   }, [report]);
+
+  const thermalImageUrl = thermalImageInfo.url;
+  const shouldRenderFrontendOverlay = !thermalImageInfo.preLabeled;
 
   const fetchReports = useCallback(async () => {
     try {
@@ -1857,26 +1865,28 @@ export default function EmrPage() {
                 alt="Thermal Marked Image"
                 className="w-full max-w-2xl rounded-xl border border-slate-200"
               />
-              <svg className="pointer-events-none absolute inset-0 z-10 h-full w-full">
-                {roiOverlayLayoutPoints.map((point, index) => {
-                  if (!point.showLeader) {
-                    return null;
-                  }
-                  const edgeX = point.labelX <= point.x ? point.labelX + 4.5 : point.labelX - 4.5;
-                  return (
-                    <line
-                      key={`line-${point.name}-${index}`}
-                      x1={`${point.x}%`}
-                      y1={`${point.y}%`}
-                      x2={`${edgeX}%`}
-                      y2={`${point.labelY}%`}
-                      stroke="rgba(15, 23, 42, 0.85)"
-                      strokeWidth="1"
-                    />
-                  );
-                })}
-              </svg>
-              {roiOverlayLayoutPoints.map((point, index) => (
+              {shouldRenderFrontendOverlay && (
+                <svg className="pointer-events-none absolute inset-0 z-10 h-full w-full">
+                  {roiOverlayLayoutPoints.map((point, index) => {
+                    if (!point.showLeader) {
+                      return null;
+                    }
+                    const edgeX = point.labelX <= point.x ? point.labelX + 4.5 : point.labelX - 4.5;
+                    return (
+                      <line
+                        key={`line-${point.name}-${index}`}
+                        x1={`${point.x}%`}
+                        y1={`${point.y}%`}
+                        x2={`${edgeX}%`}
+                        y2={`${point.labelY}%`}
+                        stroke="rgba(15, 23, 42, 0.85)"
+                        strokeWidth="1"
+                      />
+                    );
+                  })}
+                </svg>
+              )}
+              {shouldRenderFrontendOverlay && roiOverlayLayoutPoints.map((point, index) => (
                 <div
                   key={`${point.name}-${index}`}
                   className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-md border border-white/30 bg-slate-900/70 px-2 py-1 text-[11px] font-semibold text-white"

@@ -190,7 +190,7 @@ Recommended fields:
 
 ## Migration Suggestion
 
-Current file `config/knowledge_base.jsonl` can be migrated in two steps:
+Current file `rag/kb/knowledge_base.jsonl` can be migrated in two steps:
 
 1. Add missing fields to existing 10 seed entries.
 2. Split the new corpus into the category files above and concatenate them during build if needed.
