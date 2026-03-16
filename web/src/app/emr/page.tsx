@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import mammoth from "mammoth";
 import { flashSuccessButton } from "../lib/flash";
@@ -150,6 +150,9 @@ export default function EmrPage() {
   const [currentSearchPatient, setCurrentSearchPatient] = useState<PatientSearchResult | null>(null);
   const [showAbnormalDetails, setShowAbnormalDetails] = useState(false);
   const [reportPage, setReportPage] = useState(1);
+  const [generating, setGenerating] = useState(false);
+  const [generateProgress, setGenerateProgress] = useState(0);
+  const generateTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     try {
@@ -895,17 +898,49 @@ export default function EmrPage() {
     return emrIdValue ? String(emrIdValue) : null;
   }
 
+  function clearGenerateTimer() {
+    if (generateTimerRef.current !== null) {
+      clearInterval(generateTimerRef.current);
+      generateTimerRef.current = null;
+    }
+  }
+
   async function generateEmrByRecordId(nextRecordId: string) {
-    const data = await postJson(`${API_BASE}/emr/generate`, {
-      record_id: nextRecordId.trim(),
-    });
-    setOutput(data as EmrResponse);
-    syncEmrFields(data as EmrResponse);
-    setReport(extractReport(data as EmrResponse));
-    fetchReports();
-    flashSuccessButton();
-    persistContextFromEmr(data as EmrResponse);
-    setRedirecting(false);
+    setGenerating(true);
+    setGenerateProgress(0);
+    clearGenerateTimer();
+    generateTimerRef.current = setInterval(() => {
+      setGenerateProgress((prev) => {
+        if (prev < 20) return prev + 3;
+        if (prev < 50) return prev + 1;
+        if (prev < 75) return prev + 0.5;
+        if (prev < 90) return prev + 0.2;
+        return Math.min(prev + 0.05, 95);
+      });
+    }, 200);
+    try {
+      const data = await postJson<EmrResponse>(`${API_BASE}/emr/generate`, {
+        record_id: nextRecordId.trim(),
+      });
+      clearGenerateTimer();
+      setGenerateProgress(100);
+      setTimeout(() => {
+        setGenerating(false);
+        setGenerateProgress(0);
+      }, 1200);
+      setOutput(data);
+      syncEmrFields(data as EmrResponse);
+      setReport(extractReport(data as EmrResponse));
+      fetchReports();
+      flashSuccessButton();
+      persistContextFromEmr(data as EmrResponse);
+      setRedirecting(false);
+    } catch (error) {
+      clearGenerateTimer();
+      setGenerating(false);
+      setGenerateProgress(0);
+      throw error;
+    }
   }
 
   async function fetchEmrById(nextEmrId: string) {
@@ -1503,14 +1538,41 @@ export default function EmrPage() {
               onChange={(event) => setRecordId(event.target.value)}
             />
             <button
-              className="mt-4 w-full rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              className="mt-4 w-full rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
               onClick={handleGenerate}
+              disabled={generating}
             >
-              生成诊断报告
+              {generating ? "生成中..." : "生成诊断报告"}
             </button>
-            <p className="mt-3 text-xs text-slate-500">
-              将基于采集数据自动生成诊断报告，并同步分析指标。
-            </p>
+            {generating && (
+              <div className="mt-4">
+                <div className="mb-1 flex items-center justify-between text-xs text-slate-500">
+                  <span>
+                    {generateProgress < 20
+                      ? "正在读取采集数据..."
+                      : generateProgress < 50
+                      ? "AI 正在分析热成像数据..."
+                      : generateProgress < 80
+                      ? "正在生成诊断报告..."
+                      : generateProgress < 100
+                      ? "正在生成报告文件..."
+                      : "报告生成完成！"}
+                  </span>
+                  <span className="font-mono">{Math.round(generateProgress)}%</span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                  <div
+                    className="h-full rounded-full bg-slate-900 transition-all duration-200 ease-linear"
+                    style={{ width: `${generateProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+            {!generating && (
+              <p className="mt-3 text-xs text-slate-500">
+                将基于采集数据自动生成诊断报告，并同步分析指标。
+              </p>
+            )}
           </div>
 
           <div className="grid gap-6 lg:col-span-7 sm:grid-cols-2">
@@ -1669,12 +1731,12 @@ export default function EmrPage() {
               </div>
 
               <div className="rounded-xl border border-slate-200 p-4">
-                <h3 className="text-sm font-semibold text-slate-900">AI 报告说明</h3>
+                <h3 className="text-sm font-semibold text-slate-900">报告说明</h3>
                 <p className="mt-2 text-slate-700">{reportEvidence.reportNote || "-"}</p>
               </div>
 
               <div className="rounded-xl border border-slate-200 p-4">
-                <h3 className="text-sm font-semibold text-slate-900">AI 治疗建议</h3>
+                <h3 className="text-sm font-semibold text-slate-900">治疗建议</h3>
                 <p className="mt-2 text-slate-700">{reportEvidence.treatmentPlanText || "-"}</p>
               </div>
 
