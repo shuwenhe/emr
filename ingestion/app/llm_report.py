@@ -10,6 +10,7 @@ import time
 from datetime import datetime
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -83,6 +84,27 @@ _KEYWORD_RULES: Dict[str, List[str]] = {
     ],
     "risk": ["低风险", "中风险", "高风险", "炎症", "疼痛", "应激", "循环", "供血", "温差", "异常", "复评"],
     "treatment": ["疗程", "频次", "干预", "理疗", "保暖", "复测", "随访", "医生意见", "治疗方案"],
+}
+_REPORT_SECTIONS = ("diagnosis", "doctor_opinion", "report_note", "treatment_plan_text")
+_SECTION_TOP_K = {
+    "diagnosis": 4,
+    "doctor_opinion": 5,
+    "report_note": 3,
+    "treatment_plan_text": 5,
+}
+_RISK_ALIASES = {
+    "low": {"low", "低", "低风险"},
+    "medium": {"medium", "mid", "中", "中风险"},
+    "high": {"high", "高", "高风险"},
+}
+_BODY_PART_ALIASES = {
+    "颈肩": {"颈肩", "颈", "肩", "肩背"},
+    "腰背": {"腰背", "腰", "背"},
+    "四肢": {"四肢", "上肢", "下肢", "手", "足", "腕", "肘", "踝"},
+    "膝关节": {"膝", "膝关节"},
+    "腹部": {"腹", "腹部", "上腹", "下腹"},
+    "胸部": {"胸", "胸部"},
+    "头面部": {"头", "面", "头面", "头面部"},
 }
 
 
@@ -203,6 +225,13 @@ def _load_kb_items() -> List[Dict[str, Any]]:
                     "content": content,
                     "tags": _to_list_of_str(row.get("tags")),
                     "source": str(row.get("source") or "").strip(),
+                    "category": str(row.get("category") or "").strip(),
+                    "report_sections": _to_list_of_str(row.get("report_sections")),
+                    "priority": int(row.get("priority") or 0),
+                    "status": str(row.get("status") or "active").strip() or "active",
+                    "risk_levels": _to_list_of_str(row.get("risk_levels")),
+                    "body_parts": _to_list_of_str(row.get("body_parts")),
+                    "retrieval_hints": _to_list_of_str(row.get("retrieval_hints")),
                 }
             )
     except Exception as exc:
@@ -219,6 +248,40 @@ def _tokenize_text(text: str) -> List[str]:
     latin = re.findall(r"[a-z0-9_\-]+", lowered)
     cjk = re.findall(r"[\u4e00-\u9fff]{1,}", lowered)
     return [token for token in (latin + cjk) if token]
+
+
+def _normalize_risk_level(value: str) -> str:
+    text = str(value or "").strip().lower()
+    if not text:
+        return ""
+    for canonical, aliases in _RISK_ALIASES.items():
+        if text in aliases:
+            return canonical
+    return text
+
+
+def _expand_body_part_aliases(values: List[str]) -> Set[str]:
+    expanded: Set[str] = set()
+    for value in values:
+        text = str(value or "").strip()
+        if not text:
+            continue
+        expanded.add(text)
+        for canonical, aliases in _BODY_PART_ALIASES.items():
+            if text == canonical or text in aliases or any(alias in text or text in alias for alias in aliases):
+                expanded.add(canonical)
+                expanded.update(aliases)
+    return expanded
+
+
+def _body_part_matches(query_body_parts: List[str], item_body_parts: List[str]) -> bool:
+    if not query_body_parts or not item_body_parts:
+        return False
+    query_expanded = _expand_body_part_aliases(query_body_parts)
+    item_expanded = _expand_body_part_aliases(item_body_parts)
+    if query_expanded.intersection(item_expanded):
+        return True
+    return any(q in i or i in q for q in query_expanded for i in item_expanded)
 
 
 def _extract_rule_keywords(text: str) -> List[str]:
@@ -286,6 +349,51 @@ def _build_retrieval_query(report: Dict[str, Any], emr: Dict[str, Any]) -> str:
         query_parts.append("规则关键词:" + ",".join(keywords))
 
     return "\n".join(query_parts)
+
+
+def _extract_report_features(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str, Any]:
+    patient = report.get("patient") or emr.get("patient") or {}
+    analysis = report.get("analysis") or {}
+    regional = (analysis.get("regional_comparison") or {}) if isinstance(analysis, dict) else {}
+    abnormal_regions = regional.get("abnormal_regions") if isinstance(regional, dict) else []
+
+    body_parts: List[str] = []
+    patient_body_part = str(patient.get("body_part") or "").strip()
+    if patient_body_part:
+        body_parts.append(patient_body_part)
+    if isinstance(abnormal_regions, list):
+        for item in abnormal_regions:
+            if not isinstance(item, dict):
+                continue
+            for key in ("region_cn", "region"):
+                value = str(item.get(key) or "").strip()
+                if value and value not in body_parts:
+                    body_parts.append(value)
+
+    risk_level = _normalize_risk_level(str(analysis.get("risk_level") or "").strip())
+    return {
+        "body_parts": body_parts,
+        "risk_level": risk_level,
+    }
+
+
+def build_section_queries(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str, str]:
+    base_query = _build_retrieval_query(report, emr)
+    features = _extract_report_features(report, emr)
+    body_parts = ",".join(features["body_parts"]) if features["body_parts"] else ""
+    risk_level = features["risk_level"]
+    body_hint = f"部位:{body_parts}" if body_parts else ""
+    risk_hint = f"风险:{risk_level}" if risk_level else ""
+
+    def _join(parts: List[str]) -> str:
+        return "\n".join([part for part in parts if part])
+
+    return {
+        "diagnosis": _join([base_query, body_hint, risk_hint, "判读原则", "温差", "异常区域", "风险分层"]),
+        "doctor_opinion": _join([base_query, body_hint, risk_hint, "医生意见", "谨慎解释", "复评建议", "转诊提醒"]),
+        "report_note": _join([base_query, body_hint, "检查准备", "报告说明", "仅供参考", "适用边界"]),
+        "treatment_plan_text": _join([base_query, body_hint, risk_hint, "治疗方案", "疗程频次", "复评", "禁忌"]),
+    }
 
 
 def _load_vector_kb() -> Optional[Any]:
@@ -533,6 +641,217 @@ def _retrieve_context(query: str, top_k: int = RAG_TOP_K, record_id: str = "unkn
     return result
 
 
+def _filter_items_for_section(
+    items: List[Dict[str, Any]],
+    section: str,
+    *,
+    risk_level: str = "",
+    body_parts: Optional[List[str]] = None,
+) -> List[Dict[str, Any]]:
+    body_parts = [part for part in (body_parts or []) if part]
+    selected: List[Dict[str, Any]] = []
+    for item in items:
+        if str(item.get("status") or "active").lower() != "active":
+            continue
+        report_sections = _to_list_of_str(item.get("report_sections"))
+        if report_sections and section not in report_sections:
+            continue
+        selected.append(item)
+    if not selected:
+        return selected
+
+    def risk_match(item: Dict[str, Any]) -> bool:
+        item_risk_levels = [_normalize_risk_level(level) for level in _to_list_of_str(item.get("risk_levels"))]
+        if not risk_level or not item_risk_levels:
+            return False
+        return risk_level in item_risk_levels
+
+    def body_match(item: Dict[str, Any]) -> bool:
+        item_body_parts = _to_list_of_str(item.get("body_parts"))
+        if not body_parts or not item_body_parts:
+            return False
+        return _body_part_matches(body_parts, item_body_parts)
+
+    strict = [item for item in selected if risk_match(item) and body_match(item)]
+    if strict:
+        return strict
+
+    risk_only = [item for item in selected if risk_match(item)]
+    body_only = [item for item in selected if body_match(item)]
+    if risk_only and body_only:
+        combined_ids = {str(item.get("id") or "") for item in risk_only}
+        merged = risk_only + [item for item in body_only if str(item.get("id") or "") not in combined_ids]
+        return merged
+    if risk_only:
+        return risk_only
+    if body_only:
+        return body_only
+    return selected
+
+
+def _score_section_item(
+    item: Dict[str, Any],
+    q_tokens: Set[str],
+    *,
+    risk_level: str = "",
+    body_parts: Optional[List[str]] = None,
+) -> float:
+    title_text = str(item.get("title") or "")
+    tags_text = " ".join(_to_list_of_str(item.get("tags")))
+    hints_text = " ".join(_to_list_of_str(item.get("retrieval_hints")))
+    item_text = " ".join([title_text, str(item.get("content") or ""), tags_text, hints_text])
+    i_tokens = set(_tokenize_text(item_text))
+    if not i_tokens:
+        return 0.0
+    overlap = q_tokens.intersection(i_tokens)
+    if not overlap:
+        return 0.0
+
+    title_tokens = set(_tokenize_text(title_text))
+    tag_tokens = set(_tokenize_text(tags_text))
+    hint_tokens = set(_tokenize_text(hints_text))
+    base_overlap = len(overlap) / max(1, len(q_tokens))
+    title_overlap = len(q_tokens.intersection(title_tokens)) / max(1, len(q_tokens))
+    tag_overlap = len(q_tokens.intersection(tag_tokens)) / max(1, len(q_tokens))
+    hint_overlap = len(q_tokens.intersection(hint_tokens)) / max(1, len(q_tokens))
+    score = base_overlap + (0.35 * title_overlap) + (0.25 * tag_overlap) + (0.2 * hint_overlap)
+
+    item_risk_levels = [_normalize_risk_level(level) for level in _to_list_of_str(item.get("risk_levels"))]
+    if risk_level and item_risk_levels and risk_level in item_risk_levels:
+        score += 4.0
+
+    item_body_parts = _to_list_of_str(item.get("body_parts"))
+    if body_parts and item_body_parts:
+        if _body_part_matches(body_parts, item_body_parts):
+            score += 3.0
+
+    report_sections = _to_list_of_str(item.get("report_sections"))
+    if report_sections:
+        score += 0.8
+
+    score += float(item.get("priority") or 0) * 0.5
+    return score
+
+
+def _retrieve_context_for_section(
+    section: str,
+    query: str,
+    *,
+    top_k: int,
+    record_id: str,
+    risk_level: str = "",
+    body_parts: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    if not RAG_ENABLED:
+        return {"query": query, "items": [], "citations": [], "context": "", "evidence_item_ids": []}
+
+    items = _filter_items_for_section(
+        _load_kb_items(),
+        section,
+        risk_level=risk_level,
+        body_parts=body_parts,
+    )
+    q_tokens = set(_tokenize_text(query))
+    if not items or not q_tokens:
+        return {"query": query, "items": [], "citations": [], "context": "", "evidence_item_ids": []}
+
+    scored: List[Tuple[float, Dict[str, Any]]] = []
+    for item in items:
+        score = _score_section_item(item, q_tokens, risk_level=risk_level, body_parts=body_parts)
+        if score > 0:
+            scored.append((score, item))
+    scored.sort(
+        key=lambda pair: (
+            pair[0],
+            float(pair[1].get("priority") or 0),
+            len(_to_list_of_str(pair[1].get("report_sections"))),
+        ),
+        reverse=True,
+    )
+    selected_pairs = scored[:top_k]
+    selected = [row[1] for row in selected_pairs]
+    citations: List[Dict[str, Any]] = []
+    context_lines: List[str] = []
+    for rank, (score, item) in enumerate(selected_pairs, start=1):
+        citations.append(
+            {
+                "ref": rank,
+                "id": item.get("id"),
+                "title": item.get("title"),
+                "source": item.get("source"),
+                "score": score,
+            }
+        )
+        context_lines.append(f"[{rank}] {item.get('title') or '-'}\n{item.get('content') or ''}")
+
+    result = {
+        "query": query,
+        "items": selected,
+        "citations": citations,
+        "context": "\n\n".join(context_lines),
+        "evidence_item_ids": [str(item.get("id") or "") for item in selected if str(item.get("id") or "").strip()],
+    }
+    logging.info(
+        "[RAG-SECTION] record_id=%s section=%s hits=%d refs=%s query=%s",
+        record_id,
+        section,
+        len(selected),
+        result["evidence_item_ids"],
+        _short_text(query),
+    )
+    return result
+
+
+def retrieve_context_by_section(
+    report: Dict[str, Any],
+    emr: Dict[str, Any],
+    *,
+    top_k_map: Optional[Dict[str, int]] = None,
+) -> Dict[str, Any]:
+    record_id = _extract_record_id(report, emr)
+    queries = build_section_queries(report, emr)
+    features = _extract_report_features(report, emr)
+    top_k_map = {**_SECTION_TOP_K, **(top_k_map or {})}
+    sections: Dict[str, Any] = {}
+
+    merged_by_id: Dict[str, Dict[str, Any]] = {}
+    merged_citations: List[Dict[str, Any]] = []
+    for section in _REPORT_SECTIONS:
+        section_result = _retrieve_context_for_section(
+            section,
+            queries.get(section, ""),
+            top_k=int(top_k_map.get(section, RAG_TOP_K)),
+            record_id=record_id,
+            risk_level=features["risk_level"],
+            body_parts=features["body_parts"],
+        )
+        sections[section] = section_result
+        for item in section_result.get("items") or []:
+            item_id = str(item.get("id") or "").strip()
+            if item_id and item_id not in merged_by_id:
+                merged_by_id[item_id] = item
+        for citation in section_result.get("citations") or []:
+            item_id = str(citation.get("id") or "").strip()
+            if item_id and all(str(existing.get("id") or "") != item_id for existing in merged_citations):
+                merged_citations.append(citation)
+
+    merged_items = list(merged_by_id.values())
+    merged_context_lines = []
+    for rank, item in enumerate(merged_items, start=1):
+        merged_context_lines.append(f"[{rank}] {item.get('title') or '-'}\n{item.get('content') or ''}")
+    merged = {
+        "items": merged_items,
+        "citations": merged_citations,
+        "context": "\n\n".join(merged_context_lines),
+        "evidence_item_ids": [str(item.get("id") or "") for item in merged_items if str(item.get("id") or "").strip()],
+    }
+    return {
+        "section_queries": queries,
+        "sections": sections,
+        "merged": merged,
+    }
+
+
 def _build_llm_context(
     report: Dict[str, Any],
     emr: Dict[str, Any],
@@ -564,6 +883,22 @@ def _build_llm_context(
             f"{retrieved_context}\n"
         )
     return context
+
+
+def _build_llm_context_for_section(
+    report: Dict[str, Any],
+    emr: Dict[str, Any],
+    section: str,
+    retrieved_context: str = "",
+) -> str:
+    section_labels = {
+        "diagnosis": "诊断结论",
+        "doctor_opinion": "医生意见",
+        "report_note": "报告说明",
+        "treatment_plan_text": "治疗建议",
+    }
+    context = _build_llm_context(report, emr, retrieved_context=retrieved_context)
+    return context + f"\n当前任务字段：{section_labels.get(section, section)}\n"
 
 
 def _parse_evidence_ids(value: Any) -> List[str]:
@@ -600,6 +935,26 @@ def _resolve_ref_ids(text: str, citations: List[Dict[str, Any]]) -> List[str]:
         if item_id:
             resolved.append(item_id)
     return resolved
+
+
+def _remap_refs(answer: str, from_citations: List[Dict[str, Any]], target_ref_by_id: Dict[str, int]) -> str:
+    if not answer:
+        return ""
+
+    def replace(match: re.Match[str]) -> str:
+        num = int(match.group(1))
+        idx = num - 1
+        if idx < 0 or idx >= len(from_citations):
+            return ""
+        item_id = str(from_citations[idx].get("id") or "").strip()
+        if not item_id:
+            return ""
+        target_num = target_ref_by_id.get(item_id)
+        if not target_num:
+            return ""
+        return f"[{target_num}]"
+
+    return _REF_PATTERN.sub(replace, answer)
 
 
 def _handle_common_query(question: str) -> Optional[str]:
@@ -664,6 +1019,52 @@ def _generate_llm_diagnosis_and_opinion(context: str) -> Dict[str, Any]:
     return result
 
 
+def _generate_llm_field_text(section: str, context: str) -> Dict[str, Any]:
+    field_prompts = {
+        "diagnosis": (
+            "请返回严格JSON，包含字段：diagnosis, evidence_item_ids。"
+            "输出 3-5 句中文，不少于 80 字，需包含风险等级与温度范围信息，"
+            "仅输出谨慎、客观的诊断结论，并使用引用编号（如[1]）。"
+        ),
+        "doctor_opinion": (
+            "请返回严格JSON，包含字段：doctor_opinion, evidence_item_ids。"
+            "输出 3-5 句中文，不少于 80 字，需包含可执行建议与复评提示，"
+            "并明确写出‘仅供参考’，使用引用编号（如[1]）。"
+        ),
+        "report_note": (
+            "请返回严格JSON，包含字段：report_note, evidence_item_ids。"
+            "输出 2-4 句中文，不少于 60 字，强调报告适用边界、检查前提或谨慎解释要求，"
+            "并明确写出‘仅供参考’，使用引用编号（如[1]）。"
+        ),
+    }
+    output_field = section
+    base_prompt = _SYSTEM_PROMPT + "\n\n" + context + field_prompts[section]
+    text = _ollama_generate(base_prompt, temperature=0.2, max_tokens=700)
+    data = _extract_json_block(text) or {}
+    value = str(data.get(output_field) or "").strip()
+    result = {
+        output_field: value,
+        "evidence_item_ids": _parse_evidence_ids(data.get("evidence_item_ids")),
+    }
+
+    min_len = 80 if section in ("diagnosis", "doctor_opinion") else 60
+    if len(value) < min_len:
+        retry_prompt = (
+            _SYSTEM_PROMPT
+            + "\n\n"
+            + context
+            + field_prompts[section]
+            + f"请进一步展开，{output_field} 不少于 {max(min_len, 120 if section != 'report_note' else 80)} 字。"
+        )
+        text = _ollama_generate(retry_prompt, temperature=0.2, max_tokens=900)
+        data = _extract_json_block(text) or {}
+        result = {
+            output_field: str(data.get(output_field) or value).strip(),
+            "evidence_item_ids": _parse_evidence_ids(data.get("evidence_item_ids") or result["evidence_item_ids"]),
+        }
+    return result
+
+
 def _generate_llm_plan_text(context: str, plan: Dict[str, Any]) -> Dict[str, Any]:
     plan_summary = {
         "intensity_level": plan.get("intensity_level"),
@@ -716,7 +1117,8 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
             "evidence_item_ids": [],
         }
 
-    retrieval_result = _retrieve_context(retrieval_query, record_id=record_id)
+    section_retrieval_result = retrieve_context_by_section(report, emr)
+    retrieval_result = section_retrieval_result.get("merged") or {}
     retrieved_context = str(retrieval_result.get("context") or "")
     citations = retrieval_result.get("citations") or []
     if not retrieval_result.get("items"):
@@ -725,6 +1127,8 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
             "model": OLLAMA_MODEL,
             "retrieved_context": "",
             "retrieved_items": [],
+            "section_queries": section_retrieval_result.get("section_queries") or {},
+            "section_retrieval": section_retrieval_result.get("sections") or {},
             "report_note": "知识库未找到依据，无法确认。",
             "evidence_item_ids": [],
         }
@@ -736,14 +1140,70 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
         [str(item.get("id") or "") for item in citations],
     )
 
-    context = _build_llm_context(report, emr, retrieved_context=retrieved_context)
-    diag_payload = _generate_llm_diagnosis_and_opinion(context)
+    merged_ref_by_id = {
+        str(citation.get("id") or "").strip(): index
+        for index, citation in enumerate(citations, start=1)
+        if str(citation.get("id") or "").strip()
+    }
+    section_queries = section_retrieval_result.get("section_queries") or {}
+    section_retrieval = section_retrieval_result.get("sections") or {}
+
+    diag_payload: Dict[str, Any] = {}
+    opinion_payload: Dict[str, Any] = {}
+    note_payload: Dict[str, Any] = {}
     plan_text = ""
     plan_evidence_ids: List[str] = []
     plan_payload: Dict[str, Any] = {}
+
+    diagnosis_section = section_retrieval.get("diagnosis") or {}
+    diagnosis_context = _build_llm_context_for_section(
+        report, emr, "diagnosis", retrieved_context=str(diagnosis_section.get("context") or "")
+    )
+    opinion_section = section_retrieval.get("doctor_opinion") or {}
+    opinion_context = _build_llm_context_for_section(
+        report, emr, "doctor_opinion", retrieved_context=str(opinion_section.get("context") or "")
+    )
+    note_section = section_retrieval.get("report_note") or {}
+    note_context = _build_llm_context_for_section(
+        report, emr, "report_note", retrieved_context=str(note_section.get("context") or "")
+    )
     plan = report.get("treatment_plan") or {}
+    plan_section = section_retrieval.get("treatment_plan_text") or {}
+    plan_context = _build_llm_context_for_section(
+        report, emr, "treatment_plan_text", retrieved_context=str(plan_section.get("context") or "")
+    )
+
+    def _run_diagnosis() -> Dict[str, Any]:
+        return _generate_llm_field_text("diagnosis", diagnosis_context)
+
+    def _run_opinion() -> Dict[str, Any]:
+        return _generate_llm_field_text("doctor_opinion", opinion_context)
+
+    def _run_note() -> Dict[str, Any]:
+        return _generate_llm_field_text("report_note", note_context)
+
+    def _run_plan() -> Dict[str, Any]:
+        if isinstance(plan, dict):
+            return _generate_llm_plan_text(plan_context, plan)
+        return {}
+
+    _tasks = {
+        "diagnosis": _run_diagnosis,
+        "doctor_opinion": _run_opinion,
+        "report_note": _run_note,
+        "treatment_plan_text": _run_plan,
+    }
+    _results: Dict[str, Any] = {}
+    with ThreadPoolExecutor(max_workers=4) as _executor:
+        _futures = {_executor.submit(fn): name for name, fn in _tasks.items()}
+        for _future in as_completed(_futures):
+            _results[_futures[_future]] = _future.result()
+
+    diag_payload = _results.get("diagnosis") or {}
+    opinion_payload = _results.get("doctor_opinion") or {}
+    note_payload = _results.get("report_note") or {}
+    plan_payload = _results.get("treatment_plan_text") or {}
     if isinstance(plan, dict):
-        plan_payload = _generate_llm_plan_text(context, plan)
         plan_text = str(plan_payload.get("treatment_plan_text") or "").strip()
         plan_evidence_ids = _parse_evidence_ids(plan_payload.get("evidence_item_ids"))
 
@@ -759,17 +1219,31 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
             }
             for item in (retrieval_result.get("items") or [])
         ],
+        "section_queries": section_retrieval_result.get("section_queries") or {},
+        "section_retrieval": section_retrieval_result.get("sections") or {},
     }
+
+    diagnosis_citations = diagnosis_section.get("citations") or []
+    doctor_opinion_citations = opinion_section.get("citations") or []
+    report_note_citations = note_section.get("citations") or []
+    plan_citations = (section_retrieval.get("treatment_plan_text") or {}).get("citations") or []
+
     if diag_payload.get("diagnosis"):
-        payload["diagnosis"] = _strip_invalid_refs(str(diag_payload["diagnosis"]), len(citations))
-    if diag_payload.get("doctor_opinion"):
-        payload["doctor_opinion"] = _strip_invalid_refs(str(diag_payload["doctor_opinion"]), len(citations))
-    if diag_payload.get("report_note"):
-        payload["report_note"] = _strip_invalid_refs(str(diag_payload["report_note"]), len(citations))
+        diagnosis_text = _strip_invalid_refs(str(diag_payload["diagnosis"]), len(diagnosis_citations))
+        payload["diagnosis"] = _remap_refs(diagnosis_text, diagnosis_citations, merged_ref_by_id)
+    if opinion_payload.get("doctor_opinion"):
+        doctor_opinion_text = _strip_invalid_refs(str(opinion_payload["doctor_opinion"]), len(doctor_opinion_citations))
+        payload["doctor_opinion"] = _remap_refs(doctor_opinion_text, doctor_opinion_citations, merged_ref_by_id)
+    if note_payload.get("report_note"):
+        report_note_text = _strip_invalid_refs(str(note_payload["report_note"]), len(report_note_citations))
+        payload["report_note"] = _remap_refs(report_note_text, report_note_citations, merged_ref_by_id)
     if plan_text:
-        payload["treatment_plan_text"] = _strip_invalid_refs(plan_text, len(citations))
+        treatment_plan_text = _strip_invalid_refs(plan_text, len(plan_citations))
+        payload["treatment_plan_text"] = _remap_refs(treatment_plan_text, plan_citations, merged_ref_by_id)
 
     diagnosis_evidence_ids = _parse_evidence_ids(diag_payload.get("evidence_item_ids"))
+    diagnosis_evidence_ids.extend(_parse_evidence_ids(opinion_payload.get("evidence_item_ids")))
+    diagnosis_evidence_ids.extend(_parse_evidence_ids(note_payload.get("evidence_item_ids")))
     diagnosis_evidence_ids.extend(
         _resolve_ref_ids(
             "\n".join(
@@ -778,6 +1252,8 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
                     str(payload.get("doctor_opinion") or ""),
                     str(payload.get("report_note") or ""),
                     json.dumps(diag_payload.get("evidence_item_ids") or [], ensure_ascii=False),
+                    json.dumps(opinion_payload.get("evidence_item_ids") or [], ensure_ascii=False),
+                    json.dumps(note_payload.get("evidence_item_ids") or [], ensure_ascii=False),
                 ]
             ),
             citations,

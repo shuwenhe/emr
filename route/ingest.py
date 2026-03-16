@@ -58,6 +58,11 @@ def _persist_ai_result(record_id: str, analysis_result: dict, emr_result: dict, 
         if value:
             merged_report[field] = value
 
+    for field in ("section_queries", "section_retrieval"):
+        value = ai_result.get(field)
+        if isinstance(value, dict):
+            merged_report[field] = value
+
     for field in (
         "retrieved_items",
         "citations",
