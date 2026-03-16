@@ -27,6 +27,7 @@ _LIST_REPORTS_CACHE: Dict[str, Dict[str, Any]] = {}
 _CACHE_TTL = 300  # 5 minutes
 _DAY_DIR_RE = re.compile(r"^\d{8}$")
 _REPORT_SUFFIXES = {".pdf", ".docx"}
+_SOURCE_PREVIEW_SUFFIXES = {".doc", ".docx", ".pdf", ".md", ".txt"}
 _GO_PROXY_HEALTH_CACHE: Dict[str, Any] = {
     "checked_at": 0.0,
     "healthy": False,
@@ -320,6 +321,160 @@ def _extract_source_doc_relative_path(source: str) -> str:
     return normalized
 
 
+def _extract_source_title(source: str) -> str:
+    raw = str(source or "").strip()
+    if not raw or raw == "-":
+        return ""
+    normalized = raw
+    for prefix in ("来源：", "来源:", "source:", "Source:"):
+        if normalized.startswith(prefix):
+            normalized = normalized[len(prefix):].strip()
+            break
+    return normalized.strip()
+
+
+def _canonical_source_name(value: str) -> str:
+    normalized = _extract_source_title(value)
+    normalized = re.sub(r"\.(docx?|pdf|md|txt)$", "", normalized, flags=re.IGNORECASE)
+    normalized = normalized.lower()
+    normalized = re.sub(r"[\s\-_./\\:：()（）\[\]【】<>《》]+", "", normalized)
+    return normalized
+
+
+def _iter_source_candidates_by_title(source: str, allowed_roots: List[Path]) -> List[Path]:
+    canonical = _canonical_source_name(source)
+    if not canonical:
+        return []
+
+    preferred_roots: List[Path] = []
+    seen_roots: set[Path] = set()
+    for root in allowed_roots:
+        if root in seen_roots or not root.exists() or not root.is_dir():
+            continue
+        seen_roots.add(root)
+        preferred_roots.append(root)
+
+    subdirs = ("docs", "config", "rag/dataset", "rag/kb")
+    for root in list(preferred_roots):
+        for subdir in subdirs:
+            candidate = root / subdir
+            if candidate.exists() and candidate.is_dir() and candidate not in seen_roots:
+                seen_roots.add(candidate)
+                preferred_roots.append(candidate)
+
+    matches: List[Path] = []
+    checked: set[Path] = set()
+    for root in preferred_roots:
+        try:
+            iterator = root.rglob("*")
+        except Exception:
+            continue
+        for candidate in iterator:
+            if not candidate.is_file():
+                continue
+            suffix = candidate.suffix.lower()
+            if suffix not in _SOURCE_PREVIEW_SUFFIXES:
+                continue
+            try:
+                resolved = candidate.resolve()
+            except Exception:
+                continue
+            if resolved in checked:
+                continue
+            checked.add(resolved)
+            stem_key = _canonical_source_name(candidate.stem)
+            name_key = _canonical_source_name(candidate.name)
+            if canonical in {stem_key, name_key}:
+                matches.append(resolved)
+    return matches
+
+
+def _kb_source_preview_entries(source: str) -> List[Dict[str, Any]]:
+    canonical = _canonical_source_name(source)
+    if not canonical:
+        return []
+
+    project_root = Path(__file__).resolve().parents[1]
+    kb_candidates = [
+        project_root / "config" / "knowledge_base.jsonl",
+        project_root / "rag" / "kb" / "current_partial" / "chunks.jsonl",
+    ]
+
+    entries: List[Dict[str, Any]] = []
+    for kb_path in kb_candidates:
+        if not kb_path.exists() or not kb_path.is_file():
+            continue
+        try:
+            with kb_path.open("r", encoding="utf-8") as handle:
+                for raw_line in handle:
+                    line = raw_line.strip()
+                    if not line:
+                        continue
+                    try:
+                        item = json.loads(line)
+                    except Exception:
+                        continue
+                    if not isinstance(item, dict):
+                        continue
+                    source_value = str(item.get("source") or item.get("file_path") or "").strip()
+                    if _canonical_source_name(source_value) != canonical:
+                        continue
+                    entries.append(
+                        {
+                            "id": str(item.get("id") or item.get("chunk_id") or "").strip(),
+                            "title": str(item.get("title") or "").strip(),
+                            "content": str(
+                                item.get("content")
+                                or item.get("excerpt_markdown")
+                                or item.get("text_for_embedding")
+                                or ""
+                            ).strip(),
+                            "tags": item.get("tags") or [],
+                            "source": source_value,
+                        }
+                    )
+        except Exception:
+            logger.exception("failed to load knowledge-base preview entries from %s", kb_path)
+    return entries
+
+
+def _build_kb_source_preview_text(source: str, entries: List[Dict[str, Any]]) -> str:
+    lines = [
+        f"来源标题: {_extract_source_title(source) or source}",
+        "说明: 未找到原始附件文件，以下内容为知识库中同来源条目的汇总预览。",
+        "",
+    ]
+    for index, entry in enumerate(entries, start=1):
+        title = str(entry.get("title") or "未命名条目")
+        entry_id = str(entry.get("id") or "-")
+        tags = entry.get("tags") or []
+        if isinstance(tags, list):
+            tag_text = ", ".join(str(tag).strip() for tag in tags if str(tag).strip())
+        else:
+            tag_text = str(tags).strip()
+        content = str(entry.get("content") or "").strip()
+        lines.append(f"[{index}] {title}")
+        lines.append(f"条目ID: {entry_id}")
+        if tag_text:
+            lines.append(f"标签: {tag_text}")
+        if content:
+            lines.append(content)
+        lines.append("")
+    return "\n".join(lines).strip() + "\n"
+
+
+def _source_preview_response(source: str, entries: List[Dict[str, Any]], inline: bool) -> Response:
+    preview = _build_kb_source_preview_text(source, entries)
+    disposition = "inline" if inline else "attachment"
+    title = _extract_source_title(source) or "source-preview"
+    safe_name = re.sub(r"[^0-9A-Za-z\u4e00-\u9fff._-]+", "_", title).strip("_") or "source-preview"
+    quoted_name = quote(f"{safe_name}.txt")
+    headers = {
+        "Content-Disposition": f"{disposition}; filename=\"source-preview.txt\"; filename*=UTF-8''{quoted_name}",
+    }
+    return Response(content=preview, media_type="text/plain; charset=utf-8", headers=headers)
+
+
 def _resolve_source_doc_path(source: str) -> Path:
     normalized = _extract_source_doc_relative_path(source)
     if not normalized:
@@ -367,6 +522,10 @@ def _resolve_source_doc_path(source: str) -> Path:
             continue
         if not resolved.exists() or not resolved.is_file():
             continue
+        if any(resolved.is_relative_to(root) for root in allowed_roots):
+            return resolved
+
+    for resolved in _iter_source_candidates_by_title(source, allowed_roots):
         if any(resolved.is_relative_to(root) for root in allowed_roots):
             return resolved
 
@@ -472,7 +631,16 @@ def archive_report(request: ReportArchiveRequest):
 
 @router.get("/reports/source-file")
 def download_source_file(source: str, inline: bool = True):
-    candidate = _resolve_source_doc_path(source)
+    try:
+        candidate = _resolve_source_doc_path(source)
+    except HTTPException as exc:
+        if exc.status_code != 404:
+            raise
+        preview_entries = _kb_source_preview_entries(source)
+        if not preview_entries:
+            raise
+        return _source_preview_response(source, preview_entries, inline=inline)
+
     disposition = "inline" if inline else "attachment"
     ascii_name = "source" + candidate.suffix
     quoted_name = quote(candidate.name)
