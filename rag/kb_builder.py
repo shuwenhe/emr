@@ -895,7 +895,7 @@ def _publish_final_partial_snapshot(
     _publish_partial_snapshot_from_index(
         out_dir=out_dir,
         version_dir=version_dir,
-        snapshot_name="final",
+        snapshot_name="current_partial",
         index=index,
         chunks_path=chunks_path,
         kb_version=kb_version,
@@ -1153,6 +1153,7 @@ def build_kb(
         resume_enabled = _env_flag("RAG_EMBED_RESUME", default=True)
         checkpoint_every = max(1, int(os.getenv("RAG_CHECKPOINT_EVERY_BATCHES", "20")))
         partial_every = max(0, int(os.getenv("RAG_PARTIAL_KB_EVERY_BATCHES", "50")))
+        keep_batch_history = _env_flag("RAG_KEEP_PARTIAL_BATCH_HISTORY", default=False)
         checkpoint_dir = os.path.join(out_dir, ".kb_checkpoint")
         checkpoint_signature = _checkpoint_signature(
             {
@@ -1298,10 +1299,16 @@ def build_kb(
                 if partial_every > 0 and next_batch_count % partial_every == 0 and next_vector_id > 0:
                     chunks_handle.flush()
                     os.fsync(chunks_handle.fileno())
+                    # Default mode keeps one rolling partial snapshot instead of accumulating batch history.
+                    snapshot_name = (
+                        f"batch-{next_batch_count:06d}"
+                        if keep_batch_history
+                        else "current_partial"
+                    )
                     _publish_partial_snapshot_from_index(
                         out_dir=out_dir,
                         version_dir=version_dir,
-                        snapshot_name=f"batch-{next_batch_count:06d}",
+                        snapshot_name=snapshot_name,
                         index=index,
                         chunks_path=chunks_tmp_path,
                         kb_version=kb_version,
@@ -1514,6 +1521,7 @@ def build_kb(
             "resume_enabled": resume_enabled,
             "checkpoint_every_batches": checkpoint_every,
             "partial_snapshot_every_batches": partial_every,
+            "keep_partial_batch_history": keep_batch_history,
             "resumed_chunks": resumed_loaded,
             "resume_checkpoint_meta": resume_checkpoint_meta,
         }
