@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -40,7 +41,13 @@ def _report_path(record_id: str) -> Path:
     return _record_dir(record_id) / "report.json"
 
 
-def generate_emr(record_id: str, force: bool = False) -> Dict[str, Any]:
+def generate_emr(
+    record_id: str,
+    force: bool = False,
+    *,
+    enable_roi: bool = True,
+    enable_llm: bool = False,
+) -> Dict[str, Any]:
     from .analysis import analyze_record
     record_dir = _record_dir(record_id)
     if not record_dir.exists():
@@ -67,7 +74,19 @@ def generate_emr(record_id: str, force: bool = False) -> Dict[str, Any]:
                 logging.warning("DOCX backfill skipped for existing EMR record=%s error=%s", record_id, exc)
             return existing
 
-    analyze_result = analyze_record(record_id)
+    analysis_started_at = time.perf_counter()
+    analyze_result = analyze_record(
+        record_id,
+        enable_roi=enable_roi,
+        enable_llm=enable_llm,
+    )
+    logging.info(
+        "[EMR-TIMING] record_id=%s stage=analyze_record elapsed=%.3fs enable_roi=%s enable_llm=%s",
+        record_id,
+        time.perf_counter() - analysis_started_at,
+        enable_roi,
+        enable_llm,
+    )
     report = analyze_result.get("report") or {}
     plan = analyze_result.get("plan") or {}
 
@@ -135,8 +154,15 @@ def generate_emr(record_id: str, force: bool = False) -> Dict[str, Any]:
         logging.info("Attempting to generate DOCX report for emr %s (report_id=%s)", emr_id, report.get("report_id"))
         try:
             # FastReport disabled, use DOCX directly
+            docx_started_at = time.perf_counter()
             report_path = generate_docx_report(report, emr)
             logging.info("DOCX generation returned: %s (type: %s)", report_path, type(report_path).__name__)
+            logging.info(
+                "[EMR-TIMING] record_id=%s stage=generate_docx_report elapsed=%.3fs success=%s",
+                record_id,
+                time.perf_counter() - docx_started_at,
+                bool(report_path),
+            )
             if report_path:
                 emr["docx_report_path"] = str(report_path)
                 report["docx_report_path"] = str(report_path)

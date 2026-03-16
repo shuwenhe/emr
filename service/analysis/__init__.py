@@ -63,7 +63,11 @@ class AnalysisService:
         logger.info("[步骤2-分析] 开始热成像分析 record_id=%s roi=%s llm=%s", record_id, enable_roi, enable_llm)
         t0 = time.time()
         try:
-            result = self._legacy_analysis.analyze_record(record_id)
+            result = self._legacy_analysis.analyze_record(
+                record_id,
+                enable_roi=enable_roi,
+                enable_llm=enable_llm,
+            )
             elapsed = time.time() - t0
             risk = (
                 (result.get("report") or {}).get("analysis", {}).get("risk_level", "unknown")

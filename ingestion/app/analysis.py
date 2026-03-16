@@ -2,9 +2,12 @@ import csv
 import importlib
 import json
 import logging
+import multiprocessing as mp
 import os
+import queue
 import sys
 import threading
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -98,11 +101,158 @@ _TREATMENT_RULES = _load_treatment_rules()
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:1.7b")
 OLLAMA_ENABLED = os.getenv("OLLAMA_ENABLED", "1") != "0"
+ROI_ANALYSIS_ENABLED = os.getenv("ROI_ANALYSIS_ENABLED", "1") != "0"
+ROI_LANDMARK_TIMEOUT_SEC = max(1.0, float(os.getenv("ROI_LANDMARK_TIMEOUT_SEC", "12")))
 THERMAL_DTYPE = np.float32
 THERMAL_RENDER_DPI = int(os.getenv("THERMAL_RENDER_DPI", "100"))
 _ROI_MODULE_BINDINGS: Optional[Dict[str, Any]] = None
 _ROI_MODULE_IMPORT_ERROR: Optional[str] = None
 _ROI_MODULE_LOCK = threading.Lock()
+
+
+def _elapsed_seconds(started_at: float) -> float:
+    return time.perf_counter() - started_at
+
+
+def _log_stage(record_id: str, stage: str, started_at: float, **fields: Any) -> None:
+    details = " ".join(f"{key}={value}" for key, value in fields.items() if value is not None)
+    if details:
+        logging.info(
+            "[ANALYSIS-TIMING] record_id=%s stage=%s elapsed=%.3fs %s",
+            record_id,
+            stage,
+            _elapsed_seconds(started_at),
+            details,
+        )
+        return
+    logging.info(
+        "[ANALYSIS-TIMING] record_id=%s stage=%s elapsed=%.3fs",
+        record_id,
+        stage,
+        _elapsed_seconds(started_at),
+    )
+
+
+def _roi_pipeline_worker(matrix: np.ndarray, output_queue: Any) -> None:
+    timings: Dict[str, float] = {}
+    total_started_at = time.perf_counter()
+    try:
+        roi_bindings = _get_roi_module_bindings()
+        if not roi_bindings:
+            output_queue.put({"status": "unavailable", "timings": timings})
+            return
+
+        detect_landmarks = roi_bindings["detect_landmarks"]
+        build_dynamic_rois = roi_bindings["build_dynamic_rois"]
+        to_rgb = roi_bindings["to_rgb"]
+        calc_stats = roi_bindings["calc_stats"]
+
+        if matrix.dtype != THERMAL_DTYPE:
+            matrix = matrix.astype(THERMAL_DTYPE, copy=False)
+
+        h, w = matrix.shape
+
+        step_started_at = time.perf_counter()
+        rgb = to_rgb(matrix, vmin=28, vmax=40, cmap_name="inferno")
+        timings["to_rgb"] = _elapsed_seconds(step_started_at)
+
+        step_started_at = time.perf_counter()
+        landmarks = detect_landmarks(rgb)
+        timings["detect_landmarks"] = _elapsed_seconds(step_started_at)
+
+        if not landmarks:
+            timings["total"] = _elapsed_seconds(total_started_at)
+            output_queue.put({"status": "no_landmarks", "timings": timings})
+            return
+
+        step_started_at = time.perf_counter()
+        rois = build_dynamic_rois(h, w, landmarks)
+        timings["build_dynamic_rois"] = _elapsed_seconds(step_started_at)
+
+        step_started_at = time.perf_counter()
+        roi_stats = {}
+        roi_list = []
+        for roi_name, mask in rois.items():
+            ys, xs = np.where(mask)
+            if xs.size == 0 or ys.size == 0:
+                continue
+
+            values = matrix[ys, xs]
+            center_x_pct = round(float(xs.mean()) / max(w - 1, 1) * 100.0, 2)
+            center_y_pct = round(float(ys.mean()) / max(h - 1, 1) * 100.0, 2)
+
+            stats = calc_stats(values)
+            roi_stats[roi_name] = stats
+            roi_list.append({
+                "name": roi_name,
+                "count": stats.get("count", 0),
+                "mean_c": round(stats.get("mean", 0), 2),
+                "min_c": round(stats.get("min", 0), 2),
+                "max_c": round(stats.get("max", 0), 2),
+                "std_c": round(stats.get("std", 0), 2),
+                "center_x_pct": center_x_pct,
+                "center_y_pct": center_y_pct,
+            })
+
+        timings["calc_stats"] = _elapsed_seconds(step_started_at)
+
+        if not roi_list:
+            timings["total"] = _elapsed_seconds(total_started_at)
+            output_queue.put({"status": "empty", "timings": timings})
+            return
+
+        roi_list.sort(key=lambda item: item["mean_c"], reverse=True)
+        timings["total"] = _elapsed_seconds(total_started_at)
+        output_queue.put(
+            {
+                "status": "ok",
+                "timings": timings,
+                "roi_analysis": {
+                    "roi_stats": roi_stats,
+                    "roi_list": roi_list,
+                    "total_rois": len(roi_list),
+                    "hottest_region": roi_list[0]["name"] if roi_list else None,
+                    "hottest_temp": roi_list[0]["mean_c"] if roi_list else None,
+                    "coolest_region": roi_list[-1]["name"] if roi_list else None,
+                    "coolest_temp": roi_list[-1]["mean_c"] if roi_list else None,
+                },
+            }
+        )
+    except Exception as exc:
+        timings["total"] = _elapsed_seconds(total_started_at)
+        output_queue.put(
+            {
+                "status": "error",
+                "error_type": type(exc).__name__,
+                "error": str(exc),
+                "timings": timings,
+            }
+        )
+
+
+def _run_roi_pipeline_with_timeout(matrix: np.ndarray, timeout_sec: float) -> Dict[str, Any]:
+    ctx = mp.get_context("spawn")
+    output_queue = ctx.Queue(maxsize=1)
+    process = ctx.Process(target=_roi_pipeline_worker, args=(matrix, output_queue), daemon=True)
+    process.start()
+    try:
+        payload = output_queue.get(timeout=timeout_sec)
+    except queue.Empty:
+        if process.is_alive():
+            process.terminate()
+        process.join(timeout=1)
+        return {"status": "timeout", "timings": {"total": timeout_sec}}
+    finally:
+        try:
+            output_queue.close()
+        except Exception:
+            pass
+
+    process.join(timeout=1)
+    if process.is_alive():
+        process.terminate()
+        process.join(timeout=1)
+    return payload
 
 
 def _get_roi_module_bindings() -> Optional[Dict[str, Any]]:
@@ -656,7 +806,9 @@ def _get_cjk_font_prop() -> Optional[fm.FontProperties]:
     return None
 
 
-def _roi_label_points(roi_analysis: Optional[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def _roi_label_points(
+    roi_analysis: Optional[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
     if not isinstance(roi_analysis, dict):
         return []
     roi_list = roi_analysis.get("roi_list")
@@ -707,20 +859,20 @@ def _roi_label_points(roi_analysis: Optional[Dict[str, Any]]) -> List[Dict[str, 
     points.sort(key=lambda p: p["label_y"])
     min_y_gap = 6.5  # 增加垂直间距
     min_x_threshold = 18.0  # 增加水平检测范围
-    
+
     for i in range(1, len(points)):
         cur = points[i]
         max_prev_y = -1.0
-        
+
         for j in range(i):
             prev = points[j]
             x_dist = abs(cur["label_x"] - prev["label_x"])
             y_dist = cur["label_y"] - prev["label_y"]
-            
+
             # 如果水平位置接近且垂直间距不足，需要调整
             if x_dist < min_x_threshold and y_dist < min_y_gap:
                 max_prev_y = max(max_prev_y, prev["label_y"])
-        
+
         if max_prev_y >= 0:
             cur["label_y"] = min(95.0, max_prev_y + min_y_gap)
 
@@ -1004,22 +1156,19 @@ def _analyze_roi_regions(
     payload_path: Path,
     csv_is_matrix: bool = True,
     matrix: Optional[np.ndarray] = None,
+    *,
+    record_id: str = "-",
+    timeout_sec: float = ROI_LANDMARK_TIMEOUT_SEC,
 ) -> Optional[Dict[str, Any]]:
     """
     使用MediaPipe + ROI系统分析热成像数据
     返回14个身体部位的温度统计，如果失败返回None
     """
-    roi_bindings = _get_roi_module_bindings()
-    if not roi_bindings:
-        return None
-    detect_landmarks = roi_bindings["detect_landmarks"]
-    build_dynamic_rois = roi_bindings["build_dynamic_rois"]
-    to_rgb = roi_bindings["to_rgb"]
-    calc_stats = roi_bindings["calc_stats"]
-    
+    overall_started_at = time.perf_counter()
     try:
         # 优先复用调用方已加载的矩阵，避免重复IO与内存分配
         if matrix is None:
+            load_started_at = time.perf_counter()
             if csv_is_matrix:
                 matrix = np.loadtxt(str(payload_path), delimiter=",", dtype=THERMAL_DTYPE)
                 if matrix.ndim != 2:
@@ -1030,93 +1179,102 @@ def _analyze_roi_regions(
                 if grid is None:
                     return None
                 matrix = grid
+            _log_stage(record_id, "roi.load_matrix", load_started_at, shape=getattr(matrix, "shape", None))
 
         if matrix.dtype != THERMAL_DTYPE:
             matrix = matrix.astype(THERMAL_DTYPE, copy=False)
-        
-        h, w = matrix.shape
-        
-        # 关键点检测
-        rgb = to_rgb(matrix, vmin=28, vmax=40, cmap_name="inferno")
-        landmarks = detect_landmarks(rgb)
-        
-        if not landmarks:
-            logging.debug("No landmarks detected in ROI analysis")
-            return None
-        
-        # 构建ROI
-        rois = build_dynamic_rois(h, w, landmarks)
-        
-        # 计算统计
-        roi_stats = {}
-        roi_list = []
-        
-        for roi_name, mask in rois.items():
-            ys, xs = np.where(mask)
-            if xs.size == 0 or ys.size == 0:
-                continue
 
-            values = matrix[ys, xs]
-            center_x_pct = None
-            center_y_pct = None
-            center_x_pct = round(float(xs.mean()) / max(w - 1, 1) * 100.0, 2)
-            center_y_pct = round(float(ys.mean()) / max(h - 1, 1) * 100.0, 2)
-            
-            stats = calc_stats(values)
-            roi_stats[roi_name] = stats
-            roi_list.append({
-                "name": roi_name,
-                "count": stats.get("count", 0),
-                "mean_c": round(stats.get("mean", 0), 2),
-                "min_c": round(stats.get("min", 0), 2),
-                "max_c": round(stats.get("max", 0), 2),
-                "std_c": round(stats.get("std", 0), 2),
-                "center_x_pct": center_x_pct,
-                "center_y_pct": center_y_pct,
-            })
-            del values
+        roi_started_at = time.perf_counter()
+        roi_result = _run_roi_pipeline_with_timeout(matrix, timeout_sec=timeout_sec)
+        for stage_name, elapsed in (roi_result.get("timings") or {}).items():
+            logging.info(
+                "[ANALYSIS-TIMING] record_id=%s stage=roi.%s elapsed=%.3fs",
+                record_id,
+                stage_name,
+                elapsed,
+            )
 
-        del rois
-        
-        if not roi_list:
+        status = roi_result.get("status")
+        if status == "ok":
+            _log_stage(
+                record_id,
+                "roi.pipeline",
+                roi_started_at,
+                status=status,
+                total_rois=(roi_result.get("roi_analysis") or {}).get("total_rois"),
+            )
+            _log_stage(record_id, "roi.total", overall_started_at, status=status)
+            return roi_result.get("roi_analysis")
+
+        if status in {"no_landmarks", "empty", "unavailable"}:
+            logging.info(
+                "ROI analysis skipped record_id=%s status=%s",
+                record_id,
+                status,
+            )
+            _log_stage(record_id, "roi.total", overall_started_at, status=status)
             return None
-        
-        # 按平均温度排序
-        roi_list.sort(key=lambda x: x["mean_c"], reverse=True)
-        
-        return {
-            "roi_stats": roi_stats,
-            "roi_list": roi_list,
-            "total_rois": len(roi_list),
-            "hottest_region": roi_list[0]["name"] if roi_list else None,
-            "hottest_temp": roi_list[0]["mean_c"] if roi_list else None,
-            "coolest_region": roi_list[-1]["name"] if roi_list else None,
-            "coolest_temp": roi_list[-1]["mean_c"] if roi_list else None,
-        }
+
+        if status == "timeout":
+            logging.warning(
+                "ROI landmark detection timed out record_id=%s timeout=%.1fs, falling back to fixed regions",
+                record_id,
+                timeout_sec,
+            )
+        else:
+            logging.error(
+                "ROI analysis failed record_id=%s status=%s error_type=%s error=%s",
+                record_id,
+                status,
+                roi_result.get("error_type"),
+                roi_result.get("error"),
+            )
     except Exception as exc:
         message = str(exc)
         if "mediapipe" in message.lower() and (
             "solutions" in message.lower() or "legacy" in message.lower()
         ):
-            logging.warning(f"ROI analysis skipped due to MediaPipe compatibility: {exc}")
+            logging.warning("ROI analysis skipped due to MediaPipe compatibility record_id=%s error=%s", record_id, exc)
         else:
-            logging.error(f"ROI analysis failed: {exc}")
+            logging.error("ROI analysis failed record_id=%s error=%s", record_id, exc)
         # 使用 fallback 方法进行基础区域分析
         try:
             if matrix is not None and matrix.ndim == 2:
-                logging.info("Using fallback ROI analysis with fixed regions")
-                return _fallback_roi_analysis(matrix)
+                fallback_started_at = time.perf_counter()
+                fallback = _fallback_roi_analysis(matrix)
+                _log_stage(record_id, "roi.fallback", fallback_started_at, status="from_exception")
+                _log_stage(record_id, "roi.total", overall_started_at, status="fallback_from_exception")
+                return fallback
             if csv_is_matrix:
                 fallback_matrix = np.loadtxt(str(payload_path), delimiter=",", dtype=THERMAL_DTYPE)
                 if fallback_matrix.ndim == 2:
-                    logging.info("Using fallback ROI analysis with fixed regions")
-                    return _fallback_roi_analysis(fallback_matrix)
+                    fallback_started_at = time.perf_counter()
+                    fallback = _fallback_roi_analysis(fallback_matrix)
+                    _log_stage(record_id, "roi.fallback", fallback_started_at, status="from_reloaded_matrix")
+                    _log_stage(record_id, "roi.total", overall_started_at, status="fallback_from_reloaded_matrix")
+                    return fallback
         except Exception as fallback_exc:
-            logging.error(f"Fallback ROI analysis also failed: {fallback_exc}")
+            logging.error("Fallback ROI analysis also failed record_id=%s error=%s", record_id, fallback_exc)
         return None
 
+    if matrix is not None and matrix.ndim == 2:
+        fallback_started_at = time.perf_counter()
+        fallback = _fallback_roi_analysis(matrix)
+        _log_stage(record_id, "roi.fallback", fallback_started_at, status=status)
+        _log_stage(record_id, "roi.total", overall_started_at, status=f"fallback_{status}")
+        return fallback
 
-def analyze_record(record_id: str) -> Dict[str, Any]:
+    _log_stage(record_id, "roi.total", overall_started_at, status=f"failed_{status}")
+    return None
+
+
+def analyze_record(
+    record_id: str,
+    *,
+    enable_roi: bool = ROI_ANALYSIS_ENABLED,
+    enable_llm: bool = OLLAMA_ENABLED,
+) -> Dict[str, Any]:
+    overall_started_at = time.perf_counter()
     record_dir = DATA_DIR / record_id
     if not record_dir.exists():
         raise FileNotFoundError("record_not_found")
@@ -1138,14 +1296,18 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
     grid: Optional[np.ndarray] = None
     temps: List[float] = []
     if payload_path and payload_path.suffix.lower() == ".csv":
+        metrics_started_at = time.perf_counter()
         grid = _load_csv_grid(payload_path)
         if grid is not None:
             metrics = _summarize_grid_temperatures(grid)
         else:
             temps = _load_csv_temperatures(payload_path)
             metrics = _summarize_temperatures(temps)
+        _log_stage(record_id, "metrics", metrics_started_at, source="csv", grid_loaded=grid is not None)
     else:
+        metrics_started_at = time.perf_counter()
         metrics = _summarize_temperatures(temps)
+        _log_stage(record_id, "metrics", metrics_started_at, source="non_csv")
     avg_temp = metrics["avg_c"]
     risk_level = _risk_level(avg_temp)
     body_avg_temp_c = avg_temp
@@ -1161,7 +1323,9 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
     roi_analysis: Optional[Dict[str, Any]] = None
     if payload_path and payload_path.suffix.lower() == ".csv":
         if grid is not None:
+            region_started_at = time.perf_counter()
             region_comparison = _region_analysis(grid, body_avg_temp_c)
+            _log_stage(record_id, "region_analysis", region_started_at, regions=len(region_comparison))
             abnormal_regions = [
                 {
                     "region": item["region"],
@@ -1175,17 +1339,31 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
                 for item in region_comparison
                 if item.get("status") in {"high", "low"}
             ]
-        # 尝试进行ROI分析
-        roi_analysis = _analyze_roi_regions(payload_path, csv_is_matrix=True, matrix=grid)
-        logging.info(f"ROI analysis result: {'success' if roi_analysis else 'failed or None'}, has {len(roi_analysis.get('roi_list', [])) if roi_analysis else 0} ROIs")
+        if enable_roi:
+            roi_analysis = _analyze_roi_regions(
+                payload_path,
+                csv_is_matrix=True,
+                matrix=grid,
+                record_id=record_id,
+            )
+            logging.info(
+                "ROI analysis result record_id=%s status=%s total_rois=%s",
+                record_id,
+                "success" if roi_analysis else "empty_or_failed",
+                len(roi_analysis.get("roi_list", [])) if roi_analysis else 0,
+            )
+        else:
+            logging.info("ROI analysis disabled for record_id=%s", record_id)
         
         if grid is not None:
             # 生成基础热图（不绘制ROI标签，避免后续重复叠加）
+            marked_started_at = time.perf_counter()
             marked_image_path = _generate_marked_image(
                 grid,
                 record_dir / "thermal_marked.png",
                 roi_analysis=None,  # 不在这里绘制ROI标签
             )
+            _log_stage(record_id, "thermal_marked_image", marked_started_at, generated=bool(marked_image_path))
             if marked_image_path:
                 base_marked_image_path = marked_image_path
                 relative_path = Path(marked_image_path).relative_to(DATA_DIR)
@@ -1195,11 +1373,13 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
         # 如果有ROI分析结果，生成带ROI标签的图像（小字体、清晰标注，只有这一层）
         if marked_image_path and roi_analysis:
             logging.info(f"Generating small-font ROI labeled image with base: {marked_image_path}")
+            roi_image_started_at = time.perf_counter()
             roi_labeled_image_path = _generate_roi_labeled_image(
                 marked_image_path,
                 roi_analysis,
                 record_dir / "thermal_roi_labeled.png",
             )
+            _log_stage(record_id, "thermal_roi_labeled_image", roi_image_started_at, generated=bool(roi_labeled_image_path))
             if roi_labeled_image_path:
                 relative_roi_path = Path(roi_labeled_image_path).relative_to(DATA_DIR)
                 image_paths.append(str(relative_roi_path))
@@ -1239,7 +1419,9 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
         abnormal_regions=abnormal_regions,
         roi_analysis=roi_analysis,
     )
-    llm_result = _generate_llm_diagnosis_and_opinion(llm_context) if OLLAMA_ENABLED else {}
+    llm_started_at = time.perf_counter()
+    llm_result = _generate_llm_diagnosis_and_opinion(llm_context) if enable_llm else {}
+    _log_stage(record_id, "llm.diagnosis_opinion", llm_started_at, enabled=enable_llm)
     ai_diagnosis = str(llm_result.get("diagnosis") or "").strip()
     ai_doctor_opinion = str(llm_result.get("doctor_opinion") or "").strip()
     ai_report_note = str(llm_result.get("report_note") or "").strip()
@@ -1312,6 +1494,7 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
         },
     }
 
+    plan_started_at = time.perf_counter()
     plan = _build_treatment_plan(
         record_id,
         plan_id,
@@ -1321,16 +1504,21 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
         risk_level,
         abnormal_regions,
     )
+    _log_stage(record_id, "treatment_plan", plan_started_at)
 
     ai_plan_text = ""
-    if OLLAMA_ENABLED:
+    if enable_llm:
+        plan_llm_started_at = time.perf_counter()
         ai_plan_text = _generate_llm_plan_text(llm_context, plan).strip()
+        _log_stage(record_id, "llm.plan", plan_llm_started_at, enabled=True, has_text=bool(ai_plan_text))
         if ai_plan_text:
             plan["ai_recommendation"] = ai_plan_text
+    else:
+        _log_stage(record_id, "llm.plan", time.perf_counter(), enabled=False)
 
     report["treatment_plan"] = plan
 
-    if OLLAMA_ENABLED and (ai_diagnosis or ai_doctor_opinion or ai_plan_text or ai_report_note):
+    if enable_llm and (ai_diagnosis or ai_doctor_opinion or ai_plan_text or ai_report_note):
         report["ai"] = {
             "model": OLLAMA_MODEL,
             "diagnosis": ai_diagnosis,
@@ -1360,6 +1548,7 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
         },
     }
 
+    persist_started_at = time.perf_counter()
     for name, payload in (
         ("report.json", report),
         ("plan.json", plan),
@@ -1370,9 +1559,12 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
 
     save_report(record_id, report)
     save_plan(record_id, plan)
+    _log_stage(record_id, "save_json", persist_started_at, report=bool(report), plan=bool(plan))
     
     # Write CSV data to ClickHouse if exists
     csv_files = list(record_dir.glob("*.csv"))
+    csv_ingested = 0
+    clickhouse_started_at = time.perf_counter()
     for csv_file in csv_files:
         try:
             insert_thermal_csv(
@@ -1381,13 +1573,19 @@ def analyze_record(record_id: str) -> Dict[str, Any]:
                 data_path=str(csv_file),
                 frame_id=csv_file.stem
             )
+            csv_ingested += 1
         except Exception as exc:
             logging.warning("ClickHouse ingest failed for %s: %s", csv_file.name, exc)
+    _log_stage(record_id, "clickhouse_ingest", clickhouse_started_at, csv_files=len(csv_files), ingested=csv_ingested)
     
+    upsert_started_at = time.perf_counter()
     try:
         upsert_emr_from_analysis(record_id, report, plan, metadata)
     except Exception as exc:
         logging.exception("EMR upsert and report generation failed for record %s: %s", record_id, exc)
+    _log_stage(record_id, "upsert_emr_from_analysis", upsert_started_at)
+
+    _log_stage(record_id, "total", overall_started_at, enable_roi=enable_roi, enable_llm=enable_llm)
 
     return {
         "report": report,
