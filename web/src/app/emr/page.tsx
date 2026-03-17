@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import mammoth from "mammoth";
 import { flashSuccessButton } from "../lib/flash";
@@ -54,75 +54,17 @@ const ROI_LABEL_POSITIONS: Record<string, { x: number; y: number }> = {
 };
 
 const THERMAL_PLOT_BOUNDS = {
-  left: 2,
-  right: 98,
-  top: 2,
-  bottom: 98,
+  left: 3,
+  right: 72,
+  top: 8,
+  bottom: 97,
 };
 
 const HEAD_ROI_NAME_REGEX = /(额头|眼|脸颊|鼻子|鼻|下巴)/;
 
-function resolveApiBase() {
-  const envBase = process.env.NEXT_PUBLIC_API_URL?.trim();
-  if (envBase) {
-    return envBase.replace(/\/$/, "");
-  }
-  if (typeof window !== "undefined") {
-    const { protocol, hostname } = window.location;
-    const backendHost = hostname === "127.0.0.1" ? "localhost" : hostname;
-    return `${protocol}//${backendHost}:8000`;
-  }
-  return "http://localhost:8000";
-}
-
-const API_BASE = resolveApiBase();
+const API_BASE = "http://localhost:8000";
 const EMR_STATE_KEY = "patient_flow_state_emr";
 const REPORTS_PAGE_SIZE = 10;
-
-function extractSourceDocPath(source: string) {
-  const raw = String(source || "").trim();
-  if (!raw || raw === "-") {
-    return "";
-  }
-  let normalized = raw;
-  for (const prefix of ["来源：", "来源:", "source:", "Source:"]) {
-    if (normalized.startsWith(prefix)) {
-      normalized = normalized.slice(prefix.length).trim();
-      break;
-    }
-  }
-  const match = normalized.match(/([A-Za-z0-9_./\\-]+\.(?:docx?|DOCX?))/);
-  if (match?.[1]) {
-    normalized = match[1];
-  }
-  return normalized.replaceAll("\\", "/").trim().replace(/^\.\//, "");
-}
-
-function buildSourceFileUrl(source: string) {
-  const normalized = extractSourceDocPath(source);
-  if (!normalized) {
-    return "";
-  }
-  return `${API_BASE}/reports/source-file?source=${encodeURIComponent(normalized)}&inline=true`;
-}
-
-function SourceFileLink({ source, onOpen }: { source: string; onOpen: (source: string) => void }) {
-  const label = String(source || "").trim() || "-";
-  const url = buildSourceFileUrl(label);
-  if (!url) {
-    return <span>{label}</span>;
-  }
-  return (
-    <button
-      type="button"
-      onClick={() => onOpen(label)}
-      className="break-all text-blue-600 hover:text-blue-700 hover:underline"
-      title={url}
-    >
-      {label}
-    </button>
-  );
-}
 
 export default function EmrPage() {
   const router = useRouter();
@@ -135,7 +77,6 @@ export default function EmrPage() {
   const [archived, setArchived] = useState(false);
   const [report, setReport] = useState<ReportPayload>(null);
   const [reportFiles, setReportFiles] = useState<ReportFile[]>([]);
-  const [reportFilesError, setReportFilesError] = useState<string>("");
   const [previewHtml, setPreviewHtml] = useState<string>("");
   const [showPreview, setShowPreview] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
@@ -150,9 +91,6 @@ export default function EmrPage() {
   const [currentSearchPatient, setCurrentSearchPatient] = useState<PatientSearchResult | null>(null);
   const [showAbnormalDetails, setShowAbnormalDetails] = useState(false);
   const [reportPage, setReportPage] = useState(1);
-  const [generating, setGenerating] = useState(false);
-  const [generateProgress, setGenerateProgress] = useState(0);
-  const generateTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     try {
@@ -305,65 +243,6 @@ export default function EmrPage() {
     return visibleReportFiles.length ? visibleReportFiles : reportFiles;
   }, [reportFiles, visibleReportFiles]);
 
-  const reportEvidence = useMemo(() => {
-    if (!report || typeof report !== "object") {
-      return {
-        reportNote: "",
-        treatmentPlanText: "",
-        citations: [] as Array<Record<string, string>>,
-        retrievedItems: [] as Array<Record<string, string | string[]>>,
-        evidenceItemIds: [] as string[],
-        diagnosisEvidenceIds: [] as string[],
-        planEvidenceIds: [] as string[],
-      };
-    }
-
-    const reportData = report as Record<string, unknown>;
-    const aiData =
-      reportData.ai && typeof reportData.ai === "object"
-        ? (reportData.ai as Record<string, unknown>)
-        : null;
-    const treatmentPlan =
-      reportData.treatment_plan && typeof reportData.treatment_plan === "object"
-        ? (reportData.treatment_plan as Record<string, unknown>)
-        : null;
-    const citations = Array.isArray(reportData.citations)
-      ? reportData.citations
-          .filter((item): item is Record<string, unknown> => !!item && typeof item === "object")
-          .map((item) => ({
-            id: String(item.id ?? "").trim(),
-            title: String(item.title ?? "").trim(),
-            source: String(item.source ?? "").trim(),
-          }))
-      : [];
-
-    const retrievedItems = Array.isArray(reportData.retrieved_items)
-      ? reportData.retrieved_items
-          .filter((item): item is Record<string, unknown> => !!item && typeof item === "object")
-          .map((item) => ({
-            id: String(item.id ?? "").trim(),
-            title: String(item.title ?? "").trim(),
-            source: String(item.source ?? "").trim(),
-            tags: toStringArray(item.tags),
-          }))
-      : [];
-
-    return {
-      reportNote: String(reportData.report_note ?? aiData?.report_note ?? "").trim(),
-      treatmentPlanText: String(
-        reportData.treatment_plan_text ??
-          aiData?.treatment_plan_text ??
-          treatmentPlan?.ai_recommendation ??
-          "",
-      ).trim(),
-      citations,
-      retrievedItems,
-      evidenceItemIds: toStringArray(reportData.evidence_item_ids),
-      diagnosisEvidenceIds: toStringArray(reportData.diagnosis_evidence_item_ids),
-      planEvidenceIds: toStringArray(reportData.plan_evidence_item_ids),
-    };
-  }, [report]);
-
   const reportTotalPages = useMemo(() => {
     if (!reportFilesForDisplay.length) {
       return 1;
@@ -469,11 +348,15 @@ export default function EmrPage() {
       const centerXPct = toNumber(item.center_x_pct);
       const centerYPct = toNumber(item.center_y_pct);
       if (centerXPct !== null && centerYPct !== null) {
-        const clampedX = Math.max(2, Math.min(98, centerXPct));
-        const clampedY = Math.max(2, Math.min(98, centerYPct));
+        const clampedX = Math.max(0, Math.min(100, centerXPct));
+        const clampedY = Math.max(0, Math.min(100, centerYPct));
         pos = {
-          x: clampedX,
-          y: clampedY,
+          x:
+            THERMAL_PLOT_BOUNDS.left
+            + (clampedX / 100) * (THERMAL_PLOT_BOUNDS.right - THERMAL_PLOT_BOUNDS.left),
+          y:
+            THERMAL_PLOT_BOUNDS.top
+            + (clampedY / 100) * (THERMAL_PLOT_BOUNDS.bottom - THERMAL_PLOT_BOUNDS.top),
         };
       }
 
@@ -632,9 +515,9 @@ export default function EmrPage() {
     };
   }, [currentSearchPatient, report]);
 
-  const thermalImageInfo = useMemo(() => {
+  const thermalImageUrl = useMemo(() => {
     if (!report || typeof report !== "object") {
-      return { url: "", preLabeled: false };
+      return "";
     }
 
     const normalizeImagePath = (value: unknown) => {
@@ -647,15 +530,8 @@ export default function EmrPage() {
       return `${API_BASE}/data/${stripped}`;
     };
 
-    const roiLabeled = normalizeImagePath(report.thermal_roi_labeled_image);
-    if (roiLabeled) {
-      return { url: roiLabeled, preLabeled: true };
-    }
-
     const direct = normalizeImagePath(report.thermal_marked_image);
-    if (direct) {
-      return { url: direct, preLabeled: false };
-    }
+    if (direct) return direct;
 
     if (Array.isArray(report.thermal_images)) {
       for (const item of report.thermal_images) {
@@ -663,30 +539,20 @@ export default function EmrPage() {
           continue;
         }
         const candidate = normalizeImagePath(item);
-        if (candidate) {
-          return { url: candidate, preLabeled: false };
-        }
+        if (candidate) return candidate;
       }
     }
 
-    return { url: "", preLabeled: false };
+    return "";
   }, [report]);
-
-  const thermalImageUrl = thermalImageInfo.url;
-  const shouldRenderFrontendOverlay = !thermalImageInfo.preLabeled;
 
   const fetchReports = useCallback(async () => {
     try {
       const response = await fetch(`${API_BASE}/reports`);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
       const data = (await response.json()) as ReportFile[];
       setReportFiles(Array.isArray(data) ? data : []);
-      setReportFilesError("");
-    } catch (error) {
+    } catch {
       setReportFiles([]);
-      setReportFilesError(`历史报告加载失败：${String(error)}`);
     }
   }, []);
 
@@ -845,13 +711,6 @@ export default function EmrPage() {
     return Number.isFinite(num) ? num : null;
   }
 
-  function toStringArray(value: unknown): string[] {
-    if (!Array.isArray(value)) return [];
-    return value
-      .map((item) => String(item ?? "").trim())
-      .filter(Boolean);
-  }
-
   function syncEmrFields(data: EmrResponse) {
     if (Array.isArray(data)) {
       return;
@@ -906,49 +765,17 @@ export default function EmrPage() {
     return emrIdValue ? String(emrIdValue) : null;
   }
 
-  function clearGenerateTimer() {
-    if (generateTimerRef.current !== null) {
-      clearInterval(generateTimerRef.current);
-      generateTimerRef.current = null;
-    }
-  }
-
   async function generateEmrByRecordId(nextRecordId: string) {
-    setGenerating(true);
-    setGenerateProgress(0);
-    clearGenerateTimer();
-    generateTimerRef.current = setInterval(() => {
-      setGenerateProgress((prev) => {
-        if (prev < 20) return prev + 3;
-        if (prev < 50) return prev + 1;
-        if (prev < 75) return prev + 0.5;
-        if (prev < 90) return prev + 0.2;
-        return Math.min(prev + 0.05, 95);
-      });
-    }, 200);
-    try {
-      const data = await postJson<EmrResponse>(`${API_BASE}/emr/generate`, {
-        record_id: nextRecordId.trim(),
-      });
-      clearGenerateTimer();
-      setGenerateProgress(100);
-      setTimeout(() => {
-        setGenerating(false);
-        setGenerateProgress(0);
-      }, 1200);
-      setOutput(data);
-      syncEmrFields(data as EmrResponse);
-      setReport(extractReport(data as EmrResponse));
-      fetchReports();
-      flashSuccessButton();
-      persistContextFromEmr(data as EmrResponse);
-      setRedirecting(false);
-    } catch (error) {
-      clearGenerateTimer();
-      setGenerating(false);
-      setGenerateProgress(0);
-      throw error;
-    }
+    const data = await postJson(`${API_BASE}/emr/generate`, {
+      record_id: nextRecordId.trim(),
+    });
+    setOutput(data as EmrResponse);
+    syncEmrFields(data as EmrResponse);
+    setReport(extractReport(data as EmrResponse));
+    fetchReports();
+    flashSuccessButton();
+    persistContextFromEmr(data as EmrResponse);
+    setRedirecting(false);
   }
 
   async function fetchEmrById(nextEmrId: string) {
@@ -1300,11 +1127,7 @@ export default function EmrPage() {
 
   async function handleViewDocx(url: string) {
     try {
-      const requestUrl = /^https?:\/\//i.test(url) ? url : `${API_BASE}${url}`;
-      const response = await fetch(requestUrl);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
+      const response = await fetch(`${API_BASE}${url}`);
       const arrayBuffer = await response.arrayBuffer();
       const result = await mammoth.convertToHtml({ arrayBuffer });
       setPreviewHtml(result.value);
@@ -1317,11 +1140,7 @@ export default function EmrPage() {
 
   async function handlePrintDocx(url: string) {
     try {
-      const requestUrl = /^https?:\/\//i.test(url) ? url : `${API_BASE}${url}`;
-      const response = await fetch(requestUrl);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
+      const response = await fetch(`${API_BASE}${url}`);
       const arrayBuffer = await response.arrayBuffer();
       const result = await mammoth.convertToHtml({ arrayBuffer });
       printHtmlInIframe(`
@@ -1344,19 +1163,6 @@ export default function EmrPage() {
     } catch (error) {
       setOutput({ error: `打印失败: ${String(error)}` });
     }
-  }
-
-  async function handleOpenSourceFile(source: string) {
-    const normalized = extractSourceDocPath(source);
-    const url = buildSourceFileUrl(source);
-    if (!normalized || !url) {
-      return;
-    }
-    if (/\.docx$/i.test(normalized)) {
-      await handleViewDocx(url);
-      return;
-    }
-    window.open(url, "_blank", "noopener,noreferrer");
   }
 
   return (
@@ -1546,41 +1352,14 @@ export default function EmrPage() {
               onChange={(event) => setRecordId(event.target.value)}
             />
             <button
-              className="mt-4 w-full rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+              className="mt-4 w-full rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
               onClick={handleGenerate}
-              disabled={generating}
             >
-              {generating ? "生成中..." : "生成诊断报告"}
+              生成诊断报告
             </button>
-            {generating && (
-              <div className="mt-4">
-                <div className="mb-1 flex items-center justify-between text-xs text-slate-500">
-                  <span>
-                    {generateProgress < 20
-                      ? "正在读取采集数据..."
-                      : generateProgress < 50
-                      ? "AI 正在分析热成像数据..."
-                      : generateProgress < 80
-                      ? "正在生成诊断报告..."
-                      : generateProgress < 100
-                      ? "正在生成报告文件..."
-                      : "报告生成完成！"}
-                  </span>
-                  <span className="font-mono">{Math.round(generateProgress)}%</span>
-                </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
-                  <div
-                    className="h-full rounded-full bg-slate-900 transition-all duration-200 ease-linear"
-                    style={{ width: `${generateProgress}%` }}
-                  />
-                </div>
-              </div>
-            )}
-            {!generating && (
-              <p className="mt-3 text-xs text-slate-500">
-                将基于采集数据自动生成诊断报告，并同步分析指标。
-              </p>
-            )}
+            <p className="mt-3 text-xs text-slate-500">
+              将基于采集数据自动生成诊断报告，并同步分析指标。
+            </p>
           </div>
 
           <div className="grid gap-6 lg:col-span-7 sm:grid-cols-2">
@@ -1656,7 +1435,11 @@ export default function EmrPage() {
                 )}
               </div>
 
-              {Boolean(report.analysis && typeof report.analysis === "object" && (report.analysis as Record<string, unknown>).temperature_metrics) && (
+              {Boolean(
+                report.analysis &&
+                typeof report.analysis === "object" &&
+                (report.analysis as Record<string, unknown>).temperature_metrics
+              ) && (
                 <div className="rounded-xl border border-slate-200 p-4">
                   <h3 className="text-sm font-semibold text-slate-900">温度指标</h3>
                   <div className="mt-3 grid gap-3 sm:grid-cols-4">
@@ -1670,59 +1453,58 @@ export default function EmrPage() {
                 </div>
               )}
 
-              <div className="rounded-xl border border-slate-200 p-4">
-                <h3 className="text-sm font-semibold text-slate-900">姿态分区温度（ROI）</h3>
-                {report.analysis && typeof report.analysis === "object" &&
+              {Boolean(
+                report.analysis &&
+                typeof report.analysis === "object" &&
                 Boolean((report.analysis as Record<string, unknown>).roi_analysis) &&
                 typeof (report.analysis as Record<string, unknown>).roi_analysis === "object" &&
                 Boolean(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).roi_list) &&
                 Array.isArray(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).roi_list) &&
-                (((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).roi_list as unknown[]).length > 0 ? (
-                  <>
-                    <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                      <div className="rounded-lg bg-slate-50 p-3">
-                        <p className="text-xs text-slate-500">识别区域数</p>
-                        <p className="mt-1 text-base font-semibold text-slate-900">
-                          {String(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).total_rois ?? "-")}
-                        </p>
-                      </div>
-                      <div className="rounded-lg bg-slate-50 p-3">
-                        <p className="text-xs text-slate-500">最热区域</p>
-                        <p className="mt-1 text-base font-semibold text-slate-900">
-                          {formatRoiLabel(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).hottest_region)}
-                          {" "}
-                          ({String(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).hottest_temp ?? "-")}°C)
-                        </p>
-                      </div>
-                      <div className="rounded-lg bg-slate-50 p-3">
-                        <p className="text-xs text-slate-500">最冷区域</p>
-                        <p className="mt-1 text-base font-semibold text-slate-900">
-                          {formatRoiLabel(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).coolest_region)}
-                          {" "}
-                          ({String(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).coolest_temp ?? "-")}°C)
-                        </p>
-                      </div>
+                (((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).roi_list as unknown[]).length > 0
+              ) && (
+                <div className="rounded-xl border border-slate-200 p-4">
+                  <h3 className="text-sm font-semibold text-slate-900">姿态分区温度（ROI）</h3>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-lg bg-slate-50 p-3">
+                      <p className="text-xs text-slate-500">识别区域数</p>
+                      <p className="mt-1 text-base font-semibold text-slate-900">
+                        {String(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).total_rois ?? "-")}
+                      </p>
                     </div>
-                    <div className="mt-3 space-y-2">
-                      {(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).roi_list as Record<string, unknown>[]).map((roi, idx) => (
-                        <div
-                          key={`${String(roi.name || "roi")}-${idx}`}
-                          className="grid gap-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-700 sm:grid-cols-6"
-                        >
-                          <div className="font-medium text-slate-900">{formatRoiLabel(roi.name)}</div>
-                          <div>均值 {String(roi.mean_c ?? "-")}°C</div>
-                          <div>最低 {String(roi.min_c ?? "-")}°C</div>
-                          <div>最高 {String(roi.max_c ?? "-")}°C</div>
-                          <div>标准差 {String(roi.std_c ?? "-")}</div>
-                          <div>样本 {String(roi.count ?? "-")}</div>
-                        </div>
-                      ))}
+                    <div className="rounded-lg bg-slate-50 p-3">
+                      <p className="text-xs text-slate-500">最热区域</p>
+                      <p className="mt-1 text-base font-semibold text-slate-900">
+                        {formatRoiLabel(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).hottest_region)}
+                        {" "}
+                        ({String(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).hottest_temp ?? "-")}°C)
+                      </p>
                     </div>
-                  </>
-                ) : (
-                  <p className="mt-2 text-slate-500">暂无姿态分区温度数据</p>
-                )}
-              </div>
+                    <div className="rounded-lg bg-slate-50 p-3">
+                      <p className="text-xs text-slate-500">最冷区域</p>
+                      <p className="mt-1 text-base font-semibold text-slate-900">
+                        {formatRoiLabel(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).coolest_region)}
+                        {" "}
+                        ({String(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).coolest_temp ?? "-")}°C)
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    {(((report.analysis as Record<string, unknown>).roi_analysis as Record<string, unknown>).roi_list as Record<string, unknown>[]).map((roi, idx) => (
+                      <div
+                        key={`${String(roi.name || "roi")}-${idx}`}
+                        className="grid gap-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-700 sm:grid-cols-6"
+                      >
+                        <div className="font-medium text-slate-900">{formatRoiLabel(roi.name)}</div>
+                        <div>均值 {String(roi.mean_c ?? "-")}°C</div>
+                        <div>最低 {String(roi.min_c ?? "-")}°C</div>
+                        <div>最高 {String(roi.max_c ?? "-")}°C</div>
+                        <div>标准差 {String(roi.std_c ?? "-")}</div>
+                        <div>样本 {String(roi.count ?? "-")}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="rounded-xl border border-slate-200 p-4">
                 <h3 className="text-sm font-semibold text-slate-900">诊断结论</h3>
@@ -1738,95 +1520,17 @@ export default function EmrPage() {
                 </p>
               </div>
 
-              <div className="rounded-xl border border-slate-200 p-4">
-                <h3 className="text-sm font-semibold text-slate-900">报告说明</h3>
-                <p className="mt-2 text-slate-700">{reportEvidence.reportNote || "-"}</p>
-              </div>
-
-              <div className="rounded-xl border border-slate-200 p-4">
-                <h3 className="text-sm font-semibold text-slate-900">治疗建议</h3>
-                <p className="mt-2 text-slate-700">{reportEvidence.treatmentPlanText || "-"}</p>
-              </div>
-
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-                <h3 className="text-sm font-semibold text-emerald-900">证据依据</h3>
-                <p className="mt-2 text-sm text-emerald-800">
-                  诊断与建议中的引用编号，例如 [1]、[2]，对应下方知识条目。
-                </p>
-
-                {reportEvidence.citations.length > 0 ? (
-                  <div className="mt-4 space-y-3">
-                    {reportEvidence.citations.map((citation, index) => (
-                      <div key={`${citation.id || citation.title || "citation"}-${index}`} className="rounded-lg bg-white p-3 ring-1 ring-emerald-100">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">
-                            [{index + 1}]
-                          </span>
-                          <span className="text-sm font-semibold text-slate-900">{citation.title || "未命名知识条目"}</span>
-                        </div>
-                        <div className="mt-2 space-y-1 text-sm text-slate-700">
-                          <p>条目 ID：{citation.id || "-"}</p>
-                          <p>来源：<SourceFileLink source={citation.source || "-"} onOpen={handleOpenSourceFile} /></p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="mt-3 text-sm text-slate-600">暂无证据条目</p>
-                )}
-
-                <div className="mt-4 grid gap-3 lg:grid-cols-3">
-                  <div className="rounded-lg bg-white p-3 ring-1 ring-emerald-100">
-                    <p className="text-xs font-semibold text-slate-500">全部证据 ID</p>
-                    <p className="mt-2 text-sm text-slate-700">
-                      {reportEvidence.evidenceItemIds.length > 0 ? reportEvidence.evidenceItemIds.join(", ") : "-"}
-                    </p>
-                  </div>
-                  <div className="rounded-lg bg-white p-3 ring-1 ring-emerald-100">
-                    <p className="text-xs font-semibold text-slate-500">诊断证据 ID</p>
-                    <p className="mt-2 text-sm text-slate-700">
-                      {reportEvidence.diagnosisEvidenceIds.length > 0 ? reportEvidence.diagnosisEvidenceIds.join(", ") : "-"}
-                    </p>
-                  </div>
-                  <div className="rounded-lg bg-white p-3 ring-1 ring-emerald-100">
-                    <p className="text-xs font-semibold text-slate-500">方案证据 ID</p>
-                    <p className="mt-2 text-sm text-slate-700">
-                      {reportEvidence.planEvidenceIds.length > 0 ? reportEvidence.planEvidenceIds.join(", ") : "-"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-                <h3 className="text-sm font-semibold text-emerald-900">RAG 命中条目</h3>
-                {reportEvidence.retrievedItems.length > 0 ? (
-                  <div className="mt-3 space-y-3">
-                    {reportEvidence.retrievedItems.map((item, index) => (
-                      <div key={`${String(item.id || item.title || "item")}-${index}`} className="rounded-lg bg-white p-3 ring-1 ring-emerald-100">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-sm font-semibold text-slate-900">{String(item.title || "未命名条目")}</span>
-                          <span className="text-xs text-slate-500">{String(item.id || "")}</span>
-                        </div>
-                        <p className="mt-1 text-sm text-slate-700">来源：<SourceFileLink source={String(item.source || "-")} onOpen={handleOpenSourceFile} /></p>
-                        {Array.isArray(item.tags) && item.tags.length > 0 && (
-                          <p className="mt-1 text-sm text-slate-700">标签：{item.tags.join(", ")}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="mt-3 text-sm text-slate-600">暂无 RAG 命中条目</p>
-                )}
-              </div>
-
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-                <h3 className="text-sm font-semibold text-amber-900">异常区域</h3>
-                {report.analysis && typeof report.analysis === "object" &&
+              {Boolean(
+                report.analysis &&
+                typeof report.analysis === "object" &&
                 (report.analysis as Record<string, unknown>).regional_comparison &&
                 typeof (report.analysis as Record<string, unknown>).regional_comparison === "object" &&
                 ((report.analysis as Record<string, unknown>).regional_comparison as Record<string, unknown>).abnormal_regions &&
                 Array.isArray(((report.analysis as Record<string, unknown>).regional_comparison as Record<string, unknown>).abnormal_regions) &&
-                (((report.analysis as Record<string, unknown>).regional_comparison as Record<string, unknown>).abnormal_regions as unknown[]).length > 0 ? (
+                (((report.analysis as Record<string, unknown>).regional_comparison as Record<string, unknown>).abnormal_regions as unknown[]).length > 0
+              ) && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                  <h3 className="text-sm font-semibold text-amber-900">异常区域</h3>
                   <div className="mt-3 space-y-2">
                     {(((report.analysis as Record<string, unknown>).regional_comparison as Record<string, unknown>).abnormal_regions as Record<string, unknown>[]).map((region, idx) => (
                       <div key={idx} className="flex items-center justify-between rounded-lg bg-white p-3">
@@ -1843,10 +1547,8 @@ export default function EmrPage() {
                       </div>
                     ))}
                   </div>
-                ) : (
-                  <p className="mt-3 text-sm text-slate-600">未发现明显异常区域</p>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           ) : (
             <p className="mt-4 text-sm text-slate-500">暂无报告数据</p>
@@ -1865,28 +1567,26 @@ export default function EmrPage() {
                 alt="Thermal Marked Image"
                 className="w-full max-w-2xl rounded-xl border border-slate-200"
               />
-              {shouldRenderFrontendOverlay && (
-                <svg className="pointer-events-none absolute inset-0 z-10 h-full w-full">
-                  {roiOverlayLayoutPoints.map((point, index) => {
-                    if (!point.showLeader) {
-                      return null;
-                    }
-                    const edgeX = point.labelX <= point.x ? point.labelX + 4.5 : point.labelX - 4.5;
-                    return (
-                      <line
-                        key={`line-${point.name}-${index}`}
-                        x1={`${point.x}%`}
-                        y1={`${point.y}%`}
-                        x2={`${edgeX}%`}
-                        y2={`${point.labelY}%`}
-                        stroke="rgba(15, 23, 42, 0.85)"
-                        strokeWidth="1"
-                      />
-                    );
-                  })}
-                </svg>
-              )}
-              {shouldRenderFrontendOverlay && roiOverlayLayoutPoints.map((point, index) => (
+              <svg className="pointer-events-none absolute inset-0 z-10 h-full w-full">
+                {roiOverlayLayoutPoints.map((point, index) => {
+                  if (!point.showLeader) {
+                    return null;
+                  }
+                  const edgeX = point.labelX <= point.x ? point.labelX + 4.5 : point.labelX - 4.5;
+                  return (
+                    <line
+                      key={`line-${point.name}-${index}`}
+                      x1={`${point.x}%`}
+                      y1={`${point.y}%`}
+                      x2={`${edgeX}%`}
+                      y2={`${point.labelY}%`}
+                      stroke="rgba(15, 23, 42, 0.85)"
+                      strokeWidth="1"
+                    />
+                  );
+                })}
+              </svg>
+              {roiOverlayLayoutPoints.map((point, index) => (
                 <div
                   key={`${point.name}-${index}`}
                   className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-md border border-white/30 bg-slate-900/70 px-2 py-1 text-[11px] font-semibold text-white"
@@ -1909,9 +1609,7 @@ export default function EmrPage() {
               {showAllReports ? "仅看当前患者" : "显示全部"}
             </button>
           </div>
-          {reportFilesError ? (
-            <p className="mt-4 text-sm text-rose-600">{reportFilesError}</p>
-          ) : reportFiles.length === 0 ? (
+          {reportFiles.length === 0 ? (
             <p className="mt-4 text-sm text-slate-500">暂无报告文件</p>
           ) : (
             <>
