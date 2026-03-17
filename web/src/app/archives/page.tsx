@@ -9,6 +9,7 @@ type Patient = {
   gender: string | null;
   age: number | null;
   archived: boolean;
+  deleted?: boolean;
   updated_at: string;
 };
 
@@ -24,6 +25,7 @@ const API_BASE = "http://localhost:8000";
 
 export default function ArchivesPage() {
   const [archivedPatients, setArchivedPatients] = useState<Patient[]>([]);
+  const [deletedPatients, setDeletedPatients] = useState<Patient[]>([]);
   const [archivedReports, setArchivedReports] = useState<ReportFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"patients" | "reports">("patients");
@@ -39,13 +41,20 @@ export default function ArchivesPage() {
   async function fetchArchivedPatients() {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/patients?include_archived=true&limit=1000`);
+      const response = await fetch(`${API_BASE}/patients?include_archived=true&include_deleted=true&limit=1000`);
       const data = await response.json();
-      const archived = Array.isArray(data) ? data.filter((p: Patient) => p.archived) : [];
+      const archived = Array.isArray(data)
+        ? data.filter((p: Patient) => p.archived && !p.deleted)
+        : [];
+      const deleted = Array.isArray(data)
+        ? data.filter((p: Patient) => Boolean(p.deleted))
+        : [];
       setArchivedPatients(archived);
+      setDeletedPatients(deleted);
     } catch (error) {
       console.error("获取归档患者失败:", error);
       setArchivedPatients([]);
+      setDeletedPatients([]);
     } finally {
       setLoading(false);
     }
@@ -75,6 +84,55 @@ export default function ArchivesPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ archived: false }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("恢复失败");
+      }
+
+      alert("恢复成功！");
+      fetchArchivedPatients();
+    } catch (error) {
+      alert(`恢复失败: ${error instanceof Error ? error.message : "未知错误"}`);
+    }
+  }
+
+  async function handleSoftDeletePatient(patient: Patient) {
+    const confirmed = window.confirm(`确认软删除患者"${patient.name || patient.patient_id}"吗？可在下方恢复。`);
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/patients/${encodeURIComponent(patient.patient_id)}/soft-delete`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ deleted: true }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("软删除失败");
+      }
+
+      alert("已软删除，可在下方“已软删除患者”中恢复。");
+      fetchArchivedPatients();
+    } catch (error) {
+      alert(`软删除失败: ${error instanceof Error ? error.message : "未知错误"}`);
+    }
+  }
+
+  async function handleRestoreDeletedPatient(patient: Patient) {
+    const confirmed = window.confirm(`确认恢复软删除患者"${patient.name || patient.patient_id}"吗？`);
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/patients/${encodeURIComponent(patient.patient_id)}/restore`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
         }
       );
 
@@ -167,7 +225,7 @@ export default function ArchivesPage() {
             }`}
             onClick={() => setActiveTab("patients")}
           >
-            已归档患者 ({archivedPatients.length})
+            已归档患者 ({archivedPatients.length}) / 软删除 ({deletedPatients.length})
           </button>
           <button
             className={`pb-3 text-sm font-medium ${
@@ -218,12 +276,20 @@ export default function ArchivesPage() {
                             : "-"}
                         </td>
                         <td className="px-4 py-3">
-                          <button
-                            className="rounded-full bg-blue-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
-                            onClick={() => handleRestorePatient(patient)}
-                          >
-                            恢复
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              className="rounded-full bg-blue-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+                              onClick={() => handleRestorePatient(patient)}
+                            >
+                              恢复
+                            </button>
+                            <button
+                              className="rounded-full border border-rose-200 px-4 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                              onClick={() => handleSoftDeletePatient(patient)}
+                            >
+                              删除
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -235,6 +301,47 @@ export default function ArchivesPage() {
                 <p className="text-slate-500">暂无归档患者</p>
               </div>
             )}
+          </section>
+        )}
+
+        {activeTab === "patients" && deletedPatients.length > 0 && (
+          <section className="mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-rose-200">
+            <h3 className="mb-4 text-base font-semibold text-rose-700">已软删除患者（可恢复）</h3>
+            <div className="overflow-hidden rounded-xl border border-slate-200">
+              <table className="min-w-full text-left text-sm">
+                <thead className="bg-slate-50 text-slate-600">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">患者ID</th>
+                    <th className="px-4 py-3 font-medium">姓名</th>
+                    <th className="px-4 py-3 font-medium">性别</th>
+                    <th className="px-4 py-3 font-medium">年龄</th>
+                    <th className="px-4 py-3 font-medium">删除时间</th>
+                    <th className="px-4 py-3 font-medium">操作</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {deletedPatients.map((patient) => (
+                    <tr key={patient.patient_id} className="hover:bg-slate-50">
+                      <td className="px-4 py-3 font-mono text-xs text-slate-700">{patient.patient_id}</td>
+                      <td className="px-4 py-3 font-semibold text-slate-900">{patient.name || "-"}</td>
+                      <td className="px-4 py-3 text-slate-700">{patient.gender || "-"}</td>
+                      <td className="px-4 py-3 text-slate-700">{patient.age ? `${patient.age}岁` : "-"}</td>
+                      <td className="px-4 py-3 text-slate-700">
+                        {patient.updated_at ? new Date(patient.updated_at).toLocaleString() : "-"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <button
+                          className="rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
+                          onClick={() => handleRestoreDeletedPatient(patient)}
+                        >
+                          恢复到数据库
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </section>
         )}
 

@@ -15,7 +15,7 @@ from pymysql.err import OperationalError
 from core.config import settings
 from core.logging import setup_logging
 from service.platform import PlatformService
-from route import emr_router, ingest_router, patients_router, platform_router, reports_router
+from route import emr_router, ingest_router, patients_router, platform_router, reports_router, notifications_router
 
 setup_logging(__name__)
 platform_service = PlatformService()
@@ -39,6 +39,7 @@ app.include_router(emr_router)
 app.include_router(patients_router)
 app.include_router(platform_router)
 app.include_router(reports_router)
+app.include_router(notifications_router)
 
 _device_stop_event: asyncio.Event | None = None
 logger = logging.getLogger(__name__)

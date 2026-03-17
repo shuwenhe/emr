@@ -20,24 +20,39 @@ export default function ReportsPage() {
   const [selectedPdfTitle, setSelectedPdfTitle] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState<string>("");
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null);
 
   useEffect(() => {
     fetchReports();
   }, []);
 
-  async function fetchReports() {
-    setLoading(true);
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      fetchReports(true);
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  async function fetchReports(silent = false) {
+    if (!silent) {
+      setLoading(true);
+    }
     try {
       const response = await fetch(`${API_BASE}/reports`);
       if (response.ok) {
         const data = await response.json();
         setReports(Array.isArray(data) ? data : []);
+        setLastRefreshedAt(new Date());
       }
     } catch (error) {
       console.error("获取报告失败:", error);
-      setReports([]);
+      if (!silent) {
+        setReports([]);
+      }
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   }
 
@@ -101,7 +116,12 @@ export default function ReportsPage() {
       <main className="mx-auto max-w-7xl px-6 py-12">
         <header className="mb-8">
           <h1 className="text-3xl font-semibold text-slate-900">历史报告</h1>
-          <p className="mt-2 text-slate-600">查看和下载历史报告文件</p>
+          <p className="mt-2 text-slate-600">查看和下载历史报告文件（每5秒自动刷新）</p>
+          {lastRefreshedAt && (
+            <p className="mt-1 text-xs text-slate-500">
+              最近刷新：{lastRefreshedAt.toLocaleTimeString("zh-CN")}
+            </p>
+          )}
         </header>
 
         {/* 搜索和过滤 */}

@@ -42,8 +42,19 @@ class PlatformService:
     def upsert_patient(self, payload: Dict[str, Any]) -> Optional[str]:
         return self._gateway.upsert_patient(payload)
 
-    def list_patients(self, limit: int = 20, offset: int = 0, include_archived: bool = False):
-        return self._gateway.list_patients(limit=limit, offset=offset, include_archived=include_archived)
+    def list_patients(
+        self,
+        limit: int = 20,
+        offset: int = 0,
+        include_archived: bool = False,
+        include_deleted: bool = False,
+    ):
+        return self._gateway.list_patients(
+            limit=limit,
+            offset=offset,
+            include_archived=include_archived,
+            include_deleted=include_deleted,
+        )
 
     def get_patient(self, patient_id: str):
         return self._gateway.get_patient(patient_id)
@@ -56,6 +67,9 @@ class PlatformService:
 
     def delete_patient(self, patient_id: str) -> bool:
         return self._gateway.delete_patient(patient_id)
+
+    def restore_deleted_patient(self, patient_id: str):
+        return self._gateway.restore_deleted_patient(patient_id)
 
 
 __all__ = ["PlatformService"]

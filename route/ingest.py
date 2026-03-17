@@ -314,7 +314,17 @@ def ingest_from_device(request: DeviceIngestRequest):
 
     logger.info("[步骤1] 设备数据采集 处理所有待导入目录")
     t0 = time.time()
-    result = ingestion_service.ingest_pending_captures(move_to_processed=request.move_to_processed)
+    capture_result = ingestion_service.ingest_pending_captures(move_to_processed=request.move_to_processed)
+    patient_result = ingestion_service.ingest_pending_patient_folders(move_to_processed=request.move_to_processed)
+
+    result = {
+        "ingested": (capture_result.get("ingested", []) if isinstance(capture_result, dict) else [])
+        + (patient_result.get("ingested", []) if isinstance(patient_result, dict) else []),
+        "skipped": (capture_result.get("skipped", []) if isinstance(capture_result, dict) else [])
+        + (patient_result.get("skipped", []) if isinstance(patient_result, dict) else []),
+        "capture_ingested": len(capture_result.get("ingested", []) if isinstance(capture_result, dict) else []),
+        "patient_folder_ingested": len(patient_result.get("ingested", []) if isinstance(patient_result, dict) else []),
+    }
     elapsed = time.time() - t0
     ingested = len(result.get("ingested", [])) if isinstance(result, dict) else 0
     logger.info("[步骤1] 设备数据采集 批量完成 ingested=%d 耗时=%.2fs", ingested, elapsed)

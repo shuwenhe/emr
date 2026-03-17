@@ -115,6 +115,10 @@ class PatientDeleteRequest(BaseModel):
     patient_ids: list[str]
 
 
+class PatientSoftDeleteRequest(BaseModel):
+    deleted: bool = True
+
+
 class ReportArchiveRequest(BaseModel):
     date: str
     filename: str

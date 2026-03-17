@@ -176,5 +176,14 @@ class IngestionService:
         logger.info("[步骤1-设备] 待处理捕获导入完成 ingested=%d skipped=%d", ingested, skipped)
         return result
 
+    def ingest_pending_patient_folders(self, move_to_processed: bool = True) -> Dict[str, Any]:
+        logger.info("[步骤1-患者目录] 扫描并导入患者目录 move=%s", move_to_processed)
+        legacy_device_connector = self._legacy_device_connector
+        result = legacy_device_connector.ingest_pending_patient_folders(move_to_processed=move_to_processed)
+        ingested = len(result.get("ingested", [])) if isinstance(result, dict) else 0
+        skipped = len(result.get("skipped", [])) if isinstance(result, dict) else 0
+        logger.info("[步骤1-患者目录] 导入完成 ingested=%d skipped=%d", ingested, skipped)
+        return result
+
 
 __all__ = ["IngestionService"]

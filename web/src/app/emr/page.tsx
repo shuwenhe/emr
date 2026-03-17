@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import mammoth from "mammoth";
 import { flashSuccessButton } from "../lib/flash";
@@ -91,6 +91,12 @@ export default function EmrPage() {
   const [currentSearchPatient, setCurrentSearchPatient] = useState<PatientSearchResult | null>(null);
   const [showAbnormalDetails, setShowAbnormalDetails] = useState(false);
   const [reportPage, setReportPage] = useState(1);
+  const [incomingEmrToast, setIncomingEmrToast] = useState<{
+    emrId: string;
+    patientId: string;
+    message: string;
+  } | null>(null);
+  const latestKnownEmrIdRef = useRef("");
 
   useEffect(() => {
     try {
@@ -546,19 +552,34 @@ export default function EmrPage() {
     return "";
   }, [report]);
 
-  const fetchReports = useCallback(async () => {
+  const fetchReports = useCallback(async (silent = false) => {
     try {
       const response = await fetch(`${API_BASE}/reports`);
       const data = (await response.json()) as ReportFile[];
       setReportFiles(Array.isArray(data) ? data : []);
     } catch {
-      setReportFiles([]);
+      if (!silent) {
+        setReportFiles([]);
+      }
     }
   }, []);
 
   useEffect(() => {
     fetchReports();
   }, [fetchReports]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      fetchReports(true);
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, [fetchReports]);
+
+  useEffect(() => {
+    if (emrId.trim()) {
+      latestKnownEmrIdRef.current = emrId.trim();
+    }
+  }, [emrId]);
 
   useEffect(() => {
     const recordIdParam = searchParams.get("record_id") || "";
@@ -814,6 +835,146 @@ export default function EmrPage() {
     await fetchEmrById(latestEmrId);
     return true;
   }
+
+  async function jumpToIncomingEmr() {
+    if (!incomingEmrToast?.emrId) {
+      return;
+    }
+    const targetEmrId = incomingEmrToast.emrId;
+    const targetPatientId = incomingEmrToast.patientId;
+    setIncomingEmrToast(null);
+    if (targetPatientId) {
+      setPatientId(targetPatientId);
+    }
+    setEmrId(targetEmrId);
+    setSearchMessage("已跳转到新生成病历");
+    await fetchEmrById(targetEmrId);
+  }
+
+  useEffect(() => {
+    const targetPatientId = currentPatientIdForFilter.trim();
+    let cancelled = false;
+
+    const pollLatestPatientEmr = async () => {
+      try {
+        const query = targetPatientId
+          ? `?patient_id=${encodeURIComponent(targetPatientId)}&include_archived=true&limit=20`
+          : `?include_archived=true&limit=20`;
+        const response = await fetch(`${API_BASE}/emr${query}`);
+        if (!response.ok) {
+          return;
+        }
+        const data = (await response.json()) as EmrResponse;
+        const latestEmrId = resolveLatestEmrId(data);
+        if (!latestEmrId || cancelled) {
+          return;
+        }
+
+        if (!latestKnownEmrIdRef.current) {
+          latestKnownEmrIdRef.current = latestEmrId;
+          return;
+        }
+
+        if (latestEmrId !== latestKnownEmrIdRef.current) {
+          latestKnownEmrIdRef.current = latestEmrId;
+          let resolvedPatientId = targetPatientId;
+          if (!resolvedPatientId && Array.isArray(data) && data.length > 0) {
+            const latest = data[0] as Record<string, unknown>;
+            resolvedPatientId = String(latest.patient_id || "").trim();
+          }
+          setIncomingEmrToast({
+            emrId: latestEmrId,
+            patientId: resolvedPatientId,
+            message: "检测到新生成的诊断报告",
+          });
+          fetchReports(true);
+        }
+      } catch {
+        // Ignore polling errors and retry on next interval.
+      }
+    };
+
+    pollLatestPatientEmr();
+    const timer = window.setInterval(pollLatestPatientEmr, 5000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [currentPatientIdForFilter, fetchReports]);
+
+  // WebSocket connection for real-time EMR notifications
+  useEffect(() => {
+    let ws: WebSocket | null = null;
+    let reconnectTimeout: NodeJS.Timeout | null = null;
+
+    const connectWebSocket = () => {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsUrl = `${protocol}//${window.location.host}/ws/notifications`;
+
+      try {
+        ws = new WebSocket(wsUrl);
+
+        ws.onopen = () => {
+          console.log("WebSocket connected");
+        };
+
+        ws.onmessage = (event) => {
+          try {
+            const message = JSON.parse(event.data) as Record<string, unknown>;
+            const msgType = String(message.type || "").trim();
+
+            if (msgType === "emr_generated") {
+              const emrId = String(message.emr_id || "").trim();
+              const patientIdFromNotif = String(message.patient_id || "").trim();
+              const recordId = String(message.record_id || "").trim();
+
+              // Show toast notification
+              setIncomingEmrToast({
+                emrId,
+                patientId: patientIdFromNotif,
+                message: message.message ? String(message.message) : "诊断分析报告已生成",
+              });
+
+              // Update latest EMR tracking
+              if (emrId) {
+                latestKnownEmrIdRef.current = emrId;
+              }
+
+              // Refresh EMR list
+              fetchReports(true);
+            }
+          } catch (error) {
+            console.error("Failed to parse WebSocket message:", error);
+          }
+        };
+
+        ws.onerror = (error) => {
+          console.error("WebSocket error:", error);
+        };
+
+        ws.onclose = () => {
+          console.log("WebSocket disconnected");
+          // Attempt to reconnect after 5 seconds
+          reconnectTimeout = setTimeout(connectWebSocket, 5000);
+        };
+      } catch (error) {
+        console.error("Failed to create WebSocket:", error);
+        // Attempt to reconnect after 5 seconds
+        reconnectTimeout = setTimeout(connectWebSocket, 5000);
+      }
+    };
+
+    connectWebSocket();
+
+    return () => {
+      if (ws) {
+        ws.close();
+      }
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+      }
+    };
+  }, [fetchReports]);
 
   async function handleGenerate() {
     if (!recordId.trim()) {
@@ -1167,6 +1328,26 @@ export default function EmrPage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#f4f1ea]">
+      {incomingEmrToast && (
+        <div className="fixed right-6 top-20 z-50 w-[22rem] rounded-2xl border border-emerald-200 bg-white p-4 shadow-xl">
+          <p className="text-sm font-semibold text-emerald-700">生成成功</p>
+          <p className="mt-1 text-sm text-slate-700">{incomingEmrToast.message}</p>
+          <div className="mt-3 flex items-center gap-2">
+            <button
+              className="rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
+              onClick={jumpToIncomingEmr}
+            >
+              一键跳转到新病历
+            </button>
+            <button
+              className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              onClick={() => setIncomingEmrToast(null)}
+            >
+              关闭
+            </button>
+          </div>
+        </div>
+      )}
       <div className="pointer-events-none absolute -top-32 right-[-10%] h-80 w-80 rounded-full bg-amber-200/50 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-40 left-[-10%] h-96 w-96 rounded-full bg-sky-200/50 blur-3xl" />
       <main

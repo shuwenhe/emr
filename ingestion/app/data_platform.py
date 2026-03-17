@@ -147,6 +147,7 @@ def init_db() -> None:
                     gender VARCHAR(32),
                     age INT,
                     archived TINYINT DEFAULT 0,
+                    deleted TINYINT DEFAULT 0,
                     payload_json JSON,
                     updated_at DATETIME
                 )
@@ -209,6 +210,10 @@ def init_db() -> None:
             except Exception:
                 pass
             try:
+                cursor.execute("ALTER TABLE patients ADD COLUMN deleted TINYINT DEFAULT 0")
+            except Exception:
+                pass
+            try:
                 cursor.execute("CREATE INDEX idx_emrs_record ON emrs (record_id)")
             except Exception:
                 pass
@@ -238,12 +243,14 @@ def upsert_patient(patient: Dict[str, Any]) -> Optional[str]:
         with conn.cursor() as cursor:
             cursor.execute(
             """
-            INSERT INTO patients (patient_id, name, gender, age, archived, payload_json, updated_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO patients (patient_id, name, gender, age, archived, deleted, payload_json, updated_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE
                 name=VALUES(name),
                 gender=VALUES(gender),
                 age=VALUES(age),
+                archived=COALESCE(VALUES(archived), archived),
+                deleted=COALESCE(VALUES(deleted), deleted),
                 payload_json=VALUES(payload_json),
                 updated_at=VALUES(updated_at)
             """,
@@ -252,7 +259,8 @@ def upsert_patient(patient: Dict[str, Any]) -> Optional[str]:
                 patient.get("name"),
                 patient.get("gender"),
                 patient.get("age"),
-                0,
+                int(bool(patient.get("archived", 0))) if patient.get("archived") is not None else None,
+                int(bool(patient.get("deleted", 0))) if patient.get("deleted") is not None else None,
                 json.dumps(patient, ensure_ascii=False),
                 _now(),
             ),
@@ -265,19 +273,21 @@ def list_patients(
     limit: int = 100,
     offset: int = 0,
     include_archived: bool = False,
+    include_deleted: bool = False,
 ) -> List[Dict[str, Any]]:
     """Get all registered patients with pagination"""
     with _connect() as conn:
         with conn.cursor() as cursor:
             cursor.execute(
                 """
-                SELECT patient_id, name, gender, age, archived, payload_json, updated_at
+                SELECT patient_id, name, gender, age, archived, deleted, payload_json, updated_at
                 FROM patients
                 WHERE (%s = 1 OR archived = 0)
+                  AND (%s = 1 OR deleted = 0)
                 ORDER BY updated_at DESC
                 LIMIT %s OFFSET %s
                 """,
-                (1 if include_archived else 0, limit, offset)
+                (1 if include_archived else 0, 1 if include_deleted else 0, limit, offset)
             )
             rows = cursor.fetchall()
             patients = []
@@ -289,6 +299,7 @@ def list_patients(
                     "gender": row["gender"],
                     "age": row["age"],
                     "archived": bool(row.get("archived")),
+                    "deleted": bool(row.get("deleted")),
                     "updated_at": row["updated_at"].isoformat() if row.get("updated_at") else None
                 })
                 patients.append(patient)
@@ -300,7 +311,7 @@ def get_patient(patient_id: str) -> Optional[Dict[str, Any]]:
         with conn.cursor() as cursor:
             cursor.execute(
                 """
-                SELECT patient_id, name, gender, age, archived, payload_json, updated_at
+                SELECT patient_id, name, gender, age, archived, deleted, payload_json, updated_at
                 FROM patients
                 WHERE patient_id = %s
                 """,
@@ -316,6 +327,7 @@ def get_patient(patient_id: str) -> Optional[Dict[str, Any]]:
         "gender": row.get("gender"),
         "age": row.get("age"),
         "archived": bool(row.get("archived")),
+        "deleted": bool(row.get("deleted")),
         "updated_at": row.get("updated_at").isoformat() if row.get("updated_at") else None,
     })
     return patient
@@ -349,17 +361,33 @@ def archive_patient(patient_id: str, archived: bool = True) -> Optional[Dict[str
 
 
 def delete_patient(patient_id: str) -> bool:
-    """永久删除患者及其相关数据"""
+    """软删除患者（保留数据库记录，支持恢复）。"""
     with _connect() as conn:
         with conn.cursor() as cursor:
-            # 删除患者关联的EMR记录
-            cursor.execute("DELETE FROM emrs WHERE patient_id = %s", (patient_id,))
-            # 删除患者关联的采集记录
-            cursor.execute("DELETE FROM records WHERE patient_id = %s", (patient_id,))
-            # 删除患者
-            cursor.execute("DELETE FROM patients WHERE patient_id = %s", (patient_id,))
+            cursor.execute(
+                """
+                UPDATE patients
+                SET deleted = 1, archived = 1, updated_at = %s
+                WHERE patient_id = %s
+                """,
+                (_now(), patient_id),
+            )
             return cursor.rowcount > 0
     return False
+
+
+def restore_deleted_patient(patient_id: str) -> Optional[Dict[str, Any]]:
+    with _connect() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE patients
+                SET deleted = 0, updated_at = %s
+                WHERE patient_id = %s
+                """,
+                (_now(), patient_id),
+            )
+    return get_patient(patient_id)
 
 
 def save_record(
@@ -726,6 +754,44 @@ def get_report(record_id: str) -> Optional[Dict[str, Any]]:
     return result
 
 
+def _summarize_report_for_history(report_data: Any) -> Optional[Dict[str, Any]]:
+    """Build a lightweight history summary and avoid recursive payload embedding."""
+    if not isinstance(report_data, dict):
+        return None
+
+    analysis = report_data.get("analysis")
+    if not isinstance(analysis, dict):
+        analysis = {}
+
+    regional = analysis.get("regional_comparison")
+    abnormal_regions: List[Dict[str, Any]] = []
+    if isinstance(regional, dict):
+        raw_abnormal = regional.get("abnormal_regions")
+        if isinstance(raw_abnormal, list):
+            abnormal_regions = [
+                item for item in raw_abnormal[:8] if isinstance(item, dict)
+            ]
+
+    key_findings = analysis.get("key_findings")
+    if not isinstance(key_findings, list):
+        key_findings = []
+
+    summary: Dict[str, Any] = {
+        "report_id": report_data.get("report_id"),
+        "record_id": report_data.get("record_id"),
+        "created_at": report_data.get("created_at"),
+        "diagnosis": report_data.get("diagnosis"),
+        "doctor_opinion": report_data.get("doctor_opinion"),
+        "analysis": {
+            "risk_level": analysis.get("risk_level"),
+            "summary": analysis.get("summary"),
+            "key_findings": [item for item in key_findings[:10] if isinstance(item, str)],
+            "abnormal_regions": abnormal_regions,
+        },
+    }
+    return summary
+
+
 def get_patient_history(
     patient_id: str,
     exclude_record_id: Optional[str] = None,
@@ -754,13 +820,21 @@ def get_patient_history(
         report_json = row.get("report_json")
         report_data = None
         if report_json:
-            # Parse JSON (handles both uncompressed objects and compressed strings)
-            parsed = json.loads(report_json)
-            # If it's a string (compressed), decompress it then parse
-            if isinstance(parsed, str):
-                parsed = _decompress_data(parsed)
-                parsed = json.loads(parsed)
-            report_data = parsed
+            try:
+                # Parse JSON (handles both uncompressed objects and compressed strings)
+                parsed = json.loads(report_json)
+                # If it's a string (compressed), decompress it then parse
+                if isinstance(parsed, str):
+                    parsed = _decompress_data(parsed)
+                    parsed = json.loads(parsed)
+                report_data = _summarize_report_for_history(parsed)
+            except Exception as exc:
+                logger.warning(
+                    "Failed to parse/summarize patient history report record_id=%s error=%s",
+                    row.get("record_id"),
+                    exc,
+                )
+                report_data = None
         
         history.append(
             {

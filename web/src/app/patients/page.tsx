@@ -67,6 +67,22 @@ function resolveApiBase() {
   return "http://localhost:8000";
 }
 
+function normalizeWebBase(value: string): string {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) return "";
+  return trimmed.replace(/\/$/, "");
+}
+
+function extractOriginFromUrl(value: string): string {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  try {
+    return new URL(raw).origin;
+  } catch {
+    return "";
+  }
+}
+
 const API_BASE = resolveApiBase();
 
 function parseReportDay(value: string): Date {
@@ -102,6 +118,9 @@ export default function PatientsPage() {
   const [showReportPreview, setShowReportPreview] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showRegisterForm, setShowRegisterForm] = useState(false);
+  const [showWechatQr, setShowWechatQr] = useState(false);
+  const [selfRegisterUrl, setSelfRegisterUrl] = useState("");
+  const [publicWebBase, setPublicWebBase] = useState("");
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportDateFrom, setReportDateFrom] = useState("");
@@ -147,6 +166,27 @@ export default function PatientsPage() {
   useEffect(() => {
     fetchPatients(1, true);
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const localSavedBase = normalizeWebBase(localStorage.getItem("self_register_public_base") || "");
+    const envBase = normalizeWebBase(process.env.NEXT_PUBLIC_SELF_REGISTER_BASE_URL || "");
+    const currentOrigin = normalizeWebBase(window.location.origin);
+    const selectedBase = localSavedBase || envBase || currentOrigin;
+    setPublicWebBase(selectedBase);
+    setSelfRegisterUrl(`${selectedBase}/self-register`);
+  }, []);
+
+  useEffect(() => {
+    const normalized = normalizeWebBase(publicWebBase);
+    if (!normalized) {
+      setSelfRegisterUrl("");
+      return;
+    }
+    setSelfRegisterUrl(`${normalized}/self-register`);
+  }, [publicWebBase]);
+
+  const showLocalhostWarning = selfRegisterUrl.includes("localhost") || selfRegisterUrl.includes("127.0.0.1");
 
   // 无限滚动监听
   useEffect(() => {
@@ -210,6 +250,38 @@ export default function PatientsPage() {
     }, 500);
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
+
+  useEffect(() => {
+    if (!showWechatQr) return;
+
+    let cancelled = false;
+
+    const loadTunnelUrl = async () => {
+      try {
+        const response = await fetch(`/tunnel-url.txt?t=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) return;
+        const text = (await response.text()).trim();
+        const origin = extractOriginFromUrl(text);
+        if (!origin || cancelled) return;
+
+        const current = normalizeWebBase(publicWebBase);
+        const shouldOverride =
+          !current || current.includes("localhost") || current.includes("127.0.0.1");
+        if (shouldOverride) {
+          setPublicWebBase(origin);
+        }
+      } catch {
+        // tunnel url is optional; ignore when not present
+      }
+    };
+
+    loadTunnelUrl();
+    const timer = window.setInterval(loadTunnelUrl, 5000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [showWechatQr, publicWebBase]);
 
   function clearPatientFlowState() {
     try {
@@ -661,16 +733,27 @@ export default function PatientsPage() {
             <h1 className="text-3xl font-semibold text-slate-900 whitespace-nowrap">患者登记</h1>
             <p className="mt-2 text-slate-600 whitespace-nowrap">患者信息登记与管理</p>
           </div>
-          <button
-            className="rounded-full bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
-            onClick={() => {
-              clearPatientFlowState();
-              setShowRegisterForm(true);
-              flashSuccessButton();
-            }}
-          >
-            + 新增患者
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              className="rounded-full border border-emerald-200 bg-emerald-50 px-5 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-100"
+              onClick={() => {
+                setShowWechatQr(true);
+                flashSuccessButton();
+              }}
+            >
+              微信扫码登记
+            </button>
+            <button
+              className="rounded-full bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+              onClick={() => {
+                clearPatientFlowState();
+                setShowRegisterForm(true);
+                flashSuccessButton();
+              }}
+            >
+              + 新增患者
+            </button>
+          </div>
         </header>
 
         <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
@@ -785,6 +868,82 @@ export default function PatientsPage() {
         </section>
 
         {/* 患者登记表单模态框 */}
+        {showWechatQr && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-slate-900">微信扫码自助登记</h2>
+                <button
+                  className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+                  onClick={() => setShowWechatQr(false)}
+                >
+                  关闭
+                </button>
+              </div>
+              <p className="mb-4 text-sm text-slate-600">
+                患者用微信扫一扫，填写姓名和电话即可完成登记。
+              </p>
+              <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <label className="block text-xs font-semibold text-slate-700">手机访问地址</label>
+                <input
+                  className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+                  placeholder="例如: http://192.168.1.100:3000"
+                  value={publicWebBase}
+                  onChange={(e) => setPublicWebBase(e.target.value)}
+                />
+                <p className="mt-2 text-xs text-slate-500">
+                  若当前是 localhost，请改成电脑局域网 IP，手机与电脑需在同一网络。
+                </p>
+              </div>
+              {showLocalhostWarning && (
+                <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
+                  当前二维码仍是 localhost，手机无法访问。请先填写上方手机访问地址。
+                </div>
+              )}
+              <div className="mx-auto flex w-full max-w-[280px] flex-col items-center rounded-xl border border-slate-200 bg-slate-50 p-4">
+                {selfRegisterUrl && (
+                  <img
+                    src={`https://quickchart.io/qr?size=260&text=${encodeURIComponent(selfRegisterUrl)}`}
+                    alt="患者自助登记二维码"
+                    className="h-[220px] w-[220px] rounded-lg bg-white p-2"
+                  />
+                )}
+                <p className="mt-3 break-all text-center text-xs text-slate-500">{selfRegisterUrl}</p>
+              </div>
+              <div className="mt-4 flex gap-2">
+                <button
+                  className="flex-1 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                  onClick={async () => {
+                    const normalized = normalizeWebBase(publicWebBase);
+                    if (!normalized) {
+                      alert("请先填写手机访问地址");
+                      return;
+                    }
+                    localStorage.setItem("self_register_public_base", normalized);
+                    if (!selfRegisterUrl) return;
+                    try {
+                      await navigator.clipboard.writeText(selfRegisterUrl);
+                      alert("登记链接已复制，配置已保存");
+                    } catch {
+                      alert("复制失败，请手动复制");
+                    }
+                  }}
+                >
+                  保存并复制链接
+                </button>
+                <a
+                  className="flex-1 rounded-full bg-emerald-600 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-emerald-700"
+                  href={selfRegisterUrl || "#"}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  打开登记页
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+
         {showRegisterForm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
             <div className="relative max-h-[90vh] w-full max-w-4xl overflow-auto rounded-2xl bg-white p-8 shadow-xl">

@@ -5,7 +5,12 @@ from datetime import datetime
 
 from fastapi import APIRouter, HTTPException
 
-from models.schemas.api import PatientArchiveRequest, PatientDeleteRequest, PatientUpsertRequest
+from models.schemas.api import (
+    PatientArchiveRequest,
+    PatientDeleteRequest,
+    PatientSoftDeleteRequest,
+    PatientUpsertRequest,
+)
 from service.platform import PlatformService
 
 router = APIRouter(tags=["patients"])
@@ -17,7 +22,29 @@ def delete_patient_endpoint(patient_id: str):
     success = platform_service.delete_patient(patient_id)
     if not success:
         raise HTTPException(status_code=404, detail="patient_not_found")
-    return {"message": "patient_deleted", "patient_id": patient_id}
+    return {"message": "patient_soft_deleted", "patient_id": patient_id}
+
+
+@router.post("/patients/{patient_id}/soft-delete")
+def soft_delete_patient_endpoint(patient_id: str, request: PatientSoftDeleteRequest):
+    if request.deleted:
+        success = platform_service.delete_patient(patient_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="patient_not_found")
+        return {"message": "patient_soft_deleted", "patient_id": patient_id}
+
+    restored = platform_service.restore_deleted_patient(patient_id)
+    if not restored:
+        raise HTTPException(status_code=404, detail="patient_not_found")
+    return restored
+
+
+@router.post("/patients/{patient_id}/restore")
+def restore_patient_endpoint(patient_id: str):
+    restored = platform_service.restore_deleted_patient(patient_id)
+    if not restored:
+        raise HTTPException(status_code=404, detail="patient_not_found")
+    return restored
 
 
 @router.post("/patients/batch-delete")
@@ -49,9 +76,19 @@ async def register_patient(patient: PatientUpsertRequest):
 
 
 @router.get("/patients")
-def get_patients(page: int = 1, limit: int = 20, include_archived: bool = False):
+def get_patients(
+    page: int = 1,
+    limit: int = 20,
+    include_archived: bool = False,
+    include_deleted: bool = False,
+):
     offset = (page - 1) * limit
-    return platform_service.list_patients(limit=limit, offset=offset, include_archived=include_archived)
+    return platform_service.list_patients(
+        limit=limit,
+        offset=offset,
+        include_archived=include_archived,
+        include_deleted=include_deleted,
+    )
 
 
 @router.get("/patients/{patient_id}")

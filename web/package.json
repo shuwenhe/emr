@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev --webpack",
     "dev:turbo": "next dev --turbopack",
+    "tunnel:cf:start": "bash ./scripts/start_cloudflare_tunnel.sh",
+    "tunnel:cf:stop": "bash ./scripts/stop_cloudflare_tunnel.sh",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
