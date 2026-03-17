@@ -37,6 +37,7 @@
 /web/.swc/
 /web/dist/
 /web/build/
+/web/.tools/
 **/__pycache__/
 *.pyc
 *.pyo
