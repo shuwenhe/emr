@@ -125,3 +125,104 @@ def save_payload(
         "storage_path": str(data_path),
         "matrix_csv_path": str(matrix_csv_path) if matrix_csv_path else None,
     }
+
+
+def save_batch_payload(
+    primary_file_name: str,
+    primary_file_bytes: bytes,
+    metadata: Dict,
+    extra_data_files: List[tuple] | None = None,  # list of (filename, bytes)
+    image_files: List[tuple] | None = None,        # list of (filename, bytes)
+) -> Dict:
+    """
+    Ingest a batch of files for the same patient into a single record.
+
+    The first .dat/.csv file is treated as the primary data source and
+    converted / inserted into ClickHouse as usual.  All additional data
+    files and image files are stored alongside it in the same record
+    directory so that the report pipeline has access to all of them.
+
+    Returns the same dict as save_payload plus:
+      - extra_data_paths: list of paths for supplementary data files
+      - image_paths: list of paths for image files
+    """
+    record_id = str(uuid.uuid4())
+    record_path = _record_dir(record_id)
+
+    # -- primary data file --
+    primary_path = record_path / primary_file_name
+    primary_path.write_bytes(primary_file_bytes)
+
+    # -- build image path list (write files first) --
+    saved_image_paths: List[str] = []
+    if image_files:
+        images_dir = record_path / "images"
+        images_dir.mkdir(exist_ok=True)
+        for img_name, img_bytes in image_files:
+            img_path = images_dir / img_name
+            img_path.write_bytes(img_bytes)
+            saved_image_paths.append(str(img_path))
+
+    # -- save metadata + record row --
+    meta_path = record_path / "metadata.json"
+    meta_dict = dict(metadata)
+    if saved_image_paths:
+        meta_dict["image_paths"] = saved_image_paths
+
+    with open(meta_path, "w", encoding="utf-8") as f:
+        json.dump(meta_dict, f, ensure_ascii=False, indent=2)
+
+    save_record(record_id, meta_dict, str(primary_path), saved_image_paths or None)
+
+    # -- extra data files --
+    extra_data_paths: List[str] = []
+    if extra_data_files:
+        for extra_name, extra_bytes in extra_data_files:
+            extra_path = record_path / extra_name
+            extra_path.write_bytes(extra_bytes)
+            extra_data_paths.append(str(extra_path))
+
+    # -- convert primary file and insert into ClickHouse --
+    csv_targets: List[Path] = []
+    matrix_csv_path: Path | None = None
+    suffix = primary_path.suffix.lower()
+    if suffix == ".csv":
+        csv_targets.append(primary_path)
+    elif suffix == ".dat":
+        try:
+            matrix_csv_path = _convert_dat_to_matrix_csv(primary_path, metadata)
+            csv_targets.append(matrix_csv_path)
+        except Exception as exc:
+            logging.warning("DAT conversion skipped for %s: %s", primary_path.name, exc)
+
+    # also convert supplementary .dat/.csv files
+    for extra_str in extra_data_paths:
+        extra_p = Path(extra_str)
+        esuffix = extra_p.suffix.lower()
+        if esuffix == ".csv":
+            csv_targets.append(extra_p)
+        elif esuffix == ".dat":
+            try:
+                extra_csv = _convert_dat_to_matrix_csv(extra_p, metadata)
+                csv_targets.append(extra_csv)
+            except Exception as exc:
+                logging.warning("DAT conversion skipped for %s: %s", extra_p.name, exc)
+
+    for idx, csv_path in enumerate(csv_targets):
+        try:
+            insert_thermal_csv(
+                record_id=record_id,
+                metadata=metadata,
+                data_path=str(csv_path),
+                frame_id=csv_path.stem,
+            )
+        except Exception as exc:
+            logging.warning("ClickHouse ingest skipped for frame %s: %s", idx, exc)
+
+    return {
+        "record_id": record_id,
+        "storage_path": str(primary_path),
+        "matrix_csv_path": str(matrix_csv_path) if matrix_csv_path else None,
+        "extra_data_paths": extra_data_paths,
+        "image_paths": saved_image_paths,
+    }

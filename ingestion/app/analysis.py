@@ -26,21 +26,14 @@ from .data_platform import get_patient_history, save_plan, save_report
 from .emr import upsert_emr_from_analysis
 from .clickhouse_store import insert_thermal_csv
 
-THERMAL_PLOT_BOUNDS = {
-    "left": 3,
-    "right": 72,
-    "top": 8,
-    "bottom": 97,
-}
-
 FACIAL_LABEL_OFFSETS = {
-    "右眼": (15.0, -10.0),
-    "左眼": (-15.0, -10.0),
-    "鼻子": (0.0, 8.0),
-    "右脸颊": (18.0, 5.0),
-    "左脸颊": (-18.0, 5.0),
-    "额头": (0.0, -12.0),
-    "口部": (0.0, 10.0),
+    "右眼": (18.0, -12.0),     # 右眼向右上方偏移
+    "左眼": (-18.0, -12.0),    # 左眼向左上方偏移
+    "鼻子": (0.0, -10.0),      # 鼻子向上（鼻子在脸的中央偏上）
+    "右脸颊": (20.0, -8.0),    # 右脸颊右上方
+    "左脸颊": (-20.0, -8.0),   # 左脸颊左上方
+    "额头": (0.0, -18.0),      # 额头正上方，远离区域
+    "口部": (0.0, 8.0),        # 口部向下（在脸的中下方）
 }
 
 _HEAD_LABEL_KEYWORDS = (
@@ -614,6 +607,10 @@ def _get_cjk_font_prop() -> Optional[fm.FontProperties]:
 
 
 def _roi_label_points(roi_analysis: Optional[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    基于ROI边界框计算标签位置。
+    标签放置在区域边界的外侧，避免覆盖实际部位。
+    """
     if not isinstance(roi_analysis, dict):
         return []
     roi_list = roi_analysis.get("roi_list")
@@ -621,6 +618,8 @@ def _roi_label_points(roi_analysis: Optional[Dict[str, Any]]) -> List[Dict[str, 
         return []
 
     points: List[Dict[str, Any]] = []
+    offset = 4.0  # 标签与区域边界的距离百分比
+    
     for item in roi_list:
         if not isinstance(item, dict):
             continue
@@ -629,82 +628,84 @@ def _roi_label_points(roi_analysis: Optional[Dict[str, Any]]) -> List[Dict[str, 
             continue
         try:
             mean_c = float(item.get("mean_c"))
-            cx = max(0.0, min(100.0, float(item.get("center_x_pct"))))
-            cy = max(0.0, min(100.0, float(item.get("center_y_pct"))))
+            cx = float(item.get("center_x_pct"))
+            cy = float(item.get("center_y_pct"))
+            x_min = float(item.get("x_min_pct", cx - 5))
+            x_max = float(item.get("x_max_pct", cx + 5))
+            y_min = float(item.get("y_min_pct", cy - 5))
+            y_max = float(item.get("y_max_pct", cy + 5))
+            strategy = str(item.get("label_strategy", "outer")).lower()
         except Exception:
             continue
 
-        x = THERMAL_PLOT_BOUNDS["left"] + (cx / 100.0) * (
-            THERMAL_PLOT_BOUNDS["right"] - THERMAL_PLOT_BOUNDS["left"]
-        )
-        y = THERMAL_PLOT_BOUNDS["top"] + (cy / 100.0) * (
-            THERMAL_PLOT_BOUNDS["bottom"] - THERMAL_PLOT_BOUNDS["top"]
-        )
-
-        label_x = x
-        label_y = y
-        for key, (dx, dy) in FACIAL_LABEL_OFFSETS.items():
-            if key in name:
-                label_x = max(2.0, min(98.0, x + dx))
-                label_y = max(2.0, min(98.0, y + dy))
-                break
+        # 根据标签策略计算标签位置
+        x = cx
+        y = cy
+        
+        if strategy == "top":
+            # 标签放在区域上方
+            label_x = cx
+            label_y = max(2.0, y_min - offset)
+        elif strategy == "bottom":
+            # 标签放在区域下方
+            label_x = cx
+            label_y = min(98.0, y_max + offset)
+        elif strategy == "left":
+            # 标签放在区域左侧
+            label_x = max(2.0, x_min - offset)
+            label_y = cy
+        elif strategy == "right":
+            # 标签放在区域右侧
+            label_x = min(98.0, x_max + offset)
+            label_y = cy
+        else:  # "outer" 或其他
+            # 选择"最外侧"的位置：哪个方向离中心最远就放在那边
+            dist_top = y_min
+            dist_bottom = 100 - y_max
+            dist_left = x_min
+            dist_right = 100 - x_max
+            
+            max_dist = max(dist_top, dist_bottom, dist_left, dist_right)
+            
+            if max_dist == dist_top:
+                label_x = cx
+                label_y = max(2.0, y_min - offset)
+            elif max_dist == dist_bottom:
+                label_x = cx
+                label_y = min(98.0, y_max + offset)
+            elif max_dist == dist_left:
+                label_x = max(2.0, x_min - offset)
+                label_y = cy
+            else:
+                label_x = min(98.0, x_max + offset)
+                label_y = cy
 
         points.append(
             {
                 "name": name,
                 "mean_c": mean_c,
-                "x": x,
-                "y": y,
+                "x": cx,
+                "y": cy,
                 "label_x": label_x,
                 "label_y": label_y,
             }
         )
 
-    # 改进的标签位置调整算法，避免重叠
-    points.sort(key=lambda p: p["label_y"])
-    min_y_gap = 6.5  # 增加垂直间距
-    min_x_threshold = 18.0  # 增加水平检测范围
+    # 轻微的重叠避免：只在两个标签极其接近时才微调
+    points.sort(key=lambda p: (p["label_y"], p["label_x"]))
+    min_distance = 6.0  # 标签间最小距离
     
     for i in range(1, len(points)):
         cur = points[i]
-        max_prev_y = -1.0
         
-        for j in range(i):
-            prev = points[j]
-            x_dist = abs(cur["label_x"] - prev["label_x"])
-            y_dist = cur["label_y"] - prev["label_y"]
-            
-            # 如果水平位置接近且垂直间距不足，需要调整
-            if x_dist < min_x_threshold and y_dist < min_y_gap:
-                max_prev_y = max(max_prev_y, prev["label_y"])
+        # 只检查最近的前一个点，避免级联调整
+        prev = points[i - 1]
+        dist = ((cur["label_x"] - prev["label_x"]) ** 2 + (cur["label_y"] - prev["label_y"]) ** 2) ** 0.5
         
-        if max_prev_y >= 0:
-            cur["label_y"] = min(95.0, max_prev_y + min_y_gap)
+        if dist < min_distance:
+            # 微调当前标签：沿 Y 轴稍作偏移
+            cur["label_y"] = min(98.0, prev["label_y"] + min_distance)
 
-    # 特别处理头部区域的标签，使其更整齐
-    head_points: List[Dict[str, Any]] = []
-    for point in points:
-        name = str(point.get("name") or "")
-        is_head = point["y"] <= 40.0 or any(key in name for key in _HEAD_LABEL_KEYWORDS)
-        if is_head:
-            head_points.append(point)
-
-    if head_points:
-        head_points.sort(key=lambda p: p["label_x"])
-        min_head_x_gap = 12.0  # 增加水平间距
-        for idx in range(1, len(head_points)):
-            prev = head_points[idx - 1]
-            cur = head_points[idx]
-            if (cur["label_x"] - prev["label_x"]) < min_head_x_gap:
-                cur["label_x"] = min(96.0, prev["label_x"] + min_head_x_gap)
-
-        # 根据位置分两行显示头部标签，避免拥挤
-        base_y = 8.0
-        for idx, point in enumerate(head_points):
-            # 交替分两行，左边的标签在上，右边的在下，形成错落布局
-            row_offset = 0 if idx % 2 == 0 else 7.0
-            point["label_y"] = max(2.0, min(22.0, base_y + row_offset))
-    
     return points
 
 
@@ -896,27 +897,28 @@ def _risk_level(avg_temp: Optional[float]) -> str:
 def _fallback_roi_analysis(matrix: np.ndarray) -> Dict[str, Any]:
     """
     当 MediaPipe 不可用时，使用固定区域进行基础温度分析
-    返回预定义区域的温度统计
+    返回预定义区域的温度统计及边界框
     """
     h, w = matrix.shape
     roi_list = []
     
-    # 定义固定区域（百分比坐标），调整为更精确的面部区域
+    # 定义固定区域（百分比坐标）
+    # label_strategy: 'top'(上方), 'bottom'(下方), 'left'(左侧), 'right'(右侧), 'outer'(最外侧)
     fixed_regions = [
-        {"name": "额头", "x_pct": (35, 65), "y_pct": (8, 18)},
-        {"name": "右眼", "x_pct": (32, 45), "y_pct": (20, 32)},
-        {"name": "左眼", "x_pct": (55, 68), "y_pct": (20, 32)},
-        {"name": "鼻子", "x_pct": (44, 56), "y_pct": (32, 48)},
-        {"name": "右脸颊", "x_pct": (22, 42), "y_pct": (38, 58)},
-        {"name": "左脸颊", "x_pct": (58, 78), "y_pct": (38, 58)},
-        {"name": "口部", "x_pct": (42, 58), "y_pct": (52, 65)},
-        {"name": "颈部", "x_pct": (40, 60), "y_pct": (64, 74)},
-        {"name": "胸部", "x_pct": (30, 70), "y_pct": (74, 92)},
-        {"name": "腹部", "x_pct": (34, 66), "y_pct": (92, 100)},
-        {"name": "左臂", "x_pct": (10, 28), "y_pct": (72, 96)},
-        {"name": "右臂", "x_pct": (72, 90), "y_pct": (72, 96)},
-        {"name": "左腿", "x_pct": (38, 50), "y_pct": (96, 100)},
-        {"name": "右腿", "x_pct": (50, 62), "y_pct": (96, 100)},
+        {"name": "额头", "x_pct": (35, 65), "y_pct": (8, 18), "label_strategy": "top"},
+        {"name": "右眼", "x_pct": (32, 45), "y_pct": (20, 32), "label_strategy": "top"},
+        {"name": "左眼", "x_pct": (55, 68), "y_pct": (20, 32), "label_strategy": "top"},
+        {"name": "鼻子", "x_pct": (44, 56), "y_pct": (32, 48), "label_strategy": "bottom"},
+        {"name": "右脸颊", "x_pct": (22, 42), "y_pct": (38, 58), "label_strategy": "left"},
+        {"name": "左脸颊", "x_pct": (58, 78), "y_pct": (38, 58), "label_strategy": "right"},
+        {"name": "口部", "x_pct": (42, 58), "y_pct": (52, 65), "label_strategy": "bottom"},
+        {"name": "颈部", "x_pct": (40, 60), "y_pct": (64, 74), "label_strategy": "outer"},
+        {"name": "胸部", "x_pct": (30, 70), "y_pct": (74, 92), "label_strategy": "outer"},
+        {"name": "腹部", "x_pct": (34, 66), "y_pct": (92, 100), "label_strategy": "bottom"},
+        {"name": "左臂", "x_pct": (10, 28), "y_pct": (72, 96), "label_strategy": "left"},
+        {"name": "右臂", "x_pct": (72, 90), "y_pct": (72, 96), "label_strategy": "right"},
+        {"name": "左腿", "x_pct": (38, 50), "y_pct": (96, 100), "label_strategy": "left"},
+        {"name": "右腿", "x_pct": (50, 62), "y_pct": (96, 100), "label_strategy": "right"},
     ]
     
     for region in fixed_regions:
@@ -942,6 +944,11 @@ def _fallback_roi_analysis(matrix: np.ndarray) -> Dict[str, Any]:
                     "std_c": round(float(np.std(valid_data)), 2),
                     "center_x_pct": center_x_pct,
                     "center_y_pct": center_y_pct,
+                    "x_min_pct": float(region["x_pct"][0]),
+                    "x_max_pct": float(region["x_pct"][1]),
+                    "y_min_pct": float(region["y_pct"][0]),
+                    "y_max_pct": float(region["y_pct"][1]),
+                    "label_strategy": region.get("label_strategy", "outer"),
                 })
         except Exception as e:
             logging.debug(f"Failed to analyze region {region['name']}: {e}")
@@ -1021,9 +1028,29 @@ def _analyze_roi_regions(payload_path: Path, csv_is_matrix: bool = True) -> Opti
             ys, xs = np.where(mask)
             center_x_pct = None
             center_y_pct = None
+            x_min_pct = None
+            x_max_pct = None
+            y_min_pct = None
+            y_max_pct = None
+            label_strategy = "outer"
+            
             if xs.size > 0 and ys.size > 0:
                 center_x_pct = round(float(xs.mean()) / max(w - 1, 1) * 100.0, 2)
                 center_y_pct = round(float(ys.mean()) / max(h - 1, 1) * 100.0, 2)
+                x_min_pct = round(float(xs.min()) / max(w - 1, 1) * 100.0, 2)
+                x_max_pct = round(float(xs.max()) / max(w - 1, 1) * 100.0, 2)
+                y_min_pct = round(float(ys.min()) / max(h - 1, 1) * 100.0, 2)
+                y_max_pct = round(float(ys.max()) / max(h - 1, 1) * 100.0, 2)
+                
+                # 启发式判断标签策略
+                if "眼" in roi_name or "额" in roi_name:
+                    label_strategy = "top"
+                elif "脸颊" in roi_name or "颊" in roi_name:
+                    label_strategy = "left" if "左" in roi_name else "right"
+                elif "臂" in roi_name or "腿" in roi_name:
+                    label_strategy = "left" if "左" in roi_name else "right"
+                else:
+                    label_strategy = "outer"
             
             stats = calc_stats(values)
             roi_stats[roi_name] = stats
@@ -1036,6 +1063,11 @@ def _analyze_roi_regions(payload_path: Path, csv_is_matrix: bool = True) -> Opti
                 "std_c": round(stats.get("std", 0), 2),
                 "center_x_pct": center_x_pct,
                 "center_y_pct": center_y_pct,
+                "x_min_pct": x_min_pct,
+                "x_max_pct": x_max_pct,
+                "y_min_pct": y_min_pct,
+                "y_max_pct": y_max_pct,
+                "label_strategy": label_strategy,
             })
         
         if not roi_list:
@@ -1154,19 +1186,22 @@ def analyze_record(
                 image_paths.append(str(relative_path))
                 temperature_labels = _extract_temperature_labels(marked_image_path)
 
-        # 如果有ROI分析结果，生成带ROI标签的图像（小字体、清晰标注，只有这一层）
-        if marked_image_path and roi_analysis:
-            logging.info(f"Generating small-font ROI labeled image with base: {marked_image_path}")
-            roi_labeled_image_path = _generate_roi_labeled_image(
-                marked_image_path,
-                roi_analysis,
+        # 如果有ROI分析结果，直接基于温度矩阵绘制带标签热图，避免在已加边距图片上二次贴标导致偏移
+        if grid is not None and roi_analysis:
+            logging.info("Generating ROI labeled image directly from thermal grid")
+            roi_labeled_image_path = _generate_marked_image(
+                grid,
                 record_dir / "thermal_roi_labeled.png",
+                roi_analysis=roi_analysis,
+                draw_roi_labels=True,
             )
             if roi_labeled_image_path:
                 relative_roi_path = Path(roi_labeled_image_path).relative_to(DATA_DIR)
                 image_paths.append(str(relative_roi_path))
         else:
-            logging.info(f"Skipping ROI labeled image (only basic thermal): marked_image_path={bool(marked_image_path)}, roi_analysis={bool(roi_analysis)}")
+            logging.info(
+                f"Skipping ROI labeled image: grid={bool(grid is not None)}, roi_analysis={bool(roi_analysis)}"
+            )
 
     capture_time = (metadata.get("capture") or {}).get("capture_time") or datetime.now().isoformat()
     device = metadata.get("device") or {}

@@ -17,7 +17,7 @@ const UPLOAD_STATE_KEY = "patient_flow_state_upload";
 export default function UploadPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [deviceId, setDeviceId] = useState("");
   const [deviceModel, setDeviceModel] = useState("IR-Thermal-320");
   const [captureTime, setCaptureTime] = useState("");
@@ -146,8 +146,8 @@ export default function UploadPage() {
   }
 
   async function handleUpload() {
-    if (!file || !deviceId || !captureTime) {
-      setResult({ error: "请填写必填字段并选择文件" });
+    if (files.length === 0 || !deviceId || !captureTime) {
+      setResult({ error: "请填写必填字段并选择至少一个文件" });
       return;
     }
 
@@ -183,32 +183,58 @@ export default function UploadPage() {
       } : undefined,
     };
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("metadata", JSON.stringify(metadata));
-
     try {
-      const response = await fetch(`${API_BASE}/ingest`, {
-        method: "POST",
-        body: formData,
-      });
+      let record_id: string;
 
-      const data = await response.json();
-      
-      if (response.ok) {
-        setUploading(false);
-        setReportGenerating(true);
-        setReportStatus("数据上传成功，正在生成报告...");
-        
-        // 开始模拟进度并轮询检查报告状态
-        await checkReportGeneration(data.record_id);
-        
-        setResult({ record_id: data.record_id });
-        flashSuccessButton();
+      if (files.length === 1) {
+        // Single file — use original /ingest endpoint
+        const formData = new FormData();
+        formData.append("file", files[0]);
+        formData.append("metadata", JSON.stringify(metadata));
+
+        const response = await fetch(`${API_BASE}/ingest`, {
+          method: "POST",
+          body: formData,
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          setResult({ error: data.detail || "上传失败" });
+          setUploading(false);
+          return;
+        }
+        record_id = data.record_id;
       } else {
-        setResult({ error: data.detail || "上传失败" });
-        setUploading(false);
+        // Multiple files — use /ingest/batch, one record + one report for all files
+        const formData = new FormData();
+        for (const file of files) {
+          formData.append("files", file);
+        }
+        formData.append("metadata", JSON.stringify(metadata));
+
+        const response = await fetch(`${API_BASE}/ingest/batch`, {
+          method: "POST",
+          body: formData,
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          setResult({ error: data.detail || "批量上传失败" });
+          setUploading(false);
+          return;
+        }
+        record_id = data.record_id;
       }
+
+      setUploading(false);
+      setReportGenerating(true);
+      setReportStatus(files.length > 1
+        ? `${files.length} 个文件上传成功，正在生成合并报告...`
+        : "数据上传成功，正在生成报告..."
+      );
+
+      await checkReportGeneration(record_id);
+
+      setResult({ record_id });
+      flashSuccessButton();
     } catch (error) {
       setResult({ error: `上传失败: ${String(error)}` });
       setUploading(false);
@@ -284,15 +310,67 @@ export default function UploadPage() {
             <label className="block text-sm font-medium text-slate-700">
               数据文件 <span className="text-red-500">*</span>
             </label>
-            <input
-              type="file"
-              accept=".csv,.bin,.dat,.npy,.zip"
-              className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-            />
-            <p className="mt-1 text-xs text-slate-500">
-              支持格式：.csv, .bin, .dat, .npy, .zip
-            </p>
+            <div className="mt-2 rounded-lg border-2 border-dashed border-slate-200 hover:border-blue-400 transition-colors p-6 text-center">
+              <input
+                type="file"
+                accept=".csv,.bin,.dat,.npy,.zip,.jpg,.jpeg,.png"
+                multiple
+                className="hidden"
+                id="file-upload"
+                onChange={(e) => {
+                  const newFiles = Array.from(e.target.files || []);
+                  setFiles([...files, ...newFiles]);
+                  // 重置 input 以允许重复选择相同文件
+                  e.target.value = "";
+                }}
+              />
+              <label htmlFor="file-upload" className="cursor-pointer">
+                <div className="text-slate-600">
+                  <p className="text-sm font-medium">点击选择文件或拖拽到此处</p>
+                  <p className="mt-1 text-xs text-slate-500">支持格式：.csv, .bin, .dat, .npy, .zip（数据）及 .jpg, .png（热成像图片）</p>
+                  <p className="mt-1 text-xs text-blue-600 font-medium">同一患者多个文件将合并为一份报告</p>
+                </div>
+              </label>
+            </div>
+
+            {/* 已选择的文件列表 */}
+            {files.length > 0 && (
+              <div className="mt-4">
+                <p className="text-sm font-medium text-slate-700 mb-3">
+                  已选择 {files.length} 个文件：
+                </p>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {files.map((file, index) => (
+                    <div
+                      key={`${file.name}-${index}`}
+                      className="flex items-center justify-between bg-slate-50 p-3 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-slate-900 truncate">
+                          {file.name}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          {(file.size / 1024).toFixed(2)} KB
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setFiles(files.filter((_, i) => i !== index))}
+                        className="ml-2 px-3 py-1 text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded"
+                        title="删除此文件"
+                      >
+                        删除
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setFiles([])}
+                  className="mt-3 text-xs font-medium text-slate-600 hover:text-slate-700 underline"
+                >
+                  清空所有
+                </button>
+              </div>
+            )}
           </div>
         </section>
 
@@ -472,9 +550,17 @@ export default function UploadPage() {
           <button
             className="w-full rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:bg-slate-300"
             onClick={handleUpload}
-            disabled={uploading || reportGenerating}
+            disabled={uploading || reportGenerating || files.length === 0}
           >
-            {uploading ? "上传中..." : reportGenerating ? "生成报告中..." : "上传数据"}
+            {uploading
+              ? `上传中... (${files.length} 个文件)`
+              : reportGenerating
+              ? "生成合并报告中..."
+              : files.length > 1
+              ? `上传并合并生成报告 (${files.length} 个文件)`
+              : files.length === 1
+              ? `上传数据 (${files[0].name})`
+              : "上传数据"}
           </button>
 
           {reportGenerating && (
@@ -503,6 +589,11 @@ export default function UploadPage() {
               ) : (
                 <div className="rounded-xl border border-green-200 bg-green-50 p-4">
                   <p className="text-sm font-semibold text-green-900">上传成功</p>
+                  <p className="mt-1 text-xs text-green-600">
+                    {files.length > 1
+                      ? `已将 ${files.length} 个文件合并为一份报告`
+                      : "文件上传成功"}
+                  </p>
                   <p className="mt-1 font-mono text-xs text-green-700">
                     Record ID: {result.record_id}
                   </p>

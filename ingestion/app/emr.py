@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import time
 import uuid
 from datetime import datetime
@@ -8,7 +9,11 @@ from typing import Any, Dict, List, Optional
 
 from .data_platform import get_emr_by_record_id, save_emr, save_report
 from .config import DATA_DIR, EMR_DIR
-from reports.python import generate_docx_report, generate_template_report
+from reports.python import generate_docx_report, generate_pdf_report, generate_template_report
+
+
+REPORT_PRIMARY_FORMAT = os.getenv("EMR_REPORT_PRIMARY_FORMAT", "pdf").strip().lower()
+EMR_ENABLE_OPTIONAL_DOCX = os.getenv("EMR_ENABLE_OPTIONAL_DOCX", "1").strip().lower() in {"1", "true", "yes", "on"}
 
 
 class EmrNotFoundError(FileNotFoundError):
@@ -41,6 +46,124 @@ def _report_path(record_id: str) -> Path:
     return _record_dir(record_id) / "report.json"
 
 
+def _persist_emr_and_report(emr: Dict[str, Any]) -> None:
+    emr_id = str(emr.get("emr_id") or "").strip()
+    if emr_id:
+        with open(_emr_path(emr_id), "w", encoding="utf-8") as handle:
+            json.dump(emr, handle, ensure_ascii=False, indent=2, default=str)
+
+    save_emr(emr)
+
+    record_id = str(emr.get("record_id") or "").strip()
+    report = emr.get("report")
+    if record_id and isinstance(report, dict):
+        report_path = _report_path(record_id)
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(report_path, "w", encoding="utf-8") as handle:
+            json.dump(report, handle, ensure_ascii=False, indent=2, default=str)
+        save_report(record_id, report)
+
+
+def _has_valid_report_file(emr: Dict[str, Any], field_name: str) -> bool:
+    raw_path = str(emr.get(field_name) or "").strip()
+    if not raw_path:
+        report = emr.get("report")
+        if isinstance(report, dict):
+            raw_path = str(report.get(field_name) or "").strip()
+    if not raw_path:
+        return False
+
+    report_file = Path(raw_path)
+    return report_file.exists() and report_file.is_file()
+
+
+def _generate_report_outputs(
+    report: Dict[str, Any],
+    emr: Dict[str, Any],
+    *,
+    require_primary: bool = True,
+) -> bool:
+    generated_any = False
+    primary_format = REPORT_PRIMARY_FORMAT if REPORT_PRIMARY_FORMAT in {"pdf", "docx"} else "pdf"
+
+    if primary_format == "pdf":
+        if not _has_valid_report_file(emr, "pdf_report_path"):
+            pdf_started_at = time.perf_counter()
+            try:
+                pdf_path = generate_pdf_report(report, emr)
+                logging.info(
+                    "[EMR-TIMING] record_id=%s stage=generate_pdf_report elapsed=%.3fs success=%s",
+                    emr.get("record_id"),
+                    time.perf_counter() - pdf_started_at,
+                    bool(pdf_path),
+                )
+                if pdf_path:
+                    emr["pdf_report_path"] = str(pdf_path)
+                    report["pdf_report_path"] = str(pdf_path)
+                    generated_any = True
+                elif require_primary:
+                    emr.setdefault("warnings", []).append("report_pdf_generate_failed")
+                    return False
+            except Exception as exc:
+                logging.exception("PDF report generation failed for emr %s: %s", emr.get("emr_id"), exc)
+                emr.setdefault("warnings", []).append("report_pdf_generate_failed")
+                if require_primary:
+                    return False
+
+        if EMR_ENABLE_OPTIONAL_DOCX and not _has_valid_report_file(emr, "docx_report_path"):
+            docx_started_at = time.perf_counter()
+            try:
+                docx_path = generate_docx_report(report, emr)
+                logging.info(
+                    "[EMR-TIMING] record_id=%s stage=generate_docx_report elapsed=%.3fs success=%s",
+                    emr.get("record_id"),
+                    time.perf_counter() - docx_started_at,
+                    bool(docx_path),
+                )
+                if docx_path:
+                    emr["docx_report_path"] = str(docx_path)
+                    report["docx_report_path"] = str(docx_path)
+                    generated_any = True
+                else:
+                    emr.setdefault("warnings", []).append("report_docx_generate_failed")
+            except Exception as exc:
+                logging.exception("DOCX report generation failed for emr %s: %s", emr.get("emr_id"), exc)
+                emr.setdefault("warnings", []).append("report_docx_generate_failed")
+    else:
+        if not _has_valid_report_file(emr, "docx_report_path"):
+            docx_started_at = time.perf_counter()
+            try:
+                docx_path = generate_docx_report(report, emr)
+                logging.info(
+                    "[EMR-TIMING] record_id=%s stage=generate_docx_report elapsed=%.3fs success=%s",
+                    emr.get("record_id"),
+                    time.perf_counter() - docx_started_at,
+                    bool(docx_path),
+                )
+                if docx_path:
+                    emr["docx_report_path"] = str(docx_path)
+                    report["docx_report_path"] = str(docx_path)
+                    generated_any = True
+                elif require_primary:
+                    emr.setdefault("warnings", []).append("report_docx_generate_failed")
+                    return False
+            except Exception as exc:
+                logging.exception("DOCX report generation failed for emr %s: %s", emr.get("emr_id"), exc)
+                emr.setdefault("warnings", []).append("report_docx_generate_failed")
+                if require_primary:
+                    return False
+
+    emr["report"] = report
+    return generated_any or _has_valid_report_file(emr, f"{primary_format}_report_path")
+
+
+def _ensure_report_outputs(emr: Dict[str, Any]) -> bool:
+    report = emr.get("report")
+    if not isinstance(report, dict) or not report:
+        return False
+    return _generate_report_outputs(report, emr, require_primary=False)
+
+
 def generate_emr(
     record_id: str,
     force: bool = False,
@@ -59,19 +182,12 @@ def generate_emr(
         if existing:
             logging.info("EMR already exists for record %s (emr_id=%s), returning existing", record_id, existing.get("emr_id"))
             try:
-                docx_updated = _ensure_docx_report(existing)
-                if docx_updated:
-                    emr_id = str(existing.get("emr_id") or "").strip()
-                    if emr_id:
-                        with open(_emr_path(emr_id), "w", encoding="utf-8") as handle:
-                            json.dump(existing, handle, ensure_ascii=False, indent=2, default=str)
-                    save_emr(existing)
-                    report = existing.get("report")
-                    if isinstance(report, dict):
-                        save_report(record_id, report)
-                    logging.info("DOCX backfilled for existing EMR record=%s emr_id=%s", record_id, emr_id)
+                outputs_updated = _ensure_report_outputs(existing)
+                if outputs_updated:
+                    _persist_emr_and_report(existing)
+                    logging.info("Report outputs backfilled for existing EMR record=%s emr_id=%s", record_id, existing.get("emr_id"))
             except Exception as exc:
-                logging.warning("DOCX backfill skipped for existing EMR record=%s error=%s", record_id, exc)
+                logging.warning("Report output backfill skipped for existing EMR record=%s error=%s", record_id, exc)
             return existing
 
     analysis_started_at = time.perf_counter()
@@ -145,38 +261,22 @@ def generate_emr(
         "treatment_plan": plan,
     }
 
-    with open(_emr_path(emr_id), "w", encoding="utf-8") as handle:
-        json.dump(emr, handle, ensure_ascii=False, indent=2, default=str)
-
-    save_emr(emr)
+    _persist_emr_and_report(emr)
 
     if report:
-        logging.info("Attempting to generate DOCX report for emr %s (report_id=%s)", emr_id, report.get("report_id"))
-        try:
-            # FastReport disabled, use DOCX directly
-            docx_started_at = time.perf_counter()
-            report_path = generate_docx_report(report, emr)
-            logging.info("DOCX generation returned: %s (type: %s)", report_path, type(report_path).__name__)
-            logging.info(
-                "[EMR-TIMING] record_id=%s stage=generate_docx_report elapsed=%.3fs success=%s",
-                record_id,
-                time.perf_counter() - docx_started_at,
-                bool(report_path),
-            )
-            if report_path:
-                emr["docx_report_path"] = str(report_path)
-                report["docx_report_path"] = str(report_path)
-                emr["report"] = report
-                with open(_emr_path(emr_id), "w", encoding="utf-8") as handle:
-                    json.dump(emr, handle, ensure_ascii=False, indent=2, default=str)
-                save_emr(emr)
-                logging.info("DOCX report persisted: %s", report_path)
-            else:
-                logging.warning("generate_docx_report returned None or falsy value for emr %s", emr_id)
-        except Exception as exc:
-            logging.exception("DOCX report generation failed for emr %s: %s", emr_id, exc)
+        logging.info(
+            "Attempting to generate primary report output for emr %s (report_id=%s, primary=%s, optional_docx=%s)",
+            emr_id,
+            report.get("report_id"),
+            REPORT_PRIMARY_FORMAT,
+            EMR_ENABLE_OPTIONAL_DOCX,
+        )
+        if _generate_report_outputs(report, emr, require_primary=True):
+            _persist_emr_and_report(emr)
+        else:
+            logging.warning("Primary report generation failed for emr %s", emr_id)
     else:
-        logging.warning("Report is empty/None for emr %s, skipping DOCX generation", emr_id)
+        logging.warning("Report is empty/None for emr %s, skipping report generation", emr_id)
 
     return emr
 
@@ -265,41 +365,47 @@ def _resolve_data_image_path(path_value: Any) -> Optional[Path]:
 
 
 def _normalize_emr_fields(emr: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Ensure EMR has top-level temperature_metrics and risk_level fields
-    by extracting them from report.analysis if missing.
-    """
-    if "temperature_metrics" not in emr or "risk_level" not in emr:
-        report = emr.get("report")
-        if isinstance(report, dict):
-            analysis = report.get("analysis")
-            if isinstance(analysis, dict):
-                if "temperature_metrics" not in emr:
-                    temperature_metrics = analysis.get("temperature_metrics")
-                    body_avg_temp_c = analysis.get("body_avg_temp_c")
-                    if temperature_metrics and isinstance(temperature_metrics, dict):
-                        full_metrics = dict(temperature_metrics)
-                        if body_avg_temp_c is not None:
-                            full_metrics["body_avg_temp_c"] = body_avg_temp_c
-                        emr["temperature_metrics"] = full_metrics
-                    
-                if "risk_level" not in emr:
-                    risk_level = analysis.get("risk_level")
-                    if risk_level:
-                        emr["risk_level"] = risk_level
-                        
-                # Extract thermal image paths if missing
-                if "thermal_roi_labeled_image" not in emr:
-                    thermal_roi = report.get("thermal_roi_labeled_image")
-                    if thermal_roi:
-                        emr["thermal_roi_labeled_image"] = thermal_roi
-                        
-                if "thermal_marked_image" not in emr:
-                    thermal_marked = report.get("thermal_marked_image")
-                    if thermal_marked:
-                        emr["thermal_marked_image"] = thermal_marked
+    """Extract and normalize metrics from report.analysis if not in emr root."""
+    if not isinstance(emr, dict):
+        return emr
     
-    return emr
+    result = dict(emr)
+    report = result.get("report")
+    if isinstance(report, dict):
+        analysis = report.get("analysis", {})
+        if isinstance(analysis, dict):
+            if "brief_summary" not in result and "brief_summary" in analysis:
+                result["brief_summary"] = analysis["brief_summary"]
+            if "risk_level" not in result and "risk_level" in analysis:
+                result["risk_level"] = analysis["risk_level"]
+    
+    return result
+
+
+def _prioritize_report_paths(emr: Dict[str, Any]) -> Dict[str, Any]:
+    """Reorder EMR dict to prioritize pdf_report_path before docx_report_path.
+    
+    This ensures that when the frontend displays field results, PDFs are shown first.
+    """
+    if not isinstance(emr, dict):
+        return emr
+    
+    # Build new dict with desired field order
+    ordered = {}
+    
+    # Priority fields first
+    priority_fields = ["emr_id", "record_id", "patient", "hospital", "pdf_report_path", "docx_report_path"]
+    for field in priority_fields:
+        if field in emr:
+            ordered[field] = emr[field]
+    
+    # Then add remaining fields in original order
+    for key, value in emr.items():
+        if key not in ordered:
+            ordered[key] = value
+    
+    return ordered
+
 
 
 def _refresh_roi_labeled_image(emr: Dict[str, Any]) -> bool:
@@ -357,39 +463,6 @@ def _refresh_roi_labeled_image(emr: Dict[str, Any]) -> bool:
     return True
 
 
-def _has_valid_docx_report(emr: Dict[str, Any]) -> bool:
-    raw_path = str(emr.get("docx_report_path") or "").strip()
-    if not raw_path:
-        report = emr.get("report")
-        if isinstance(report, dict):
-            raw_path = str(report.get("docx_report_path") or "").strip()
-    if not raw_path:
-        return False
-
-    report_file = Path(raw_path)
-    return report_file.exists() and report_file.is_file()
-
-
-def _ensure_docx_report(emr: Dict[str, Any]) -> bool:
-    if _has_valid_docx_report(emr):
-        return False
-
-    report = emr.get("report")
-    if not isinstance(report, dict) or not report:
-        return False
-
-    try:
-        report_path = generate_docx_report(report, emr)
-    except Exception:
-        emr.setdefault("warnings", []).append("report_docx_generate_failed")
-        return False
-
-    emr["docx_report_path"] = str(report_path)
-    report["docx_report_path"] = str(report_path)
-    emr["report"] = report
-    return True
-
-
 def get_emr(emr_id: str) -> Dict[str, Any]:
     path = _emr_path(emr_id)
     if not path.exists():
@@ -401,7 +474,7 @@ def get_emr(emr_id: str) -> Dict[str, Any]:
     emr = _normalize_emr_fields(emr)
     
     updated = _refresh_roi_labeled_image(emr)
-    report_file_updated = _ensure_docx_report(emr)
+    report_file_updated = _ensure_report_outputs(emr)
     if updated or report_file_updated:
         with open(path, "w", encoding="utf-8") as handle:
             json.dump(emr, handle, ensure_ascii=False, indent=2)
@@ -423,7 +496,8 @@ def get_emr(emr_id: str) -> Dict[str, Any]:
         except Exception:
             pass
 
-    return emr
+    # Apply field priority ordering: pdf_report_path before docx_report_path
+    return _prioritize_report_paths(emr)
 
 
 def update_emr(emr_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
@@ -464,18 +538,15 @@ def update_emr(emr_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
         except Exception:
             emr.setdefault("warnings", []).append("report_db_save_failed")
         try:
-            # FastReport disabled, use DOCX directly
-            docx_path = generate_docx_report(report, emr)
-            emr["docx_report_path"] = str(docx_path)
-            report["docx_report_path"] = str(docx_path)
+            _generate_report_outputs(report, emr, require_primary=False)
         except Exception:
-            emr.setdefault("warnings", []).append("report_docx_generate_failed")
+            emr.setdefault("warnings", []).append("report_generate_failed")
 
     with open(_emr_path(emr_id), "w", encoding="utf-8") as handle:
         json.dump(emr, handle, ensure_ascii=False, indent=2)
 
     save_emr(emr)
-    return emr
+    return _prioritize_report_paths(emr)
 
 
 def archive_emr(emr_id: str, archived: bool = True) -> Dict[str, Any]:
@@ -486,7 +557,7 @@ def archive_emr(emr_id: str, archived: bool = True) -> Dict[str, Any]:
         json.dump(emr, handle, ensure_ascii=False, indent=2)
 
     save_emr(emr)
-    return emr
+    return _prioritize_report_paths(emr)
 
 
 def list_emrs(patient_id: Optional[str] = None, include_archived: bool = False) -> List[Dict[str, Any]]:
@@ -501,7 +572,7 @@ def list_emrs(patient_id: Optional[str] = None, include_archived: bool = False) 
                 continue
         if not include_archived and data.get("archived"):
             continue
-        emrs.append(data)
+        emrs.append(_prioritize_report_paths(data))
 
     emrs.sort(key=lambda item: item.get("created_at") or "")
     return emrs

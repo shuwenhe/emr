@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 
 from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, UploadFile
+from typing import List
 
 from models.schemas.api import AnalyzeRequest, DeviceIngestRequest, DispatchRequest, IngestMetadata
 from service.ai import AIService
@@ -18,6 +19,7 @@ router = APIRouter(tags=["ingest"])
 logger = logging.getLogger(__name__)
 
 ALLOWED_EXTENSIONS = {".csv", ".dat"}
+ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif"}
 MAX_FILE_MB = 100
 ai_service = AIService()
 analysis_service = AnalysisService()
@@ -192,6 +194,102 @@ async def ingest(
     return {
         **result,
         "qc_issues": [],  # No QC issues if validation passed
+        "report_generation": "scheduled",
+    }
+
+
+@router.post("/ingest/batch")
+async def ingest_batch(
+    background_tasks: BackgroundTasks,
+    files: List[UploadFile] = File(...),
+    metadata: str = Form(...),
+):
+    """
+    Batch ingest: upload multiple data files (.dat/.csv) and optional thermal
+    images (.jpg/.png) for the same patient and generate a single combined report.
+
+    All files are stored under one record_id.  Report generation runs once in
+    the background for that record.
+    """
+    if not files:
+        raise HTTPException(status_code=400, detail="no_files_provided")
+
+    try:
+        metadata_json = json.loads(metadata)
+        parsed = IngestMetadata.model_validate(metadata_json)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="invalid_metadata") from exc
+
+    # Separate data files from image files
+    data_files: list[UploadFile] = []
+    image_files_upload: list[UploadFile] = []
+
+    for f in files:
+        suffix = Path(f.filename).suffix.lower()
+        if suffix in ALLOWED_EXTENSIONS:
+            data_files.append(f)
+        elif suffix in ALLOWED_IMAGE_EXTENSIONS:
+            image_files_upload.append(f)
+        else:
+            logger.warning("[步骤1-批量] 忽略不支持的文件类型 filename=%s", f.filename)
+
+    if not data_files:
+        raise HTTPException(status_code=400, detail="no_supported_data_file_in_batch")
+
+    # Check sizes
+    for f in files:
+        content = await f.read()
+        await f.seek(0)
+        if len(content) > MAX_FILE_MB * 1024 * 1024:
+            raise HTTPException(status_code=400, detail=f"file_too_large: {f.filename}")
+
+    # Read primary data file
+    primary_upload = data_files[0]
+    primary_bytes = await primary_upload.read()
+    tmp_primary = Path("/tmp") / primary_upload.filename
+    tmp_primary.write_bytes(primary_bytes)
+
+    # Read extra data files
+    extra_data: list[tuple] = []
+    for extra_upload in data_files[1:]:
+        extra_bytes = await extra_upload.read()
+        extra_data.append((extra_upload.filename, extra_bytes))
+
+    # Read image files
+    image_data: list[tuple] = []
+    for img_upload in image_files_upload:
+        img_bytes = await img_upload.read()
+        image_data.append((img_upload.filename, img_bytes))
+
+    logger.info(
+        "[步骤1-批量] 开始 primary=%s extra_data=%d images=%d",
+        primary_upload.filename, len(extra_data), len(image_data),
+    )
+    t0 = time.time()
+
+    try:
+        record_id = ingestion_service.ingest_batch(
+            tmp_primary,
+            parsed.model_dump(),
+            extra_data_files=extra_data or None,
+            image_files=image_data or None,
+            validate=True,
+        )
+    except Exception as exc:
+        detail = exc.args[0] if exc.args else "ingest_batch_failed"
+        raise HTTPException(status_code=422, detail=detail) from exc
+
+    background_tasks.add_task(_generate_report_after_ingest, record_id, parsed.model_dump())
+
+    elapsed = time.time() - t0
+    logger.info(
+        "[步骤1-批量] 完成 record_id=%s data_files=%d images=%d 耗时=%.2fs",
+        record_id, len(data_files), len(image_data), elapsed,
+    )
+    return {
+        "record_id": record_id,
+        "data_files": len(data_files),
+        "image_files": len(image_data),
         "report_generation": "scheduled",
     }
 

@@ -92,6 +92,68 @@ class IngestionService:
         except Exception as exc:
             raise ValidationError(f"Ingestion failed: {exc}") from exc
 
+    def ingest_batch(
+        self,
+        primary_data_file: Path,
+        metadata: Dict[str, Any],
+        extra_data_files: list[tuple] | None = None,
+        image_files: list[tuple] | None = None,
+        *,
+        validate: bool = True,
+    ) -> str:
+        """
+        Ingest a group of files (data + images) for the same patient into
+        a single record.  Returns one record_id.
+
+        Args:
+            primary_data_file: Main .dat/.csv file (already written to disk)
+            metadata: Patient and device metadata
+            extra_data_files: list of (filename, bytes) for supplementary data
+            image_files: list of (filename, bytes) for thermal images (.jpg/.png)
+            validate: Whether to perform QC checks
+        """
+        if not primary_data_file.exists() or not primary_data_file.is_file():
+            raise ValidationError(f"Data file not found: {primary_data_file}")
+
+        file_size_kb = primary_data_file.stat().st_size / 1024
+        logger.info(
+            "[步骤1-批量] 开始批量入库 primary=%s size=%.1fKB extra_data=%d images=%d",
+            primary_data_file.name, file_size_kb,
+            len(extra_data_files or []), len(image_files or []),
+        )
+
+        try:
+            legacy_models = self._legacy_models
+            legacy_qc = self._legacy_qc
+            legacy_storage = self._legacy_storage
+
+            parsed = legacy_models.IngestMetadata.model_validate(metadata)
+            patient_name = getattr(parsed, "name", None) or metadata.get("name", "未知")
+            if validate:
+                issues = legacy_qc.run_qc(parsed)
+                if issues:
+                    raise ValidationError("QC validation failed", details={"issues": issues})
+
+            primary_bytes = primary_data_file.read_bytes()
+            result = legacy_storage.save_batch_payload(
+                primary_data_file.name,
+                primary_bytes,
+                parsed.model_dump(),
+                extra_data_files=extra_data_files,
+                image_files=image_files,
+            )
+            record_id = str(result.get("record_id") or "")
+            logger.info(
+                "[步骤1-批量] 存储成功 record_id=%s patient=%s images=%d",
+                record_id, patient_name, len(result.get("image_paths") or []),
+            )
+            return record_id
+        except ValidationError:
+            raise
+        except Exception as exc:
+            raise ValidationError(f"Batch ingestion failed: {exc}") from exc
+
+
     def ingest_capture_dir(self, capture_path: str, move_to_processed: bool = True) -> Dict[str, Any]:
         capture_dir = Path(capture_path)
         if not capture_dir.exists() or not capture_dir.is_dir():

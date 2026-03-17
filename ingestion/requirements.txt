@@ -9,6 +9,7 @@ numpy==1.26.4
 matplotlib==3.9.2
 pytesseract==0.3.13
 python-docx==1.1.2
+reportlab==4.2.5
 clickhouse-driver==0.2.9
 pythonnet==3.0.3
 faiss-cpu==1.8.0.post1
