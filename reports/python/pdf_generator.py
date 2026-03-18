@@ -508,8 +508,6 @@ def generate_pdf_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     styles = _styles()
     created_at = report.get("created_at") or emr.get("created_at")
     created_dt = _parse_datetime(created_at)
-    # Keep capture time for content display, but use generation time for output
-    # filename/path to avoid reusing stale historical report files.
     report_generated_dt = datetime.now()
     patient = report.get("patient") or emr.get("patient") or {}
     patient_name = _safe_name(str(patient.get("name") or "患者")) or "患者"
@@ -532,12 +530,31 @@ def generate_pdf_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     if not isinstance(abnormal_regions, list):
         abnormal_regions = []
 
+    # RAG/LLM generated text fields
+    ai_payload = report.get("ai") or {}
+    diagnosis_text = _text(report.get("diagnosis") or emr.get("diagnosis"))
+    doctor_opinion_text = _text(
+        report.get("doctor_opinion")
+        or emr.get("doctor_opinion")
+        or (ai_payload.get("doctor_opinion") if isinstance(ai_payload, dict) else None)
+    )
+    report_note_text = _text(
+        (ai_payload.get("report_note") if isinstance(ai_payload, dict) else None)
+        or (report.get("treatment_plan") or {}).get("ai_recommendation")
+    )
+    summary_text = _text(analysis.get("summary") or diagnosis_text)
+    key_findings: List[str] = []
+    if isinstance(analysis.get("key_findings"), list):
+        key_findings = [str(f) for f in analysis["key_findings"] if f]
+
     unit_name = _text(emr.get("hospital") or emr.get("unit") or "张氏疼痛外治中心")
     system_name = "红外影像云平台-红外影像热层析系统"
 
+    # Build labeled thermal image (re-rendered from base image + ROI data)
     image_candidates: List[Path] = []
     base_image = _select_report_base_image(report)
-    primary_image = render_labeled_thermal_image(base_image, report, "pdf_labeled") if base_image is not None else None
+    labeled_image = render_labeled_thermal_image(base_image, report, "pdf_labeled") if base_image is not None else None
+    primary_image = labeled_image or base_image
     if primary_image is not None:
         image_candidates.append(primary_image)
     for item in report.get("thermal_images") or []:
@@ -558,7 +575,7 @@ def generate_pdf_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
 
     story: List[Any] = []
 
-    # Cover page
+    # ── 封面 ──────────────────────────────────────────────────────────────────
     story.append(Spacer(1, 18 * mm))
     story.append(_paragraph("红外热成像评估报告", styles["title"]))
     story.append(_paragraph("INFRARED THERMAL IMAGING HEALTH REPORT", styles["subtitle"]))
@@ -566,42 +583,90 @@ def generate_pdf_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     story.append(_paragraph("个人信息", styles["section"]))
     story.append(Spacer(1, 3 * mm))
     story.append(_build_cover_table(patient, created_dt, styles))
-    story.append(Spacer(1, 20 * mm))
+    story.append(Spacer(1, 10 * mm))
     if primary_image is not None:
-        story.append(_make_image(primary_image, 120 * mm, 90 * mm))
-        story.append(Spacer(1, 8 * mm))
+        story.append(_make_image(primary_image, 130 * mm, 100 * mm))
+        story.append(Spacer(1, 6 * mm))
     story.append(_paragraph(unit_name, styles["center"]))
     story.append(_paragraph(system_name, styles["subtitle"]))
     story.append(PageBreak())
 
-    # Overview page
-    story.append(_paragraph("机体功能状态实时热像", styles["section"]))
+    # ── 一、温度指标概览 ───────────────────────────────────────────────────────
+    story.append(_paragraph("一、温度指标概览", styles["section"]))
     story.append(Spacer(1, 3 * mm))
-    story.append(_image_grid(image_candidates or ([primary_image] if primary_image else []), 170 * mm, 48 * mm))
-    story.append(Spacer(1, 6 * mm))
-    summary_table = _rows_to_table(
-        ["最低温度", "最高温度", "平均温度", "风险等级"],
-        [[_fmt_temp(metrics.get("min_c")), _fmt_temp(metrics.get("max_c")), _fmt_temp(metrics.get("avg_c")), _risk_level_cn(analysis.get("risk_level"))]],
-        [35 * mm, 35 * mm, 35 * mm, 35 * mm],
-        styles,
+    # 整体热图（全部图片缩略网格）
+    if image_candidates:
+        story.append(_image_grid(image_candidates, 170 * mm, 52 * mm))
+        story.append(Spacer(1, 5 * mm))
+    # 温度指标表
+    story.append(_paragraph("整体温度指标", styles["subsection"]))
+    story.append(Spacer(1, 2 * mm))
+    story.append(
+        _rows_to_table(
+            ["最低温度 (℃)", "最高温度 (℃)", "平均温度 (℃)", "风险等级"],
+            [[
+                _fmt_temp(metrics.get("min_c")),
+                _fmt_temp(metrics.get("max_c")),
+                _fmt_temp(metrics.get("avg_c")),
+                _risk_level_cn(analysis.get("risk_level")),
+            ]],
+            [40 * mm, 40 * mm, 40 * mm, 40 * mm],
+            styles,
+        )
     )
-    story.append(summary_table)
-    story.append(Spacer(1, 7 * mm))
+    story.append(Spacer(1, 6 * mm))
+    # 风险概览
     story.append(_paragraph("风险概览", styles["subsection"]))
     story.append(Spacer(1, 2 * mm))
     story.append(_risk_cards(analysis, roi_list, styles))
-    story.append(Spacer(1, 7 * mm))
-    story.append(_paragraph("热图所见", styles["subsection"]))
-    story.append(Spacer(1, 1 * mm))
-    story.append(_paragraph(_text(analysis.get("summary") or report.get("diagnosis") or "未见明显异常描述"), styles["body"]))
     story.append(PageBreak())
 
-    # Abnormal regions and objective data
-    story.append(_paragraph("代谢异常部位热图", styles["section"]))
+    # ── 二、热成像图（含叠加人体部位温度标签） ────────────────────────────────
+    story.append(_paragraph("二、热成像图（含人体姿态分区温度标签）", styles["section"]))
     story.append(Spacer(1, 3 * mm))
     if primary_image is not None:
-        story.append(_make_image(primary_image, 150 * mm, 90 * mm))
-        story.append(Spacer(1, 6 * mm))
+        story.append(_make_image(primary_image, 155 * mm, 118 * mm))
+        story.append(Spacer(1, 4 * mm))
+        story.append(_paragraph("※ 图中标签为 MediaPipe 姿态关键点自动定位的各部位均温", styles["small"]))
+    else:
+        story.append(_paragraph("热成像图文件未找到", styles["body"]))
+    story.append(PageBreak())
+
+    # ── 三、姿态分区温度（ROI）详情 ───────────────────────────────────────────
+    story.append(_paragraph("三、姿态分区温度（ROI）详情", styles["section"]))
+    story.append(Spacer(1, 3 * mm))
+    story.append(_paragraph("各部位温度统计", styles["subsection"]))
+    story.append(Spacer(1, 2 * mm))
+    # 完整 ROI 表：分组 / 部位 / 均温 / 最低 / 最高 / 标准差
+    roi_full_rows: List[Sequence[Any]] = []
+    for item in roi_list:
+        roi_full_rows.append([
+            _section_name(_text(item.get("name"), "")),
+            _text(item.get("name")),
+            _fmt_temp(item.get("mean_c")),
+            _fmt_temp(item.get("min_c")),
+            _fmt_temp(item.get("max_c")),
+            _fmt_temp(item.get("std_c")),
+        ])
+    if roi_full_rows:
+        story.append(
+            _rows_to_table(
+                ["分组", "部位", "均温℃", "最低℃", "最高℃", "标准差"],
+                roi_full_rows,
+                [28 * mm, 32 * mm, 24 * mm, 24 * mm, 24 * mm, 24 * mm],
+                styles,
+            )
+        )
+    else:
+        story.append(_paragraph("暂无 ROI 分区数据", styles["body"]))
+    story.append(PageBreak())
+
+    # ── 四、异常区域 ──────────────────────────────────────────────────────────
+    story.append(_paragraph("四、异常区域", styles["section"]))
+    story.append(Spacer(1, 3 * mm))
+    if primary_image is not None:
+        story.append(_make_image(primary_image, 150 * mm, 100 * mm))
+        story.append(Spacer(1, 5 * mm))
     story.append(_paragraph("异常区域汇总", styles["subsection"]))
     story.append(Spacer(1, 2 * mm))
     story.append(
@@ -612,41 +677,34 @@ def generate_pdf_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
             styles,
         )
     )
-    story.append(Spacer(1, 6 * mm))
-    story.append(_paragraph("客观热源数据表", styles["subsection"]))
-    story.append(Spacer(1, 2 * mm))
-    story.append(
-        _rows_to_table(
-            ["分组", "部位", "温度℃", "最低℃", "最高℃"],
-            _build_objective_rows(roi_list),
-            [34 * mm, 46 * mm, 22 * mm, 22 * mm, 22 * mm],
-            styles,
-        )
-    )
-
-    # Detail pages by section
-    grouped_sections = _group_section_rows(roi_list)
-    for section_name, rows in grouped_sections.items():
-        story.append(PageBreak())
-        story.append(_paragraph(section_name, styles["section"]))
-        story.append(Spacer(1, 2 * mm))
-        story.append(
-            _rows_to_table(
-                ["项目", "热源描述", "热特征度", "面积", "均值", "标准差"],
-                rows,
-                [24 * mm, 72 * mm, 22 * mm, 18 * mm, 18 * mm, 18 * mm],
-                styles,
-            )
-        )
-        story.append(Spacer(1, 8 * mm))
-        if primary_image is not None:
-            story.append(_paragraph("图像", styles["subsection"]))
-            story.append(Spacer(1, 2 * mm))
-            story.append(_make_image(primary_image, 130 * mm, 90 * mm))
-
-    # Advice page
     story.append(PageBreak())
-    story.append(_paragraph("保健建议", styles["section"]))
+
+    # ── 五、诊断结论 ──────────────────────────────────────────────────────────
+    story.append(_paragraph("五、诊断结论", styles["section"]))
+    story.append(Spacer(1, 3 * mm))
+    story.append(_paragraph(summary_text, styles["body"]))
+    if key_findings:
+        story.append(Spacer(1, 5 * mm))
+        story.append(_paragraph("主要发现", styles["subsection"]))
+        story.append(Spacer(1, 2 * mm))
+        for finding in key_findings:
+            story.append(_paragraph(f"· {finding}", styles["body"]))
+            story.append(Spacer(1, 1 * mm))
+    story.append(PageBreak())
+
+    # ── 六、医生意见 ──────────────────────────────────────────────────────────
+    story.append(_paragraph("六、医生意见", styles["section"]))
+    story.append(Spacer(1, 3 * mm))
+    story.append(_paragraph(doctor_opinion_text if doctor_opinion_text != "-" else "暂无医生意见", styles["body"]))
+    if report_note_text and report_note_text != "-":
+        story.append(Spacer(1, 5 * mm))
+        story.append(_paragraph("报告说明", styles["subsection"]))
+        story.append(Spacer(1, 2 * mm))
+        story.append(_paragraph(report_note_text, styles["body"]))
+    story.append(PageBreak())
+
+    # ── 七、保健建议 ──────────────────────────────────────────────────────────
+    story.append(_paragraph("七、保健建议", styles["section"]))
     story.append(Spacer(1, 3 * mm))
     for index, line in enumerate(_advice_rows(report, emr), start=1):
         story.append(_paragraph(f"{index}、{line}", styles["body"]))
