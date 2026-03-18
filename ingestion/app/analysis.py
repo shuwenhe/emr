@@ -33,7 +33,9 @@ FACIAL_LABEL_OFFSETS = {
     "右脸颊": (20.0, -8.0),    # 右脸颊右上方
     "左脸颊": (-20.0, -8.0),   # 左脸颊左上方
     "额头": (0.0, -18.0),      # 额头正上方，远离区域
+    "下巴": (0.0, 10.0),       # 下巴向下
     "口部": (0.0, 8.0),        # 口部向下（在脸的中下方）
+    "颈部": (0.0, 8.0),        # 颈部略向下
 }
 
 _HEAD_LABEL_KEYWORDS = (
@@ -642,35 +644,41 @@ def _roi_label_points(roi_analysis: Optional[Dict[str, Any]]) -> List[Dict[str, 
         except Exception:
             continue
 
-        # 根据标签策略计算标签位置
+        # 根据标签策略计算标签位置，头面部优先使用固定偏移，避免互相挤压。
         x = cx
         y = cy
-        
-        if strategy == "top":
-            # 标签放在区域上方
+        label_x = cx
+        label_y = cy
+
+        facial_offset = None
+        for key, delta in FACIAL_LABEL_OFFSETS.items():
+            if key in name:
+                facial_offset = delta
+                break
+
+        if facial_offset is not None:
+            dx, dy = facial_offset
+            label_x = max(2.0, min(98.0, cx + dx))
+            label_y = max(2.0, min(98.0, cy + dy))
+        elif strategy == "top":
             label_x = cx
             label_y = max(2.0, y_min - offset)
         elif strategy == "bottom":
-            # 标签放在区域下方
             label_x = cx
             label_y = min(98.0, y_max + offset)
         elif strategy == "left":
-            # 标签放在区域左侧
             label_x = max(2.0, x_min - offset)
             label_y = cy
         elif strategy == "right":
-            # 标签放在区域右侧
             label_x = min(98.0, x_max + offset)
             label_y = cy
         else:  # "outer" 或其他
-            # 选择"最外侧"的位置：哪个方向离中心最远就放在那边
             dist_top = y_min
             dist_bottom = 100 - y_max
             dist_left = x_min
             dist_right = 100 - x_max
-            
             max_dist = max(dist_top, dist_bottom, dist_left, dist_right)
-            
+
             if max_dist == dist_top:
                 label_x = cx
                 label_y = max(2.0, y_min - offset)
@@ -695,7 +703,7 @@ def _roi_label_points(roi_analysis: Optional[Dict[str, Any]]) -> List[Dict[str, 
             }
         )
 
-    # 轻微的重叠避免：只在两个标签极其接近时才微调
+    # 重叠避免：头面部标签允许更大的纵向间距，减少“看起来没对准”的拥挤感。
     points.sort(key=lambda p: (p["label_y"], p["label_x"]))
     min_distance = 6.0  # 标签间最小距离
     
@@ -709,6 +717,17 @@ def _roi_label_points(roi_analysis: Optional[Dict[str, Any]]) -> List[Dict[str, 
         if dist < min_distance:
             # 微调当前标签：沿 Y 轴稍作偏移
             cur["label_y"] = min(98.0, prev["label_y"] + min_distance)
+
+    for i in range(1, len(points)):
+        prev = points[i - 1]
+        cur = points[i]
+        is_head_pair = any(keyword in cur["name"] for keyword in _HEAD_LABEL_KEYWORDS) or any(
+            keyword in prev["name"] for keyword in _HEAD_LABEL_KEYWORDS
+        )
+        if not is_head_pair:
+            continue
+        if abs(cur["label_x"] - prev["label_x"]) < 14 and (cur["label_y"] - prev["label_y"]) < 4.5:
+            cur["label_y"] = min(98.0, prev["label_y"] + 4.5)
 
     return points
 
