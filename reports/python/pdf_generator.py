@@ -23,6 +23,7 @@ if str(_DEVICE_INGESTION_DIR) not in sys.path:
     sys.path.insert(0, str(_DEVICE_INGESTION_DIR))
 
 from app.config import DATA_DIR, REPORTS_DIR
+from reports.python.thermal_label_renderer import render_labeled_thermal_image
 
 _PAGE_WIDTH, _PAGE_HEIGHT = A4
 _FONT_NAME: Optional[str] = None
@@ -119,6 +120,22 @@ def _resolve_image_path(value: Any) -> Optional[Path]:
         if candidate.exists() and candidate.is_file():
             return candidate
     return None
+
+
+def _select_report_base_image(report: Dict[str, Any]) -> Optional[Path]:
+    primary = _resolve_image_path(report.get("thermal_marked_image"))
+    if primary is not None:
+        return primary
+
+    thermal_images = report.get("thermal_images") or []
+    for item in thermal_images:
+        if "thermal_roi_labeled" in str(item or ""):
+            continue
+        candidate = _resolve_image_path(item)
+        if candidate is not None:
+            return candidate
+
+    return _resolve_image_path(report.get("thermal_roi_labeled_image"))
 
 
 def _section_name(name: str) -> str:
@@ -517,7 +534,8 @@ def generate_pdf_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     system_name = "红外影像云平台-红外影像热层析系统"
 
     image_candidates: List[Path] = []
-    primary_image = _resolve_image_path(report.get("thermal_roi_labeled_image") or report.get("thermal_marked_image"))
+    base_image = _select_report_base_image(report)
+    primary_image = render_labeled_thermal_image(base_image, report, "pdf_labeled") if base_image is not None else None
     if primary_image is not None:
         image_candidates.append(primary_image)
     for item in report.get("thermal_images") or []:
