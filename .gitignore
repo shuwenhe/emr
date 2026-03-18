@@ -22,7 +22,8 @@
 /ingestion/generated/
 /data/
 /device/
-/reports/
+# NOTE: keep generated report files ignored under /storage/reports/.
+# Do NOT ignore source-code directory /reports/.
 /logs/
 /batch_results/
 
