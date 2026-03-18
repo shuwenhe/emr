@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence
@@ -284,8 +285,9 @@ def _styles() -> Dict[str, ParagraphStyle]:
 
 
 def _paragraph(text: str, style: ParagraphStyle) -> Paragraph:
+    cleaned = re.sub(r"</?b>", "", str(text or ""), flags=re.IGNORECASE)
     safe = (
-        str(text or "")
+        cleaned
         .replace("&", "&amp;")
         .replace("<", "&lt;")
         .replace(">", "&gt;")
