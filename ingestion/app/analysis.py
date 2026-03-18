@@ -909,22 +909,24 @@ def _fallback_roi_analysis(matrix: np.ndarray) -> Dict[str, Any]:
     # 定义固定区域（百分比坐标）
     # label_strategy: 'top'(上方), 'bottom'(下方), 'left'(左侧), 'right'(右侧), 'outer'(最外侧)
     fixed_regions = [
-        {"name": "额头", "x_pct": (35, 65), "y_pct": (8, 18), "label_strategy": "top"},
-        # Keep left/right naming consistent with other body regions in fallback mode:
+        # Calibrated for the common full-body frontal thermogram used in this
+        # project, where the visible body occupies the middle area of the frame.
+        {"name": "额头", "x_pct": (40, 60), "y_pct": (8, 15), "label_strategy": "top"},
+        # Keep left/right naming consistent with what the user sees in the image:
         # left side of image -> 左*, right side of image -> 右*.
-        {"name": "左眼", "x_pct": (32, 45), "y_pct": (20, 32), "label_strategy": "top"},
-        {"name": "右眼", "x_pct": (55, 68), "y_pct": (20, 32), "label_strategy": "top"},
-        {"name": "鼻子", "x_pct": (44, 56), "y_pct": (32, 48), "label_strategy": "bottom"},
-        {"name": "左脸颊", "x_pct": (22, 42), "y_pct": (38, 58), "label_strategy": "left"},
-        {"name": "右脸颊", "x_pct": (58, 78), "y_pct": (38, 58), "label_strategy": "right"},
-        {"name": "口部", "x_pct": (42, 58), "y_pct": (52, 65), "label_strategy": "bottom"},
-        {"name": "颈部", "x_pct": (40, 60), "y_pct": (64, 74), "label_strategy": "outer"},
-        {"name": "胸部", "x_pct": (30, 70), "y_pct": (74, 92), "label_strategy": "outer"},
-        {"name": "腹部", "x_pct": (34, 66), "y_pct": (92, 100), "label_strategy": "bottom"},
-        {"name": "左臂", "x_pct": (10, 28), "y_pct": (72, 96), "label_strategy": "left"},
-        {"name": "右臂", "x_pct": (72, 90), "y_pct": (72, 96), "label_strategy": "right"},
-        {"name": "左腿", "x_pct": (38, 50), "y_pct": (96, 100), "label_strategy": "left"},
-        {"name": "右腿", "x_pct": (50, 62), "y_pct": (96, 100), "label_strategy": "right"},
+        {"name": "左眼", "x_pct": (36, 45), "y_pct": (16, 22), "label_strategy": "top"},
+        {"name": "右眼", "x_pct": (55, 64), "y_pct": (16, 22), "label_strategy": "top"},
+        {"name": "鼻子", "x_pct": (46, 54), "y_pct": (22, 31), "label_strategy": "bottom"},
+        {"name": "左脸颊", "x_pct": (30, 42), "y_pct": (26, 38), "label_strategy": "left"},
+        {"name": "右脸颊", "x_pct": (58, 70), "y_pct": (26, 38), "label_strategy": "right"},
+        {"name": "口部", "x_pct": (44, 56), "y_pct": (32, 39), "label_strategy": "bottom"},
+        {"name": "颈部", "x_pct": (43, 57), "y_pct": (38, 46), "label_strategy": "outer"},
+        {"name": "胸部", "x_pct": (30, 70), "y_pct": (42, 60), "label_strategy": "outer"},
+        {"name": "腹部", "x_pct": (34, 66), "y_pct": (60, 76), "label_strategy": "bottom"},
+        {"name": "左臂", "x_pct": (12, 28), "y_pct": (44, 80), "label_strategy": "left"},
+        {"name": "右臂", "x_pct": (72, 88), "y_pct": (44, 80), "label_strategy": "right"},
+        {"name": "左腿", "x_pct": (39, 49), "y_pct": (76, 98), "label_strategy": "left"},
+        {"name": "右腿", "x_pct": (51, 61), "y_pct": (76, 98), "label_strategy": "right"},
     ]
     
     for region in fixed_regions:
