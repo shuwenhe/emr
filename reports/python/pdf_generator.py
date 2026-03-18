@@ -494,11 +494,9 @@ def generate_pdf_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     report_generated_dt = datetime.now()
     patient = report.get("patient") or emr.get("patient") or {}
     patient_name = _safe_name(str(patient.get("name") or "患者")) or "患者"
-    emr_id = str(emr.get("emr_id") or report.get("report_id") or "")
-    emr_suffix = f"_EMR-{_safe_name(emr_id)}" if emr_id else ""
     date_dir = REPORTS_DIR / report_generated_dt.strftime("%Y%m%d")
     date_dir.mkdir(parents=True, exist_ok=True)
-    output_path = date_dir / f"{patient_name}{report_generated_dt.strftime('%Y%m%d%H%M%S')}{emr_suffix}.pdf"
+    output_path = date_dir / f"{patient_name}{report_generated_dt.strftime('%Y%m%d%H%M%S')}.pdf"
 
     analysis = report.get("analysis") if isinstance(report, dict) else {}
     if not isinstance(analysis, dict):

@@ -611,9 +611,7 @@ def generate_template_report(
 
     patient = report.get("patient") or emr.get("patient") or {}
     patient_name = _safe_name(str(patient.get("name") or "患者")) or "患者"
-    emr_id = str(emr.get("emr_id") or report.get("report_id") or "")
-    emr_suffix = f"_{_safe_name(emr_id)}" if emr_id else ""
-    output_path = date_dir / f"{patient_name}_{created_dt.strftime('%Y%m%d_%H%M%S')}{emr_suffix}.pdf"
+    output_path = date_dir / f"{patient_name}_{created_dt.strftime('%Y%m%d_%H%M%S')}.pdf"
 
     data_set = DataSet("frxData")
     tables = _build_tables(report, emr, Array[Byte], Int32, String)
