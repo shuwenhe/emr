@@ -5,7 +5,7 @@ import os
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Sequence
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -25,7 +25,6 @@ if str(_DEVICE_INGESTION_DIR) not in sys.path:
     sys.path.insert(0, str(_DEVICE_INGESTION_DIR))
 
 from app.config import DATA_DIR, REPORTS_DIR
-from app.llm_report import generate_report_ai, is_llm_enabled
 
 matplotlib.use("Agg")
 
@@ -120,6 +119,67 @@ def _fmt_temp(value: Any) -> str:
         return f"{float(value):.2f}"
     except Exception:
         return "-"
+
+
+def _text(value: Any, default: str = "-") -> str:
+    raw = str(value or "").strip()
+    return raw or default
+
+
+def _risk_level_cn(value: Any) -> str:
+    level = str(value or "").strip().lower()
+    if level == "high":
+        return "高风险"
+    if level == "medium":
+        return "中风险"
+    if level == "low":
+        return "低风险"
+    return "未知"
+
+
+def _split_advice_lines(*values: Any) -> List[str]:
+    lines: List[str] = []
+    for value in values:
+        text = str(value or "").strip()
+        if not text:
+            continue
+        normalized = text.replace("；", "。")
+        for piece in normalized.split("。"):
+            item = piece.strip()
+            if item:
+                lines.append(item)
+    return lines
+
+
+def _advice_rows(report: Dict[str, Any], emr: Dict[str, Any]) -> List[str]:
+    plan = report.get("treatment_plan") or emr.get("treatment_plan") or {}
+    ai_payload = report.get("ai") or {}
+    return _split_advice_lines(
+        report.get("doctor_opinion"),
+        plan.get("ai_recommendation") if isinstance(plan, dict) else None,
+        ai_payload.get("report_note") if isinstance(ai_payload, dict) else None,
+    ) or ["以上为热图所提示可能性，请结合临床进一步诊查。"]
+
+
+def _build_summary_rows(abnormal_regions: Sequence[Dict[str, Any]]) -> List[str]:
+    rows: List[str] = []
+    for item in abnormal_regions:
+        region_name = _text(item.get("region_cn") or item.get("region"))
+        status = "异常高温" if str(item.get("status") or "").lower() == "high" else "异常低温"
+        rows.append(
+            f"{region_name}：{status}，均温 {_fmt_temp(item.get('avg_c'))}°C，Δ {_fmt_temp(item.get('delta_c'))}°C"
+        )
+    return rows
+
+
+def _build_objective_rows(roi_list: Sequence[Dict[str, Any]]) -> List[str]:
+    rows: List[str] = []
+    for item in roi_list:
+        rows.append(
+            f"{_region_to_body_part_cn(_text(item.get('name'), ''), None) or _text(item.get('name'))}："
+            f"均温 {_fmt_temp(item.get('mean_c'))}°C，最低 {_fmt_temp(item.get('min_c'))}°C，最高 {_fmt_temp(item.get('max_c'))}°C"
+        )
+    return rows
 
 
 def _region_to_body_part_cn(region_code: str, body_part: Optional[str]) -> str:
@@ -432,6 +492,10 @@ def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     patient = (report.get("patient") or emr.get("patient") or {})
     analysis = report.get("analysis") or {}
     metrics = (analysis.get("temperature_metrics") or {}) if isinstance(analysis, dict) else {}
+    regional = (analysis.get("regional_comparison") or {}) if isinstance(analysis, dict) else {}
+    abnormal_regions = regional.get("abnormal_regions") if isinstance(regional, dict) else []
+    if not isinstance(abnormal_regions, list):
+        abnormal_regions = []
 
     # 使用当前时间作为报告生成时间（而不是采集时间）
     report_generated_dt = datetime.now()
@@ -448,6 +512,8 @@ def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
 
     doc = Document()
     doc.add_heading("红外热成像评估报告", level=1)
+    doc.add_paragraph(_text(emr.get("hospital") or emr.get("unit") or "张氏疼痛外治中心"))
+    doc.add_paragraph("红外影像云平台-红外影像热层析系统")
 
     doc.add_paragraph(f"报告ID: {report.get('report_id', '-')}")
     doc.add_paragraph(f"采集时间: {created_dt.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -490,102 +556,37 @@ def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
 
     # 异常区域
     doc.add_heading("异常区域", level=2)
-    regional = (analysis.get("regional_comparison") or {}) if isinstance(analysis, dict) else {}
-    abnormal_regions = regional.get("abnormal_regions") if isinstance(regional, dict) else None
-    if isinstance(abnormal_regions, list) and abnormal_regions:
-        body_part = (report.get("patient") or emr.get("patient") or {}).get("body_part")
-        rendered = False
-        for item in abnormal_regions:
-            region = str(item.get("region", "-") or "-")
-            if region in _EXCLUDED_REPORT_REGIONS:
-                continue
-            region_cn = str(item.get("region_cn") or "").strip() or _region_to_body_part_cn(region, body_part)
-            status = str(item.get("status", "-")).upper()
-            avg_c = _fmt_temp(item.get("avg_c"))
-            delta_c = _fmt_temp(item.get("delta_c"))
-            doc.add_paragraph(
-                f"{region_cn}（{region}）: 状态 {status}，均温 {avg_c}°C，Δ {delta_c}°C",
-                style="List Bullet",
-            )
-            rendered = True
-        if not rendered:
-            doc.add_paragraph("未发现明显异常区域")
+    summary_rows = _build_summary_rows(abnormal_regions)
+    if summary_rows:
+        for row in summary_rows:
+            doc.add_paragraph(row, style="List Bullet")
     else:
         doc.add_paragraph("未发现明显异常区域")
 
     doc.add_heading("风险等级", level=2)
-    doc.add_paragraph(str(analysis.get("risk_level", "-")).upper())
+    doc.add_paragraph(_risk_level_cn(analysis.get("risk_level")))
 
-    ai_payload = report.get("ai") or {}
-    if not ai_payload and is_llm_enabled():
-        try:
-            ai_payload = generate_report_ai(report, emr)
-            if ai_payload:
-                report.setdefault("ai", ai_payload)
-                for key, value in ai_payload.items():
-                    report.setdefault(key, value)
-        except Exception as exc:
-            logging.exception("LLM report generation failed: %s", exc)
+    doc.add_heading("热图所见", level=2)
+    thermal_summary = _text(analysis.get("summary") or report.get("diagnosis") or emr.get("diagnosis"))
+    doc.add_paragraph(_strip_think(thermal_summary))
 
-    retrieved_items_for_log = report.get("retrieved_items") if isinstance(report, dict) else None
-    retrieved_count = len(retrieved_items_for_log) if isinstance(retrieved_items_for_log, list) else 0
-    record_id = str(report.get("report_id") or emr.get("emr_id") or emr.get("record_id") or "unknown")
-    logging.info("[RAG] report generation record_id=%s retrieved_items=%d", record_id, retrieved_count)
-
-    use_rag_text = retrieved_count > 0
-
-    diagnosis_text = str(report.get("diagnosis") or emr.get("diagnosis") or "-").strip()
-    doctor_opinion_text = str(report.get("doctor_opinion") or "-").strip()
-    if use_rag_text and isinstance(ai_payload, dict):
-        diagnosis_text = str(ai_payload.get("diagnosis") or diagnosis_text).strip() or diagnosis_text
-        doctor_opinion_text = str(ai_payload.get("doctor_opinion") or doctor_opinion_text).strip() or doctor_opinion_text
+    doc.add_heading("客观热源数据", level=2)
+    objective_rows = _build_objective_rows(roi_analysis.get("roi_list", []) if isinstance(roi_analysis, dict) else [])
+    if objective_rows:
+        for row in objective_rows:
+            doc.add_paragraph(row, style="List Bullet")
+    else:
+        doc.add_paragraph("无可用客观热源数据")
 
     doc.add_heading("诊断结论", level=2)
-    doc.add_paragraph(_strip_think(diagnosis_text or "-"))
+    doc.add_paragraph(_strip_think(_text(report.get("diagnosis") or emr.get("diagnosis"))))
 
     doc.add_heading("医生意见", level=2)
-    doc.add_paragraph(_strip_think(doctor_opinion_text or "-"))
+    doc.add_paragraph(_strip_think(_text(report.get("doctor_opinion"))))
 
-    # AI 治疗建议：优先读 report.treatment_plan_text（前端字段），依次 fallback
-    if use_rag_text:
-        ai_plan_text = (
-            str(ai_payload.get("treatment_plan_text") or "").strip()
-            or str(report.get("treatment_plan_text") or "").strip()
-        )
-    else:
-        ai_plan_text = (
-            str(report.get("treatment_plan_text") or "").strip()
-            or str(ai_payload.get("treatment_plan_text") or "").strip()
-        )
-    if not ai_plan_text:
-        plan = report.get("treatment_plan") or emr.get("treatment_plan") or {}
-        if isinstance(plan, dict):
-            ai_plan_text = str(plan.get("ai_recommendation") or "").strip()
-
-    # AI 报告说明：优先读 report.report_note（前端字段），依次 fallback
-    if use_rag_text:
-        ai_report_note = (
-            str(ai_payload.get("report_note") or "").strip()
-            or str(report.get("report_note") or "").strip()
-        )
-    else:
-        ai_report_note = (
-            str(report.get("report_note") or "").strip()
-            or str(ai_payload.get("report_note") or "").strip()
-        )
-
-    if ai_plan_text:
-        ai_plan_text = _strip_think(ai_plan_text.replace("AI", "").replace("ＡＩ", "").strip())
-    if ai_report_note:
-        ai_report_note = _strip_think(ai_report_note.replace("AI", "").replace("ＡＩ", "").strip())
-
-    if ai_report_note:
-        doc.add_heading("报告说明", level=2)
-        doc.add_paragraph(ai_report_note)
-
-    if ai_plan_text:
-        doc.add_heading("治疗建议", level=2)
-        doc.add_paragraph(ai_plan_text)
+    doc.add_heading("保健建议", level=2)
+    for index, line in enumerate(_advice_rows(report, emr), start=1):
+        doc.add_paragraph(f"{index}、{_strip_think(line)}")
 
     image_path = report.get("thermal_marked_image") or report.get("thermal_roi_labeled_image")
     image_file = _resolve_image_file(str(image_path or "")) if image_path else None
