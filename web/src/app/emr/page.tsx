@@ -1959,50 +1959,46 @@ function EmrPageContent() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
-                    {paginatedReportFiles.map((file) => (
-                      <tr key={`${file.date}-${file.name}`}>
-                        <td className="px-4 py-2 text-slate-700">{file.date}</td>
-                        <td className="px-4 py-2 text-slate-900">{file.name}</td>
-                        <td className="px-4 py-2 text-slate-700">
-                          {(file.size_bytes / 1024).toFixed(1)} KB
-                        </td>
-                        <td className="px-4 py-2">
-                          <div className="flex flex-wrap gap-2">
-                            {(() => {
-                              const isDocx = file.name.toLowerCase().endsWith(".docx");
-                              return (
-                                <>
-                            <button
-                              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                              onClick={() => handleViewDocx(file.url)}
-                              disabled={!isDocx}
-                              title={isDocx ? "" : "PDF 请使用下载按钮"}
-                            >
-                              查看
-                            </button>
-                            <a
-                              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                              href={`/api${file.url}`}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              下载
-                            </a>
-                            <button
-                              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                              onClick={() => handlePrintDocx(file.url)}
-                              disabled={!isDocx}
-                              title={isDocx ? "" : "PDF 请使用下载按钮"}
-                            >
-                              打印
-                            </button>
-                                </>
-                              );
-                            })()}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                    {paginatedReportFiles.map((file) => {
+                      const isDocx = file.name.toLowerCase().endsWith(".docx");
+                      return (
+                        <tr key={`${file.date}-${file.name}`}>
+                          <td className="px-4 py-2 text-slate-700">{file.date}</td>
+                          <td className="px-4 py-2 text-slate-900">{file.name}</td>
+                          <td className="px-4 py-2 text-slate-700">
+                            {(file.size_bytes / 1024).toFixed(1)} KB
+                          </td>
+                          <td className="px-4 py-2">
+                            <div className="flex flex-wrap gap-2">
+                              <button
+                                className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                onClick={() => handleViewDocx(file.url)}
+                                disabled={!isDocx}
+                                title={isDocx ? "" : "PDF 请使用下载按钮"}
+                              >
+                                查看
+                              </button>
+                              <a
+                                className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                                href={`/api${file.url}`}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                下载
+                              </a>
+                              <button
+                                className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                onClick={() => handlePrintDocx(file.url)}
+                                disabled={!isDocx}
+                                title={isDocx ? "" : "PDF 请使用下载按钮"}
+                              >
+                                打印
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
