@@ -999,11 +999,10 @@ def _analyze_roi_regions(payload_path: Path, csv_is_matrix: bool = True) -> Opti
                 return None
             matrix = grid
 
-        # Prefer MediaPipe ROI by default. If unavailable or incompatible, the
-        # code below still falls back to stable fixed regions.
+        # Use MediaPipe ROI only. If it is disabled, ROI analysis is skipped.
         if os.getenv("ENABLE_MEDIAPIPE_ROI", "1") != "1":
-            logging.info("ROI analysis uses fallback regions (ENABLE_MEDIAPIPE_ROI!=1)")
-            return _fallback_roi_analysis(matrix)
+            logging.info("ROI analysis skipped because ENABLE_MEDIAPIPE_ROI!=1")
+            return None
 
         roi_module = importlib.import_module("roi_mediapipe_dynamic")
         detect_landmarks = getattr(roi_module, "detect_landmarks")
@@ -1102,15 +1101,6 @@ def _analyze_roi_regions(payload_path: Path, csv_is_matrix: bool = True) -> Opti
             logging.warning(f"ROI analysis skipped due to MediaPipe compatibility: {exc}")
         else:
             logging.error(f"ROI analysis failed: {exc}")
-        # 使用 fallback 方法进行基础区域分析
-        try:
-            if csv_is_matrix:
-                matrix = np.loadtxt(str(payload_path), delimiter=",")
-                if matrix.ndim == 2:
-                    logging.info("Using fallback ROI analysis with fixed regions")
-                    return _fallback_roi_analysis(matrix)
-        except Exception as fallback_exc:
-            logging.error(f"Fallback ROI analysis also failed: {fallback_exc}")
         return None
 
 
