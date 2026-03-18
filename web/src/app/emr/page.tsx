@@ -1380,6 +1380,44 @@ function EmrPageContent() {
     }
   }
 
+  function printPdfByUrl(url: string) {
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    iframe.setAttribute("aria-hidden", "true");
+    document.body.appendChild(iframe);
+
+    let cleaned = false;
+    const cleanup = () => {
+      if (cleaned) return;
+      cleaned = true;
+      iframe.remove();
+    };
+
+    const timer = window.setTimeout(() => {
+      cleanup();
+      setOutput({ error: "PDF 打印超时，请重试或改用查看后手动打印" });
+    }, 12000);
+
+    iframe.onload = () => {
+      window.clearTimeout(timer);
+      try {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+      } catch {
+        setOutput({ error: "PDF 自动打印失败，请先查看后使用浏览器打印" });
+      } finally {
+        window.setTimeout(cleanup, 1000);
+      }
+    };
+
+    iframe.src = url;
+  }
+
   function toInlinePreviewUrl(rawUrl: string) {
     const raw = String(rawUrl || "").trim();
     if (!raw) return "/api/reports";
@@ -1426,7 +1464,8 @@ function EmrPageContent() {
     const lowerUrl = String(url || "").toLowerCase();
     if (!lowerUrl.endsWith(".docx")) {
       const previewUrl = toInlinePreviewUrl(url);
-      openPreviewInNewTab(previewUrl);
+      printPdfByUrl(previewUrl);
+      flashSuccessButton();
       return;
     }
 
