@@ -999,8 +999,9 @@ def _analyze_roi_regions(payload_path: Path, csv_is_matrix: bool = True) -> Opti
                 return None
             matrix = grid
 
-        # MediaPipe 在部分环境下会触发底层崩溃，默认使用稳定的固定区域分析。
-        if os.getenv("ENABLE_MEDIAPIPE_ROI", "0") != "1":
+        # Prefer MediaPipe ROI by default. If unavailable or incompatible, the
+        # code below still falls back to stable fixed regions.
+        if os.getenv("ENABLE_MEDIAPIPE_ROI", "1") != "1":
             logging.info("ROI analysis uses fallback regions (ENABLE_MEDIAPIPE_ROI!=1)")
             return _fallback_roi_analysis(matrix)
 
