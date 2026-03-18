@@ -254,14 +254,16 @@ def _detect_landmarks_worker(
 def detect_landmarks(rgb: np.ndarray) -> dict[str, Pt]:
     timeout_sec = float(os.getenv("MEDIAPIPE_DETECT_TIMEOUT_SEC", "20"))
     model_complexity = int(os.getenv("MEDIAPIPE_POSE_MODEL_COMPLEXITY", "1"))
+    start_method = "fork" if os.name == "posix" else "spawn"
 
     logger.info(
-        "Starting MediaPipe pose detection model_complexity=%s timeout=%.1fs",
+        "Starting MediaPipe pose detection model_complexity=%s timeout=%.1fs start_method=%s",
         model_complexity,
         timeout_sec,
+        start_method,
     )
 
-    ctx = mp_ctx.get_context("spawn")
+    ctx = mp_ctx.get_context(start_method)
     result_queue = ctx.Queue(maxsize=1)
     process = ctx.Process(
         target=_detect_landmarks_worker,
