@@ -82,3 +82,7 @@ rag/_text_ops*.so
 rag/simhash/_simhash*.so
 rag/simhash/*.o
 rag/simhash/build/
+
+# auto git push runtime files
+.auto-git-push.pid
+.auto-git-push.log

@@ -2,8 +2,8 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-PID_FILE="$REPO_DIR/.auto-git-push.pid"
-LOG_FILE="$REPO_DIR/.auto-git-push.log"
+PID_FILE="$REPO_DIR/.git/.auto-git-push.pid"
+LOG_FILE="$REPO_DIR/.git/.auto-git-push.log"
 DAEMON_SCRIPT="$REPO_DIR/scripts/auto_git_push_daemon.sh"
 
 if [[ -f "$PID_FILE" ]]; then

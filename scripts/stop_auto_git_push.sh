@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-PID_FILE="$REPO_DIR/.auto-git-push.pid"
+PID_FILE="$REPO_DIR/.git/.auto-git-push.pid"
 
 if [[ ! -f "$PID_FILE" ]]; then
   echo "[INFO] auto git push is not running"
