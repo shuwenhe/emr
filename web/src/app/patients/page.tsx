@@ -707,7 +707,10 @@ export default function PatientsPage() {
     setReportError(null);
     const url = buildReportFileUrl(file);
     if (!file.name.toLowerCase().endsWith(".docx")) {
-      window.open(url, "_blank", "noopener,noreferrer");
+      const popup = window.open(url, "_blank", "noopener,noreferrer");
+      if (!popup) {
+        window.location.href = url;
+      }
       return;
     }
 
@@ -728,7 +731,10 @@ export default function PatientsPage() {
     setReportError(null);
     const url = buildReportFileUrl(file);
     if (!file.name.toLowerCase().endsWith(".docx")) {
-      window.open(url, "_blank", "noopener,noreferrer");
+      const popup = window.open(url, "_blank", "noopener,noreferrer");
+      if (!popup) {
+        window.location.href = url;
+      }
       return;
     }
     try {

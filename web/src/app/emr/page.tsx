@@ -1372,8 +1372,18 @@ function EmrPageContent() {
   }
 
   async function handleViewDocx(url: string) {
+    const proxyUrl = `/api${url}`;
+    const lowerUrl = String(url || "").toLowerCase();
+    if (!lowerUrl.endsWith(".docx")) {
+      const popup = window.open(proxyUrl, "_blank", "noopener,noreferrer");
+      if (!popup) {
+        window.location.href = proxyUrl;
+      }
+      return;
+    }
+
     try {
-      const response = await fetch(`/api${url}`, { cache: "no-store" });
+      const response = await fetch(proxyUrl, { cache: "no-store" });
       const arrayBuffer = await response.arrayBuffer();
       const result = await mammoth.convertToHtml({ arrayBuffer });
       setPreviewHtml(result.value);
@@ -1385,8 +1395,18 @@ function EmrPageContent() {
   }
 
   async function handlePrintDocx(url: string) {
+    const proxyUrl = `/api${url}`;
+    const lowerUrl = String(url || "").toLowerCase();
+    if (!lowerUrl.endsWith(".docx")) {
+      const popup = window.open(proxyUrl, "_blank", "noopener,noreferrer");
+      if (!popup) {
+        window.location.href = proxyUrl;
+      }
+      return;
+    }
+
     try {
-      const response = await fetch(`/api${url}`, { cache: "no-store" });
+      const response = await fetch(proxyUrl, { cache: "no-store" });
       const arrayBuffer = await response.arrayBuffer();
       const result = await mammoth.convertToHtml({ arrayBuffer });
       printHtmlInIframe(`
