@@ -55,7 +55,7 @@ TCM_WORKERS  ?= 4
 TCM_DOCX_DIR  ?= $(CURDIR)/rag/dataset/docx_corpus
 TCM_DOCX_RPF  ?= 500   # records per docx file
 
-.PHONY: help install service service-precheck web web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build clean
+.PHONY: help install service service-precheck web web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build public-domain-up public-domain-down clean
 
 help:
 	@echo "Available targets:"
@@ -65,6 +65,8 @@ help:
 	@echo "  make web              # run Next.js web app (dev, slow)"
 	@echo "  make web-build        # compile Next.js for production (run once)"
 	@echo "  make web-prod         # start production Next.js server (fast, use after web-build)"
+	@echo "  make public-domain-up DOMAIN=example.com   # deploy fixed domain + Caddy HTTPS"
+	@echo "  make public-domain-down                    # stop fixed domain stack"
 	@echo "  make db-check         # verify MySQL connectivity and privileges"
 	@echo "  make report           # generate docx reports"
 	@echo "  make kb-build         # build vector KB from docx files"
@@ -123,6 +125,14 @@ web-build:
 
 web-prod:
 	@bash -c 'set -e; cd "$(CURDIR)/web"; if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" && nvm use 20; fi; npm run start'
+
+DOMAIN ?=
+
+public-domain-up:
+	@bash -c 'set -e; if [ -z "$(DOMAIN)" ]; then echo "[ERROR] DOMAIN is required. Example: make public-domain-up DOMAIN=clinic.example.com"; exit 1; fi; bash "$(CURDIR)/scripts/deployment/deploy_public_domain.sh" "$(DOMAIN)"'
+
+public-domain-down:
+	@bash "$(CURDIR)/scripts/deployment/stop_public_domain.sh"
 
 db-check:
 	$(VENV_PY) scripts/db_check.py

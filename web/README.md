@@ -44,6 +44,39 @@ If patients use mobile data (5G), they are not on your LAN. Use a public HTTPS U
 
 ### Fixed Public Domain + Reverse Proxy (Recommended)
 
+Cloudflare acceleration recommendation (nearby edge routing):
+
+1. Add your domain in Cloudflare and delegate NS to Cloudflare.
+2. Create DNS A record for your service host (for example `clinic.example.com`) pointing to your server public IP.
+3. Set this A record to **Proxied** (orange cloud) so users hit the nearest Cloudflare POP first.
+
+One-command deployment from repo root:
+
+```bash
+cd /home/shuwen/emr
+make public-domain-up DOMAIN=clinic.example.com
+```
+
+Or deploy with script directly:
+
+```bash
+cd /home/shuwen/emr
+bash ./scripts/deployment/deploy_public_domain.sh clinic.example.com
+```
+
+This script will:
+
+- generate/update `docker/.env.public`,
+- start production services with Caddy HTTPS reverse proxy,
+- sync QR/self-register base URL to your fixed domain.
+
+Stop stack:
+
+```bash
+cd /home/shuwen/emr
+make public-domain-down
+```
+
 1. Point your domain DNS A record to your server public IP.
 2. In `emr/docker/.env.public`, configure:
 
