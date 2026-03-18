@@ -62,8 +62,9 @@ async function proxyRequest(method: string, request: Request, params: RouteParam
       if (value) outHeaders.set(name, value);
     }
 
-    const payload = await response.arrayBuffer();
-    return new Response(payload, {
+    // Stream the upstream payload directly to the browser to reduce TTFB and
+    // memory overhead for large files like PDF previews.
+    return new Response(response.body, {
       status: response.status,
       headers: outHeaders,
     });
