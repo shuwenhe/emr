@@ -6,7 +6,8 @@ TOOLS_DIR="$WEB_DIR/.tools"
 LOG_DIR="$WEB_DIR/.tunnel"
 LOG_FILE="$LOG_DIR/cloudflared.log"
 PID_FILE="$LOG_DIR/cloudflared.pid"
-URL_FILE="$WEB_DIR/public/tunnel-url.txt"
+URL_FILE="$WEB_DIR/public/self-register-base.txt"
+LEGACY_URL_FILE="$WEB_DIR/public/tunnel-url.txt"
 
 mkdir -p "$TOOLS_DIR" "$LOG_DIR"
 
@@ -55,6 +56,7 @@ fi
 
 : > "$LOG_FILE"
 : > "$URL_FILE"
+: > "$LEGACY_URL_FILE"
 
 "$CLOUDFLARED_BIN" tunnel --url http://127.0.0.1:3000 >"$LOG_FILE" 2>&1 &
 new_pid=$!
@@ -81,6 +83,7 @@ if [[ -z "$public_url" ]]; then
 fi
 
 echo "$public_url" > "$URL_FILE"
+echo "$public_url" > "$LEGACY_URL_FILE"
 
 echo "[OK] Tunnel URL: $public_url"
 echo "[OK] Written to: $URL_FILE"

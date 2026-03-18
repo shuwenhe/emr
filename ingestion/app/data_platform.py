@@ -229,6 +229,15 @@ def init_db() -> None:
                 cursor.execute("CREATE INDEX idx_emrs_patient_archived_created ON emrs (patient_id, archived, created_at)")
             except Exception:
                 pass
+            # Add indices for patients table to speed up list_patients queries
+            try:
+                cursor.execute("CREATE INDEX idx_patients_updated_at ON patients (updated_at DESC)")
+            except Exception:
+                pass
+            try:
+                cursor.execute("CREATE INDEX idx_patients_archived_deleted_updated ON patients (archived, deleted, updated_at DESC)")
+            except Exception:
+                pass
 
 
 def _now() -> str:
@@ -292,16 +301,25 @@ def list_patients(
             rows = cursor.fetchall()
             patients = []
             for row in rows:
-                patient = json.loads(row["payload_json"]) if row.get("payload_json") else {}
-                patient.update({
+                # Only parse JSON if needed; use it to augment basic fields
+                extra_data = {}
+                try:
+                    if row.get("payload_json"):
+                        extra_data = json.loads(row["payload_json"])
+                except (json.JSONDecodeError, TypeError):
+                    pass
+                
+                # Build patient record with basic fields + extra data
+                patient = {
                     "patient_id": row["patient_id"],
                     "name": row["name"],
                     "gender": row["gender"],
                     "age": row["age"],
                     "archived": bool(row.get("archived")),
                     "deleted": bool(row.get("deleted")),
-                    "updated_at": row["updated_at"].isoformat() if row.get("updated_at") else None
-                })
+                    "updated_at": row["updated_at"].isoformat() if row.get("updated_at") else None,
+                    **extra_data,  # Merge extra fields from payload_json
+                }
                 patients.append(patient)
             return patients
 

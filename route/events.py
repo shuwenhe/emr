@@ -82,16 +82,30 @@ async def patient_events(request: Request):
 # ---------------------------------------------------------------------------
 
 class _IngestProgressBroker:
-    """Fan-out SSE broker keyed by record_id, safe to call from async context."""
+    """Fan-out SSE broker keyed by record_id, safe to call from async context.
+
+    Maintains a last-event replay cache so late-connecting subscribers (e.g. the
+    EMR page that navigates in after the upload response) receive the most recent
+    progress state immediately upon subscribing.
+    """
 
     def __init__(self) -> None:
         self._subscribers: dict[str, set[asyncio.Queue[str]]] = {}
+        self._last_event: dict[str, dict[str, Any]] = {}  # last payload per record_id
         self._lock = asyncio.Lock()
 
     async def subscribe(self, record_id: str) -> asyncio.Queue[str]:
         queue: asyncio.Queue[str] = asyncio.Queue(maxsize=50)
         async with self._lock:
             self._subscribers.setdefault(record_id, set()).add(queue)
+            last = self._last_event.get(record_id)
+        # Replay the most recent event so the frontend never sees a blank bar
+        if last:
+            try:
+                replay = f"event: progress\ndata: {json.dumps(last, separators=(',', ':'))}\n\n"
+                queue.put_nowait(replay)
+            except asyncio.QueueFull:
+                pass
         return queue
 
     async def unsubscribe(self, record_id: str, queue: asyncio.Queue[str]) -> None:
@@ -105,6 +119,7 @@ class _IngestProgressBroker:
     async def publish(self, record_id: str, payload: dict[str, Any]) -> None:
         message = f"event: progress\ndata: {json.dumps(payload, separators=(',', ':'))}\n\n"
         async with self._lock:
+            self._last_event[record_id] = payload  # cache for late subscribers
             queues = list(self._subscribers.get(record_id, set()))
         for queue in queues:
             try:

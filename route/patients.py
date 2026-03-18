@@ -80,14 +80,16 @@ async def register_patient(patient: PatientUpsertRequest):
 
 
 @router.get("/patients")
-def get_patients(
+async def get_patients(
     page: int = 1,
     limit: int = 20,
     include_archived: bool = False,
     include_deleted: bool = False,
 ):
     offset = (page - 1) * limit
-    return platform_service.list_patients(
+    # Run blocking DB query in thread pool to keep event loop responsive
+    return await asyncio.to_thread(
+        platform_service.list_patients,
         limit=limit,
         offset=offset,
         include_archived=include_archived,

@@ -56,12 +56,14 @@ services:
       context: ./web
       dockerfile: Dockerfile
       args:
-        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://backend:8000}
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-/api}
+        - NEXT_PUBLIC_SELF_REGISTER_BASE_URL=${NEXT_PUBLIC_SELF_REGISTER_BASE_URL:-}
     container_name: hospital-web
     depends_on:
       - backend
     environment:
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://backend:8000}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-/api}
+      - NEXT_PUBLIC_SELF_REGISTER_BASE_URL=${NEXT_PUBLIC_SELF_REGISTER_BASE_URL:-}
     networks:
       - hospital-network
     restart: unless-stopped

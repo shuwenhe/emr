@@ -3,7 +3,8 @@ set -euo pipefail
 
 WEB_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 PID_FILE="$WEB_DIR/.tunnel/cloudflared.pid"
-URL_FILE="$WEB_DIR/public/tunnel-url.txt"
+URL_FILE="$WEB_DIR/public/self-register-base.txt"
+LEGACY_URL_FILE="$WEB_DIR/public/tunnel-url.txt"
 
 if [[ -f "$PID_FILE" ]]; then
   pid="$(cat "$PID_FILE" || true)"
@@ -15,4 +16,5 @@ if [[ -f "$PID_FILE" ]]; then
 fi
 
 : > "$URL_FILE"
+: > "$LEGACY_URL_FILE"
 echo "[OK] Cleared tunnel URL file: $URL_FILE"

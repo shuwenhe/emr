@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type RegisterForm = {
   name: string;
@@ -23,6 +24,7 @@ function isAbortError(err: unknown): boolean {
 }
 
 export default function SelfRegisterPage() {
+  const router = useRouter();
   const [form, setForm] = useState<RegisterForm>({
     name: "",
     phone: "",
@@ -95,6 +97,12 @@ export default function SelfRegisterPage() {
 
       setSuccessPatientId(String(data.patient_id || ""));
       setForm({ name: "", phone: "", gender: "男", age: "" });
+      const nextPatientId = String(data.patient_id || "").trim();
+      if (nextPatientId) {
+        window.setTimeout(() => {
+          router.push(`/emr?patient_id=${encodeURIComponent(nextPatientId)}`);
+        }, 600);
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "登记失败，请稍后重试";
       if (isAbortError(err)) {
@@ -199,7 +207,7 @@ export default function SelfRegisterPage() {
 
           {successPatientId && (
             <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-3.5 text-sm text-emerald-700">
-              登记成功，您的患者编号：{successPatientId}
+              登记成功，您的患者编号：{successPatientId}。正在跳转到诊断分析页面...
             </div>
           )}
 

@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  nginx:
+    profiles: ["legacy-nginx"]
+
+  caddy:
+    image: caddy:2.8-alpine
+    container_name: hospital-caddy
+    depends_on:
+      - web
+      - backend
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - PUBLIC_DOMAIN=${PUBLIC_DOMAIN}
+    volumes:
+      - ../config/Caddyfile.public:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - hospital-network
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local

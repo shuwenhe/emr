@@ -387,11 +387,15 @@ def _find_payload_file(record_dir: Path) -> Path:
 
 def _find_image_files(record_dir: Path) -> List[Path]:
     image_exts = {".png", ".jpg", ".jpeg"}
-    return [
-        item
-        for item in record_dir.iterdir()
-        if item.is_file() and item.suffix.lower() in image_exts
-    ]
+    found: List[Path] = []
+    for item in record_dir.iterdir():
+        if item.is_file() and item.suffix.lower() in image_exts:
+            found.append(item)
+        elif item.is_dir() and item.name == "images":
+            for sub in item.iterdir():
+                if sub.is_file() and sub.suffix.lower() in image_exts:
+                    found.append(sub)
+    return found
 
 
 def _load_csv_temperatures(file_path: Path) -> List[float]:
@@ -1128,7 +1132,15 @@ def analyze_record(
         payload_path = _find_payload_file(record_dir)
     except FileNotFoundError:
         payload_path = None
-    image_paths = [str(path) for path in _find_image_files(record_dir)]
+
+    # Build relative paths (from DATA_DIR) for all found image files so the
+    # frontend can construct URLs via /data/<relative_path>.
+    image_paths: List[str] = []
+    for img_abs in _find_image_files(record_dir):
+        try:
+            image_paths.append(str(img_abs.relative_to(DATA_DIR)))
+        except ValueError:
+            image_paths.append(str(img_abs))  # fallback: keep absolute
 
     temps: List[float] = []
     if payload_path and payload_path.suffix.lower() == ".csv":

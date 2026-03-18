@@ -98,6 +98,10 @@ function EmrPageContent() {
     patientId: string;
     message: string;
   } | null>(null);
+  const [ingestProgress, setIngestProgress] = useState(0);
+  const [ingestStep, setIngestStep] = useState(0);
+  const [ingestStatus, setIngestStatus] = useState("");
+  const [ingestRunning, setIngestRunning] = useState(false);
   const latestKnownEmrIdRef = useRef("");
 
   useEffect(() => {
@@ -523,36 +527,46 @@ function EmrPageContent() {
     };
   }, [currentSearchPatient, report]);
 
+  const normalizeImagePath = useCallback((value: unknown): string => {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    if (/^https?:\/\//i.test(raw)) return raw;
+    const stripped = raw.replace(/^\/+/, "").replace(/^data\//i, "");
+    return `${API_BASE}/data/${stripped}`;
+  }, []);
+
+  // Primary marked image (with ROI overlay SVG rendered on top in browser)
   const thermalImageUrl = useMemo(() => {
-    if (!report || typeof report !== "object") {
-      return "";
-    }
-
-    const normalizeImagePath = (value: unknown) => {
-      const raw = String(value || "").trim();
-      if (!raw) return "";
-      if (/^https?:\/\//i.test(raw)) {
-        return raw;
-      }
-      const stripped = raw.replace(/^\/+/, "").replace(/^data\//i, "");
-      return `${API_BASE}/data/${stripped}`;
-    };
-
+    if (!report || typeof report !== "object") return "";
     const direct = normalizeImagePath(report.thermal_marked_image);
     if (direct) return direct;
-
     if (Array.isArray(report.thermal_images)) {
       for (const item of report.thermal_images) {
-        if (String(item || "").includes("thermal_roi_labeled")) {
-          continue;
-        }
+        if (String(item || "").includes("thermal_roi_labeled")) continue;
         const candidate = normalizeImagePath(item);
         if (candidate) return candidate;
       }
     }
-
     return "";
-  }, [report]);
+  }, [report, normalizeImagePath]);
+
+  // All uploaded source images (exclude the backend-generated heatmaps)
+  const uploadedThermalImageUrls = useMemo((): string[] => {
+    if (!report || typeof report !== "object") return [];
+    const generated = new Set(["thermal_marked.png", "thermal_roi_labeled.png"]);
+    const urls: string[] = [];
+    if (Array.isArray(report.thermal_images)) {
+      for (const item of report.thermal_images) {
+        const raw = String(item || "").trim();
+        if (!raw) continue;
+        const filename = raw.split("/").pop() || "";
+        if (generated.has(filename)) continue;
+        const url = normalizeImagePath(raw);
+        if (url) urls.push(url);
+      }
+    }
+    return urls;
+  }, [report, normalizeImagePath]);
 
   const fetchReports = useCallback(async (silent = false) => {
     try {
@@ -588,7 +602,76 @@ function EmrPageContent() {
     if (recordIdParam) {
       setRecordId(recordIdParam);
     }
+    const patientIdParam = searchParams.get("patient_id") || "";
+    if (patientIdParam) {
+      setPatientId(patientIdParam);
+    }
   }, [searchParams]);
+
+  useEffect(() => {
+    const rid = recordId.trim();
+    if (!rid) {
+      setIngestRunning(false);
+      return;
+    }
+
+    let isClosed = false;
+    let settleTimer: number | null = null;
+    const source = new EventSource(`${API_BASE}/events/ingest-progress/${encodeURIComponent(rid)}`);
+
+    setIngestRunning(true);
+    setIngestStatus("等待后端分析进度...");
+
+    const finishAndClose = () => {
+      if (isClosed) return;
+      isClosed = true;
+      source.close();
+      setIngestRunning(false);
+    };
+
+    source.addEventListener("progress", (event: MessageEvent) => {
+      try {
+        const payload = JSON.parse(event.data) as {
+          step?: number;
+          label?: string;
+          pct?: number;
+          status?: string;
+        };
+
+        const pct = Number(payload.pct ?? 0);
+        setIngestProgress(Number.isFinite(pct) ? Math.max(0, Math.min(100, pct)) : 0);
+        setIngestStep(Number(payload.step ?? 0));
+        setIngestStatus(String(payload.label || "分析中..."));
+
+        if (payload.status === "complete" || pct >= 100) {
+          setIngestProgress(100);
+          setIngestStatus("分析完成");
+          if (settleTimer) {
+            window.clearTimeout(settleTimer);
+          }
+          settleTimer = window.setTimeout(() => {
+            finishAndClose();
+          }, 1200);
+        }
+      } catch {
+        // ignore malformed event payloads
+      }
+    });
+
+    source.onerror = () => {
+      if (settleTimer) {
+        window.clearTimeout(settleTimer);
+      }
+      finishAndClose();
+    };
+
+    return () => {
+      if (settleTimer) {
+        window.clearTimeout(settleTimer);
+      }
+      finishAndClose();
+    };
+  }, [recordId]);
 
   // 当URL中有record_id时，始终确保当前报告与该record_id一致
   useEffect(() => {
@@ -1290,7 +1373,7 @@ function EmrPageContent() {
 
   async function handleViewDocx(url: string) {
     try {
-      const response = await fetch(`${API_BASE}${url}`);
+      const response = await fetch(`/api${url}`, { cache: "no-store" });
       const arrayBuffer = await response.arrayBuffer();
       const result = await mammoth.convertToHtml({ arrayBuffer });
       setPreviewHtml(result.value);
@@ -1303,7 +1386,7 @@ function EmrPageContent() {
 
   async function handlePrintDocx(url: string) {
     try {
-      const response = await fetch(`${API_BASE}${url}`);
+      const response = await fetch(`/api${url}`, { cache: "no-store" });
       const arrayBuffer = await response.arrayBuffer();
       const result = await mammoth.convertToHtml({ arrayBuffer });
       printHtmlInIframe(`
@@ -1439,6 +1522,28 @@ function EmrPageContent() {
                 </div>
               )}
             </div>
+
+            {(ingestRunning || ingestProgress > 0) && (
+              <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50/95 p-4 shadow-sm">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-emerald-900">数据分析进度</p>
+                  <span className="text-xs font-semibold text-emerald-700">{Math.round(ingestProgress)}%</span>
+                </div>
+                <div className="mt-2 h-2 w-full rounded-full bg-emerald-200">
+                  <div
+                    className="h-2 rounded-full bg-emerald-600 transition-all duration-300"
+                    style={{ width: `${Math.max(0, Math.min(100, ingestProgress))}%` }}
+                  />
+                </div>
+                <p className="mt-2 text-xs text-emerald-800">
+                  {ingestStatus || "分析准备中..."}
+                  {recordId.trim() ? `（record_id: ${recordId.trim()}）` : ""}
+                </p>
+                {ingestStep > 0 && (
+                  <p className="mt-1 text-xs text-emerald-700">当前阶段：步骤 {ingestStep}</p>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="rounded-3xl bg-white/90 p-5 shadow-sm ring-1 ring-amber-200/60 backdrop-blur hero-fade">
@@ -1738,47 +1843,70 @@ function EmrPageContent() {
           )}
         </section>
 
-        {thermalImageUrl && (
+        {(thermalImageUrl || uploadedThermalImageUrls.length > 0) && (
           <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
             <h2 className="text-lg font-semibold text-slate-900">热成像图</h2>
-            <div className="mt-4">
-              <p className="mb-3 text-xs text-slate-500">已叠加人体部位温度标签（头部标签自动避让，基于 ROI 分析）</p>
-            </div>
-            <div className="relative mt-2 w-full max-w-2xl">
-              <img
-                src={thermalImageUrl}
-                alt="Thermal Marked Image"
-                className="w-full max-w-2xl rounded-xl border border-slate-200"
-              />
-              <svg className="pointer-events-none absolute inset-0 z-10 h-full w-full">
-                {roiOverlayLayoutPoints.map((point, index) => {
-                  if (!point.showLeader) {
-                    return null;
-                  }
-                  const edgeX = point.labelX <= point.x ? point.labelX + 4.5 : point.labelX - 4.5;
-                  return (
-                    <line
-                      key={`line-${point.name}-${index}`}
-                      x1={`${point.x}%`}
-                      y1={`${point.y}%`}
-                      x2={`${edgeX}%`}
-                      y2={`${point.labelY}%`}
-                      stroke="rgba(15, 23, 42, 0.85)"
-                      strokeWidth="1"
+
+            {/* Original uploaded thermal images grid */}
+            {uploadedThermalImageUrls.length > 0 && (
+              <div className="mt-4">
+                <p className="mb-3 text-xs text-slate-500">
+                  原始上传图片（共 {uploadedThermalImageUrls.length} 张）
+                </p>
+                <div className={`grid gap-3 ${uploadedThermalImageUrls.length === 1 ? "grid-cols-1" : uploadedThermalImageUrls.length === 2 ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-3"}`}>
+                  {uploadedThermalImageUrls.map((url, idx) => (
+                    <img
+                      key={url}
+                      src={url}
+                      alt={`热成像图 ${idx + 1}`}
+                      className="w-full rounded-xl border border-slate-200 object-contain"
                     />
-                  );
-                })}
-              </svg>
-              {roiOverlayLayoutPoints.map((point, index) => (
-                <div
-                  key={`${point.name}-${index}`}
-                  className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-md border border-white/30 bg-slate-900/70 px-2 py-1 text-[11px] font-semibold text-white"
-                  style={{ left: `${point.labelX}%`, top: `${point.labelY}%` }}
-                >
-                  {point.name} {point.meanC.toFixed(1)}°C
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
+
+            {/* Generated heatmap with ROI overlay */}
+            {thermalImageUrl && (
+              <div className="mt-5">
+                <p className="mb-3 text-xs text-slate-500">已叠加人体部位温度标签（头部标签自动避让，基于 ROI 分析）</p>
+                <div className="relative w-full max-w-2xl">
+                  <img
+                    src={thermalImageUrl}
+                    alt="Thermal Marked Image"
+                    className="w-full max-w-2xl rounded-xl border border-slate-200"
+                  />
+                  <svg className="pointer-events-none absolute inset-0 z-10 h-full w-full">
+                    {roiOverlayLayoutPoints.map((point, index) => {
+                      if (!point.showLeader) {
+                        return null;
+                      }
+                      const edgeX = point.labelX <= point.x ? point.labelX + 4.5 : point.labelX - 4.5;
+                      return (
+                        <line
+                          key={`line-${point.name}-${index}`}
+                          x1={`${point.x}%`}
+                          y1={`${point.y}%`}
+                          x2={`${edgeX}%`}
+                          y2={`${point.labelY}%`}
+                          stroke="rgba(15, 23, 42, 0.85)"
+                          strokeWidth="1"
+                        />
+                      );
+                    })}
+                  </svg>
+                  {roiOverlayLayoutPoints.map((point, index) => (
+                    <div
+                      key={`${point.name}-${index}`}
+                      className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-md border border-white/30 bg-slate-900/70 px-2 py-1 text-[11px] font-semibold text-white"
+                      style={{ left: `${point.labelX}%`, top: `${point.labelY}%` }}
+                    >
+                      {point.name} {point.meanC.toFixed(1)}°C
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
         )}
 
@@ -1834,7 +1962,7 @@ function EmrPageContent() {
                             </button>
                             <a
                               className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                              href={`${API_BASE}${file.url}`}
+                              href={`/api${file.url}`}
                               target="_blank"
                               rel="noreferrer"
                             >

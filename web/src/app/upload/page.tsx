@@ -42,11 +42,49 @@ function UploadPageContent() {
   }
   const [patientsLoading, setPatientsLoading] = useState(true);
   const [patientsError, setPatientsError] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState("");
+  const [uploadCompleted, setUploadCompleted] = useState(false);
   const [reportGenerating, setReportGenerating] = useState(false);
   const [reportProgress, setReportProgress] = useState(0);
   const [reportStatus, setReportStatus] = useState("");
   const [currentStep, setCurrentStep] = useState(0);
   const autoSelectedFromUrlRef = useRef(false);
+
+  function uploadFormDataWithProgress(url: string, formData: FormData): Promise<{ ok: boolean; status: number; data: any }> {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", url, true);
+      xhr.responseType = "json";
+      xhr.timeout = 120000;
+
+      xhr.upload.onprogress = (event) => {
+        if (!event.lengthComputable || event.total <= 0) return;
+        const pct = Math.max(0, Math.min(99, Math.round((event.loaded / event.total) * 100)));
+        setUploadProgress(pct);
+        setUploadStatus(`正在上传数据文件... ${pct}%`);
+      };
+
+      xhr.onload = () => {
+        const raw = xhr.response;
+        const data = typeof raw === "string"
+          ? (() => {
+              try {
+                return JSON.parse(raw);
+              } catch {
+                return {};
+              }
+            })()
+          : (raw || {});
+        resolve({ ok: xhr.status >= 200 && xhr.status < 300, status: xhr.status, data });
+      };
+
+      xhr.onerror = () => reject(new Error("网络连接失败，上传中断"));
+      xhr.ontimeout = () => reject(new Error("上传超时，请重试"));
+      xhr.onabort = () => reject(new Error("上传已取消"));
+      xhr.send(formData);
+    });
+  }
 
   useEffect(() => {
     fetchPatients();
@@ -180,6 +218,9 @@ function UploadPageContent() {
 
     setUploading(true);
     setResult(null);
+    setUploadProgress(0);
+    setUploadStatus("准备上传...");
+    setUploadCompleted(false);
     setReportGenerating(false);
     setReportProgress(0);
     setReportStatus("");
@@ -215,17 +256,13 @@ function UploadPageContent() {
         formData.append("file", files[0]);
         formData.append("metadata", JSON.stringify(metadata));
 
-        const response = await fetch(`${API_BASE}/ingest`, {
-          method: "POST",
-          body: formData,
-        });
-        const data = await response.json();
+        const response = await uploadFormDataWithProgress(`${API_BASE}/ingest`, formData);
         if (!response.ok) {
-          setResult({ error: data.detail || "上传失败" });
+          setResult({ error: response.data?.detail || `上传失败（HTTP ${response.status}）` });
           setUploading(false);
           return;
         }
-        record_id = data.record_id;
+        record_id = response.data.record_id;
       } else {
         // Multiple files — use /ingest/batch, one record + one report for all files
         const formData = new FormData();
@@ -234,19 +271,18 @@ function UploadPageContent() {
         }
         formData.append("metadata", JSON.stringify(metadata));
 
-        const response = await fetch(`${API_BASE}/ingest/batch`, {
-          method: "POST",
-          body: formData,
-        });
-        const data = await response.json();
+        const response = await uploadFormDataWithProgress(`${API_BASE}/ingest/batch`, formData);
         if (!response.ok) {
-          setResult({ error: data.detail || "批量上传失败" });
+          setResult({ error: response.data?.detail || `批量上传失败（HTTP ${response.status}）` });
           setUploading(false);
           return;
         }
-        record_id = data.record_id;
+        record_id = response.data.record_id;
       }
 
+      setUploadProgress(100);
+      setUploadCompleted(true);
+      setUploadStatus("数据上传完成，后台开始分析...");
       setUploading(false);
       setReportGenerating(true);
       setReportStatus(files.length > 1
@@ -260,6 +296,7 @@ function UploadPageContent() {
       flashSuccessButton();
     } catch (error) {
       setResult({ error: `上传失败: ${String(error)}` });
+      setUploadStatus("上传失败");
       setUploading(false);
     }
   }
@@ -591,7 +628,7 @@ function UploadPageContent() {
             disabled={uploading || reportGenerating || files.length === 0}
           >
             {uploading
-              ? `上传中... (${files.length} 个文件)`
+              ? `上传中... ${Math.round(uploadProgress)}%`
               : reportGenerating
               ? "生成合并报告中..."
               : files.length > 1
@@ -600,6 +637,27 @@ function UploadPageContent() {
               ? `上传数据 (${files[0].name})`
               : "上传数据"}
           </button>
+
+          {(uploading || uploadCompleted) && (
+            <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-sm font-semibold text-emerald-900">上传进度</p>
+                <p className="text-sm font-semibold text-emerald-700">{Math.round(uploadProgress)}%</p>
+              </div>
+              <div className="mb-2 h-2 w-full rounded-full bg-emerald-200">
+                <div
+                  className="h-2 rounded-full bg-emerald-600 transition-all duration-300 ease-out"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+              <p className="text-xs text-emerald-800">{uploadStatus}</p>
+              {uploadCompleted && (
+                <p className="mt-1 text-xs text-emerald-700">
+                  上传完成判定：已收到 record_id，文件已入库，进入分析阶段。
+                </p>
+              )}
+            </div>
+          )}
 
           {reportGenerating && (
             <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4">

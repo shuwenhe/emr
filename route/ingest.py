@@ -204,6 +204,12 @@ async def ingest(
     tmp_file.write_bytes(file_bytes)
     record_id = ingestion_service.ingest_data(tmp_file, parsed.model_dump(), validate=True)
     result = {"record_id": record_id, "storage_path": None, "matrix_csv_path": None}
+
+    # Seed the progress cache (step 1, 5%) so the frontend receives an immediate
+    # replay event even if it connects after the background task has already
+    # started publishing later steps.
+    await publish_ingest_progress(record_id, 1, "数据采集完成，正在启动分析...", 5)
+
     background_tasks.add_task(_generate_report_after_ingest, result["record_id"], parsed.model_dump())
 
     elapsed = time.time() - t0
@@ -297,6 +303,9 @@ async def ingest_batch(
         raise HTTPException(status_code=422, detail=detail) from exc
 
     background_tasks.add_task(_generate_report_after_ingest, record_id, parsed.model_dump())
+
+    # Seed the progress cache so late-connecting subscribers get an immediate replay.
+    await publish_ingest_progress(record_id, 1, "数据采集完成，正在启动分析...", 5)
 
     elapsed = time.time() - t0
     logger.info(

@@ -83,7 +83,51 @@ function extractOriginFromUrl(value: string): string {
   }
 }
 
+function isLocalhostBase(value: string): boolean {
+  const normalized = normalizeWebBase(value);
+  return normalized.includes("localhost") || normalized.includes("127.0.0.1");
+}
+
+function isPrivateOrLocalBase(value: string): boolean {
+  const normalized = normalizeWebBase(value);
+  if (!normalized) return true;
+
+  let host = "";
+  try {
+    host = new URL(normalized).hostname;
+  } catch {
+    return true;
+  }
+
+  if (
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    host.startsWith("127.") ||
+    host.startsWith("10.") ||
+    host.startsWith("192.168.")
+  ) {
+    return true;
+  }
+
+  if (host.startsWith("172.")) {
+    const octets = host.split(".");
+    const second = Number(octets[1] || "0");
+    if (second >= 16 && second <= 31) return true;
+  }
+
+  // Tailscale and CGNAT range 100.64.0.0/10
+  if (host.startsWith("100.")) {
+    const octets = host.split(".");
+    const second = Number(octets[1] || "0");
+    if (second >= 64 && second <= 127) return true;
+  }
+
+  return false;
+}
+
 const API_BASE = resolveApiBase();
+const PATIENTS_PROXY_BASE = "/api/patients";
+const SHARED_WEB_BASE_FILE = "/self-register-base.txt";
 
 function parseReportDay(value: string): Date {
   const raw = String(value || "").trim();
@@ -200,7 +244,7 @@ export default function PatientsPage() {
     setSelfRegisterUrl(`${normalized}/self-register`);
   }, [publicWebBase]);
 
-  const showLocalhostWarning = selfRegisterUrl.includes("localhost") || selfRegisterUrl.includes("127.0.0.1");
+  const showLocalhostWarning = isLocalhostBase(selfRegisterUrl);
 
   // 无限滚动监听
   useEffect(() => {
@@ -270,27 +314,26 @@ export default function PatientsPage() {
 
     let cancelled = false;
 
-    const loadTunnelUrl = async () => {
+    const loadSharedWebBase = async () => {
       try {
-        const response = await fetch(`/tunnel-url.txt?t=${Date.now()}`, { cache: "no-store" });
+        const response = await fetch(`${SHARED_WEB_BASE_FILE}?t=${Date.now()}`, { cache: "no-store" });
         if (!response.ok) return;
         const text = (await response.text()).trim();
         const origin = extractOriginFromUrl(text);
         if (!origin || cancelled) return;
 
         const current = normalizeWebBase(publicWebBase);
-        const shouldOverride =
-          !current || current.includes("localhost") || current.includes("127.0.0.1");
+        const shouldOverride = !current || isPrivateOrLocalBase(current);
         if (shouldOverride) {
           setPublicWebBase(origin);
         }
       } catch {
-        // tunnel url is optional; ignore when not present
+        // shared web base is optional; ignore when not present
       }
     };
 
-    loadTunnelUrl();
-    const timer = window.setInterval(loadTunnelUrl, 5000);
+    loadSharedWebBase();
+    const timer = window.setInterval(loadSharedWebBase, 5000);
     return () => {
       cancelled = true;
       window.clearInterval(timer);
@@ -335,9 +378,23 @@ export default function PatientsPage() {
     if (loading) return;
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/patients?page=${pageNum}&limit=${PAGE_SIZE}`, {
-        cache: "no-store",
-      });
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), 8000);
+      let response: Response;
+      try {
+        response = await fetch(`${PATIENTS_PROXY_BASE}?page=${pageNum}&limit=${PAGE_SIZE}`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (response.status === 405) {
+          response = await fetch(`${API_BASE}/patients?page=${pageNum}&limit=${PAGE_SIZE}`, {
+            cache: "no-store",
+            signal: controller.signal,
+          });
+        }
+      } finally {
+        window.clearTimeout(timer);
+      }
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
@@ -383,7 +440,23 @@ export default function PatientsPage() {
 
     try {
       // 高频刷新仅检查第一页，避免每次拉取全量历史患者
-      const response = await fetch(`${API_BASE}/patients?page=1&limit=${PAGE_SIZE}`, { cache: "no-store" });
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), 8000);
+      let response: Response;
+      try {
+        response = await fetch(`${PATIENTS_PROXY_BASE}?page=1&limit=${PAGE_SIZE}`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (response.status === 405) {
+          response = await fetch(`${API_BASE}/patients?page=1&limit=${PAGE_SIZE}`, {
+            cache: "no-store",
+            signal: controller.signal,
+          });
+        }
+      } finally {
+        window.clearTimeout(timer);
+      }
       if (!response.ok) return;
 
       const data = await response.json();
@@ -557,13 +630,13 @@ export default function PatientsPage() {
   function buildReportFileUrl(file: ReportFile) {
     const encodedDate = encodeURIComponent(file.date);
     const encodedName = encodeURIComponent(file.name);
-    return `${API_BASE}/reports/preview?date=${encodedDate}&filename=${encodedName}`;
+    return `/api/reports/preview?date=${encodedDate}&filename=${encodedName}`;
   }
 
   function buildReportDownloadUrl(file: ReportFile) {
     const encodedDate = encodeURIComponent(file.date);
     const encodedName = encodeURIComponent(file.name);
-    return `${API_BASE}/reports/${encodedDate}/${encodedName}`;
+    return `/api/reports/${encodedDate}/${encodedName}`;
   }
 
   async function handleOpenReportHistory(patient: Patient) {
@@ -576,7 +649,7 @@ export default function PatientsPage() {
     setReportDateFrom("");
     setReportDateTo("");
     try {
-      const response = await fetch(`${API_BASE}/reports`);
+      const response = await fetch(`/api/reports`, { cache: "no-store" });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
@@ -725,16 +798,17 @@ export default function PatientsPage() {
     if (!confirmed) return;
     setReportError(null);
     try {
-      const response = await fetch(`${API_BASE}/reports/archive`, {
+      const response = await fetch(`/api/reports/archive`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ date: file.date, filename: file.name, archived: true }),
+        cache: "no-store",
       });
       if (!response.ok) {
         throw new Error("报告归档失败");
       }
       if (reportPatient) {
-        const refresh = await fetch(`${API_BASE}/reports`).then((r) => r.json());
+        const refresh = await fetch(`/api/reports`, { cache: "no-store" }).then((r) => r.json());
         const files = Array.isArray(refresh) ? (refresh as ReportFile[]) : [];
         setAllReportFiles(files);
         const filtered = filterReportsForPatient(files, reportPatient, reportDateFrom, reportDateTo);
@@ -760,10 +834,11 @@ export default function PatientsPage() {
     if (archivingPatientId) return;
     setArchivingPatientId(patient.patient_id);
     try {
-      const response = await fetch(`${API_BASE}/patients/${encodeURIComponent(patient.patient_id)}/archive`, {
+      const response = await fetch(`/api/patients/${encodeURIComponent(patient.patient_id)}/archive`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ archived: true }),
+        cache: "no-store",
       });
       if (!response.ok) {
         const detailText = await response.text().catch(() => "");
@@ -1039,12 +1114,12 @@ export default function PatientsPage() {
                   onChange={(e) => setPublicWebBase(e.target.value)}
                 />
                 <p className="mt-2 text-xs text-slate-500">
-                  若当前是 localhost，请改成电脑局域网 IP，手机与电脑需在同一网络。
+                  局域网可运行 `npm run share:lan:sync`；无域名且患者用 5G 可运行 `npm run share:cloudflare:sync`（临时地址）。
                 </p>
               </div>
               {showLocalhostWarning && (
                 <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
-                  当前二维码仍是 localhost，手机无法访问。请先填写上方手机访问地址。
+                  当前二维码仍是 localhost，手机无法访问。请改成局域网地址或公网地址。
                 </div>
               )}
               <div className="mx-auto flex w-full max-w-[280px] flex-col items-center rounded-xl border border-slate-200 bg-slate-50 p-4">
