@@ -910,11 +910,13 @@ def _fallback_roi_analysis(matrix: np.ndarray) -> Dict[str, Any]:
     # label_strategy: 'top'(上方), 'bottom'(下方), 'left'(左侧), 'right'(右侧), 'outer'(最外侧)
     fixed_regions = [
         {"name": "额头", "x_pct": (35, 65), "y_pct": (8, 18), "label_strategy": "top"},
-        {"name": "右眼", "x_pct": (32, 45), "y_pct": (20, 32), "label_strategy": "top"},
-        {"name": "左眼", "x_pct": (55, 68), "y_pct": (20, 32), "label_strategy": "top"},
+        # Keep left/right naming consistent with other body regions in fallback mode:
+        # left side of image -> 左*, right side of image -> 右*.
+        {"name": "左眼", "x_pct": (32, 45), "y_pct": (20, 32), "label_strategy": "top"},
+        {"name": "右眼", "x_pct": (55, 68), "y_pct": (20, 32), "label_strategy": "top"},
         {"name": "鼻子", "x_pct": (44, 56), "y_pct": (32, 48), "label_strategy": "bottom"},
-        {"name": "右脸颊", "x_pct": (22, 42), "y_pct": (38, 58), "label_strategy": "left"},
-        {"name": "左脸颊", "x_pct": (58, 78), "y_pct": (38, 58), "label_strategy": "right"},
+        {"name": "左脸颊", "x_pct": (22, 42), "y_pct": (38, 58), "label_strategy": "left"},
+        {"name": "右脸颊", "x_pct": (58, 78), "y_pct": (38, 58), "label_strategy": "right"},
         {"name": "口部", "x_pct": (42, 58), "y_pct": (52, 65), "label_strategy": "bottom"},
         {"name": "颈部", "x_pct": (40, 60), "y_pct": (64, 74), "label_strategy": "outer"},
         {"name": "胸部", "x_pct": (30, 70), "y_pct": (74, 92), "label_strategy": "outer"},
