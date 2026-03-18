@@ -627,7 +627,7 @@ def generate_pdf_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     if primary_image is not None:
         story.append(_make_image(primary_image, 155 * mm, 118 * mm))
         story.append(Spacer(1, 4 * mm))
-        story.append(_paragraph("※ 图中标签为 MediaPipe 姿态关键点自动定位的各部位均温", styles["small"]))
+        story.append(_paragraph("※ 图中标签显示各部位均温（℃）", styles["small"]))
     else:
         story.append(_paragraph("热成像图文件未找到", styles["body"]))
     story.append(PageBreak())
