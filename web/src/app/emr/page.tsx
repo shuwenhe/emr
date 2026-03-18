@@ -1374,7 +1374,32 @@ function EmrPageContent() {
   async function handleViewDocx(url: string) {
     const lowerUrl = String(url || "").toLowerCase();
     if (!lowerUrl.endsWith(".docx")) {
-      setOutput({ error: "诊断分析页仅支持 DOCX 在线查看，PDF 请使用下载按钮查看" });
+      const toInlinePreviewUrl = (rawUrl: string) => {
+        const raw = String(rawUrl || "").trim();
+        if (!raw) return "/api/reports";
+        if (raw.startsWith("/reports/preview")) return `/api${raw}`;
+
+        const match = raw.match(/^\/reports\/([^/]+)\/(.+)$/);
+        if (!match) return `/api${raw}`;
+
+        const safeDecode = (value: string) => {
+          try {
+            return decodeURIComponent(value);
+          } catch {
+            return value;
+          }
+        };
+
+        const date = encodeURIComponent(safeDecode(match[1]));
+        const filename = encodeURIComponent(safeDecode(match[2]));
+        return `/api/reports/preview?date=${date}&filename=${filename}`;
+      };
+
+      const previewUrl = toInlinePreviewUrl(url);
+      const popup = window.open(previewUrl, "_blank", "noopener,noreferrer");
+      if (!popup) {
+        window.location.href = previewUrl;
+      }
       return;
     }
 
@@ -1394,7 +1419,7 @@ function EmrPageContent() {
   async function handlePrintDocx(url: string) {
     const lowerUrl = String(url || "").toLowerCase();
     if (!lowerUrl.endsWith(".docx")) {
-      setOutput({ error: "诊断分析页仅支持 DOCX 打印，PDF 请使用下载按钮" });
+      setOutput({ error: "PDF 暂不支持该入口一键打印，请先打开 PDF 后使用浏览器打印" });
       return;
     }
 
@@ -1973,8 +1998,7 @@ function EmrPageContent() {
                               <button
                                 className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                                 onClick={() => handleViewDocx(file.url)}
-                                disabled={!isDocx}
-                                title={isDocx ? "" : "PDF 请使用下载按钮"}
+                                title={isDocx ? "" : "PDF 在线预览"}
                               >
                                 查看
                               </button>
