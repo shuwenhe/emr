@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import mammoth from "mammoth";
@@ -145,6 +145,7 @@ export default function PatientsPage() {
   const [birthYear, setBirthYear] = useState("");
   const [birthMonth, setBirthMonth] = useState("");
   const [birthDay, setBirthDay] = useState("");
+  const patientsVersionRef = useRef("");
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 100 }, (_, i) => String(currentYear - i));
   const months = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0"));
@@ -166,6 +167,14 @@ export default function PatientsPage() {
   useEffect(() => {
     fetchPatients(1, true);
   }, []);
+
+  useEffect(() => {
+    const version = patients
+      .map((p) => `${p.patient_id}:${p.updated_at || ""}`)
+      .sort()
+      .join("|");
+    patientsVersionRef.current = version;
+  }, [patients]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -344,6 +353,101 @@ export default function PatientsPage() {
       setLoading(false);
     }
   }
+
+  const refreshPatientsIfChanged = useCallback(async () => {
+    if (typeof document !== "undefined" && document.hidden) return;
+
+    try {
+      const response = await fetch(`${API_BASE}/patients?page=1&limit=10000`, { cache: "no-store" });
+      if (!response.ok) return;
+
+      const data = await response.json();
+      const nextPatients = Array.isArray(data) ? (data as Patient[]) : [];
+      const nextVersion = nextPatients
+        .map((p) => `${p.patient_id}:${p.updated_at || ""}`)
+        .sort()
+        .join("|");
+
+      if (nextVersion === patientsVersionRef.current) return;
+
+      setPatients(nextPatients);
+      setPage(1);
+      setHasMore(false);
+
+      setSelectedPatient((prev) => {
+        if (!prev) return prev;
+        const refreshed = nextPatients.find((item) => item.patient_id === prev.patient_id);
+        return refreshed || null;
+      });
+    } catch {
+      // auto-refresh failures are non-blocking
+    }
+  }, []);
+
+  useEffect(() => {
+    let closed = false;
+    let reconnectTimer: number | undefined;
+    let source: EventSource | null = null;
+
+    const connect = () => {
+      if (closed) return;
+      source = new EventSource(`${API_BASE}/events/patients`);
+
+      const onPatientEvent = () => {
+        refreshPatientsIfChanged();
+      };
+
+      const onPatientRegistered = () => {
+        if (showWechatQr) {
+          setShowWechatQr(false);
+        }
+        refreshPatientsIfChanged();
+      };
+
+      source.addEventListener("patient_registered", onPatientRegistered);
+      source.addEventListener("patient_updated", onPatientEvent);
+      source.addEventListener("patient_archived", onPatientEvent);
+      source.addEventListener("patient_deleted", onPatientEvent);
+
+      source.onerror = () => {
+        if (source) {
+          source.close();
+          source = null;
+        }
+        if (closed) return;
+        reconnectTimer = window.setTimeout(connect, 1500);
+      };
+    };
+
+    connect();
+
+    return () => {
+      closed = true;
+      if (typeof reconnectTimer === "number") {
+        window.clearTimeout(reconnectTimer);
+      }
+      if (source) {
+        source.close();
+      }
+    };
+  }, [refreshPatientsIfChanged, showWechatQr]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      refreshPatientsIfChanged();
+    }, 15000);
+
+    const onFocus = () => {
+      refreshPatientsIfChanged();
+    };
+
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [refreshPatientsIfChanged]);
 
   async function fetchPatientEmrs(patient: Patient) {
     try {

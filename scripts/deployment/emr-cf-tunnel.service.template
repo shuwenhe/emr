@@ -1,0 +1,28 @@
+[Unit]
+Description=EMR Cloudflare Tunnel (QR Code URL)
+After=network-online.target emr-ingestion.service
+Wants=network-online.target
+PartOf=emr-ingestion.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=__APP_USER__
+WorkingDirectory=__WEB_DIR__
+
+# Pass the proxy so cloudflared can reach Cloudflare when direct access is blocked.
+Environment=HTTPS_PROXY=http://127.0.0.1:7890
+Environment=HTTP_PROXY=http://127.0.0.1:7890
+
+ExecStart=/usr/bin/bash __WEB_DIR__/scripts/start_cloudflare_tunnel.sh
+ExecStop=/usr/bin/bash __WEB_DIR__/scripts/stop_cloudflare_tunnel.sh
+
+Restart=on-failure
+RestartSec=10
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=emr-cf-tunnel
+
+[Install]
+WantedBy=multi-user.target

@@ -9,6 +9,71 @@
 2. 安装依赖
 3. 启动服务（本地开发）
 
+## 生产部署（开机自启 + 异常自动重启）
+如果你是通过 `uvicorn ... &` 手工启动，服务器重启后进程不会自动恢复。
+
+项目已提供 `systemd` 安装脚本：
+
+1. 安装并启用服务
+
+  ```bash
+  cd /home/shuwen/emr
+  ./scripts/deployment/install_systemd_service.sh
+  ```
+
+2. 查看状态
+
+  ```bash
+  sudo systemctl status emr-ingestion
+  ```
+
+3. 追踪日志
+
+  ```bash
+  sudo journalctl -u emr-ingestion -f
+  tail -f /home/shuwen/emr/logs/emr-ingestion.out.log
+  tail -f /home/shuwen/emr/logs/emr-ingestion.err.log
+  ```
+
+默认使用：
+- 工作目录：`/home/shuwen/emr`
+- 入口模块：`route.main:app`
+- 端口：`8000`
+
+可通过环境变量自定义安装（示例）：
+
+```bash
+SERVICE_NAME=emr-api APP_PORT=8010 APP_MODULE=route.main:app ./scripts/deployment/install_systemd_service.sh
+```
+
+## Nginx 反向代理与健康检查
+为避免外网访问偶发不可达，建议在后端前增加 Nginx 反向代理并启用健康探针。
+
+1. 安装并加载 Nginx 配置
+
+  ```bash
+  cd /home/shuwen/emr
+  ./scripts/deployment/install_nginx_proxy.sh
+  ```
+
+2. 验证探针
+
+  ```bash
+  curl -i http://127.0.0.1/nginx-healthz
+  curl -i http://127.0.0.1/healthz
+  curl -i http://127.0.0.1/readyz
+  ```
+
+默认上游：
+- 后端：`127.0.0.1:8000`
+- 前端：`127.0.0.1:3000`
+
+可按需覆盖：
+
+```bash
+SERVER_NAME=example.com BACKEND_UPSTREAM=127.0.0.1:8000 FRONTEND_UPSTREAM=127.0.0.1:3000 ./scripts/deployment/install_nginx_proxy.sh
+```
+
 ## API
 - POST /ingest
   - 表单字段：

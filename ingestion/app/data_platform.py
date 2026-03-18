@@ -259,8 +259,8 @@ def upsert_patient(patient: Dict[str, Any]) -> Optional[str]:
                 patient.get("name"),
                 patient.get("gender"),
                 patient.get("age"),
-                int(bool(patient.get("archived", 0))) if patient.get("archived") is not None else None,
-                int(bool(patient.get("deleted", 0))) if patient.get("deleted") is not None else None,
+                int(bool(patient.get("archived", 0))),
+                int(bool(patient.get("deleted", 0))),
                 json.dumps(patient, ensure_ascii=False),
                 _now(),
             ),
@@ -282,8 +282,8 @@ def list_patients(
                 """
                 SELECT patient_id, name, gender, age, archived, deleted, payload_json, updated_at
                 FROM patients
-                WHERE (%s = 1 OR archived = 0)
-                  AND (%s = 1 OR deleted = 0)
+                                WHERE (%s = 1 OR COALESCE(archived, 0) = 0)
+                                    AND (%s = 1 OR COALESCE(deleted, 0) = 0)
                 ORDER BY updated_at DESC
                 LIMIT %s OFFSET %s
                 """,

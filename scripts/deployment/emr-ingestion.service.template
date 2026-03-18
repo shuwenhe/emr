@@ -1,0 +1,23 @@
+[Unit]
+Description=EMR FastAPI Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__APP_USER__
+Group=__APP_GROUP__
+WorkingDirectory=__PROJECT_ROOT__
+EnvironmentFile=-__PROJECT_ROOT__/.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=__VENV_PY__ -m uvicorn __APP_MODULE__ --host 0.0.0.0 --port __APP_PORT__
+Restart=always
+RestartSec=5
+StartLimitIntervalSec=0
+
+# Persist logs to project logs directory.
+StandardOutput=append:__PROJECT_ROOT__/logs/__SERVICE_NAME__.out.log
+StandardError=append:__PROJECT_ROOT__/logs/__SERVICE_NAME__.err.log
+
+[Install]
+WantedBy=multi-user.target

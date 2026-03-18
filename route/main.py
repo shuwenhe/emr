@@ -15,7 +15,7 @@ from pymysql.err import OperationalError
 from core.config import settings
 from core.logging import setup_logging
 from service.platform import PlatformService
-from route import emr_router, ingest_router, patients_router, platform_router, reports_router, notifications_router
+from route import emr_router, ingest_router, patients_router, platform_router, reports_router, notifications_router, events_router
 
 setup_logging(__name__)
 platform_service = PlatformService()
@@ -40,9 +40,25 @@ app.include_router(patients_router)
 app.include_router(platform_router)
 app.include_router(reports_router)
 app.include_router(notifications_router)
+app.include_router(events_router)
 
 _device_stop_event: asyncio.Event | None = None
 logger = logging.getLogger(__name__)
+
+
+@app.get("/healthz")
+async def healthz():
+    return {"status": "ok", "service": "emr-backend"}
+
+
+@app.get("/readyz")
+async def readyz():
+    try:
+        platform_service.init_db()
+        return {"status": "ready", "service": "emr-backend"}
+    except Exception as exc:
+        logger.warning("Readiness probe failed: %s", exc)
+        return JSONResponse(status_code=503, content={"status": "not_ready", "detail": "database_unavailable"})
 
 
 @app.exception_handler(OperationalError)

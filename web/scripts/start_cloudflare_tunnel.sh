@@ -30,6 +30,20 @@ find_cloudflared() {
 
 CLOUDFLARED_BIN="$(find_cloudflared)"
 
+# Use local HTTP proxy if Cloudflare API is not directly reachable.
+HTTPS_PROXY="${HTTPS_PROXY:-}"
+if [[ -z "$HTTPS_PROXY" ]]; then
+  for proxy_candidate in "http://127.0.0.1:7890" "http://127.0.0.1:1080"; do
+    if curl -sf --proxy "$proxy_candidate" --max-time 4 https://api.trycloudflare.com -o /dev/null 2>/dev/null; then
+      HTTPS_PROXY="$proxy_candidate"
+      HTTP_PROXY="$proxy_candidate"
+      echo "[INFO] Using proxy: $HTTPS_PROXY"
+      break
+    fi
+  done
+fi
+export HTTPS_PROXY HTTP_PROXY
+
 if [[ -f "$PID_FILE" ]]; then
   old_pid="$(cat "$PID_FILE" || true)"
   if [[ -n "${old_pid}" ]] && kill -0 "$old_pid" >/dev/null 2>&1; then
@@ -52,7 +66,7 @@ public_url=""
 for _ in $(seq 1 60); do
   if [[ -f "$LOG_FILE" ]]; then
     # shellcheck disable=SC2002
-    public_url="$(cat "$LOG_FILE" | grep -Eo 'https://[-a-zA-Z0-9]+\.trycloudflare\.com' | head -n 1 || true)"
+    public_url="$(cat "$LOG_FILE" | grep -Eo 'https://[-a-zA-Z0-9]+\.trycloudflare\.com' | grep -v 'api\.trycloudflare\.com' | head -n 1 || true)"
   fi
   if [[ -n "$public_url" ]]; then
     break

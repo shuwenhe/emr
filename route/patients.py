@@ -12,6 +12,7 @@ from models.schemas.api import (
     PatientUpsertRequest,
 )
 from service.platform import PlatformService
+from route.events import publish_patient_event
 
 router = APIRouter(tags=["patients"])
 platform_service = PlatformService()
@@ -71,6 +72,8 @@ async def register_patient(patient: PatientUpsertRequest):
 
     if not patient_id:
         raise HTTPException(status_code=400, detail="patient_registration_failed")
+
+    await publish_patient_event("patient_registered", patient_id)
 
     return {"patient_id": patient_id, "message": "patient_registered_successfully"}
 
