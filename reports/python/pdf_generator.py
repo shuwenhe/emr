@@ -425,12 +425,12 @@ def _rows_to_table(headers: Sequence[str], rows: Sequence[Sequence[Any]], col_wi
     return table
 
 
-def _header_footer(patient: Dict[str, Any], created_dt: datetime, unit_name: str):
+def _header_footer(patient: Dict[str, Any], header_dt: datetime, unit_name: str):
     font_name = _ensure_font()
     patient_name = _text(patient.get("name"))
     gender = _gender_cn(patient.get("gender"))
     age = _text(patient.get("age"))
-    created_text = created_dt.strftime("%Y-%m-%d %H:%M:%S")
+    created_text = header_dt.strftime("%Y-%m-%d %H:%M:%S")
 
     def draw(canvas, doc):
         canvas.saveState()
@@ -714,6 +714,6 @@ def generate_pdf_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     story.append(Spacer(1, 2 * mm))
     story.append(_paragraph("以上为热图所提示可能性，请结合临床进一步诊查。", styles["small"]))
 
-    header_footer = _header_footer(patient, created_dt, unit_name)
+    header_footer = _header_footer(patient, report_generated_dt, unit_name)
     doc.build(story, onFirstPage=header_footer, onLaterPages=header_footer)
     return output_path
