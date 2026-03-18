@@ -16,6 +16,9 @@ from __future__ import annotations
 import argparse
 import csv
 import logging
+import multiprocessing as mp_ctx
+import os
+import queue
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -169,7 +172,7 @@ def to_rgb(matrix: np.ndarray, vmin: float | None, vmax: float | None, cmap_name
     return rgb
 
 
-def detect_landmarks(rgb: np.ndarray) -> dict[str, Pt]:
+def _detect_landmarks_sync(rgb: np.ndarray, model_complexity: int) -> dict[str, tuple[float, float]]:
     try:
         import mediapipe as mp
     except ImportError as exc:
@@ -197,7 +200,7 @@ def detect_landmarks(rgb: np.ndarray) -> dict[str, Pt]:
 
     with mp_pose.Pose(
         static_image_mode=True,
-        model_complexity=2,
+        model_complexity=model_complexity,
         smooth_landmarks=False,
         enable_segmentation=False,
         min_detection_confidence=0.5,
@@ -215,25 +218,91 @@ def detect_landmarks(rgb: np.ndarray) -> dict[str, Pt]:
             y=float(np.clip(lm[idx].y * h, 0, h - 1)),
         )
 
-    landmarks = {
-        "nose": p(0),
-        "left_eye": p(2),
-        "right_eye": p(5),
-        "mouth_left": p(9),
-        "mouth_right": p(10),
-        "left_shoulder": p(11),
-        "right_shoulder": p(12),
-        "left_elbow": p(13),
-        "right_elbow": p(14),
-        "left_wrist": p(15),
-        "right_wrist": p(16),
-        "left_hip": p(23),
-        "right_hip": p(24),
-        "left_knee": p(25),
-        "right_knee": p(26),
-        "left_ankle": p(27),
-        "right_ankle": p(28),
+    return {
+        "nose": (p(0).x, p(0).y),
+        "left_eye": (p(2).x, p(2).y),
+        "right_eye": (p(5).x, p(5).y),
+        "mouth_left": (p(9).x, p(9).y),
+        "mouth_right": (p(10).x, p(10).y),
+        "left_shoulder": (p(11).x, p(11).y),
+        "right_shoulder": (p(12).x, p(12).y),
+        "left_elbow": (p(13).x, p(13).y),
+        "right_elbow": (p(14).x, p(14).y),
+        "left_wrist": (p(15).x, p(15).y),
+        "right_wrist": (p(16).x, p(16).y),
+        "left_hip": (p(23).x, p(23).y),
+        "right_hip": (p(24).x, p(24).y),
+        "left_knee": (p(25).x, p(25).y),
+        "right_knee": (p(26).x, p(26).y),
+        "left_ankle": (p(27).x, p(27).y),
+        "right_ankle": (p(28).x, p(28).y),
     }
+
+
+def _detect_landmarks_worker(
+    rgb: np.ndarray,
+    model_complexity: int,
+    result_queue: "mp_ctx.Queue[dict[str, object]]",
+) -> None:
+    try:
+        landmarks = _detect_landmarks_sync(rgb, model_complexity)
+        result_queue.put({"ok": True, "landmarks": landmarks})
+    except BaseException as exc:
+        result_queue.put({"ok": False, "error": f"{type(exc).__name__}: {exc}"})
+
+
+def detect_landmarks(rgb: np.ndarray) -> dict[str, Pt]:
+    timeout_sec = float(os.getenv("MEDIAPIPE_DETECT_TIMEOUT_SEC", "20"))
+    model_complexity = int(os.getenv("MEDIAPIPE_POSE_MODEL_COMPLEXITY", "1"))
+
+    logger.info(
+        "Starting MediaPipe pose detection model_complexity=%s timeout=%.1fs",
+        model_complexity,
+        timeout_sec,
+    )
+
+    ctx = mp_ctx.get_context("spawn")
+    result_queue = ctx.Queue(maxsize=1)
+    process = ctx.Process(
+        target=_detect_landmarks_worker,
+        args=(rgb, model_complexity, result_queue),
+        daemon=True,
+    )
+    process.start()
+    process.join(timeout_sec)
+
+    if process.is_alive():
+        process.terminate()
+        process.join(3)
+        raise RuntimeError(
+            f"MediaPipe pose detection timeout after {timeout_sec:.1f}s"
+        )
+
+    try:
+        result = result_queue.get_nowait()
+    except queue.Empty:
+        exit_code = process.exitcode
+        raise RuntimeError(
+            f"MediaPipe pose detection exited without result (exit_code={exit_code})"
+        )
+
+    if not bool(result.get("ok")):
+        raise RuntimeError(str(result.get("error") or "MediaPipe pose detection failed"))
+
+    raw_landmarks = result.get("landmarks") or {}
+    if not isinstance(raw_landmarks, dict):
+        raise RuntimeError("MediaPipe pose detection returned invalid landmarks payload")
+
+    landmarks: dict[str, Pt] = {}
+    for name, coords in raw_landmarks.items():
+        if not isinstance(name, str) or not isinstance(coords, tuple) or len(coords) != 2:
+            continue
+        landmarks[name] = Pt(x=float(coords[0]), y=float(coords[1]))
+
+    if not landmarks:
+        raise RuntimeError("MediaPipe pose detection returned empty landmarks")
+
+    logger.info("MediaPipe pose detection completed with %s landmarks", len(landmarks))
     return landmarks
 
 
