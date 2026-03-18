@@ -1371,6 +1371,15 @@ function EmrPageContent() {
     };
   }
 
+  function openPreviewInNewTab(url: string) {
+    const popup = window.open(url, "_blank", "noopener,noreferrer");
+    // Some browsers may return null even when a new tab is opened. Do not
+    // fallback to same-tab navigation to avoid opening the PDF twice.
+    if (!popup) {
+      setOutput({ error: "浏览器可能拦截了新窗口，请允许弹窗后重试" });
+    }
+  }
+
   async function handleViewDocx(url: string) {
     const lowerUrl = String(url || "").toLowerCase();
     if (!lowerUrl.endsWith(".docx")) {
@@ -1396,10 +1405,7 @@ function EmrPageContent() {
       };
 
       const previewUrl = toInlinePreviewUrl(url);
-      const popup = window.open(previewUrl, "_blank", "noopener,noreferrer");
-      if (!popup) {
-        window.location.href = previewUrl;
-      }
+      openPreviewInNewTab(previewUrl);
       return;
     }
 

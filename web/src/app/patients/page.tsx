@@ -639,6 +639,15 @@ export default function PatientsPage() {
     return `/api/reports/${encodedDate}/${encodedName}`;
   }
 
+  function openPreviewInNewTab(url: string) {
+    const popup = window.open(url, "_blank", "noopener,noreferrer");
+    // Avoid same-tab fallback because some browsers may return null while still
+    // opening a tab, which causes duplicate opens.
+    if (!popup) {
+      setReportError("浏览器可能拦截了新窗口，请允许弹窗后重试");
+    }
+  }
+
   async function handleOpenReportHistory(patient: Patient) {
     setReportLoading(true);
     setReportError(null);
@@ -707,10 +716,7 @@ export default function PatientsPage() {
     setReportError(null);
     const url = buildReportFileUrl(file);
     if (!file.name.toLowerCase().endsWith(".docx")) {
-      const popup = window.open(url, "_blank", "noopener,noreferrer");
-      if (!popup) {
-        window.location.href = url;
-      }
+      openPreviewInNewTab(url);
       return;
     }
 
@@ -731,10 +737,7 @@ export default function PatientsPage() {
     setReportError(null);
     const url = buildReportFileUrl(file);
     if (!file.name.toLowerCase().endsWith(".docx")) {
-      const popup = window.open(url, "_blank", "noopener,noreferrer");
-      if (!popup) {
-        window.location.href = url;
-      }
+      openPreviewInNewTab(url);
       return;
     }
     try {
