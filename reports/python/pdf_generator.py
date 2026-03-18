@@ -603,7 +603,7 @@ def generate_pdf_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     story.append(Spacer(1, 2 * mm))
     story.append(
         _rows_to_table(
-            ["最低温度 (℃)", "最高温度 (℃)", "平均温度 (℃)", "风险等级"],
+            ["最低温度 (°C)", "最高温度 (°C)", "平均温度 (°C)", "风险等级"],
             [[
                 _fmt_temp(metrics.get("min_c")),
                 _fmt_temp(metrics.get("max_c")),
@@ -627,7 +627,7 @@ def generate_pdf_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     if primary_image is not None:
         story.append(_make_image(primary_image, 155 * mm, 118 * mm))
         story.append(Spacer(1, 4 * mm))
-        story.append(_paragraph("※ 图中标签显示各部位均温（℃）", styles["small"]))
+        story.append(_paragraph("※ 图中标签显示各部位均温（°C）", styles["small"]))
     else:
         story.append(_paragraph("热成像图文件未找到", styles["body"]))
     story.append(PageBreak())
@@ -651,7 +651,7 @@ def generate_pdf_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     if roi_full_rows:
         story.append(
             _rows_to_table(
-                ["分组", "部位", "均温℃", "最低℃", "最高℃", "标准差"],
+                ["分组", "部位", "均温°C", "最低°C", "最高°C", "标准差"],
                 roi_full_rows,
                 [28 * mm, 32 * mm, 24 * mm, 24 * mm, 24 * mm, 24 * mm],
                 styles,
@@ -671,7 +671,7 @@ def generate_pdf_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     story.append(Spacer(1, 2 * mm))
     story.append(
         _rows_to_table(
-            ["部位", "异常类型", "均温℃", "温差℃"],
+            ["部位", "异常类型", "均温°C", "温差°C"],
             _build_summary_rows(abnormal_regions),
             [58 * mm, 34 * mm, 28 * mm, 28 * mm],
             styles,
