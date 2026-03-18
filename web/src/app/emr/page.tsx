@@ -1372,17 +1372,40 @@ function EmrPageContent() {
   }
 
   async function handleViewDocx(url: string) {
-    const proxyUrl = `/api${url}`;
     const lowerUrl = String(url || "").toLowerCase();
     if (!lowerUrl.endsWith(".docx")) {
-      const popup = window.open(proxyUrl, "_blank", "noopener,noreferrer");
+      // Force browser inline preview for PDF and other non-docx reports.
+      const toInlinePreviewUrl = (rawUrl: string) => {
+        const raw = String(rawUrl || "").trim();
+        if (!raw) return "/api/reports";
+        if (raw.startsWith("/reports/preview")) return `/api${raw}`;
+
+        const match = raw.match(/^\/reports\/([^/]+)\/(.+)$/);
+        if (!match) return `/api${raw}`;
+
+        const safeDecode = (value: string) => {
+          try {
+            return decodeURIComponent(value);
+          } catch {
+            return value;
+          }
+        };
+
+        const date = encodeURIComponent(safeDecode(match[1]));
+        const filename = encodeURIComponent(safeDecode(match[2]));
+        return `/api/reports/preview?date=${date}&filename=${filename}`;
+      };
+
+      const previewUrl = toInlinePreviewUrl(url);
+      const popup = window.open(previewUrl, "_blank", "noopener,noreferrer");
       if (!popup) {
-        window.location.href = proxyUrl;
+        window.location.href = previewUrl;
       }
       return;
     }
 
     try {
+      const proxyUrl = `/api${url}`;
       const response = await fetch(proxyUrl, { cache: "no-store" });
       const arrayBuffer = await response.arrayBuffer();
       const result = await mammoth.convertToHtml({ arrayBuffer });
@@ -1395,17 +1418,39 @@ function EmrPageContent() {
   }
 
   async function handlePrintDocx(url: string) {
-    const proxyUrl = `/api${url}`;
     const lowerUrl = String(url || "").toLowerCase();
     if (!lowerUrl.endsWith(".docx")) {
-      const popup = window.open(proxyUrl, "_blank", "noopener,noreferrer");
+      const toInlinePreviewUrl = (rawUrl: string) => {
+        const raw = String(rawUrl || "").trim();
+        if (!raw) return "/api/reports";
+        if (raw.startsWith("/reports/preview")) return `/api${raw}`;
+
+        const match = raw.match(/^\/reports\/([^/]+)\/(.+)$/);
+        if (!match) return `/api${raw}`;
+
+        const safeDecode = (value: string) => {
+          try {
+            return decodeURIComponent(value);
+          } catch {
+            return value;
+          }
+        };
+
+        const date = encodeURIComponent(safeDecode(match[1]));
+        const filename = encodeURIComponent(safeDecode(match[2]));
+        return `/api/reports/preview?date=${date}&filename=${filename}`;
+      };
+
+      const previewUrl = toInlinePreviewUrl(url);
+      const popup = window.open(previewUrl, "_blank", "noopener,noreferrer");
       if (!popup) {
-        window.location.href = proxyUrl;
+        window.location.href = previewUrl;
       }
       return;
     }
 
     try {
+      const proxyUrl = `/api${url}`;
       const response = await fetch(proxyUrl, { cache: "no-store" });
       const arrayBuffer = await response.arrayBuffer();
       const result = await mammoth.convertToHtml({ arrayBuffer });
