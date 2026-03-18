@@ -1374,33 +1374,7 @@ function EmrPageContent() {
   async function handleViewDocx(url: string) {
     const lowerUrl = String(url || "").toLowerCase();
     if (!lowerUrl.endsWith(".docx")) {
-      // Force browser inline preview for PDF and other non-docx reports.
-      const toInlinePreviewUrl = (rawUrl: string) => {
-        const raw = String(rawUrl || "").trim();
-        if (!raw) return "/api/reports";
-        if (raw.startsWith("/reports/preview")) return `/api${raw}`;
-
-        const match = raw.match(/^\/reports\/([^/]+)\/(.+)$/);
-        if (!match) return `/api${raw}`;
-
-        const safeDecode = (value: string) => {
-          try {
-            return decodeURIComponent(value);
-          } catch {
-            return value;
-          }
-        };
-
-        const date = encodeURIComponent(safeDecode(match[1]));
-        const filename = encodeURIComponent(safeDecode(match[2]));
-        return `/api/reports/preview?date=${date}&filename=${filename}`;
-      };
-
-      const previewUrl = toInlinePreviewUrl(url);
-      const popup = window.open(previewUrl, "_blank", "noopener,noreferrer");
-      if (!popup) {
-        window.location.href = previewUrl;
-      }
+      setOutput({ error: "诊断分析页仅支持 DOCX 在线查看，PDF 请使用下载按钮查看" });
       return;
     }
 
@@ -1420,32 +1394,7 @@ function EmrPageContent() {
   async function handlePrintDocx(url: string) {
     const lowerUrl = String(url || "").toLowerCase();
     if (!lowerUrl.endsWith(".docx")) {
-      const toInlinePreviewUrl = (rawUrl: string) => {
-        const raw = String(rawUrl || "").trim();
-        if (!raw) return "/api/reports";
-        if (raw.startsWith("/reports/preview")) return `/api${raw}`;
-
-        const match = raw.match(/^\/reports\/([^/]+)\/(.+)$/);
-        if (!match) return `/api${raw}`;
-
-        const safeDecode = (value: string) => {
-          try {
-            return decodeURIComponent(value);
-          } catch {
-            return value;
-          }
-        };
-
-        const date = encodeURIComponent(safeDecode(match[1]));
-        const filename = encodeURIComponent(safeDecode(match[2]));
-        return `/api/reports/preview?date=${date}&filename=${filename}`;
-      };
-
-      const previewUrl = toInlinePreviewUrl(url);
-      const popup = window.open(previewUrl, "_blank", "noopener,noreferrer");
-      if (!popup) {
-        window.location.href = previewUrl;
-      }
+      setOutput({ error: "诊断分析页仅支持 DOCX 打印，PDF 请使用下载按钮" });
       return;
     }
 
@@ -2019,9 +1968,15 @@ function EmrPageContent() {
                         </td>
                         <td className="px-4 py-2">
                           <div className="flex flex-wrap gap-2">
+                            {(() => {
+                              const isDocx = file.name.toLowerCase().endsWith(".docx");
+                              return (
+                                <>
                             <button
-                              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                               onClick={() => handleViewDocx(file.url)}
+                              disabled={!isDocx}
+                              title={isDocx ? "" : "PDF 请使用下载按钮"}
                             >
                               查看
                             </button>
@@ -2034,11 +1989,16 @@ function EmrPageContent() {
                               下载
                             </a>
                             <button
-                              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                               onClick={() => handlePrintDocx(file.url)}
+                              disabled={!isDocx}
+                              title={isDocx ? "" : "PDF 请使用下载按钮"}
                             >
                               打印
                             </button>
+                                </>
+                              );
+                            })()}
                           </div>
                         </td>
                       </tr>
