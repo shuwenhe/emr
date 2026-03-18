@@ -515,7 +515,7 @@ def generate_pdf_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     if not isinstance(abnormal_regions, list):
         abnormal_regions = []
 
-    unit_name = _text(emr.get("hospital") or emr.get("unit") or "亘颐（上海）科技有限公司")
+    unit_name = _text(emr.get("hospital") or emr.get("unit") or "张氏疼痛外治中心")
     system_name = "红外影像云平台-红外影像热层析系统"
 
     image_candidates: List[Path] = []

@@ -314,7 +314,7 @@ def _build_tables(
             "性别": _gender_cn(patient.get("gender")),
             "年龄": _text(patient.get("age")),
             "日期": created_dt.strftime("%Y-%m-%d"),
-            "单位名称": _text(emr.get("hospital") or emr.get("unit") or "亘颐（上海）科技有限公司"),
+            "单位名称": _text(emr.get("hospital") or emr.get("unit") or "张氏疼痛外治中心"),
             "系统名称": "红外影像云平台-红外影像热层析系统",
             "报告标题": "红外热成像评估报告",
             "英文标题": "INFRARED THERMAL IMAGEING HEALTH REPORT",
