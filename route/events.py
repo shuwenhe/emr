@@ -75,3 +75,89 @@ async def patient_events(request: Request):
         "X-Accel-Buffering": "no",
     }
     return StreamingResponse(event_generator(), media_type="text/event-stream", headers=headers)
+
+
+# ---------------------------------------------------------------------------
+# Ingest progress broker — per-record_id SSE fan-out
+# ---------------------------------------------------------------------------
+
+class _IngestProgressBroker:
+    """Fan-out SSE broker keyed by record_id, safe to call from async context."""
+
+    def __init__(self) -> None:
+        self._subscribers: dict[str, set[asyncio.Queue[str]]] = {}
+        self._lock = asyncio.Lock()
+
+    async def subscribe(self, record_id: str) -> asyncio.Queue[str]:
+        queue: asyncio.Queue[str] = asyncio.Queue(maxsize=50)
+        async with self._lock:
+            self._subscribers.setdefault(record_id, set()).add(queue)
+        return queue
+
+    async def unsubscribe(self, record_id: str, queue: asyncio.Queue[str]) -> None:
+        async with self._lock:
+            subs = self._subscribers.get(record_id)
+            if subs:
+                subs.discard(queue)
+                if not subs:
+                    del self._subscribers[record_id]
+
+    async def publish(self, record_id: str, payload: dict[str, Any]) -> None:
+        message = f"event: progress\ndata: {json.dumps(payload, separators=(',', ':'))}\n\n"
+        async with self._lock:
+            queues = list(self._subscribers.get(record_id, set()))
+        for queue in queues:
+            try:
+                queue.put_nowait(message)
+            except asyncio.QueueFull:
+                continue
+
+
+_ingest_broker = _IngestProgressBroker()
+
+
+async def publish_ingest_progress(
+    record_id: str,
+    step: int,
+    label: str,
+    pct: int,
+    status: str = "running",
+) -> None:
+    payload = {
+        "record_id": record_id,
+        "step": step,
+        "label": label,
+        "pct": pct,
+        "status": status,
+        "ts": datetime.now(timezone.utc).isoformat(),
+    }
+    await _ingest_broker.publish(record_id, payload)
+
+
+@router.get("/events/ingest-progress/{record_id}")
+async def ingest_progress_events(record_id: str, request: Request):
+    queue = await _ingest_broker.subscribe(record_id)
+
+    async def event_generator():
+        try:
+            ready_payload = json.dumps(
+                {"record_id": record_id, "status": "connected"}, separators=(",", ":")
+            )
+            yield f"event: ready\ndata: {ready_payload}\n\n"
+            while True:
+                if await request.is_disconnected():
+                    break
+                try:
+                    message = await asyncio.wait_for(queue.get(), timeout=20)
+                    yield message
+                except TimeoutError:
+                    yield ": keepalive\n\n"
+        finally:
+            await _ingest_broker.unsubscribe(record_id, queue)
+
+    headers = {
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no",
+    }
+    return StreamingResponse(event_generator(), media_type="text/event-stream", headers=headers)

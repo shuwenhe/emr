@@ -167,6 +167,9 @@ def _build_patient_folder_signature(patient_dir: Path) -> str:
             digest.update(str(stat.st_size).encode("utf-8"))
             digest.update(b"|")
             digest.update(str(stat.st_mtime_ns).encode("utf-8"))
+            digest.update(b"|")
+            # Include ctime so regenerated/copied files with preserved mtime are still detected.
+            digest.update(str(stat.st_ctime_ns).encode("utf-8"))
             digest.update(b";")
         except FileNotFoundError:
             continue
@@ -607,35 +610,108 @@ async def poll_device_drop(stop_event: asyncio.Event) -> None:
     global _current_patient_folder, _current_patient_folder_file_count
 
     while not stop_event.is_set():
-        ingest_pending_captures()
+        try:
+            await asyncio.to_thread(ingest_pending_captures)
 
-        # Priority 1: Check if current patient folder has new files added
-        if (
-            _current_patient_folder
-            and _current_patient_folder.exists()
-            and _current_patient_folder.is_dir()
-        ):
-            current_data_files = _find_data_files(_current_patient_folder)
-            current_file_count = len(current_data_files)
-            needs_analysis, current_signature = _patient_folder_needs_analysis(_current_patient_folder)
+            # Priority 1: Check if current patient folder has new files added
+            if (
+                _current_patient_folder
+                and _current_patient_folder.exists()
+                and _current_patient_folder.is_dir()
+            ):
+                current_data_files = _find_data_files(_current_patient_folder)
+                current_file_count = len(current_data_files)
+                needs_analysis, current_signature = _patient_folder_needs_analysis(_current_patient_folder)
 
-            # Re-ingest only when folder contents have changed.
-            if needs_analysis:
+                # Re-ingest only when folder contents have changed.
+                if needs_analysis:
+                    logger.info(
+                        "detected_folder_change folder=%s old_count=%d new_count=%d",
+                        _current_patient_folder.name,
+                        _current_patient_folder_file_count,
+                        current_file_count,
+                    )
+                    try:
+                        result = await asyncio.to_thread(ingest_patient_dir, _current_patient_folder)
+                        record_id = str(result.get("record_id") or "")
+                        emr_id = ""
+                        if record_id:
+                            emr_result = await asyncio.to_thread(_auto_generate_emr_report, record_id)
+                            result["auto_emr"] = emr_result
+                            emr_id = str(emr_result.get("emr_id") or "")
+
+                            # Send notification if EMR generation was successful
+                            if emr_result.get("status") == "generated":
+                                patient_id = str(emr_result.get("patient_id") or "")
+                                if emr_id and patient_id:
+                                    await _send_emr_notification(record_id, emr_id, patient_id)
+
+                        _write_patient_folder_state(
+                            _current_patient_folder,
+                            signature=current_signature,
+                            record_id=record_id,
+                            emr_id=emr_id,
+                        )
+
+                        _current_patient_folder_file_count = current_file_count
+                        logger.info(
+                            "re_ingested_patient_folder=%s record_id=%s",
+                            _current_patient_folder.name,
+                            record_id,
+                        )
+                    except DeviceCaptureError as e:
+                        logger.warning(
+                            "failed_to_reingest patient_folder=%s error=%s",
+                            _current_patient_folder.name,
+                            e,
+                        )
+
+                    # Continue monitoring current folder
+                    try:
+                        await asyncio.wait_for(
+                            stop_event.wait(), timeout=DEVICE_POLL_INTERVAL_SEC
+                        )
+                    except asyncio.TimeoutError:
+                        continue
+                    continue
+
+            # Priority 2: Scan for new patient folders
+            pending, skipped = scan_patient_drop()
+
+            if pending:
+                # Prefer folders that changed since last successful analysis.
+                changed_candidates: List[Tuple[Path, str]] = []
+                for folder in pending:
+                    needs_analysis, signature = _patient_folder_needs_analysis(folder)
+                    if needs_analysis:
+                        changed_candidates.append((folder, signature))
+
+                if not changed_candidates:
+                    try:
+                        await asyncio.wait_for(stop_event.wait(), timeout=DEVICE_POLL_INTERVAL_SEC)
+                    except asyncio.TimeoutError:
+                        continue
+                    continue
+
+                # New/changed patient folder(s) detected, switch to first changed one
+                new_patient_dir, new_signature = changed_candidates[0]
+                new_data_files = _find_data_files(new_patient_dir)
+
                 logger.info(
-                    "detected_folder_change folder=%s old_count=%d new_count=%d",
-                    _current_patient_folder.name,
-                    _current_patient_folder_file_count,
-                    current_file_count,
+                    "switching_to_new_patient_folder folder=%s file_count=%d",
+                    new_patient_dir.name,
+                    len(new_data_files),
                 )
+
                 try:
-                    result = ingest_patient_dir(_current_patient_folder)
+                    result = await asyncio.to_thread(ingest_patient_dir, new_patient_dir)
                     record_id = str(result.get("record_id") or "")
                     emr_id = ""
                     if record_id:
-                        emr_result = _auto_generate_emr_report(record_id)
+                        emr_result = await asyncio.to_thread(_auto_generate_emr_report, record_id)
                         result["auto_emr"] = emr_result
                         emr_id = str(emr_result.get("emr_id") or "")
-                        
+
                         # Send notification if EMR generation was successful
                         if emr_result.get("status") == "generated":
                             patient_id = str(emr_result.get("patient_id") or "")
@@ -643,102 +719,32 @@ async def poll_device_drop(stop_event: asyncio.Event) -> None:
                                 await _send_emr_notification(record_id, emr_id, patient_id)
 
                     _write_patient_folder_state(
-                        _current_patient_folder,
-                        signature=current_signature,
+                        new_patient_dir,
+                        signature=new_signature,
                         record_id=record_id,
                         emr_id=emr_id,
                     )
-                    
-                    _current_patient_folder_file_count = current_file_count
+
+                    # Update state to track this new folder
+                    _current_patient_folder = new_patient_dir
+                    _current_patient_folder_file_count = len(new_data_files)
+
                     logger.info(
-                        "re_ingested_patient_folder=%s record_id=%s",
-                        _current_patient_folder.name,
+                        "ingested_new_patient_folder=%s record_id=%s",
+                        new_patient_dir.name,
                         record_id,
                     )
                 except DeviceCaptureError as e:
                     logger.warning(
-                        "failed_to_reingest patient_folder=%s error=%s",
-                        _current_patient_folder.name,
+                        "failed_to_ingest new patient_folder=%s error=%s",
+                        new_patient_dir.name,
                         e,
                     )
-
-                # Continue monitoring current folder
-                try:
-                    await asyncio.wait_for(
-                        stop_event.wait(), timeout=DEVICE_POLL_INTERVAL_SEC
-                    )
-                except asyncio.TimeoutError:
-                    continue
-                continue
-
-        # Priority 2: Scan for new patient folders
-        pending, skipped = scan_patient_drop()
-
-        if pending:
-            # Prefer folders that changed since last successful analysis.
-            changed_candidates: List[Tuple[Path, str]] = []
-            for folder in pending:
-                needs_analysis, signature = _patient_folder_needs_analysis(folder)
-                if needs_analysis:
-                    changed_candidates.append((folder, signature))
-
-            if not changed_candidates:
-                try:
-                    await asyncio.wait_for(stop_event.wait(), timeout=DEVICE_POLL_INTERVAL_SEC)
-                except asyncio.TimeoutError:
-                    continue
-                continue
-
-            # New/changed patient folder(s) detected, switch to first changed one
-            new_patient_dir, new_signature = changed_candidates[0]
-            new_data_files = _find_data_files(new_patient_dir)
-
-            logger.info(
-                "switching_to_new_patient_folder folder=%s file_count=%d",
-                new_patient_dir.name,
-                len(new_data_files),
-            )
-
-            try:
-                result = ingest_patient_dir(new_patient_dir)
-                record_id = str(result.get("record_id") or "")
-                emr_id = ""
-                if record_id:
-                    emr_result = _auto_generate_emr_report(record_id)
-                    result["auto_emr"] = emr_result
-                    emr_id = str(emr_result.get("emr_id") or "")
-                    
-                    # Send notification if EMR generation was successful
-                    if emr_result.get("status") == "generated":
-                        patient_id = str(emr_result.get("patient_id") or "")
-                        if emr_id and patient_id:
-                            await _send_emr_notification(record_id, emr_id, patient_id)
-
-                _write_patient_folder_state(
-                    new_patient_dir,
-                    signature=new_signature,
-                    record_id=record_id,
-                    emr_id=emr_id,
-                )
-
-                # Update state to track this new folder
-                _current_patient_folder = new_patient_dir
-                _current_patient_folder_file_count = len(new_data_files)
-
-                logger.info(
-                    "ingested_new_patient_folder=%s record_id=%s",
-                    new_patient_dir.name,
-                    record_id,
-                )
-            except DeviceCaptureError as e:
-                logger.warning(
-                    "failed_to_ingest new patient_folder=%s error=%s",
-                    new_patient_dir.name,
-                    e,
-                )
-                # Still track it to avoid re-scanning same failed folder
-                _current_patient_folder = new_patient_dir
-                _current_patient_folder_file_count = len(new_data_files)
+                    # Still track it to avoid re-scanning same failed folder
+                    _current_patient_folder = new_patient_dir
+                    _current_patient_folder_file_count = len(new_data_files)
+        except Exception as exc:
+            logger.exception("poll_device_drop unexpected_error=%s", exc)
 
         try:
             await asyncio.wait_for(stop_event.wait(), timeout=DEVICE_POLL_INTERVAL_SEC)

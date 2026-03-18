@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import uuid
 from datetime import datetime
 
@@ -112,8 +113,18 @@ def update_patient_endpoint(patient_id: str, request: PatientUpsertRequest):
 
 
 @router.post("/patients/{patient_id}/archive")
-def archive_patient_endpoint(patient_id: str, request: PatientArchiveRequest):
-    updated = platform_service.archive_patient(patient_id, request.archived)
+async def archive_patient_endpoint(patient_id: str, request: PatientArchiveRequest):
+    # Run blocking DB work in a thread so async endpoints stay responsive.
+    updated = await asyncio.to_thread(
+        platform_service.archive_patient,
+        patient_id,
+        request.archived,
+    )
     if not updated:
         raise HTTPException(status_code=404, detail="patient_not_found")
+    # Best-effort event publish: do not hold API response on slow SSE clients.
+    try:
+        await asyncio.wait_for(publish_patient_event("patient_archived", patient_id), timeout=0.5)
+    except Exception:
+        pass
     return updated

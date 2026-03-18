@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+export const dynamic = "force-dynamic";
+
+import { Suspense, useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 
@@ -44,7 +46,7 @@ type ComparisonResult = {
 
 const API_BASE = "http://localhost:8000";
 
-export default function ComparisonPage() {
+function ComparisonPageContent() {
   const searchParams = useSearchParams();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [selectedPatientId, setSelectedPatientId] = useState("");
@@ -983,5 +985,13 @@ export default function ComparisonPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function ComparisonPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-slate-500">加载中...</div>}>
+      <ComparisonPageContent />
+    </Suspense>
   );
 }

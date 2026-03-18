@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+export const dynamic = "force-dynamic";
+
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { flashSuccessButton } from "../lib/flash";
 
@@ -14,7 +16,7 @@ type Patient = {
 const API_BASE = "http://localhost:8000";
 const UPLOAD_STATE_KEY = "patient_flow_state_upload";
 
-export default function UploadPage() {
+function UploadPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [files, setFiles] = useState<File[]>([]);
@@ -43,6 +45,8 @@ export default function UploadPage() {
   const [reportGenerating, setReportGenerating] = useState(false);
   const [reportProgress, setReportProgress] = useState(0);
   const [reportStatus, setReportStatus] = useState("");
+  const [currentStep, setCurrentStep] = useState(0);
+  const autoSelectedFromUrlRef = useRef(false);
 
   useEffect(() => {
     fetchPatients();
@@ -67,6 +71,24 @@ export default function UploadPage() {
       setPatientsLoading(false);
     }
   }
+
+  // Auto-select patient when navigated from self-register QR flow
+  useEffect(() => {
+    if (autoSelectedFromUrlRef.current) return;
+    const patientId = searchParams.get("patient_id");
+    if (patientId && patients.length > 0) {
+      autoSelectedFromUrlRef.current = true;
+      setPatientMode("existing");
+      setSelectedPatientId(patientId);
+      const patient = patients.find(p => p.patient_id === patientId);
+      if (patient) {
+        setPatientName(patient.name);
+        const gv = patient.gender === "男" ? "male" : patient.gender === "女" ? "female" : patient.gender;
+        setGender(gv);
+        setAge(String(patient.age));
+      }
+    }
+  }, [patients, searchParams]);
 
   useEffect(() => {
     const name = searchParams.get("name") || "";
@@ -161,6 +183,7 @@ export default function UploadPage() {
     setReportGenerating(false);
     setReportProgress(0);
     setReportStatus("");
+    setCurrentStep(0);
 
     const metadata = {
       device: {
@@ -241,59 +264,74 @@ export default function UploadPage() {
     }
   }
 
-  async function checkReportGeneration(recordId: string) {
-    const startTime = Date.now();
-    const maxWaitTime = 30000; // 最多等待30秒
-    const pollInterval = 1000; // 每秒轮询一次
-    
-    // 模拟进度更新
-    const progressInterval = setInterval(() => {
-      setReportProgress((prev) => {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(90, (elapsed / maxWaitTime) * 100);
-        
-        // 根据进度更新状态提示
-        if (progress < 20) {
-          setReportStatus("正在分析热成像数据...");
-        } else if (progress < 50) {
-          setReportStatus("正在生成诊断结论...");
-        } else if (progress < 80) {
-          setReportStatus("正在生成治疗方案...");
-        } else {
-          setReportStatus("正在生成报告文档...");
-        }
-        
-        return progress;
-      });
-    }, 100);
+  function checkReportGeneration(recordId: string): Promise<void> {
+    return new Promise((resolve) => {
+      setReportProgress(10);
+      setCurrentStep(1);
+      setReportStatus("数据上传完成，后台开始分析...");
 
-    // 轮询检查报告是否生成完成
-    while (Date.now() - startTime < maxWaitTime) {
-      try {
-        const response = await fetch(`${API_BASE}/emr?record_id=${recordId}`);
-        if (response.ok) {
-          const emrData = await response.json();
-          if (emrData && emrData.emr_id) {
-            // 报告生成完成
-            clearInterval(progressInterval);
+      const source = new EventSource(`${API_BASE}/events/ingest-progress/${recordId}`);
+
+      const timeoutId = window.setTimeout(() => {
+        source.close();
+        setReportProgress(100);
+        setReportStatus("分析已在后台进行，稍后可查看报告");
+        setReportGenerating(false);
+        resolve();
+      }, 90_000);
+
+      source.addEventListener("progress", (e: MessageEvent) => {
+        try {
+          const data = JSON.parse(e.data) as {
+            step: number;
+            label: string;
+            pct: number;
+            status: string;
+          };
+          setReportProgress(data.pct ?? 0);
+          setReportStatus(data.label ?? "");
+          setCurrentStep(data.step ?? 0);
+          if (data.pct >= 100 || data.status === "complete") {
+            clearTimeout(timeoutId);
+            source.close();
             setReportProgress(100);
-            setReportStatus("报告生成完成！");
             setReportGenerating(false);
-            return;
+            resolve();
           }
+        } catch {
+          // ignore parse errors
         }
-      } catch {
-        // 继续轮询
-      }
-      
-      await new Promise(resolve => setTimeout(resolve, pollInterval));
-    }
-    
-    // 超时
-    clearInterval(progressInterval);
-    setReportProgress(100);
-    setReportStatus("报告生成中，请稍后查看...");
-    setReportGenerating(false);
+      });
+
+      source.onerror = () => {
+        source.close();
+        clearTimeout(timeoutId);
+        const start = Date.now();
+        const poll = setInterval(async () => {
+          try {
+            const res = await fetch(`${API_BASE}/emr?record_id=${recordId}`);
+            if (res.ok) {
+              const d = await res.json() as { emr_id?: string };
+              if (d?.emr_id) {
+                clearInterval(poll);
+                setReportProgress(100);
+                setReportStatus("报告生成完成！");
+                setReportGenerating(false);
+                resolve();
+                return;
+              }
+            }
+          } catch { /* ignore */ }
+          if (Date.now() - start > 90_000) {
+            clearInterval(poll);
+            setReportProgress(100);
+            setReportStatus("分析已在后台进行，稍后可查看报告");
+            setReportGenerating(false);
+            resolve();
+          }
+        }, 2000);
+      };
+    });
   }
 
   return (
@@ -565,17 +603,55 @@ export default function UploadPage() {
 
           {reportGenerating && (
             <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-semibold text-blue-900">报告生成中</p>
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-sm font-semibold text-blue-900">分析进度</p>
                 <p className="text-sm font-semibold text-blue-700">{Math.round(reportProgress)}%</p>
               </div>
-              <div className="w-full bg-blue-200 rounded-full h-2.5 mb-2">
-                <div 
-                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+              <div className="mb-3 h-2 w-full rounded-full bg-blue-200">
+                <div
+                  className="h-2 rounded-full bg-blue-600 transition-all duration-500 ease-out"
                   style={{ width: `${reportProgress}%` }}
-                ></div>
+                />
               </div>
-              <p className="text-xs text-blue-700">{reportStatus}</p>
+              <ol className="space-y-1.5">
+                {[
+                  { step: 1, label: "数据入库" },
+                  { step: 2, label: "热成像分析" },
+                  { step: 3, label: "电子病历生成" },
+                  { step: 4, label: "AI诊断报告" },
+                  { step: 5, label: "治疗方案" },
+                ].map(({ step, label }) => {
+                  const active = currentStep === step;
+                  const done = currentStep > step || reportProgress >= 100;
+                  return (
+                    <li key={step} className="flex items-center gap-2 text-xs">
+                      <span
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+                          done
+                            ? "bg-blue-600 text-white"
+                            : active
+                            ? "animate-pulse bg-blue-400 text-white"
+                            : "bg-blue-100 text-blue-400"
+                        }`}
+                      >
+                        {done ? "✓" : step}
+                      </span>
+                      <span
+                        className={
+                          done
+                            ? "font-medium text-blue-800"
+                            : active
+                            ? "text-blue-700"
+                            : "text-blue-400"
+                        }
+                      >
+                        {label}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ol>
+              <p className="mt-2 text-xs italic text-blue-700">{reportStatus}</p>
             </div>
           )}
 
@@ -605,5 +681,13 @@ export default function UploadPage() {
         </section>
       </main>
     </div>
+  );
+}
+
+export default function UploadPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-slate-500">加载中...</div>}>
+      <UploadPageContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+export const dynamic = "force-dynamic";
+
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import mammoth from "mammoth";
 import { flashSuccessButton } from "../lib/flash";
@@ -66,7 +68,7 @@ const API_BASE = "http://localhost:8000";
 const EMR_STATE_KEY = "patient_flow_state_emr";
 const REPORTS_PAGE_SIZE = 10;
 
-export default function EmrPage() {
+function EmrPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [recordId, setRecordId] = useState("");
@@ -2034,5 +2036,13 @@ export default function EmrPage() {
         `}</style>
       </main>
     </div>
+  );
+}
+
+export default function EmrPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-slate-500">加载中...</div>}>
+      <EmrPageContent />
+    </Suspense>
   );
 }

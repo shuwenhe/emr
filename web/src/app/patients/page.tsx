@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import mammoth from "mammoth";
@@ -94,6 +94,8 @@ function parseReportDay(value: string): Date {
   return new Date(raw);
 }
 const PATIENTS_STATE_KEY = "patient_flow_state_patients";
+const PAGE_SIZE = 30;
+const MIN_REFRESH_INTERVAL_MS = 1200;
 const PATIENT_FLOW_KEYS = [
   "patient_flow_state_patients",
   "patient_flow_state_upload",
@@ -128,6 +130,7 @@ export default function PatientsPage() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [archivingPatientId, setArchivingPatientId] = useState<string | null>(null);
   const [formData, setFormData] = useState<NewPatient>({
     name: "",
     gender: "男",
@@ -146,6 +149,8 @@ export default function PatientsPage() {
   const [birthMonth, setBirthMonth] = useState("");
   const [birthDay, setBirthDay] = useState("");
   const patientsVersionRef = useRef("");
+  const refreshInFlightRef = useRef(false);
+  const lastRefreshAtRef = useRef(0);
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 100 }, (_, i) => String(currentYear - i));
   const months = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0"));
@@ -330,24 +335,38 @@ export default function PatientsPage() {
     if (loading) return;
     setLoading(true);
     try {
-      if (reset || pageNum === 1) {
-        // 只获取已注册的患者，不从EMR补充
-        const allPatientsResponse = await fetch(`${API_BASE}/patients?page=1&limit=10000`);
-        const allRegisteredPatients = await allPatientsResponse.json();
-        
-        if (Array.isArray(allRegisteredPatients)) {
-          setPatients(allRegisteredPatients);
-        } else {
-          setPatients([]);
-        }
-        
-        setPage(1);
-        setHasMore(false);
+      const response = await fetch(`${API_BASE}/patients?page=${pageNum}&limit=${PAGE_SIZE}`, {
+        cache: "no-store",
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
       }
+
+      const data = await response.json();
+      const nextPageRows = Array.isArray(data) ? (data as Patient[]) : [];
+
+      if (reset || pageNum === 1) {
+        setPatients(nextPageRows);
+      } else {
+        setPatients((prev) => {
+          const merged = [...prev, ...nextPageRows];
+          const seen = new Set<string>();
+          return merged.filter((item) => {
+            if (seen.has(item.patient_id)) return false;
+            seen.add(item.patient_id);
+            return true;
+          });
+        });
+      }
+
+      setPage(pageNum);
+      setHasMore(nextPageRows.length >= PAGE_SIZE);
     } catch (error) {
       console.error("获取患者列表失败:", error);
       if (reset) {
         setPatients([]);
+        setPage(1);
+        setHasMore(false);
       }
     } finally {
       setLoading(false);
@@ -356,9 +375,15 @@ export default function PatientsPage() {
 
   const refreshPatientsIfChanged = useCallback(async () => {
     if (typeof document !== "undefined" && document.hidden) return;
+    const now = Date.now();
+    if (refreshInFlightRef.current) return;
+    if (now - lastRefreshAtRef.current < MIN_REFRESH_INTERVAL_MS) return;
+    refreshInFlightRef.current = true;
+    lastRefreshAtRef.current = now;
 
     try {
-      const response = await fetch(`${API_BASE}/patients?page=1&limit=10000`, { cache: "no-store" });
+      // 高频刷新仅检查第一页，避免每次拉取全量历史患者
+      const response = await fetch(`${API_BASE}/patients?page=1&limit=${PAGE_SIZE}`, { cache: "no-store" });
       if (!response.ok) return;
 
       const data = await response.json();
@@ -372,7 +397,7 @@ export default function PatientsPage() {
 
       setPatients(nextPatients);
       setPage(1);
-      setHasMore(false);
+      setHasMore(nextPatients.length >= PAGE_SIZE);
 
       setSelectedPatient((prev) => {
         if (!prev) return prev;
@@ -381,6 +406,8 @@ export default function PatientsPage() {
       });
     } catch {
       // auto-refresh failures are non-blocking
+    } finally {
+      refreshInFlightRef.current = false;
     }
   }, []);
 
@@ -397,9 +424,18 @@ export default function PatientsPage() {
         refreshPatientsIfChanged();
       };
 
-      const onPatientRegistered = () => {
+      const onPatientRegistered = (event: MessageEvent) => {
         if (showWechatQr) {
           setShowWechatQr(false);
+        }
+        try {
+          const data = JSON.parse(event.data) as { patient_id?: string };
+          if (data.patient_id) {
+            router.push(`/upload?patient_id=${encodeURIComponent(data.patient_id)}`);
+            return;
+          }
+        } catch {
+          // fallback: just refresh list
         }
         refreshPatientsIfChanged();
       };
@@ -435,7 +471,7 @@ export default function PatientsPage() {
   useEffect(() => {
     const timer = window.setInterval(() => {
       refreshPatientsIfChanged();
-    }, 15000);
+    }, 30000);
 
     const onFocus = () => {
       refreshPatientsIfChanged();
@@ -721,6 +757,8 @@ export default function PatientsPage() {
   async function handleArchivePatient(patient: Patient) {
     const confirmed = window.confirm(`确认归档患者“${patient.name || patient.patient_id}”吗？`);
     if (!confirmed) return;
+    if (archivingPatientId) return;
+    setArchivingPatientId(patient.patient_id);
     try {
       const response = await fetch(`${API_BASE}/patients/${encodeURIComponent(patient.patient_id)}/archive`, {
         method: "POST",
@@ -728,16 +766,20 @@ export default function PatientsPage() {
         body: JSON.stringify({ archived: true }),
       });
       if (!response.ok) {
-        throw new Error("归档失败");
+        const detailText = await response.text().catch(() => "");
+        throw new Error(`归档失败 (HTTP ${response.status})${detailText ? `: ${detailText}` : ""}`);
       }
       setPatients((prev) => prev.filter((item) => item.patient_id !== patient.patient_id));
       if (selectedPatient?.patient_id === patient.patient_id) {
         setSelectedPatient(null);
         setShowDetailModal(false);
       }
+      await refreshPatientsIfChanged();
       flashSuccessButton();
     } catch (error) {
       alert(`归档失败: ${error instanceof Error ? error.message : "未知错误"}`);
+    } finally {
+      setArchivingPatientId(null);
     }
   }
 
@@ -818,16 +860,16 @@ export default function PatientsPage() {
     setFormData(prev => ({ ...prev, [field]: value }));
   }
 
-  const filteredPatients = patients.filter((p) => {
-    if (!searchQuery) return true;
+  const filteredPatients = useMemo(() => {
+    if (!searchQuery) return patients;
     const query = searchQuery.toLowerCase();
-    return (
+    return patients.filter((p) => (
       (p.patient_id && p.patient_id.toLowerCase().includes(query)) ||
       (p.name && p.name.toLowerCase().includes(query)) ||
       (p.id_card && p.id_card.toLowerCase().includes(query)) ||
       (p.phone && p.phone.includes(query))
-    );
-  });
+    ));
+  }, [patients, searchQuery]);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -923,9 +965,10 @@ export default function PatientsPage() {
                           </button>
                           <button
                             className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50 whitespace-nowrap"
+                            disabled={archivingPatientId === patient.patient_id}
                             onClick={() => handleArchivePatient(patient)}
                           >
-                            归档
+                            {archivingPatientId === patient.patient_id ? "归档中..." : "归档"}
                           </button>
                         </div>
                       </td>
