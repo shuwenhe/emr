@@ -12,6 +12,18 @@ const REQUEST_TIMEOUT_MS = 45000;
 const REPORT_FILE_TIMEOUT_MS = 180000;
 const IDEMPOTENT_RETRY_DELAYS_MS = [200, 600];
 
+function safeDecodeSegment(segment: string) {
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return segment;
+  }
+}
+
+function normalizePathSegments(pathSegments: string[]) {
+  return pathSegments.map((segment) => safeDecodeSegment(String(segment || "")));
+}
+
 function resolveBackendBaseUrl() {
   const envBase = process.env.BACKEND_API_URL?.trim() || process.env.NEXT_PUBLIC_API_URL?.trim();
   if (envBase) {
@@ -227,16 +239,17 @@ async function fetchWithTimeout(target: string, init: RequestInit, timeoutMs: nu
 
 async function proxyRequest(method: string, request: Request, params: RouteParams) {
   const { path = [] } = await params.params;
-  const localResponse = await tryServeLocalReport(request, method, path);
+  const normalizedPath = normalizePathSegments(path);
+  const localResponse = await tryServeLocalReport(request, method, normalizedPath);
   if (localResponse) {
     return localResponse;
   }
 
-  const target = buildTargetUrl(request, path);
+  const target = buildTargetUrl(request, normalizedPath);
   const headers = createProxyHeaders(request);
-  const joinedPath = path.join("/").toLowerCase();
+  const joinedPath = normalizedPath.join("/").toLowerCase();
   const isReportFileRequest =
-    path.length >= 2 &&
+    normalizedPath.length >= 2 &&
     /\.(pdf|docx|doc|txt)$/.test(joinedPath);
 
   let body: string | undefined;
