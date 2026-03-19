@@ -330,7 +330,7 @@ auto-commit-status:
 logs: logs-backend
 
 logs-backend:
-	@journalctl --user -u emr-backend -f
+	@bash -c 'tail -f "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log"'
 
 logs-frontend:
 	@journalctl --user -u emr-frontend -f
@@ -339,7 +339,7 @@ logs-auto-git-push:
 	@journalctl --user -u emr-auto-git-push -f
 
 logs-all:
-	@journalctl --user -u emr-backend -u emr-frontend -u emr-auto-git-push -f
+	@bash -c 'tail -f "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log" "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"'
 
 logs-file-backend:
 	@bash -c 'tail -f "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log"'
