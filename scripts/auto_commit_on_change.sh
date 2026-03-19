@@ -184,9 +184,9 @@ build_commit_message() {
 
   local subject
   if [[ -n "$COMMIT_SCOPE" ]]; then
-    subject="${commit_type}(${COMMIT_SCOPE}): summarize code updates (${file_count} files, ${feature_count} areas)"
+    subject="${commit_type}(${COMMIT_SCOPE}): summarize code updates"
   else
-    subject="${commit_type}: summarize code updates (${file_count} files, ${feature_count} areas)"
+    subject="${commit_type}: summarize code updates"
   fi
 
   local body="Main changes:\n"
