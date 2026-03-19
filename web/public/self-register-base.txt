@@ -1,1 +1,1 @@
-https://stripes-got-transcripts-duke.trycloudflare.com
+http://192.168.128.13:3000
