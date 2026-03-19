@@ -538,6 +538,11 @@ def update_emr(emr_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
         except Exception:
             emr.setdefault("warnings", []).append("report_db_save_failed")
         try:
+            # Force regeneration so PDF/DOCX reflects the latest diagnosis &
+            # doctor_opinion (which may have just been updated by the AI step).
+            for _path_key in ("pdf_report_path", "docx_report_path"):
+                emr.pop(_path_key, None)
+                report.pop(_path_key, None)
             _generate_report_outputs(report, emr, require_primary=False)
         except Exception:
             emr.setdefault("warnings", []).append("report_generate_failed")
