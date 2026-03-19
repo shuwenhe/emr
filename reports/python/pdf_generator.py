@@ -167,11 +167,23 @@ def _severity_from_value(value: Any) -> str:
 
 
 _ADVICE_NUM_RE = re.compile(r"^\s*(?:\d+[.、。)）]\s*)+")
+_ADVICE_REF_RE = re.compile(r"\[(?:\s*\d+\s*(?:,\s*\d+\s*)*)\]")
+_ADVICE_NOISE_RE = re.compile(r"\[\s*['\"]?\s*['\"]?(?:\s*,\s*['\"]?\s*['\"]?)*\s*\]")
 
 
 def _strip_advice_num(line: str) -> str:
     """Remove leading numbering like '1.', '1、', '1. 1.' etc."""
     return _ADVICE_NUM_RE.sub("", line).strip()
+
+
+def _clean_advice_text(line: str) -> str:
+    """Remove references/noise in advice text, e.g. [8], [9], ['','']."""
+    text = str(line or "")
+    text = _ADVICE_REF_RE.sub("", text)
+    text = _ADVICE_NOISE_RE.sub("", text)
+    # Normalize extra spaces left after marker removal.
+    text = re.sub(r"\s{2,}", " ", text)
+    return text.strip()
 
 
 def _split_advice_lines(*values: Any) -> List[str]:
@@ -187,7 +199,7 @@ def _split_advice_lines(*values: Any) -> List[str]:
             normalized = text.replace("；", "。")
             raw_lines = [p.strip() for p in normalized.split("。") if p.strip()]
         for item in raw_lines:
-            cleaned = _strip_advice_num(item)
+            cleaned = _clean_advice_text(_strip_advice_num(item))
             if cleaned:
                 lines.append(cleaned)
     return lines
