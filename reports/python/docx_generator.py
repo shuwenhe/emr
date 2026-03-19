@@ -121,24 +121,45 @@ def _risk_level_cn(value: Any) -> str:
     return "未知"
 
 
+
+_ADVICE_NUM_RE = re.compile(r"^\s*(?:\d+[.、。)）]\s*)+")
+
+
+def _strip_advice_num(line: str) -> str:
+    """Remove leading numbering like '1.', '1、', '1. 1.' etc."""
+    return _ADVICE_NUM_RE.sub("", line).strip()
+
+
 def _split_advice_lines(*values: Any) -> List[str]:
     lines: List[str] = []
     for value in values:
         text = str(value or "").strip()
         if not text:
             continue
-        normalized = text.replace("；", "。")
-        for piece in normalized.split("。"):
-            item = piece.strip()
-            if item:
-                lines.append(item)
+        # Prefer newline-split (LLM outputs numbered lists with \n).
+        # Fall back to '。'-split for plain prose.
+        raw_lines = [l.strip() for l in text.splitlines() if l.strip()]
+        if len(raw_lines) <= 1:
+            normalized = text.replace("；", "。")
+            raw_lines = [p.strip() for p in normalized.split("。") if p.strip()]
+        for item in raw_lines:
+            cleaned = _strip_advice_num(item)
+            if cleaned:
+                lines.append(cleaned)
     return lines
 
 
 def _advice_rows(report: Dict[str, Any], emr: Dict[str, Any]) -> List[str]:
     plan = report.get("treatment_plan") or emr.get("treatment_plan") or {}
     ai_payload = report.get("ai") or {}
+    health_advice = (
+        report.get("health_advice")
+        or emr.get("health_advice")
+        or (plan.get("health_advice") if isinstance(plan, dict) else None)
+        or (ai_payload.get("health_advice") if isinstance(ai_payload, dict) else None)
+    )
     return _split_advice_lines(
+        health_advice,
         report.get("doctor_opinion"),
         plan.get("ai_recommendation") if isinstance(plan, dict) else None,
         ai_payload.get("report_note") if isinstance(ai_payload, dict) else None,
