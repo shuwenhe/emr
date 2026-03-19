@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   const target = `${backendBase}/patients${queryString ? `?${queryString}` : ""}`;
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 8000);
+  const timer = setTimeout(() => controller.abort(), 20000);
   try {
     const response = await fetch(target, {
       method: "GET",

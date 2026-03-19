@@ -4,8 +4,8 @@ type RouteParams = {
   params: Promise<{ path?: string[] }>;
 };
 
-const REQUEST_TIMEOUT_MS = 15000;
-const IDEMPOTENT_RETRY_DELAYS_MS = [120, 300];
+const REQUEST_TIMEOUT_MS = 45000;
+const IDEMPOTENT_RETRY_DELAYS_MS = [200, 600];
 
 function resolveBackendBaseUrl() {
   const envBase = process.env.BACKEND_API_URL?.trim() || process.env.NEXT_PUBLIC_API_URL?.trim();

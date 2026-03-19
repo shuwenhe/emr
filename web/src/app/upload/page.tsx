@@ -147,7 +147,7 @@ function UploadPageContent() {
     setPatientsLoading(true);
     setPatientsError("");
     const controller = new AbortController();
-    const timer = window.setTimeout(() => controller.abort(), 8000);
+    const timer = window.setTimeout(() => controller.abort(), 25000);
     try {
       const response = await fetch(`${API_PROXY_BASE}/patients`, {
         cache: "no-store",
@@ -161,7 +161,13 @@ function UploadPageContent() {
       setPatients(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Failed to fetch patients:", error);
-      setPatientsError(String(error));
+      const msg =
+        error instanceof Error && (error.name === "AbortError" || /abort/i.test(error.message))
+          ? "请求超时，请检查服务是否启动后重试"
+          : error instanceof Error
+          ? error.message
+          : String(error);
+      setPatientsError(msg);
       setPatients([]);
     } finally {
       window.clearTimeout(timer);
