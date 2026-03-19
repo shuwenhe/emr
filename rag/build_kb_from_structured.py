@@ -174,8 +174,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--kb",
-        default=str(project_root / "rag" / "kb" / "knowledge_base.json"),
-        help="Path to structured knowledge_base.json (also accepts .jsonl)",
+        default=str(project_root / "rag" / "kb" / "knowledge_base.jsonl"),
+        help="Path to structured knowledge base (.jsonl default; .json also accepted)",
     )
     parser.add_argument(
         "--out",

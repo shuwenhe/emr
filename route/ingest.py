@@ -6,7 +6,7 @@ import logging
 import time
 from pathlib import Path
 
-from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from typing import List
 
 from models.schemas.api import AnalyzeRequest, DeviceIngestRequest, DispatchRequest, IngestMetadata
@@ -19,6 +19,8 @@ from .events import publish_ingest_progress
 
 router = APIRouter(tags=["ingest"])
 logger = logging.getLogger(__name__)
+
+_DETACHED_INGEST_TASKS: set[asyncio.Task[None]] = set()
 
 ALLOWED_EXTENSIONS = {".csv", ".dat"}
 ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif"}
@@ -180,9 +182,22 @@ async def _generate_report_after_ingest(record_id: str, metadata: dict | None = 
     await publish_ingest_progress(record_id, 5, "全部分析完成，正在跳转...", 100, "complete")
 
 
+def _start_detached_ingest_pipeline(record_id: str, metadata: dict | None = None) -> None:
+    task = asyncio.create_task(_generate_report_after_ingest(record_id, metadata))
+    _DETACHED_INGEST_TASKS.add(task)
+
+    def _cleanup(done_task: asyncio.Task[None]) -> None:
+        _DETACHED_INGEST_TASKS.discard(done_task)
+        try:
+            done_task.result()
+        except Exception:
+            logger.exception("[ingest] detached pipeline failed record_id=%s", record_id)
+
+    task.add_done_callback(_cleanup)
+
+
 @router.post("/ingest")
 async def ingest(
-    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     metadata: str = Form(...),
 ):
@@ -204,7 +219,12 @@ async def ingest(
 
     tmp_file = Path("/tmp") / file.filename
     tmp_file.write_bytes(file_bytes)
-    record_id = ingestion_service.ingest_data(tmp_file, parsed.model_dump(), validate=True)
+    record_id = await asyncio.to_thread(
+        ingestion_service.ingest_data,
+        tmp_file,
+        parsed.model_dump(),
+        validate=True,
+    )
     result = {"record_id": record_id, "storage_path": None, "matrix_csv_path": None}
 
     # Seed the progress cache (step 1, 5%) so the frontend receives an immediate
@@ -212,7 +232,7 @@ async def ingest(
     # started publishing later steps.
     await publish_ingest_progress(record_id, 1, "数据采集完成，正在启动分析...", 5)
 
-    background_tasks.add_task(_generate_report_after_ingest, result["record_id"], parsed.model_dump())
+    _start_detached_ingest_pipeline(result["record_id"], parsed.model_dump())
 
     elapsed = time.time() - t0
     logger.info("[步骤1] 数据采集 完成 record_id=%s 耗时=%.2fs EMR生成已后台调度", record_id, elapsed)
@@ -225,7 +245,6 @@ async def ingest(
 
 @router.post("/ingest/batch")
 async def ingest_batch(
-    background_tasks: BackgroundTasks,
     files: List[UploadFile] = File(...),
     metadata: str = Form(...),
 ):
@@ -293,7 +312,8 @@ async def ingest_batch(
     t0 = time.time()
 
     try:
-        record_id = ingestion_service.ingest_batch(
+        record_id = await asyncio.to_thread(
+            ingestion_service.ingest_batch,
             tmp_primary,
             parsed.model_dump(),
             extra_data_files=extra_data or None,
@@ -304,7 +324,7 @@ async def ingest_batch(
         detail = exc.args[0] if exc.args else "ingest_batch_failed"
         raise HTTPException(status_code=422, detail=detail) from exc
 
-    background_tasks.add_task(_generate_report_after_ingest, record_id, parsed.model_dump())
+    _start_detached_ingest_pipeline(record_id, parsed.model_dump())
 
     # Seed the progress cache so late-connecting subscribers get an immediate replay.
     await publish_ingest_progress(record_id, 1, "数据采集完成，正在启动分析...", 5)

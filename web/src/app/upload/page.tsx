@@ -64,6 +64,7 @@ function UploadPageContent() {
   }
   const [patientsLoading, setPatientsLoading] = useState(true);
   const [patientsError, setPatientsError] = useState("");
+  const [patientsWarming, setPatientsWarming] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState("");
   const [uploadCompleted, setUploadCompleted] = useState(false);
@@ -72,6 +73,8 @@ function UploadPageContent() {
   const [reportStatus, setReportStatus] = useState("");
   const [currentStep, setCurrentStep] = useState(0);
   const autoSelectedFromUrlRef = useRef(false);
+  const warmingRetryRef = useRef(0);
+  const MAX_WARMING_RETRIES = 200; // 200 × 3 s ≈ 10 min max wait
 
   function uploadFormDataWithProgress(url: string, formData: FormData): Promise<{ ok: boolean; status: number; data: any }> {
     return new Promise((resolve, reject) => {
@@ -92,7 +95,10 @@ function UploadPageContent() {
 
       xhr.open("POST", url, true);
       xhr.responseType = "json";
-      xhr.timeout = 120000;
+      // Upload can queue briefly behind local file I/O or large batch writes.
+      // Keep the browser request alive long enough for the backend to return a
+      // record_id quickly, then remaining analysis continues in the background.
+      xhr.timeout = 600000;
 
       xhr.onloadstart = () => {
         setUploadProgress((prev) => Math.max(prev, 3));
@@ -129,7 +135,7 @@ function UploadPageContent() {
       };
       xhr.ontimeout = () => {
         clearFallbackTimer();
-        reject(new Error("上传超时，请重试"));
+        reject(new Error("上传超时，请检查后端服务状态或稍后重试"));
       };
       xhr.onabort = () => {
         clearFallbackTimer();
@@ -143,34 +149,50 @@ function UploadPageContent() {
     fetchPatients();
   }, []);
 
-  async function fetchPatients() {
-    setPatientsLoading(true);
-    setPatientsError("");
-    const controller = new AbortController();
-    const timer = window.setTimeout(() => controller.abort(), 25000);
+  async function fetchPatients(isWarmingRetry = false) {
+    if (!isWarmingRetry) {
+      warmingRetryRef.current = 0;
+      setPatientsLoading(true);
+      setPatientsError("");
+      setPatientsWarming(false);
+    }
     try {
       const response = await fetch(`${API_PROXY_BASE}/patients`, {
         cache: "no-store",
-        signal: controller.signal,
       });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
+      const cacheStatus = response.headers.get("x-cache");
       const data = await response.json();
-      console.log("Fetched patients:", data);
+
+      if (cacheStatus === "WARMING") {
+        // Backend not ready yet — silently retry every 3 s
+        warmingRetryRef.current += 1;
+        if (warmingRetryRef.current === 4) setPatientsWarming(true); // hint after ~12 s
+        if (warmingRetryRef.current <= MAX_WARMING_RETRIES) {
+          window.setTimeout(() => fetchPatients(true), 3000);
+          return; // stay in loading state, no error shown
+        }
+        // Gave up after ~10 min — show error with retry button
+        setPatientsError("服务响应超时，请检查后端服务是否正常运行");
+        setPatients([]);
+        setPatientsWarming(false);
+        setPatientsLoading(false);
+        return;
+      }
+
+      warmingRetryRef.current = 0;
+      setPatientsWarming(false);
       setPatients(Array.isArray(data) ? data : []);
+      setPatientsLoading(false);
     } catch (error) {
       console.error("Failed to fetch patients:", error);
-      const msg =
-        error instanceof Error && (error.name === "AbortError" || /abort/i.test(error.message))
-          ? "请求超时，请检查服务是否启动后重试"
-          : error instanceof Error
-          ? error.message
-          : String(error);
-      setPatientsError(msg);
+      setPatientsError(
+        error instanceof Error ? error.message : String(error)
+      );
       setPatients([]);
-    } finally {
-      window.clearTimeout(timer);
+      setPatientsWarming(false);
       setPatientsLoading(false);
     }
   }
@@ -602,14 +624,14 @@ function UploadPageContent() {
                 </label>
                 {patientsLoading ? (
                   <div className="mt-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
-                    正在加载患者列表...
+                    {patientsWarming ? "后端服务忙碌，正在等待响应..." : "正在加载患者列表..."}
                   </div>
                 ) : patientsError ? (
                   <div className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
                     加载失败：{patientsError}
                     <button
                       className="ml-2 text-xs underline"
-                      onClick={() => fetchPatients()}
+                      onClick={() => fetchPatients(false)}
                     >
                       重试
                     </button>

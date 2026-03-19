@@ -11,6 +11,11 @@ last_snapshot=""
 changed_at=0
 
 while true; do
+  # Keep runtime JSONL in sync with editable JSON source.
+  if [[ -f "$REPO_DIR/scripts/sync_kb_json_to_jsonl.sh" ]]; then
+    bash "$REPO_DIR/scripts/sync_kb_json_to_jsonl.sh" >/dev/null 2>&1 || true
+  fi
+
   # Skip auto-commit during merge conflicts.
   if [[ -n "$(git diff --name-only --diff-filter=U)" ]]; then
     sleep "$INTERVAL_SECONDS"
@@ -50,8 +55,16 @@ while true; do
   fi
 
   # Build a concise English summary from staged diff (file list + first diff hunks).
-  changed_files="$(git diff --cached --name-only | head -20 | tr '\n' ' ' | sed 's/ $//')"
-  diff_body="$(git diff --cached --unified=0 -- '*.py' '*.ts' '*.tsx' '*.js' '*.sh' '*.go' 2>/dev/null | head -120)"
+  changed_files="$(
+    {
+      git diff --cached --name-only || true
+    } | sed -n '1,20p' | tr '\n' ' ' | sed 's/ $//'
+  )"
+  diff_body="$(
+    {
+      git diff --cached --unified=0 -- '*.py' '*.ts' '*.tsx' '*.js' '*.sh' '*.go' 2>/dev/null || true
+    } | sed -n '1,120p'
+  )"
   prompt="You are a git commit message writer. Output ONLY a single commit message line with no extra text, no quotes, no markdown.
 
 Format: <type>(<scope>): <short English description under 72 chars>
@@ -73,7 +86,7 @@ Commit message:"
   # Validate: must look like a conventional commit; fall back to file-list summary if not.
   if [[ -z "$ai_msg" ]] || ! echo "$ai_msg" | grep -qE '^(feat|fix|refactor|chore|docs|style|perf)\([a-zA-Z0-9_-]+\):'; then
     # Derive a readable summary from changed files
-    first_file="$(git diff --cached --name-only | head -1)"
+    first_file="$(git diff --cached --name-only | sed -n '1p')"
     scope="$(echo "$first_file" | cut -d/ -f1)"
     file_count="$(git diff --cached --name-only | wc -l | tr -d ' ')"
     if (( file_count == 1 )); then

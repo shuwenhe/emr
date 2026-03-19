@@ -312,12 +312,12 @@ def build_jsonl(
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Build knowledge_base.json from Word/PDF files")
+    parser = argparse.ArgumentParser(description="Build knowledge_base.jsonl from Word/PDF files")
     parser.add_argument("--input-dir", required=True, help="Directory containing .docx/.pdf guidelines")
     parser.add_argument(
         "--output-file",
-        default="./rag/kb/knowledge_base.json",
-        help="Output file path (default: ./rag/kb/knowledge_base.json; .jsonl also supported)",
+        default="./rag/kb/knowledge_base.jsonl",
+        help="Output file path (default: ./rag/kb/knowledge_base.jsonl; .json also supported)",
     )
     parser.add_argument("--id-prefix", default="KB-HT", help="ID prefix (default: KB-HT)")
     parser.add_argument("--max-chars", type=int, default=700, help="Max chars per chunk (default: 700)")

@@ -105,6 +105,7 @@ _TREATMENT_RULES = _load_treatment_rules()
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:1.7b")
 OLLAMA_ENABLED = os.getenv("OLLAMA_ENABLED", "1") != "0"
+_ABSOLUTE_DATE_PATTERN = re.compile(r"\b\d{4}[-/.年]\d{1,2}[-/.月]\d{1,2}(?:日)?\b")
 
 
 def _extract_json_block(text: str) -> Optional[dict]:
@@ -206,13 +207,24 @@ def _generate_llm_diagnosis_and_opinion(context: str) -> Dict[str, str]:
         context
         + "请返回严格JSON，包含字段：diagnosis, doctor_opinion, report_note。"
         "其中 doctor_opinion 和 report_note 需明确‘仅供参考’。"
+        "禁止输出任何绝对日期（如2023-10-15），复评只能使用相对时间（如7-14天内复评）。"
     )
     text = _ollama_generate(prompt, temperature=0.2, max_tokens=400)
     data = _extract_json_block(text) or {}
+
+    def _normalize_followup_date_text(value: str) -> str:
+        text_value = str(value or "").strip()
+        if not text_value:
+            return text_value
+        normalized = _ABSOLUTE_DATE_PATTERN.sub("7-14天内", text_value)
+        normalized = normalized.replace("复评于7-14天内", "建议7-14天内复评")
+        normalized = normalized.replace("复评时间：7-14天内", "复评时间：建议7-14天内")
+        return normalized
+
     return {
         "diagnosis": str(data.get("diagnosis") or "").strip(),
-        "doctor_opinion": str(data.get("doctor_opinion") or "").strip(),
-        "report_note": str(data.get("report_note") or "").strip(),
+        "doctor_opinion": _normalize_followup_date_text(str(data.get("doctor_opinion") or "").strip()),
+        "report_note": _normalize_followup_date_text(str(data.get("report_note") or "").strip()),
     }
 
 

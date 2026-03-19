@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import json
 import logging
 import os
@@ -47,7 +48,7 @@ RAG_OPENAI_BASE_URL = os.getenv("RAG_OPENAI_BASE_URL")
 RAG_OPENAI_API_KEY = os.getenv("RAG_OPENAI_API_KEY")
 RAG_KB_PATH = os.getenv(
     "RAG_KB_PATH",
-    str(Path(__file__).resolve().parents[2] / "rag" / "kb" / "knowledge_base.json"),
+    str(Path(__file__).resolve().parents[2] / "rag" / "kb" / "knowledge_base.jsonl"),
 )
 
 _KB_ITEMS_CACHE: Optional[List[Dict[str, Any]]] = None
@@ -58,6 +59,7 @@ _VECTOR_EMBEDDINGS: Any = None
 _VECTOR_DISABLED_REASON: Optional[str] = None
 _RAG_CONFIG_LOGGED = False
 _REF_PATTERN = re.compile(r"\[(\d+)\]")
+_ABSOLUTE_DATE_PATTERN = re.compile(r"\b\d{4}[-/.年]\d{1,2}[-/.月]\d{1,2}(?:日)?\b")
 _SYSTEM_PROMPT = (
     "你是医疗热成像评估助手。你只能基于提供的资料回答。"
     "必须在结论中使用编号引用（如[1]），不得编造，不确定就明确说明无法确认。"
@@ -86,6 +88,39 @@ def _extract_record_id(report: Dict[str, Any], emr: Dict[str, Any]) -> str:
         if value:
             return value
     return "unknown"
+
+
+def _flatten_text_items(value: Any) -> List[str]:
+    if value is None:
+        return []
+    if isinstance(value, (list, tuple)):
+        items: List[str] = []
+        for item in value:
+            items.extend(_flatten_text_items(item))
+        return items
+    text = str(value).strip()
+    return [text] if text else []
+
+
+def _normalize_generated_text(value: Any) -> str:
+    if isinstance(value, (list, tuple)):
+        return "\n".join(_flatten_text_items(value))
+
+    text = str(value or "").strip()
+    if not text:
+        return ""
+
+    if text[:1] in "[(" and text[-1:] in "])":
+        try:
+            parsed = ast.literal_eval(text)
+        except Exception:
+            parsed = None
+        if isinstance(parsed, (list, tuple)):
+            items = _flatten_text_items(parsed)
+            if items:
+                return "\n".join(items)
+
+    return text
 
 
 def _import_top_level_rag_modules():
@@ -1000,6 +1035,19 @@ def _strip_invalid_refs(answer: str, max_ref: int) -> str:
     return _REF_PATTERN.sub(replace, answer or "")
 
 
+def _normalize_followup_date_text(text: str) -> str:
+    value = str(text or "").strip()
+    if not value:
+        return value
+
+    # For safety, replace any absolute calendar date in generated narrative text
+    # with a relative follow-up window to avoid stale/hallucinated years.
+    normalized = _ABSOLUTE_DATE_PATTERN.sub("7-14天内", value)
+    normalized = normalized.replace("复评于7-14天内", "建议7-14天内复评")
+    normalized = normalized.replace("复评时间：7-14天内", "复评时间：建议7-14天内")
+    return normalized
+
+
 def _extract_ref_numbers(text: str) -> Set[int]:
     if not text:
         return set()
@@ -1114,24 +1162,27 @@ def _generate_llm_field_text(section: str, context: str) -> Dict[str, Any]:
             "请返回严格JSON，包含字段：doctor_opinion, evidence_item_ids。"
             "输出 3-5 句中文，不少于 60 字，需包含可执行建议与复评提示，"
             "并明确写出‘仅供参考’，使用引用编号（如[1]）。"
+            "禁止输出任何绝对日期（如2023-10-15）；复评仅可使用相对时间（如‘7-14天内复评’）。"
         ),
         "report_note": (
             "请返回严格JSON，包含字段：report_note, evidence_item_ids。"
             "输出 2-4 句中文，不少于 45 字，强调报告适用边界、检查前提或谨慎解释要求，"
             "并明确写出‘仅供参考’，使用引用编号（如[1]）。"
+            "禁止输出任何绝对日期，复评只允许相对时间表达。"
         ),
         "health_advice": (
             "请返回严格JSON，包含字段：health_advice, evidence_item_ids。"
             "输出 4-8 条可执行的中文保健建议，总字数不少于 80 字，"
             "可覆盖作息、保暖、饮食、活动、复评观察点等，并明确写出‘仅供参考’，"
             "使用引用编号（如[1]）。"
+            "禁止输出任何绝对日期，复评只允许相对时间表达（如7-14天内）。"
         ),
     }
     output_field = section
     base_prompt = _SYSTEM_PROMPT + "\n\n" + context + field_prompts[section]
     text = _ollama_generate(base_prompt, temperature=0.2, max_tokens=700)
     data = _extract_json_block(text) or {}
-    value = str(data.get(output_field) or "").strip()
+    value = _normalize_generated_text(data.get(output_field))
     result = {
         output_field: value,
         "evidence_item_ids": _parse_evidence_ids(data.get("evidence_item_ids")),
@@ -1150,7 +1201,7 @@ def _generate_llm_field_text(section: str, context: str) -> Dict[str, Any]:
         text = _ollama_generate(retry_prompt, temperature=0.2, max_tokens=900)
         data = _extract_json_block(text) or {}
         result = {
-            output_field: str(data.get(output_field) or value).strip(),
+            output_field: _normalize_generated_text(data.get(output_field) or value),
             "evidence_item_ids": _parse_evidence_ids(data.get("evidence_item_ids") or result["evidence_item_ids"]),
         }
     result["_metrics"] = {
@@ -1380,16 +1431,24 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
         diagnosis_text = _strip_invalid_refs(str(diag_payload["diagnosis"]), len(diagnosis_citations))
         payload["diagnosis"] = _remap_refs(diagnosis_text, diagnosis_citations, merged_ref_by_id)
     if opinion_payload.get("doctor_opinion"):
-        doctor_opinion_text = _strip_invalid_refs(str(opinion_payload["doctor_opinion"]), len(doctor_opinion_citations))
+        doctor_opinion_text = _normalize_followup_date_text(
+            _strip_invalid_refs(str(opinion_payload["doctor_opinion"]), len(doctor_opinion_citations))
+        )
         payload["doctor_opinion"] = _remap_refs(doctor_opinion_text, doctor_opinion_citations, merged_ref_by_id)
     if note_payload.get("report_note"):
-        report_note_text = _strip_invalid_refs(str(note_payload["report_note"]), len(report_note_citations))
+        report_note_text = _normalize_followup_date_text(
+            _strip_invalid_refs(str(note_payload["report_note"]), len(report_note_citations))
+        )
         payload["report_note"] = _remap_refs(report_note_text, report_note_citations, merged_ref_by_id)
     if health_advice_text:
-        normalized_health_advice = _strip_invalid_refs(health_advice_text, len(health_advice_citations))
+        normalized_health_advice = _normalize_followup_date_text(
+            _strip_invalid_refs(health_advice_text, len(health_advice_citations))
+        )
         payload["health_advice"] = _remap_refs(normalized_health_advice, health_advice_citations, merged_ref_by_id)
     if plan_text:
-        treatment_plan_text = _strip_invalid_refs(plan_text, len(plan_citations))
+        treatment_plan_text = _normalize_followup_date_text(
+            _strip_invalid_refs(plan_text, len(plan_citations))
+        )
         payload["treatment_plan_text"] = _remap_refs(treatment_plan_text, plan_citations, merged_ref_by_id)
 
     diagnosis_evidence_ids = _parse_evidence_ids(diag_payload.get("evidence_item_ids"))

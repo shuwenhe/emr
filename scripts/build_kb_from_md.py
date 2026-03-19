@@ -401,12 +401,12 @@ def build_jsonl(
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Build knowledge_base.json from markdown files")
+    parser = argparse.ArgumentParser(description="Build knowledge_base.jsonl from markdown files")
     parser.add_argument("--input-dir", required=True, help="Directory containing markdown files")
     parser.add_argument(
         "--output-file",
-        default="./rag/kb/knowledge_base.json",
-        help="Output file path (default: ./rag/kb/knowledge_base.json; .jsonl also supported)",
+        default="./rag/kb/knowledge_base.jsonl",
+        help="Output file path (default: ./rag/kb/knowledge_base.jsonl; .json also supported)",
     )
     parser.add_argument("--id-prefix", default="KB-MD", help="ID prefix (default: KB-MD)")
     parser.add_argument("--max-chars", type=int, default=700, help="Max chars per chunk (default: 700)")

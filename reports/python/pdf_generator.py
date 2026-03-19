@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import os
 import re
 from datetime import datetime
@@ -186,22 +187,42 @@ def _clean_advice_text(line: str) -> str:
     return text.strip()
 
 
+def _expand_advice_value(value: Any) -> List[str]:
+    if value is None:
+        return []
+    if isinstance(value, (list, tuple)):
+        lines: List[str] = []
+        for item in value:
+            lines.extend(_expand_advice_value(item))
+        return lines
+
+    text = str(value or "").strip()
+    if not text:
+        return []
+
+    if text[:1] in "[(" and text[-1:] in "])":
+        try:
+            parsed = ast.literal_eval(text)
+        except Exception:
+            parsed = None
+        if isinstance(parsed, (list, tuple)):
+            return _expand_advice_value(parsed)
+
+    return [text]
+
+
 def _split_advice_lines(*values: Any) -> List[str]:
     lines: List[str] = []
     for value in values:
-        text = str(value or "").strip()
-        if not text:
-            continue
-        # Prefer newline-split (LLM outputs numbered lists with \n).
-        # Fall back to '。'-split for plain prose.
-        raw_lines = [l.strip() for l in text.splitlines() if l.strip()]
-        if len(raw_lines) <= 1:
-            normalized = text.replace("；", "。")
-            raw_lines = [p.strip() for p in normalized.split("。") if p.strip()]
-        for item in raw_lines:
-            cleaned = _clean_advice_text(_strip_advice_num(item))
-            if cleaned:
-                lines.append(cleaned)
+        for text in _expand_advice_value(value):
+            raw_lines = [l.strip() for l in text.splitlines() if l.strip()]
+            if len(raw_lines) <= 1:
+                normalized = text.replace("；", "。")
+                raw_lines = [p.strip() for p in normalized.split("。") if p.strip()]
+            for item in raw_lines:
+                cleaned = _clean_advice_text(_strip_advice_num(item))
+                if cleaned:
+                    lines.append(cleaned)
     return lines
 
 
