@@ -30,7 +30,7 @@ if is_true "$AUTO_PUSH_RAW"; then
 fi
 
 # Code-like file extensions that can trigger auto commit.
-CODE_EXT_RE='\.(py|go|js|jsx|ts|tsx|java|c|cc|cpp|h|hpp|rs|php|rb|swift|kt|kts|scala|sh|bash|zsh|sql|yaml|yml|json|toml|ini|cfg)$'
+CODE_EXT_RE='\.(py|go|js|jsx|ts|tsx|java|c|cc|cpp|h|hpp|rs|php|rb|swift|kt|kts|scala|sh|bash|zsh|sql|yaml|yml|json|jsonl|toml|ini|cfg)$'
 
 list_changed_files() {
   {
