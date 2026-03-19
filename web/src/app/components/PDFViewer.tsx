@@ -6,7 +6,10 @@ import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 
 // Set up the worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.mjs",
+  import.meta.url,
+).toString();
 
 interface PDFViewerProps {
   pdfUrl: string;
@@ -86,7 +89,11 @@ export default function PDFViewer({ pdfUrl, title, onClose }: PDFViewerProps) {
               onLoadError={onDocumentLoadError}
               loading={<div>加载中...</div>}
             >
-              <Page pageNumber={pageNumber} />
+              <Page
+                pageNumber={pageNumber}
+                renderTextLayer={false}
+                renderAnnotationLayer={false}
+              />
             </Document>
           )}
         </div>
