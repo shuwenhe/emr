@@ -10,17 +10,44 @@ LAN_PROTOCOL="${LAN_PROTOCOL:-http}"
 LAN_HOST="${LAN_HOST:-}"
 
 detect_lan_ip() {
+  # Prefer real LAN IPs (192.168.x.x or 10.x.x.x) from physical/wireless interfaces.
+  # Skips loopback, Docker bridges, VPN/tunnel interfaces (tailscale, FlClash, tun, etc.).
   if command -v ip >/dev/null 2>&1; then
-    local ip_from_route
-    ip_from_route="$(ip route get 1.1.1.1 2>/dev/null | awk '{for (i=1;i<=NF;i++) if ($i=="src") {print $(i+1); exit}}')"
-    if [[ -n "${ip_from_route}" ]]; then
-      echo "$ip_from_route"
+    local lan_ip
+    lan_ip="$(ip addr show \
+      | awk '
+          /^[0-9]+: / { iface=$2; gsub(/:$/, "", iface) }
+          /inet / {
+            split($2, a, "/"); ip=a[1]
+            # Skip loopback, docker, bridge, VPN-like interfaces
+            if (iface ~ /^(lo|docker|br-|veth|tun|tap|virbr|FlClash|tailscale|wg|utun)/) next
+            # Prefer private LAN ranges: 192.168.x.x or 10.x.x.x
+            if (ip ~ /^192\.168\./ || ip ~ /^10\./) { print ip; exit }
+          }
+        ')"
+    if [[ -n "${lan_ip}" ]]; then
+      echo "${lan_ip}"
+      return
+    fi
+
+    # Fallback: any non-loopback, non-VPN IP
+    lan_ip="$(ip addr show \
+      | awk '
+          /^[0-9]+: / { iface=$2; gsub(/:$/, "", iface) }
+          /inet / {
+            split($2, a, "/"); ip=a[1]
+            if (iface ~ /^(lo|docker|br-|veth|tun|tap|virbr|FlClash|tailscale|wg|utun)/) next
+            if (ip !~ /^127\./) { print ip; exit }
+          }
+        ')"
+    if [[ -n "${lan_ip}" ]]; then
+      echo "${lan_ip}"
       return
     fi
   fi
 
   if command -v hostname >/dev/null 2>&1; then
-    hostname -I 2>/dev/null | awk '{for(i=1;i<=NF;i++) if ($i !~ /^127\./) {print $i; exit}}'
+    hostname -I 2>/dev/null | awk '{for(i=1;i<=NF;i++) if ($i ~ /^192\.168\./ || $i ~ /^10\./) {print $i; exit}}'
     return
   fi
 
