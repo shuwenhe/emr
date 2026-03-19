@@ -497,8 +497,16 @@ def _group_section_rows(roi_list: Sequence[Dict[str, Any]]) -> Dict[str, List[Se
 def _advice_rows(report: Dict[str, Any], emr: Dict[str, Any]) -> List[str]:
     plan = report.get("treatment_plan") or emr.get("treatment_plan") or {}
     ai_payload = report.get("ai") or {}
+    health_advice = (
+        report.get("health_advice")
+        or emr.get("health_advice")
+        or (plan.get("health_advice") if isinstance(plan, dict) else None)
+        or (ai_payload.get("health_advice") if isinstance(ai_payload, dict) else None)
+    )
     return _split_advice_lines(
+        health_advice,
         report.get("doctor_opinion"),
+        plan.get("treatment_plan_text") if isinstance(plan, dict) else None,
         plan.get("ai_recommendation") if isinstance(plan, dict) else None,
         ai_payload.get("report_note") if isinstance(ai_payload, dict) else None,
     ) or ["以上为热图所提示可能性，请结合临床进一步诊查。"]
@@ -582,7 +590,7 @@ def generate_pdf_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     story.append(Spacer(1, 8 * mm))
     story.append(_paragraph("个人信息", styles["section"]))
     story.append(Spacer(1, 3 * mm))
-    story.append(_build_cover_table(patient, created_dt, styles))
+    story.append(_build_cover_table(patient, report_generated_dt, styles))
     story.append(Spacer(1, 10 * mm))
     if primary_image is not None:
         story.append(_make_image(primary_image, 130 * mm, 100 * mm))

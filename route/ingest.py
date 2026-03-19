@@ -57,7 +57,7 @@ def _persist_ai_result(record_id: str, analysis_result: dict, emr_result: dict, 
     if isinstance(emr_report, dict):
         merged_report.update(emr_report)
 
-    for field in ("diagnosis", "doctor_opinion", "report_note", "treatment_plan_text", "retrieved_context"):
+    for field in ("diagnosis", "doctor_opinion", "report_note", "health_advice", "treatment_plan_text", "retrieved_context"):
         value = ai_result.get(field)
         if value:
             merged_report[field] = value
@@ -73,6 +73,7 @@ def _persist_ai_result(record_id: str, analysis_result: dict, emr_result: dict, 
         "evidence_item_ids",
         "diagnosis_evidence_item_ids",
         "plan_evidence_item_ids",
+        "health_advice_evidence_item_ids",
     ):
         value = ai_result.get(field)
         if isinstance(value, list):
@@ -92,6 +93,7 @@ def _persist_ai_result(record_id: str, analysis_result: dict, emr_result: dict, 
         updates["treatment_plan"] = {
             **treatment_plan,
             "treatment_plan_text": ai_result["treatment_plan_text"],
+            "health_advice": ai_result.get("health_advice") or treatment_plan.get("health_advice"),
             "evidence_item_ids": ai_result.get("plan_evidence_item_ids") or ai_result.get("evidence_item_ids") or [],
         }
 

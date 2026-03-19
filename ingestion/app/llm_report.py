@@ -14,17 +14,28 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
+
+def _env_int(name: str, default: int, *, min_value: Optional[int] = None) -> int:
+    raw = os.getenv(name)
+    try:
+        value = int(str(raw).strip()) if raw is not None else default
+    except Exception:
+        value = default
+    if min_value is not None:
+        return max(min_value, value)
+    return value
+
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:1.7b")
 OLLAMA_ENABLED = os.getenv("OLLAMA_ENABLED", "1") != "0"
-OLLAMA_TIMEOUT_SEC = max(5, int(os.getenv("OLLAMA_TIMEOUT_SEC", "60")))
-OLLAMA_MAX_RETRIES = max(0, int(os.getenv("OLLAMA_MAX_RETRIES", "2")))
+OLLAMA_TIMEOUT_SEC = _env_int("OLLAMA_TIMEOUT_SEC", 60, min_value=5)
+OLLAMA_MAX_RETRIES = _env_int("OLLAMA_MAX_RETRIES", 2, min_value=0)
 RAG_ENABLED = os.getenv("RAG_ENABLED", "1") != "0"
-RAG_TOP_K = max(1, int(os.getenv("RAG_TOP_K", "5")))
+RAG_TOP_K = _env_int("RAG_TOP_K", 5, min_value=1)
 RAG_SCORE_THRESHOLD = float(os.getenv("RAG_SCORE_THRESHOLD", "0"))
-RAG_CONTEXT_ITEM_MAX_CHARS = max(120, int(os.getenv("RAG_CONTEXT_ITEM_MAX_CHARS", "260")))
+RAG_CONTEXT_ITEM_MAX_CHARS = _env_int("RAG_CONTEXT_ITEM_MAX_CHARS", 260, min_value=120)
 RAG_VECTOR_ENABLED = os.getenv("RAG_VECTOR_ENABLED", "1") != "0"
-RAG_VECTOR_LOAD_RETRIES = max(0, int(os.getenv("RAG_VECTOR_LOAD_RETRIES", "5")))
+RAG_VECTOR_LOAD_RETRIES = _env_int("RAG_VECTOR_LOAD_RETRIES", 5, min_value=0)
 RAG_VECTOR_LOAD_RETRY_DELAY_SEC = max(0.1, float(os.getenv("RAG_VECTOR_LOAD_RETRY_DELAY_SEC", "0.5")))
 RAG_VECTOR_KB_PATH = os.getenv(
     "RAG_VECTOR_KB_PATH",
@@ -43,6 +54,7 @@ _KB_ITEMS_CACHE: Optional[List[Dict[str, Any]]] = None
 _VECTOR_KB_CACHE: Optional[Any] = None
 _VECTOR_EMBEDDINGS: Any = None
 _VECTOR_DISABLED_REASON: Optional[str] = None
+_RAG_CONFIG_LOGGED = False
 _REF_PATTERN = re.compile(r"\[(\d+)\]")
 _SYSTEM_PROMPT = (
     "你是医疗热成像评估助手。你只能基于提供的资料回答。"
@@ -93,12 +105,18 @@ _KEYWORD_RULES: Dict[str, List[str]] = {
     "risk": ["低风险", "中风险", "高风险", "炎症", "疼痛", "应激", "循环", "供血", "温差", "异常", "复评"],
     "treatment": ["疗程", "频次", "干预", "理疗", "保暖", "复测", "随访", "医生意见", "治疗方案"],
 }
-_REPORT_SECTIONS = ("diagnosis", "doctor_opinion", "report_note", "treatment_plan_text")
+_REPORT_SECTIONS = ("diagnosis", "doctor_opinion", "report_note", "treatment_plan_text", "health_advice")
+RAG_TOP_K_DIAGNOSIS = _env_int("RAG_TOP_K_DIAGNOSIS", 3, min_value=1)
+RAG_TOP_K_DOCTOR_OPINION = _env_int("RAG_TOP_K_DOCTOR_OPINION", 3, min_value=1)
+RAG_TOP_K_REPORT_NOTE = _env_int("RAG_TOP_K_REPORT_NOTE", 2, min_value=1)
+RAG_TOP_K_TREATMENT_PLAN = _env_int("RAG_TOP_K_TREATMENT_PLAN", 3, min_value=1)
+RAG_TOP_K_HEALTH_ADVICE = _env_int("RAG_TOP_K_HEALTH_ADVICE", 4, min_value=1)
 _SECTION_TOP_K = {
-    "diagnosis": 3,
-    "doctor_opinion": 3,
-    "report_note": 2,
-    "treatment_plan_text": 3,
+    "diagnosis": RAG_TOP_K_DIAGNOSIS,
+    "doctor_opinion": RAG_TOP_K_DOCTOR_OPINION,
+    "report_note": RAG_TOP_K_REPORT_NOTE,
+    "treatment_plan_text": RAG_TOP_K_TREATMENT_PLAN,
+    "health_advice": RAG_TOP_K_HEALTH_ADVICE,
 }
 _RISK_ALIASES = {
     "low": {"low", "低", "低风险"},
@@ -118,6 +136,27 @@ _BODY_PART_ALIASES = {
 
 def is_llm_enabled() -> bool:
     return OLLAMA_ENABLED
+
+
+def _log_rag_runtime_config_once() -> None:
+    global _RAG_CONFIG_LOGGED
+    if _RAG_CONFIG_LOGGED:
+        return
+    _RAG_CONFIG_LOGGED = True
+    logging.info(
+        "[RAG-CONFIG] enabled=%s vector_enabled=%s provider=%s embed_model=%s top_k=%s "
+        "score_threshold=%s context_item_max_chars=%s section_top_k=%s kb_path=%s vector_kb_path=%s",
+        RAG_ENABLED,
+        RAG_VECTOR_ENABLED,
+        RAG_EMBED_PROVIDER,
+        RAG_EMBED_MODEL,
+        RAG_TOP_K,
+        RAG_SCORE_THRESHOLD,
+        RAG_CONTEXT_ITEM_MAX_CHARS,
+        _SECTION_TOP_K,
+        RAG_KB_PATH,
+        RAG_VECTOR_KB_PATH,
+    )
 
 
 def _extract_json_block(text: str) -> Optional[dict]:
@@ -401,6 +440,7 @@ def build_section_queries(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[s
         "doctor_opinion": _join([base_query, body_hint, risk_hint, "医生意见", "谨慎解释", "复评建议", "转诊提醒"]),
         "report_note": _join([base_query, body_hint, "检查准备", "报告说明", "仅供参考", "适用边界"]),
         "treatment_plan_text": _join([base_query, body_hint, risk_hint, "治疗方案", "疗程频次", "复评", "禁忌"]),
+        "health_advice": _join([base_query, body_hint, risk_hint, "保健建议", "居家护理", "作息", "饮食", "运动", "复评"]),
     }
 
 
@@ -904,6 +944,7 @@ def _build_llm_context_for_section(
         "doctor_opinion": "医生意见",
         "report_note": "报告说明",
         "treatment_plan_text": "治疗建议",
+        "health_advice": "保健建议",
     }
     context = _build_llm_context(report, emr, retrieved_context=retrieved_context)
     return context + f"\n当前任务字段：{section_labels.get(section, section)}\n"
@@ -1046,6 +1087,12 @@ def _generate_llm_field_text(section: str, context: str) -> Dict[str, Any]:
             "输出 2-4 句中文，不少于 45 字，强调报告适用边界、检查前提或谨慎解释要求，"
             "并明确写出‘仅供参考’，使用引用编号（如[1]）。"
         ),
+        "health_advice": (
+            "请返回严格JSON，包含字段：health_advice, evidence_item_ids。"
+            "输出 4-8 条可执行的中文保健建议，总字数不少于 80 字，"
+            "可覆盖作息、保暖、饮食、活动、复评观察点等，并明确写出‘仅供参考’，"
+            "使用引用编号（如[1]）。"
+        ),
     }
     output_field = section
     base_prompt = _SYSTEM_PROMPT + "\n\n" + context + field_prompts[section]
@@ -1057,7 +1104,7 @@ def _generate_llm_field_text(section: str, context: str) -> Dict[str, Any]:
         "evidence_item_ids": _parse_evidence_ids(data.get("evidence_item_ids")),
     }
 
-    min_len = 60 if section in ("diagnosis", "doctor_opinion") else 45
+    min_len = 60 if section in ("diagnosis", "doctor_opinion", "health_advice") else 45
     if len(value) < min_len:
         retried = True
         retry_prompt = (
@@ -1118,6 +1165,7 @@ def _generate_llm_plan_text(context: str, plan: Dict[str, Any]) -> Dict[str, Any
 
 
 def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str, Any]:
+    _log_rag_runtime_config_once()
     record_id = _extract_record_id(report, emr)
 
     if not OLLAMA_ENABLED:
@@ -1181,8 +1229,11 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
     diag_payload: Dict[str, Any] = {}
     opinion_payload: Dict[str, Any] = {}
     note_payload: Dict[str, Any] = {}
+    health_payload: Dict[str, Any] = {}
     plan_text = ""
     plan_evidence_ids: List[str] = []
+    health_advice_text = ""
+    health_evidence_ids: List[str] = []
     plan_payload: Dict[str, Any] = {}
 
     diagnosis_section = section_retrieval.get("diagnosis") or {}
@@ -1196,6 +1247,10 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
     note_section = section_retrieval.get("report_note") or {}
     note_context = _build_llm_context_for_section(
         report, emr, "report_note", retrieved_context=str(note_section.get("context") or "")
+    )
+    health_section = section_retrieval.get("health_advice") or {}
+    health_context = _build_llm_context_for_section(
+        report, emr, "health_advice", retrieved_context=str(health_section.get("context") or "")
     )
     plan = report.get("treatment_plan") or {}
     plan_section = section_retrieval.get("treatment_plan_text") or {}
@@ -1212,6 +1267,9 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
     def _run_note() -> Dict[str, Any]:
         return _generate_llm_field_text("report_note", note_context)
 
+    def _run_health() -> Dict[str, Any]:
+        return _generate_llm_field_text("health_advice", health_context)
+
     def _run_plan() -> Dict[str, Any]:
         if isinstance(plan, dict):
             return _generate_llm_plan_text(plan_context, plan)
@@ -1221,11 +1279,12 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
         "diagnosis": _run_diagnosis,
         "doctor_opinion": _run_opinion,
         "report_note": _run_note,
+        "health_advice": _run_health,
         "treatment_plan_text": _run_plan,
     }
     llm_started_at = time.time()
     _results: Dict[str, Any] = {}
-    with ThreadPoolExecutor(max_workers=4) as _executor:
+    with ThreadPoolExecutor(max_workers=5) as _executor:
         _futures = {_executor.submit(fn): name for name, fn in _tasks.items()}
         for _future in as_completed(_futures):
             _results[_futures[_future]] = _future.result()
@@ -1234,12 +1293,14 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
     diag_payload = _results.get("diagnosis") or {}
     opinion_payload = _results.get("doctor_opinion") or {}
     note_payload = _results.get("report_note") or {}
+    health_payload = _results.get("health_advice") or {}
     plan_payload = _results.get("treatment_plan_text") or {}
 
     for section_name, section_payload in (
         ("diagnosis", diag_payload),
         ("doctor_opinion", opinion_payload),
         ("report_note", note_payload),
+        ("health_advice", health_payload),
         ("treatment_plan_text", plan_payload),
     ):
         metrics = section_payload.get("_metrics") if isinstance(section_payload, dict) else None
@@ -1257,6 +1318,8 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
     if isinstance(plan, dict):
         plan_text = str(plan_payload.get("treatment_plan_text") or "").strip()
         plan_evidence_ids = _parse_evidence_ids(plan_payload.get("evidence_item_ids"))
+    health_advice_text = str(health_payload.get("health_advice") or "").strip()
+    health_evidence_ids = _parse_evidence_ids(health_payload.get("evidence_item_ids"))
 
     payload: Dict[str, Any] = {
         "model": OLLAMA_MODEL,
@@ -1277,6 +1340,7 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
     diagnosis_citations = diagnosis_section.get("citations") or []
     doctor_opinion_citations = opinion_section.get("citations") or []
     report_note_citations = note_section.get("citations") or []
+    health_advice_citations = health_section.get("citations") or []
     plan_citations = (section_retrieval.get("treatment_plan_text") or {}).get("citations") or []
 
     if diag_payload.get("diagnosis"):
@@ -1288,6 +1352,9 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
     if note_payload.get("report_note"):
         report_note_text = _strip_invalid_refs(str(note_payload["report_note"]), len(report_note_citations))
         payload["report_note"] = _remap_refs(report_note_text, report_note_citations, merged_ref_by_id)
+    if health_advice_text:
+        normalized_health_advice = _strip_invalid_refs(health_advice_text, len(health_advice_citations))
+        payload["health_advice"] = _remap_refs(normalized_health_advice, health_advice_citations, merged_ref_by_id)
     if plan_text:
         treatment_plan_text = _strip_invalid_refs(plan_text, len(plan_citations))
         payload["treatment_plan_text"] = _remap_refs(treatment_plan_text, plan_citations, merged_ref_by_id)
@@ -1295,6 +1362,7 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
     diagnosis_evidence_ids = _parse_evidence_ids(diag_payload.get("evidence_item_ids"))
     diagnosis_evidence_ids.extend(_parse_evidence_ids(opinion_payload.get("evidence_item_ids")))
     diagnosis_evidence_ids.extend(_parse_evidence_ids(note_payload.get("evidence_item_ids")))
+    diagnosis_evidence_ids.extend(_parse_evidence_ids(health_payload.get("evidence_item_ids")))
     diagnosis_evidence_ids.extend(
         _resolve_ref_ids(
             "\n".join(
@@ -1302,9 +1370,11 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
                     str(payload.get("diagnosis") or ""),
                     str(payload.get("doctor_opinion") or ""),
                     str(payload.get("report_note") or ""),
+                    str(payload.get("health_advice") or ""),
                     json.dumps(diag_payload.get("evidence_item_ids") or [], ensure_ascii=False),
                     json.dumps(opinion_payload.get("evidence_item_ids") or [], ensure_ascii=False),
                     json.dumps(note_payload.get("evidence_item_ids") or [], ensure_ascii=False),
+                    json.dumps(health_payload.get("evidence_item_ids") or [], ensure_ascii=False),
                 ]
             ),
             citations,
@@ -1324,10 +1394,23 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
             citations,
         )
     )
+    health_evidence_ids.extend(
+        _resolve_ref_ids(
+            "\n".join(
+                [
+                    str(payload.get("health_advice") or ""),
+                    json.dumps(health_payload.get("evidence_item_ids") or [], ensure_ascii=False),
+                ]
+            ),
+            citations,
+        )
+    )
     if plan_evidence_ids:
         payload["plan_evidence_item_ids"] = sorted(set(plan_evidence_ids))
+    if health_evidence_ids:
+        payload["health_advice_evidence_item_ids"] = sorted(set(health_evidence_ids))
 
-    merged_evidence_ids = sorted(set(diagnosis_evidence_ids + plan_evidence_ids))
+    merged_evidence_ids = sorted(set(diagnosis_evidence_ids + plan_evidence_ids + health_evidence_ids))
     payload["evidence_item_ids"] = merged_evidence_ids
     payload["citations"] = citations
 
