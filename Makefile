@@ -55,13 +55,17 @@ TCM_WORKERS  ?= 4
 TCM_DOCX_DIR  ?= $(CURDIR)/rag/dataset/docx_corpus
 TCM_DOCX_RPF  ?= 500   # records per docx file
 
-.PHONY: help install service service-precheck web web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build public-domain-up public-domain-down auto-commit-start auto-commit-stop auto-commit-status clean
+.PHONY: help install service service-fg service-start service-stop service-status service-restart service-precheck web web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build public-domain-up public-domain-down auto-commit-start auto-commit-stop auto-commit-status clean
 
 help:
 	@echo "Available targets:"
 	@echo "  make help             # list available commands"
 	@echo "  make install          # install dependencies"
-	@echo "  make service          # run backend service"
+	@echo "  make service          # run backend service in foreground (Ctrl+C to stop)"
+	@echo "  make service-start    # start backend service in background (PID-managed)"
+	@echo "  make service-stop     # stop backend service (PID-managed)"
+	@echo "  make service-status   # show backend service status"
+	@echo "  make service-restart  # restart backend service (PID-managed)"
 	@echo "  make web              # run Next.js web app (dev, slow)"
 	@echo "  make web-build        # compile Next.js for production (run once)"
 	@echo "  make web-prod         # start production Next.js server (fast, use after web-build)"
@@ -107,17 +111,28 @@ service-precheck:
 	@bash -c 'set -e; ENABLE_RAW="$${ENABLE_GO_REPORT_PROXY:-}"; if [ -z "$$ENABLE_RAW" ] && [ -f "$(CURDIR)/.env" ]; then ENABLE_RAW="$$(grep -E "^ENABLE_GO_REPORT_PROXY=" "$(CURDIR)/.env" | tail -n1 | cut -d= -f2- | tr -d "\r\"\047" | xargs)"; fi; ENABLE="$$(printf "%s" "$$ENABLE_RAW" | tr "[:upper:]" "[:lower:]")"; if [ "$$ENABLE" = "true" ] || [ "$$ENABLE" = "1" ] || [ "$$ENABLE" = "yes" ] || [ "$$ENABLE" = "on" ]; then GO_URL="$${GO_REPORT_SERVICE_URL:-}"; if [ -z "$$GO_URL" ] && [ -f "$(CURDIR)/.env" ]; then GO_URL="$$(grep -E "^GO_REPORT_SERVICE_URL=" "$(CURDIR)/.env" | tail -n1 | cut -d= -f2- | tr -d "\r\"\047" | xargs)"; fi; if [ -z "$$GO_URL" ]; then GO_URL="http://127.0.0.1:8088"; fi; HEALTH_URL="$${GO_URL%/}/healthz"; if ! command -v curl >/dev/null 2>&1; then echo "[warn] curl 不可用，跳过 Go 服务健康检查: $$HEALTH_URL"; exit 0; fi; if ! curl -fsS "$$HEALTH_URL" >/dev/null 2>&1; then echo "[error] Go 代理开关已开启但 Go 服务未启动: $$HEALTH_URL"; echo "        请先启动 Go 服务（例如: cd reports/go && make run），或关闭 ENABLE_GO_REPORT_PROXY。"; exit 1; fi; echo "[ok] Go report 服务可用: $$HEALTH_URL"; fi'
 
 SERVICE_PORT ?= 8000
+SERVICE_PID_FILE ?= $(CURDIR)/.run/service.pid
+SERVICE_LOG_FILE ?= $(CURDIR)/.run/service.log
 
-service: install service-precheck
+
+service-fg: install service-precheck
 	@bash -c 'set -e; PORT="$(SERVICE_PORT)"; if command -v ss >/dev/null 2>&1 && ss -ltn "sport = :$$PORT" | grep -q LISTEN; then echo "[error] Port $$PORT is already in use."; echo "        Run: make service-stop   (or use: make SERVICE_PORT=8001 service)"; exit 1; fi; exec "$(VENV_PY)" -m uvicorn route.main:app --host 0.0.0.0 --port "$$PORT" --reload'
+
+service: service-fg
+
+service-start: install service-precheck
+	@bash -c 'set -e; PORT="$(SERVICE_PORT)"; PID_FILE="$(SERVICE_PID_FILE)"; LOG_FILE="$(SERVICE_LOG_FILE)"; mkdir -p "$$({ dirname "$$PID_FILE"; })"; mkdir -p "$$({ dirname "$$LOG_FILE"; })"; if [ -f "$$PID_FILE" ] && kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[service] already running pid=$$(cat "$$PID_FILE")"; exit 0; fi; if command -v ss >/dev/null 2>&1 && ss -ltn "sport = :$$PORT" | grep -q LISTEN; then echo "[error] Port $$PORT is already in use."; echo "        Run: make service-stop   (or use: make SERVICE_PORT=8001 service-start)"; exit 1; fi; nohup "$(VENV_PY)" -m uvicorn route.main:app --host 0.0.0.0 --port "$$PORT" --reload > "$$LOG_FILE" 2>&1 & echo $$! > "$$PID_FILE"; sleep 1; if kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[service] started pid=$$(cat "$$PID_FILE") port=$$PORT log=$$LOG_FILE"; else echo "[service] failed to start; last log:"; tail -n 40 "$$LOG_FILE" || true; rm -f "$$PID_FILE"; exit 1; fi'
 
 service-dev: install service-precheck
 	@bash -c 'set -e; PORT="$(SERVICE_PORT)"; if command -v ss >/dev/null 2>&1 && ss -ltn "sport = :$$PORT" | grep -q LISTEN; then echo "[error] Port $$PORT is already in use."; echo "        Run: make service-stop   (or use: make SERVICE_PORT=8001 service-dev)"; exit 1; fi; exec "$(VENV_PY)" -m uvicorn route.main:app --host 0.0.0.0 --port "$$PORT" --reload'
 
 service-stop:
-	@bash -c 'set -e; PORT="$(SERVICE_PORT)"; PIDS="$$(fuser -n tcp $$PORT 2>/dev/null || true)"; if [ -n "$$PIDS" ]; then echo "Stopping port $$PORT pids: $$PIDS"; echo "$$PIDS" | xargs -r kill; sleep 1; REMAIN="$$(fuser -n tcp $$PORT 2>/dev/null || true)"; if [ -n "$$REMAIN" ]; then echo "Force stopping port $$PORT pids: $$REMAIN"; echo "$$REMAIN" | xargs -r kill -9; fi; fi; if command -v ss >/dev/null 2>&1; then ss -ltnp | grep ":$$PORT" || true; fi'
+	@bash -c 'set -e; PORT="$(SERVICE_PORT)"; PID_FILE="$(SERVICE_PID_FILE)"; if [ -f "$$PID_FILE" ]; then PID="$$(cat "$$PID_FILE")"; if kill -0 "$$PID" 2>/dev/null; then echo "[service] stopping pid=$$PID"; kill "$$PID" || true; sleep 1; if kill -0 "$$PID" 2>/dev/null; then echo "[service] force stopping pid=$$PID"; kill -9 "$$PID" || true; fi; else echo "[service] stale pid file removed"; fi; rm -f "$$PID_FILE"; fi; PIDS="$$(fuser -n tcp $$PORT 2>/dev/null || true)"; if [ -n "$$PIDS" ]; then echo "[service] cleanup by port $$PORT pids: $$PIDS"; echo "$$PIDS" | xargs -r kill || true; sleep 1; REMAIN="$$(fuser -n tcp $$PORT 2>/dev/null || true)"; if [ -n "$$REMAIN" ]; then echo "[service] force cleanup by port $$PORT pids: $$REMAIN"; echo "$$REMAIN" | xargs -r kill -9 || true; fi; fi; if command -v ss >/dev/null 2>&1; then ss -ltnp | grep ":$$PORT" || true; fi'
 
-service-restart: service-stop service
+service-status:
+	@bash -c 'set -e; PORT="$(SERVICE_PORT)"; PID_FILE="$(SERVICE_PID_FILE)"; if [ -f "$$PID_FILE" ]; then PID="$$(cat "$$PID_FILE")"; if kill -0 "$$PID" 2>/dev/null; then echo "[service] running pid=$$PID port=$$PORT"; if command -v ss >/dev/null 2>&1; then ss -ltnp | grep ":$$PORT" || true; fi; exit 0; fi; echo "[service] pid file exists but process not running: $$PID_FILE"; exit 1; fi; if command -v ss >/dev/null 2>&1 && ss -ltn "sport = :$$PORT" | grep -q LISTEN; then echo "[service] running on port $$PORT but pid file missing"; ss -ltnp | grep ":$$PORT" || true; exit 0; fi; echo "[service] not running"; exit 1'
+
+service-restart: service-stop service-start
 
 service-prod: install service-precheck
 	@bash -c 'set -e; PORT="$(SERVICE_PORT)"; if command -v ss >/dev/null 2>&1 && ss -ltn "sport = :$$PORT" | grep -q LISTEN; then echo "[error] Port $$PORT is already in use."; echo "        Run: make service-stop   (or use: make SERVICE_PORT=8001 service-prod)"; exit 1; fi; exec "$(VENV_PY)" -m uvicorn route.main:app --host 0.0.0.0 --port "$$PORT"'
