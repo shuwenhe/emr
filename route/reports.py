@@ -674,6 +674,8 @@ def download_report(date: str, filename: str, inline: bool = False):
 
 @router.get("/reports/preview")
 def preview_report(date: str, filename: str):
+    from fastapi.responses import StreamingResponse
+    
     if _should_use_proxy():
         encoded_name = quote(filename)
         return _proxy_file("GET", f"/v1/reports/{date}/{encoded_name}", query={"inline": "true"})
@@ -692,9 +694,19 @@ def preview_report(date: str, filename: str):
         content_disposition = (
             f"inline; filename=\"{ascii_name}\"; filename*=UTF-8''{quoted_name}"
         )
+        
+        # Use StreamingResponse instead of FileResponse for better compatibility
+        def file_iterator(path, chunk_size=65536):
+            with open(path, 'rb') as f:
+                while True:
+                    chunk = f.read(chunk_size)
+                    if not chunk:
+                        break
+                    yield chunk
+        
         headers = {"Content-Disposition": content_disposition}
-        return FileResponse(
-            path=str(candidate),
+        return StreamingResponse(
+            file_iterator(candidate),
             headers=headers,
             media_type="application/octet-stream"
         )
