@@ -75,6 +75,24 @@ function UploadPageContent() {
   const autoSelectedFromUrlRef = useRef(false);
   const warmingRetryRef = useRef(0);
   const MAX_WARMING_RETRIES = 200; // 200 × 3 s ≈ 10 min max wait
+  const PATIENTS_FETCH_TIMEOUT_MS = 20000;
+  const PATIENTS_FETCH_RETRY_COUNT = 1;
+
+  function normalizePatientsLoadError(error: unknown): string {
+    const message = error instanceof Error ? error.message : String(error || "");
+    const lower = message.toLowerCase();
+    if (
+      lower.includes("aborterror") ||
+      lower.includes("signal is aborted") ||
+      lower.includes("timeout")
+    ) {
+      return "患者列表加载超时，请检查后端服务后重试";
+    }
+    if (lower.includes("failed to fetch") || lower.includes("network")) {
+      return "患者列表加载失败，请检查网络连接后重试";
+    }
+    return message || "患者列表加载失败，请稍后重试";
+  }
 
   function uploadFormDataWithProgress(url: string, formData: FormData): Promise<{ ok: boolean; status: number; data: any }> {
     return new Promise((resolve, reject) => {
@@ -157,11 +175,35 @@ function UploadPageContent() {
       setPatientsWarming(false);
     }
     try {
-      const response = await fetch(`${API_PROXY_BASE}/patients`, {
-        cache: "no-store",
-      });
+      let response: Response | null = null;
+      let lastError: unknown;
+      for (let attempt = 0; attempt <= PATIENTS_FETCH_RETRY_COUNT; attempt += 1) {
+        const controller = new AbortController();
+        const timer = window.setTimeout(() => controller.abort(), PATIENTS_FETCH_TIMEOUT_MS);
+        try {
+          response = await fetch(`${API_PROXY_BASE}/patients`, {
+            cache: "no-store",
+            signal: controller.signal,
+          });
+          break;
+        } catch (error) {
+          lastError = error;
+          if (attempt >= PATIENTS_FETCH_RETRY_COUNT) {
+            throw error;
+          }
+        } finally {
+          window.clearTimeout(timer);
+        }
+      }
+
+      if (!response) {
+        throw new Error(lastError instanceof Error ? lastError.message : "患者列表请求失败");
+      }
+
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        const payload = await response.json().catch(() => ({}));
+        const detail = typeof payload?.detail === "string" ? payload.detail : "";
+        throw new Error(detail || `HTTP ${response.status}`);
       }
       const cacheStatus = response.headers.get("x-cache");
       const data = await response.json();
@@ -188,9 +230,7 @@ function UploadPageContent() {
       setPatientsLoading(false);
     } catch (error) {
       console.error("Failed to fetch patients:", error);
-      setPatientsError(
-        error instanceof Error ? error.message : String(error)
-      );
+      setPatientsError(normalizePatientsLoadError(error));
       setPatients([]);
       setPatientsWarming(false);
       setPatientsLoading(false);
