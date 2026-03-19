@@ -10,7 +10,7 @@ fi
 cd "$REPO_ROOT"
 
 INTERVAL_SEC="${AUTO_COMMIT_INTERVAL_SEC:-5}"
-COMMIT_SCOPE="${AUTO_COMMIT_SCOPE:-auto}"
+COMMIT_SCOPE="${AUTO_COMMIT_SCOPE:-}"
 COMMIT_TYPE_RAW="${AUTO_COMMIT_TYPE:-}"
 AUTO_PUSH_RAW="${AUTO_COMMIT_PUSH:-0}"
 AUTO_PUSH_REMOTE="${AUTO_COMMIT_PUSH_REMOTE:-origin}"
@@ -151,7 +151,7 @@ build_commit_message() {
   local files
   files="$(git diff --cached --name-only | sed '/^$/d')"
   if [[ -z "$files" ]]; then
-    echo "feat(${COMMIT_SCOPE}): summarize code updates"
+    echo "feat: summarize code updates"
     echo "Main changes:\n- No staged file summary available."
     return
   fi
@@ -183,7 +183,11 @@ build_commit_message() {
   commit_type="$(resolve_commit_type "$files")"
 
   local subject
-  subject="${commit_type}(${COMMIT_SCOPE}): summarize code updates (${file_count} files, ${feature_count} areas)"
+  if [[ -n "$COMMIT_SCOPE" ]]; then
+    subject="${commit_type}(${COMMIT_SCOPE}): summarize code updates (${file_count} files, ${feature_count} areas)"
+  else
+    subject="${commit_type}: summarize code updates (${file_count} files, ${feature_count} areas)"
+  fi
 
   local body="Main changes:\n"
   local feature
@@ -211,7 +215,11 @@ while true; do
       commit_subject=""
       commit_body=""
       mapfile -t commit_parts < <(build_commit_message)
-      commit_subject="${commit_parts[0]:-feat(${COMMIT_SCOPE}): summarize code updates}"
+      if [[ -n "$COMMIT_SCOPE" ]]; then
+        commit_subject="${commit_parts[0]:-feat(${COMMIT_SCOPE}): summarize code updates}"
+      else
+        commit_subject="${commit_parts[0]:-feat: summarize code updates}"
+      fi
       if [[ "${#commit_parts[@]}" -gt 1 ]]; then
         commit_body="${commit_parts[1]}"
       fi
