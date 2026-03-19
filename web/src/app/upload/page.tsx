@@ -54,11 +54,32 @@ function UploadPageContent() {
   function uploadFormDataWithProgress(url: string, formData: FormData): Promise<{ ok: boolean; status: number; data: any }> {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
+      let receivedNativeProgress = false;
+      const fallbackTimer = window.setInterval(() => {
+        if (receivedNativeProgress) return;
+        setUploadProgress((prev) => {
+          const next = Math.max(prev, 3);
+          return next >= 18 ? next : next + 1;
+        });
+        setUploadStatus("正在上传数据文件...");
+      }, 250);
+
+      const clearFallbackTimer = () => {
+        window.clearInterval(fallbackTimer);
+      };
+
       xhr.open("POST", url, true);
       xhr.responseType = "json";
       xhr.timeout = 120000;
 
+      xhr.onloadstart = () => {
+        setUploadProgress((prev) => Math.max(prev, 3));
+        setUploadStatus("正在建立上传连接...");
+      };
+
       xhr.upload.onprogress = (event) => {
+        receivedNativeProgress = true;
+        clearFallbackTimer();
         if (!event.lengthComputable || event.total <= 0) return;
         const pct = Math.max(0, Math.min(99, Math.round((event.loaded / event.total) * 100)));
         setUploadProgress(pct);
@@ -66,6 +87,7 @@ function UploadPageContent() {
       };
 
       xhr.onload = () => {
+        clearFallbackTimer();
         const raw = xhr.response;
         const data = typeof raw === "string"
           ? (() => {
@@ -79,9 +101,18 @@ function UploadPageContent() {
         resolve({ ok: xhr.status >= 200 && xhr.status < 300, status: xhr.status, data });
       };
 
-      xhr.onerror = () => reject(new Error("网络连接失败，上传中断"));
-      xhr.ontimeout = () => reject(new Error("上传超时，请重试"));
-      xhr.onabort = () => reject(new Error("上传已取消"));
+      xhr.onerror = () => {
+        clearFallbackTimer();
+        reject(new Error("网络连接失败，上传中断"));
+      };
+      xhr.ontimeout = () => {
+        clearFallbackTimer();
+        reject(new Error("上传超时，请重试"));
+      };
+      xhr.onabort = () => {
+        clearFallbackTimer();
+        reject(new Error("上传已取消"));
+      };
       xhr.send(formData);
     });
   }
