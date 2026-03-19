@@ -17,13 +17,34 @@ const API_PROXY_BASE = "/api";
 const API_BACKEND_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const UPLOAD_STATE_KEY = "patient_flow_state_upload";
 
+function getCurrentDateTimeLocalValue() {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const y = now.getFullYear();
+  const m = pad(now.getMonth() + 1);
+  const d = pad(now.getDate());
+  const hh = pad(now.getHours());
+  const mm = pad(now.getMinutes());
+  return `${y}-${m}-${d}T${hh}:${mm}`;
+}
+
+function normalizeCaptureTime(value: string) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) return "";
+  // datetime-local typically returns YYYY-MM-DDTHH:mm; backend expects seconds.
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(trimmed)) {
+    return `${trimmed}:00`;
+  }
+  return trimmed;
+}
+
 function UploadPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [files, setFiles] = useState<File[]>([]);
-  const [deviceId, setDeviceId] = useState("");
+  const [deviceId, setDeviceId] = useState("device-001");
   const [deviceModel, setDeviceModel] = useState("IR-Thermal-320");
-  const [captureTime, setCaptureTime] = useState("");
+  const [captureTime, setCaptureTime] = useState(getCurrentDateTimeLocalValue());
   const [patientName, setPatientName] = useState("");
   const [gender, setGender] = useState("");
   const [age, setAge] = useState("");
@@ -244,8 +265,18 @@ function UploadPageContent() {
   }
 
   async function handleUpload() {
-    if (files.length === 0 || !deviceId || !captureTime) {
-      setResult({ error: "请填写必填字段并选择至少一个文件" });
+    if (files.length === 0) {
+      setResult({ error: "请选择至少一个文件" });
+      return;
+    }
+
+    if (!deviceId.trim()) {
+      setResult({ error: "请填写设备ID" });
+      return;
+    }
+
+    if (!captureTime.trim()) {
+      setResult({ error: "请填写采集时间" });
       return;
     }
 
@@ -270,7 +301,7 @@ function UploadPageContent() {
         model: deviceModel || undefined,
       },
       capture: {
-        capture_time: captureTime,
+        capture_time: normalizeCaptureTime(captureTime),
         frame_rate_hz: 9.0,
         resolution: "320x240",
         distance_m: 1.2,
@@ -518,8 +549,8 @@ function UploadPageContent() {
               <input
                 type="datetime-local"
                 className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                value={captureTime}
-                onChange={(e) => setCaptureTime(e.target.value + ":00")}
+                value={captureTime.slice(0, 16)}
+                onChange={(e) => setCaptureTime(e.target.value)}
               />
             </div>
           </div>
