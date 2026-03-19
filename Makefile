@@ -91,6 +91,7 @@ help:
 	@echo "  make roi-benchmark    # run ROI Python/C++ benchmark"
 	@echo "  make auto-commit-start  # start watcher (includes code + Makefile/Dockerfile/.env.example)"
 	@echo "    env: AUTO_COMMIT_PUSH=1 AUTO_COMMIT_PUSH_REMOTE=origin AUTO_COMMIT_PUSH_BRANCH=main"
+	@echo "    env: AUTO_COMMIT_TYPE=feat|fix (commit type is restricted to feat/fix)"
 	@echo "  make auto-commit-stop   # stop background auto-commit watcher"
 	@echo "  make auto-commit-status # show watcher status"
 	@echo "  make clean            # remove generated files"
