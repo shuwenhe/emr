@@ -22,7 +22,7 @@ KB_API_KEY ?=
 KB_MAX_LEN ?= 800
 KB_OVERLAP ?= 100
 KB_BATCH_SIZE ?= 32
-STRUCTURED_KB_JSONL ?= $(CURDIR)/rag/kb/knowledge_base.jsonl
+STRUCTURED_KB_JSONL ?= $(CURDIR)/rag/kb/knowledge_base.json
 STRUCTURED_KB_OUT_DIR ?= $(CURDIR)/rag/kb/current_partial
 KB_DOC_IMPORT_DIR ?= $(CURDIR)/docs/guidelines
 KB_DOC_ID_PREFIX ?= KB-DOC
@@ -81,10 +81,10 @@ help:
 	@echo "  make simhash-build    # compile C++ SimHash extension (speeds up dedup)" 
 	@echo "  make text-ops-build   # compile C++ text ops extension (chunk_text + low-signal)"
 	@echo "  make kb-build-markdown # build KB and print markdown/chunk debug"
-	@echo "  make kb-build-structured # build vector KB from rag/kb/knowledge_base.jsonl"
-	@echo "  make kb-import-docs    # batch import .docx/.pdf into knowledge_base.jsonl (upsert by id)"
+	@echo "  make kb-build-structured # build vector KB from rag/kb/knowledge_base.json"
+	@echo "  make kb-import-docs    # batch import .docx/.pdf into knowledge_base.json (upsert by id)"
 	@echo "  make kb-import-docs-build # import docs then rebuild structured vector KB"
-	@echo "  make kb-import-md      # batch import .md into knowledge_base.jsonl (upsert by id)"
+	@echo "  make kb-import-md      # batch import .md into knowledge_base.json (upsert by id)"
 	@echo "  make kb-import-md-build # import markdown then rebuild structured vector KB"
 	@echo "  make kb-rebuild       # alias of kb-build"
 	@echo "  make kb-clean         # remove generated KB artifacts"

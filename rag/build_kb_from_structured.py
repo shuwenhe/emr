@@ -31,6 +31,13 @@ def _sha1(text: str) -> str:
 
 
 def _load_jsonl(path: str) -> List[Dict[str, Any]]:
+    if Path(path).suffix.lower() == ".json":
+        try:
+            data = json.loads(Path(path).read_text(encoding="utf-8"))
+            return [r for r in data if isinstance(r, dict)] if isinstance(data, list) else []
+        except Exception as exc:
+            log.warning("Failed to parse JSON file %s: %s", path, exc)
+            return []
     items: List[Dict[str, Any]] = []
     with open(path, "r", encoding="utf-8") as f:
         for lineno, line in enumerate(f, 1):
@@ -167,8 +174,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--kb",
-        default=str(project_root / "rag" / "kb" / "knowledge_base.jsonl"),
-        help="Path to structured knowledge_base.jsonl",
+        default=str(project_root / "rag" / "kb" / "knowledge_base.json"),
+        help="Path to structured knowledge_base.json (also accepts .jsonl)",
     )
     parser.add_argument(
         "--out",

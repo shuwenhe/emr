@@ -281,18 +281,25 @@ def _build_entries_for_file(
 def _upsert_jsonl(output_file: Path, all_entries: List[dict]) -> None:
     existing_rows: List[dict] = []
     if output_file.exists():
-        with output_file.open("r", encoding="utf-8") as f:
-            for line_no, line in enumerate(f, start=1):
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    row = json.loads(line)
-                except json.JSONDecodeError as exc:
-                    print(f"[WARN] Skip malformed existing row line={line_no}: {exc}")
-                    continue
-                if isinstance(row, dict):
-                    existing_rows.append(row)
+        if output_file.suffix.lower() == ".json":
+            try:
+                data = json.loads(output_file.read_text(encoding="utf-8"))
+                existing_rows = [r for r in data if isinstance(r, dict)] if isinstance(data, list) else []
+            except Exception as exc:
+                print(f"[WARN] Failed to read existing JSON file: {exc}")
+        else:
+            with output_file.open("r", encoding="utf-8") as f:
+                for line_no, line in enumerate(f, start=1):
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        row = json.loads(line)
+                    except json.JSONDecodeError as exc:
+                        print(f"[WARN] Skip malformed existing row line={line_no}: {exc}")
+                        continue
+                    if isinstance(row, dict):
+                        existing_rows.append(row)
 
     index_by_id = {
         str(row.get("id") or "").strip(): idx
@@ -314,9 +321,12 @@ def _upsert_jsonl(output_file: Path, all_entries: List[dict]) -> None:
             added += 1
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
-    with output_file.open("w", encoding="utf-8") as f:
-        for row in existing_rows:
-            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    if output_file.suffix.lower() == ".json":
+        output_file.write_text(json.dumps(existing_rows, ensure_ascii=False, indent=2), encoding="utf-8")
+    else:
+        with output_file.open("w", encoding="utf-8") as f:
+            for row in existing_rows:
+                f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
     print(
         f"[DONE] Upserted {len(all_entries)} entries to: {output_file} "
@@ -372,21 +382,31 @@ def build_jsonl(
         _upsert_jsonl(output_file, all_entries)
     else:
         output_file.parent.mkdir(parents=True, exist_ok=True)
-        with output_file.open("a", encoding="utf-8") as f:
-            for item in all_entries:
-                f.write(json.dumps(item, ensure_ascii=False) + "\n")
+        if output_file.suffix.lower() == ".json":
+            existing_append: List[dict] = []
+            if output_file.exists():
+                try:
+                    data = json.loads(output_file.read_text(encoding="utf-8"))
+                    existing_append = [r for r in data if isinstance(r, dict)] if isinstance(data, list) else []
+                except Exception:
+                    pass
+            output_file.write_text(json.dumps(existing_append + all_entries, ensure_ascii=False, indent=2), encoding="utf-8")
+        else:
+            with output_file.open("a", encoding="utf-8") as f:
+                for item in all_entries:
+                    f.write(json.dumps(item, ensure_ascii=False) + "\n")
         print(f"[DONE] Appended {len(all_entries)} entries to: {output_file}")
 
     return len(all_entries)
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Build knowledge_base.jsonl from markdown files")
+    parser = argparse.ArgumentParser(description="Build knowledge_base.json from markdown files")
     parser.add_argument("--input-dir", required=True, help="Directory containing markdown files")
     parser.add_argument(
         "--output-file",
-        default="./rag/kb/knowledge_base.jsonl",
-        help="Output JSONL file path (default: ./rag/kb/knowledge_base.jsonl)",
+        default="./rag/kb/knowledge_base.json",
+        help="Output file path (default: ./rag/kb/knowledge_base.json; .jsonl also supported)",
     )
     parser.add_argument("--id-prefix", default="KB-MD", help="ID prefix (default: KB-MD)")
     parser.add_argument("--max-chars", type=int, default=700, help="Max chars per chunk (default: 700)")

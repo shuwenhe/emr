@@ -240,18 +240,25 @@ def build_jsonl(
 
     if upsert and output_file.exists():
         existing_rows: List[dict] = []
-        with output_file.open("r", encoding="utf-8") as f:
-            for line_no, line in enumerate(f, start=1):
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    row = json.loads(line)
-                except json.JSONDecodeError as exc:
-                    print(f"[WARN] Skip malformed existing row line={line_no}: {exc}")
-                    continue
-                if isinstance(row, dict):
-                    existing_rows.append(row)
+        if output_file.suffix.lower() == ".json":
+            try:
+                data = json.loads(output_file.read_text(encoding="utf-8"))
+                existing_rows = [r for r in data if isinstance(r, dict)] if isinstance(data, list) else []
+            except Exception as exc:
+                print(f"[WARN] Failed to read existing JSON file: {exc}")
+        else:
+            with output_file.open("r", encoding="utf-8") as f:
+                for line_no, line in enumerate(f, start=1):
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        row = json.loads(line)
+                    except json.JSONDecodeError as exc:
+                        print(f"[WARN] Skip malformed existing row line={line_no}: {exc}")
+                        continue
+                    if isinstance(row, dict):
+                        existing_rows.append(row)
 
         index_by_id = {
             str(row.get("id") or "").strip(): idx
@@ -272,9 +279,12 @@ def build_jsonl(
                     index_by_id[item_id] = len(existing_rows) - 1
                 added += 1
 
-        with output_file.open("w", encoding="utf-8") as f:
-            for row in existing_rows:
-                f.write(json.dumps(row, ensure_ascii=False) + "\n")
+        if output_file.suffix.lower() == ".json":
+            output_file.write_text(json.dumps(existing_rows, ensure_ascii=False, indent=2), encoding="utf-8")
+        else:
+            with output_file.open("w", encoding="utf-8") as f:
+                for row in existing_rows:
+                    f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
         print(
             f"[DONE] Upserted {len(all_entries)} entries to: {output_file} "
@@ -282,22 +292,32 @@ def build_jsonl(
         )
         return len(all_entries)
 
-    mode = "a" if append and output_file.exists() else "w"
-    with output_file.open(mode, encoding="utf-8") as f:
-        for item in all_entries:
-            f.write(json.dumps(item, ensure_ascii=False) + "\n")
+    if output_file.suffix.lower() == ".json":
+        existing: List[dict] = []
+        if append and output_file.exists():
+            try:
+                data = json.loads(output_file.read_text(encoding="utf-8"))
+                existing = [r for r in data if isinstance(r, dict)] if isinstance(data, list) else []
+            except Exception:
+                pass
+        output_file.write_text(json.dumps(existing + all_entries, ensure_ascii=False, indent=2), encoding="utf-8")
+    else:
+        mode = "a" if append and output_file.exists() else "w"
+        with output_file.open(mode, encoding="utf-8") as f:
+            for item in all_entries:
+                f.write(json.dumps(item, ensure_ascii=False) + "\n")
 
     print(f"[DONE] Wrote {len(all_entries)} entries to: {output_file}")
     return len(all_entries)
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Build knowledge_base.jsonl from Word/PDF files")
+    parser = argparse.ArgumentParser(description="Build knowledge_base.json from Word/PDF files")
     parser.add_argument("--input-dir", required=True, help="Directory containing .docx/.pdf guidelines")
     parser.add_argument(
         "--output-file",
-        default="./rag/kb/knowledge_base.jsonl",
-        help="Output JSONL file path (default: ./rag/kb/knowledge_base.jsonl)",
+        default="./rag/kb/knowledge_base.json",
+        help="Output file path (default: ./rag/kb/knowledge_base.json; .jsonl also supported)",
     )
     parser.add_argument("--id-prefix", default="KB-HT", help="ID prefix (default: KB-HT)")
     parser.add_argument("--max-chars", type=int, default=700, help="Max chars per chunk (default: 700)")

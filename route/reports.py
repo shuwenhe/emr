@@ -396,43 +396,56 @@ def _kb_source_preview_entries(source: str) -> List[Dict[str, Any]]:
 
     project_root = Path(__file__).resolve().parents[1]
     kb_candidates = [
+        project_root / "rag" / "kb" / "knowledge_base.json",
         project_root / "rag" / "kb" / "knowledge_base.jsonl",
         project_root / "rag" / "kb" / "current_partial" / "chunks.jsonl",
     ]
 
+    seen_kb: set = set()
     entries: List[Dict[str, Any]] = []
     for kb_path in kb_candidates:
         if not kb_path.exists() or not kb_path.is_file():
             continue
         try:
-            with kb_path.open("r", encoding="utf-8") as handle:
-                for raw_line in handle:
-                    line = raw_line.strip()
-                    if not line:
-                        continue
-                    try:
-                        item = json.loads(line)
-                    except Exception:
-                        continue
-                    if not isinstance(item, dict):
-                        continue
-                    source_value = str(item.get("source") or item.get("file_path") or "").strip()
-                    if _canonical_source_name(source_value) != canonical:
-                        continue
-                    entries.append(
-                        {
-                            "id": str(item.get("id") or item.get("chunk_id") or "").strip(),
-                            "title": str(item.get("title") or "").strip(),
-                            "content": str(
-                                item.get("content")
-                                or item.get("excerpt_markdown")
-                                or item.get("text_for_embedding")
-                                or ""
-                            ).strip(),
-                            "tags": item.get("tags") or [],
-                            "source": source_value,
-                        }
-                    )
+            if kb_path.suffix.lower() == ".json":
+                data = json.loads(kb_path.read_text(encoding="utf-8"))
+                kb_rows: List[Any] = [r for r in data if isinstance(r, dict)] if isinstance(data, list) else []
+            else:
+                kb_rows = []
+                with kb_path.open("r", encoding="utf-8") as handle:
+                    for raw_line in handle:
+                        raw = raw_line.strip()
+                        if not raw:
+                            continue
+                        try:
+                            row = json.loads(raw)
+                            if isinstance(row, dict):
+                                kb_rows.append(row)
+                        except Exception:
+                            continue
+            for item in kb_rows:
+                source_value = str(item.get("source") or item.get("file_path") or "").strip()
+                if _canonical_source_name(source_value) != canonical:
+                    continue
+                item_id = str(item.get("id") or item.get("chunk_id") or "").strip()
+                if item_id and item_id in seen_kb:
+                    continue
+                if item_id:
+                    seen_kb.add(item_id)
+                entries.append(
+                    {
+                        "id": item_id,
+                        "title": str(item.get("title") or "").strip(),
+                        "content": str(
+                            item.get("content")
+                            or item.get("excerpt_markdown")
+                            or item.get("text_for_embedding")
+                            or ""
+                        ).strip(),
+                        "tags": item.get("tags") or [],
+                        "source": source_value,
+                    }
+                )
         except Exception:
             logger.exception("failed to load knowledge-base preview entries from %s", kb_path)
     return entries

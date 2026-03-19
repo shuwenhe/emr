@@ -47,7 +47,7 @@ RAG_OPENAI_BASE_URL = os.getenv("RAG_OPENAI_BASE_URL")
 RAG_OPENAI_API_KEY = os.getenv("RAG_OPENAI_API_KEY")
 RAG_KB_PATH = os.getenv(
     "RAG_KB_PATH",
-    str(Path(__file__).resolve().parents[2] / "rag" / "kb" / "knowledge_base.jsonl"),
+    str(Path(__file__).resolve().parents[2] / "rag" / "kb" / "knowledge_base.json"),
 )
 
 _KB_ITEMS_CACHE: Optional[List[Dict[str, Any]]] = None
