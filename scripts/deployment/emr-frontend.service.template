@@ -1,0 +1,20 @@
+[Unit]
+Description=EMR Frontend (Next.js)
+After=network-online.target emr-backend.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=__PROJECT_ROOT__/web
+# 每次启动前自动把局域网IP写入二维码URL文件
+ExecStartPre=/usr/bin/env bash __PROJECT_ROOT__/web/scripts/sync_lan_self_register_base.sh
+ExecStart=/usr/bin/npm run start
+Restart=always
+RestartSec=5
+StartLimitIntervalSec=0
+
+StandardOutput=append:__PROJECT_ROOT__/logs/emr-frontend.out.log
+StandardError=append:__PROJECT_ROOT__/logs/emr-frontend.err.log
+
+[Install]
+WantedBy=default.target

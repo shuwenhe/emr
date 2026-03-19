@@ -1,0 +1,19 @@
+[Unit]
+Description=EMR Backend (FastAPI/uvicorn)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=__PROJECT_ROOT__
+Environment=PYTHONUNBUFFERED=1
+ExecStart=__PROJECT_ROOT__/.venv/bin/python -m uvicorn route.main:app --host 0.0.0.0 --port 8000 --reload
+Restart=always
+RestartSec=5
+StartLimitIntervalSec=0
+
+StandardOutput=append:__PROJECT_ROOT__/logs/emr-backend.out.log
+StandardError=append:__PROJECT_ROOT__/logs/emr-backend.err.log
+
+[Install]
+WantedBy=default.target
