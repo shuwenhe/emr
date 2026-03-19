@@ -51,7 +51,9 @@ RAG_KB_PATH = os.getenv(
 )
 
 _KB_ITEMS_CACHE: Optional[List[Dict[str, Any]]] = None
+_KB_ITEMS_MTIME: Optional[float] = None
 _VECTOR_KB_CACHE: Optional[Any] = None
+_VECTOR_KB_MTIME: Optional[float] = None
 _VECTOR_EMBEDDINGS: Any = None
 _VECTOR_DISABLED_REASON: Optional[str] = None
 _RAG_CONFIG_LOGGED = False
@@ -233,11 +235,17 @@ def _to_list_of_str(value: Any) -> List[str]:
 
 
 def _load_kb_items() -> List[Dict[str, Any]]:
-    global _KB_ITEMS_CACHE
-    if _KB_ITEMS_CACHE is not None:
-        return _KB_ITEMS_CACHE
-
+    global _KB_ITEMS_CACHE, _KB_ITEMS_MTIME
     path = Path(RAG_KB_PATH)
+    try:
+        current_mtime = path.stat().st_mtime if path.exists() else None
+    except OSError:
+        current_mtime = None
+    if _KB_ITEMS_CACHE is not None and current_mtime == _KB_ITEMS_MTIME:
+        return _KB_ITEMS_CACHE
+    # File changed or first load — invalidate cache
+    _KB_ITEMS_CACHE = None
+    _KB_ITEMS_MTIME = current_mtime
     if not path.exists() or not path.is_file():
         _KB_ITEMS_CACHE = []
         return _KB_ITEMS_CACHE
@@ -285,6 +293,8 @@ def _load_kb_items() -> List[Dict[str, Any]]:
         logging.error("load kb items failed: %s", exc)
 
     _KB_ITEMS_CACHE = items
+    # mtime already set before load; reaffirm after successful load
+    _KB_ITEMS_MTIME = current_mtime
     return _KB_ITEMS_CACHE
 
 
@@ -444,20 +454,42 @@ def build_section_queries(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[s
     }
 
 
+def _vector_kb_index_mtime(kb_dir: str) -> Optional[float]:
+    """Return mtime of index.faiss inside kb_dir (follows symlinks)."""
+    try:
+        p = Path(kb_dir).resolve() / "index.faiss"
+        return p.stat().st_mtime if p.exists() else None
+    except OSError:
+        return None
+
+
 def _load_vector_kb() -> Optional[Any]:
-    global _VECTOR_KB_CACHE, _VECTOR_DISABLED_REASON
-    if _VECTOR_KB_CACHE is not None:
-        return _VECTOR_KB_CACHE
-    if _VECTOR_DISABLED_REASON is not None:
+    global _VECTOR_KB_CACHE, _VECTOR_KB_MTIME, _VECTOR_DISABLED_REASON
+    if _VECTOR_DISABLED_REASON is not None and _VECTOR_DISABLED_REASON == "vector disabled":
         return None
     if not RAG_VECTOR_ENABLED:
         _VECTOR_DISABLED_REASON = "vector disabled"
         return None
 
+    # Check if the on-disk KB has been updated since last load
+    primary_candidate = str(RAG_VECTOR_KB_PATH).strip()
+    project_root = Path(__file__).resolve().parents[2]
+    fallback_partial = str(project_root / "rag" / "kb" / "current_partial")
+    check_dir = primary_candidate or fallback_partial
+    current_mtime = _vector_kb_index_mtime(check_dir)
+    if _VECTOR_KB_CACHE is not None and current_mtime == _VECTOR_KB_MTIME:
+        return _VECTOR_KB_CACHE
+    if current_mtime != _VECTOR_KB_MTIME and _VECTOR_KB_CACHE is not None:
+        logging.info("vector kb on-disk change detected, reloading (old_mtime=%s new_mtime=%s)", _VECTOR_KB_MTIME, current_mtime)
+        _VECTOR_KB_CACHE = None
+        _VECTOR_DISABLED_REASON = None
+    if _VECTOR_DISABLED_REASON is not None:
+        return None
+
     try:
         load_kb, _ = _import_top_level_rag_modules()
         candidates: List[str] = []
-        primary = str(RAG_VECTOR_KB_PATH).strip()
+        primary = primary_candidate
         if primary:
             candidates.append(primary)
 
@@ -471,6 +503,7 @@ def _load_vector_kb() -> Optional[Any]:
             for attempt in range(RAG_VECTOR_LOAD_RETRIES + 1):
                 try:
                     _VECTOR_KB_CACHE = load_kb(candidate)
+                    _VECTOR_KB_MTIME = _vector_kb_index_mtime(candidate)
                     if candidate != primary:
                         logging.warning("vector kb fallback activated: %s", candidate)
                     return _VECTOR_KB_CACHE
