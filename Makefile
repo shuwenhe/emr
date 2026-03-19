@@ -55,7 +55,7 @@ TCM_WORKERS  ?= 4
 TCM_DOCX_DIR  ?= $(CURDIR)/rag/dataset/docx_corpus
 TCM_DOCX_RPF  ?= 500   # records per docx file
 
-.PHONY: help install service service-precheck web web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build public-domain-up public-domain-down clean
+.PHONY: help install service service-precheck web web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build public-domain-up public-domain-down auto-commit-start auto-commit-stop auto-commit-status clean
 
 help:
 	@echo "Available targets:"
@@ -89,6 +89,10 @@ help:
 	@echo "  make kb-build-tcm     # Stage 3: embed chunks → FAISS KB  (needs TCM_CHUNKS_JSONL)"
 	@echo "  make roi-build        # build ROI C++ library under roi/cpp"
 	@echo "  make roi-benchmark    # run ROI Python/C++ benchmark"
+	@echo "  make auto-commit-start  # start watcher (includes code + Makefile/Dockerfile/.env.example)"
+	@echo "    env: AUTO_COMMIT_PUSH=1 AUTO_COMMIT_PUSH_REMOTE=origin AUTO_COMMIT_PUSH_BRANCH=main"
+	@echo "  make auto-commit-stop   # stop background auto-commit watcher"
+	@echo "  make auto-commit-status # show watcher status"
 	@echo "  make clean            # remove generated files"
 
 install:
@@ -287,6 +291,15 @@ roi-build:
 
 roi-benchmark:
 	@"$(KB_PY)" "$(ROI_DIR)/python/benchmark_masks.py"
+
+auto-commit-start:
+	@bash -c 'set -e; PID_FILE="$(CURDIR)/.git/.auto_commit.pid"; LOG_FILE="$(CURDIR)/.git/auto_commit.log"; if [ -f "$$PID_FILE" ] && kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[auto-commit] already running (pid=$$(cat "$$PID_FILE"))"; exit 0; fi; nohup bash "$(CURDIR)/scripts/auto_commit_on_change.sh" > "$$LOG_FILE" 2>&1 & echo $$! > "$$PID_FILE"; echo "[auto-commit] started pid=$$(cat "$$PID_FILE") log=$$LOG_FILE"'
+
+auto-commit-stop:
+	@bash -c 'set -e; PID_FILE="$(CURDIR)/.git/.auto_commit.pid"; if [ ! -f "$$PID_FILE" ]; then echo "[auto-commit] not running"; exit 0; fi; PID="$$(cat "$$PID_FILE")"; if kill -0 "$$PID" 2>/dev/null; then kill "$$PID"; echo "[auto-commit] stopped pid=$$PID"; else echo "[auto-commit] stale pid file removed"; fi; rm -f "$$PID_FILE"'
+
+auto-commit-status:
+	@bash -c 'set -e; PID_FILE="$(CURDIR)/.git/.auto_commit.pid"; if [ -f "$$PID_FILE" ] && kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[auto-commit] running pid=$$(cat "$$PID_FILE")"; else echo "[auto-commit] not running"; fi; LOG_FILE="$(CURDIR)/.git/auto_commit.log"; if [ -f "$$LOG_FILE" ]; then echo "[auto-commit] recent log:"; tail -n 10 "$$LOG_FILE"; fi'
 
 clean:
 	@rm -rf $(VENV_DIR)
