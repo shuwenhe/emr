@@ -166,17 +166,30 @@ def _severity_from_value(value: Any) -> str:
     return "轻"
 
 
+_ADVICE_NUM_RE = re.compile(r"^\s*(?:\d+[.、。)）]\s*)+")
+
+
+def _strip_advice_num(line: str) -> str:
+    """Remove leading numbering like '1.', '1、', '1. 1.' etc."""
+    return _ADVICE_NUM_RE.sub("", line).strip()
+
+
 def _split_advice_lines(*values: Any) -> List[str]:
     lines: List[str] = []
     for value in values:
         text = str(value or "").strip()
         if not text:
             continue
-        normalized = text.replace("；", "。")
-        for piece in normalized.split("。"):
-            item = piece.strip()
-            if item:
-                lines.append(item)
+        # Prefer newline-split (LLM outputs numbered lists with \n).
+        # Fall back to '。'-split for plain prose.
+        raw_lines = [l.strip() for l in text.splitlines() if l.strip()]
+        if len(raw_lines) <= 1:
+            normalized = text.replace("；", "。")
+            raw_lines = [p.strip() for p in normalized.split("。") if p.strip()]
+        for item in raw_lines:
+            cleaned = _strip_advice_num(item)
+            if cleaned:
+                lines.append(cleaned)
     return lines
 
 
@@ -716,7 +729,7 @@ def generate_pdf_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
     story.append(Spacer(1, 3 * mm))
     for index, line in enumerate(_advice_rows(report, emr), start=1):
         story.append(_paragraph(f"{index}、{line}", styles["body"]))
-        story.append(Spacer(1, 2 * mm))
+        story.append(Spacer(1, 2 * mm))  # number is added here; _split_advice_lines strips any pre-existing numbering
     story.append(Spacer(1, 8 * mm))
     story.append(_paragraph(f"评估日期：{created_dt.strftime('%Y-%m-%d')}", styles["small"]))
     story.append(Spacer(1, 2 * mm))
