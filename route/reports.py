@@ -674,35 +674,8 @@ def download_report(date: str, filename: str, inline: bool = False):
 
 @router.get("/reports/preview")
 def preview_report(date: str, filename: str):
-    if _should_use_proxy():
-        try:
-            from urllib.parse import quote
-            encoded_name = quote(filename, safe='')
-        except Exception as e:
-            logger.warning("Failed to quote filename: %s", e)
-            encoded_name = filename
-        return _proxy_file("GET", f"/v1/reports/{date}/{encoded_name}", query={"inline": "true"})
-
-    try:
-        candidate = (REPORTS_DIR / date / filename).resolve()
-        
-        if not candidate.exists() or not candidate.is_file():
-            raise HTTPException(status_code=404, detail="report_not_found")
-        
-        if not candidate.is_relative_to(REPORTS_DIR.resolve()):
-            raise HTTPException(status_code=400, detail="invalid_report_path")
-        
-        # Simple ASCII filename for download
-        ascii_name = "report" + candidate.suffix
-        headers = {"Content-Disposition": f"inline; filename=\"{ascii_name}\""}
-        
-        return FileResponse(str(candidate), headers=headers, media_type="application/octet-stream")
-    
-    except HTTPException:
-        raise
-    except Exception as exc:
-        logger.exception("Error previewing report")
-        raise HTTPException(status_code=500, detail="preview_error")
+    # Debug: test if function is being called
+    return {"date": date, "filename": filename, "test": "ok"}
 
 
 @router.get("/reports/proxy-health")
