@@ -13,7 +13,7 @@ type Patient = {
   age: number;
 };
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = "/api";
 const UPLOAD_STATE_KEY = "patient_flow_state_upload";
 
 function UploadPageContent() {
@@ -124,8 +124,13 @@ function UploadPageContent() {
   async function fetchPatients() {
     setPatientsLoading(true);
     setPatientsError("");
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 8000);
     try {
-      const response = await fetch(`${API_BASE}/patients`);
+      const response = await fetch(`${API_BASE}/patients`, {
+        cache: "no-store",
+        signal: controller.signal,
+      });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
@@ -137,6 +142,7 @@ function UploadPageContent() {
       setPatientsError(String(error));
       setPatients([]);
     } finally {
+      window.clearTimeout(timer);
       setPatientsLoading(false);
     }
   }
