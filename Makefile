@@ -101,7 +101,7 @@ help:
 	@echo "  make auto-commit-status # show watcher status"
 	@echo "  make logs             # follow backend + frontend logs"
 	@echo "  make logs-backend     # follow backend logs (systemd journal)"
-	@echo "  make logs-frontend    # follow frontend logs (systemd journal)"
+	@echo "  make logs-frontend    # tail frontend log files"
 	@echo "  make logs-auto-git-push # follow auto git push logs (systemd journal)"
 	@echo "  make logs-all         # follow backend + frontend + auto git push logs"
 	@echo "  make logs-file-backend  # tail backend log files"
@@ -333,7 +333,7 @@ logs-backend:
 	@bash -c 'tail -f "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log"'
 
 logs-frontend:
-	@journalctl --user -u emr-frontend -f
+	@bash -c 'tail -f "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"'
 
 logs-auto-git-push:
 	@journalctl --user -u emr-auto-git-push -f
