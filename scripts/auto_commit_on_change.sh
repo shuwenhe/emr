@@ -10,7 +10,7 @@ fi
 cd "$REPO_ROOT"
 
 INTERVAL_SEC="${AUTO_COMMIT_INTERVAL_SEC:-5}"
-COMMIT_PREFIX="${AUTO_COMMIT_MESSAGE_PREFIX:-chore(auto): code update}"
+COMMIT_PREFIX="${AUTO_COMMIT_MESSAGE_PREFIX:-chore(auto): summarize code updates}"
 AUTO_PUSH_RAW="${AUTO_COMMIT_PUSH:-0}"
 AUTO_PUSH_REMOTE="${AUTO_COMMIT_PUSH_REMOTE:-origin}"
 AUTO_PUSH_BRANCH="${AUTO_COMMIT_PUSH_BRANCH:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo main)}"
@@ -83,6 +83,102 @@ stage_code_changes() {
   done < <(list_changed_files)
 }
 
+contains_line() {
+  local needle="$1"
+  local text="$2"
+  grep -Fqx "$needle" <<< "$text"
+}
+
+summarize_area_from_file() {
+  local file="$1"
+  case "$file" in
+    ingestion/app/*)
+      echo "Improve ingestion and AI report generation pipeline"
+      ;;
+    route/*)
+      echo "Refine API routing and persistence flow"
+      ;;
+    reports/python/*)
+      echo "Enhance report rendering and output content"
+      ;;
+    rag/*)
+      echo "Enhance RAG retrieval and knowledge base workflow"
+      ;;
+    scripts/*)
+      echo "Improve automation scripts and developer tooling"
+      ;;
+    web/*)
+      echo "Update web application behavior and assets"
+      ;;
+    config/*)
+      echo "Adjust project configuration defaults"
+      ;;
+    Makefile|*/Makefile)
+      echo "Update build and automation tasks"
+      ;;
+    Dockerfile|*/Dockerfile|Dockerfile.*|*/Dockerfile.*)
+      echo "Adjust container build/runtime setup"
+      ;;
+    .env|.env.example)
+      echo "Update environment variable templates"
+      ;;
+    *)
+      echo "Update project source files"
+      ;;
+  esac
+}
+
+build_commit_message() {
+  local files
+  files="$(git diff --cached --name-only | sed '/^$/d')"
+  if [[ -z "$files" ]]; then
+    echo "$COMMIT_PREFIX"
+    echo "Main changes:\n- No staged file summary available."
+    return
+  fi
+
+  local feature_lines=""
+  local file_lines=""
+  local feature_count=0
+  local file_count=0
+  local file
+
+  while IFS= read -r file; do
+    [[ -z "$file" ]] && continue
+    file_count=$((file_count + 1))
+
+    local feature
+    feature="$(summarize_area_from_file "$file")"
+    if ! contains_line "$feature" "$feature_lines"; then
+      feature_lines+="$feature"$'\n'
+      feature_count=$((feature_count + 1))
+    fi
+
+    # Keep the body concise.
+    if [[ "$file_count" -le 12 ]]; then
+      file_lines+="- ${file}"$'\n'
+    fi
+  done <<< "$files"
+
+  local subject
+  subject="${COMMIT_PREFIX} (${file_count} files, ${feature_count} areas)"
+
+  local body="Main changes:\n"
+  local feature
+  while IFS= read -r feature; do
+    [[ -z "$feature" ]] && continue
+    body+="- ${feature}\n"
+  done <<< "$feature_lines"
+
+  body+="\nTouched files:\n${file_lines}"
+  if [[ "$file_count" -gt 12 ]]; then
+    body+="- ... and additional files\n"
+  fi
+
+  echo "$subject"
+  echo -e "$body"
+}
+
 echo "[auto-commit] Started in $REPO_ROOT (interval=${INTERVAL_SEC}s, auto_push=${AUTO_PUSH_ENABLED}, push_remote=${AUTO_PUSH_REMOTE}, push_branch=${AUTO_PUSH_BRANCH})"
 
 while true; do
@@ -90,8 +186,27 @@ while true; do
     stage_code_changes
     if ! git diff --cached --quiet; then
       ts="$(date '+%Y-%m-%d %H:%M:%S')"
-      if git commit -m "${COMMIT_PREFIX} ${ts}" >/dev/null 2>&1; then
-        echo "[auto-commit] committed at ${ts}"
+      commit_subject=""
+      commit_body=""
+      mapfile -t commit_parts < <(build_commit_message)
+      commit_subject="${commit_parts[0]:-${COMMIT_PREFIX}}"
+      if [[ "${#commit_parts[@]}" -gt 1 ]]; then
+        commit_body="${commit_parts[1]}"
+      fi
+
+      if [[ -n "$commit_body" ]]; then
+        if git commit -m "$commit_subject" -m "$commit_body" >/dev/null 2>&1; then
+          echo "[auto-commit] committed at ${ts}: $commit_subject"
+          if [[ "$AUTO_PUSH_ENABLED" -eq 1 ]]; then
+            if git push "$AUTO_PUSH_REMOTE" "$AUTO_PUSH_BRANCH" >/dev/null 2>&1; then
+              echo "[auto-commit] pushed to ${AUTO_PUSH_REMOTE}/${AUTO_PUSH_BRANCH} at ${ts}"
+            else
+              echo "[auto-commit] push failed: ${AUTO_PUSH_REMOTE}/${AUTO_PUSH_BRANCH}"
+            fi
+          fi
+        fi
+      elif git commit -m "$commit_subject" >/dev/null 2>&1; then
+        echo "[auto-commit] committed at ${ts}: $commit_subject"
         if [[ "$AUTO_PUSH_ENABLED" -eq 1 ]]; then
           if git push "$AUTO_PUSH_REMOTE" "$AUTO_PUSH_BRANCH" >/dev/null 2>&1; then
             echo "[auto-commit] pushed to ${AUTO_PUSH_REMOTE}/${AUTO_PUSH_BRANCH} at ${ts}"
