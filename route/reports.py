@@ -674,10 +674,6 @@ def download_report(date: str, filename: str, inline: bool = False):
 
 @router.get("/reports/preview")
 def preview_report(date: str, filename: str):
-    if _should_use_proxy():
-        encoded_name = quote(filename)
-        return _proxy_file("GET", f"/v1/reports/{date}/{encoded_name}", query={"inline": "true"})
-
     candidate = (REPORTS_DIR / date / filename).resolve()
     if not candidate.exists() or not candidate.is_file():
         raise HTTPException(status_code=404, detail="report_not_found")
