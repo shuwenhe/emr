@@ -10,7 +10,8 @@ fi
 cd "$REPO_ROOT"
 
 INTERVAL_SEC="${AUTO_COMMIT_INTERVAL_SEC:-5}"
-COMMIT_PREFIX="${AUTO_COMMIT_MESSAGE_PREFIX:-chore(auto): summarize code updates}"
+COMMIT_SCOPE="${AUTO_COMMIT_SCOPE:-auto}"
+COMMIT_TYPE_RAW="${AUTO_COMMIT_TYPE:-}"
 AUTO_PUSH_RAW="${AUTO_COMMIT_PUSH:-0}"
 AUTO_PUSH_REMOTE="${AUTO_COMMIT_PUSH_REMOTE:-origin}"
 AUTO_PUSH_BRANCH="${AUTO_COMMIT_PUSH_BRANCH:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo main)}"
@@ -128,11 +129,29 @@ summarize_area_from_file() {
   esac
 }
 
+resolve_commit_type() {
+  local files="$1"
+  local lowered="${files,,}"
+  local forced="${COMMIT_TYPE_RAW,,}"
+
+  if [[ "$forced" == "feat" || "$forced" == "fix" ]]; then
+    echo "$forced"
+    return
+  fi
+
+  if [[ "$lowered" =~ (fix|bug|hotfix|patch|issue|error) ]]; then
+    echo "fix"
+    return
+  fi
+
+  echo "feat"
+}
+
 build_commit_message() {
   local files
   files="$(git diff --cached --name-only | sed '/^$/d')"
   if [[ -z "$files" ]]; then
-    echo "$COMMIT_PREFIX"
+    echo "feat(${COMMIT_SCOPE}): summarize code updates"
     echo "Main changes:\n- No staged file summary available."
     return
   fi
@@ -160,8 +179,11 @@ build_commit_message() {
     fi
   done <<< "$files"
 
+  local commit_type
+  commit_type="$(resolve_commit_type "$files")"
+
   local subject
-  subject="${COMMIT_PREFIX} (${file_count} files, ${feature_count} areas)"
+  subject="${commit_type}(${COMMIT_SCOPE}): summarize code updates (${file_count} files, ${feature_count} areas)"
 
   local body="Main changes:\n"
   local feature
@@ -189,7 +211,7 @@ while true; do
       commit_subject=""
       commit_body=""
       mapfile -t commit_parts < <(build_commit_message)
-      commit_subject="${commit_parts[0]:-${COMMIT_PREFIX}}"
+      commit_subject="${commit_parts[0]:-feat(${COMMIT_SCOPE}): summarize code updates}"
       if [[ "${#commit_parts[@]}" -gt 1 ]]; then
         commit_body="${commit_parts[1]}"
       fi
