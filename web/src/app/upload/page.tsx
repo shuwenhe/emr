@@ -13,7 +13,8 @@ type Patient = {
   age: number;
 };
 
-const API_BASE = "/api";
+const API_PROXY_BASE = "/api";
+const API_BACKEND_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const UPLOAD_STATE_KEY = "patient_flow_state_upload";
 
 function UploadPageContent() {
@@ -127,7 +128,7 @@ function UploadPageContent() {
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), 8000);
     try {
-      const response = await fetch(`${API_BASE}/patients`, {
+      const response = await fetch(`${API_PROXY_BASE}/patients`, {
         cache: "no-store",
         signal: controller.signal,
       });
@@ -293,7 +294,8 @@ function UploadPageContent() {
         formData.append("file", files[0]);
         formData.append("metadata", JSON.stringify(metadata));
 
-        const response = await uploadFormDataWithProgress(`${API_BASE}/ingest`, formData);
+        // Use backend direct URL for file uploads to avoid Next proxy body-size limits.
+        const response = await uploadFormDataWithProgress(`${API_BACKEND_BASE}/ingest`, formData);
         if (!response.ok) {
           setResult({ error: response.data?.detail || `上传失败（HTTP ${response.status}）` });
           setUploading(false);
@@ -308,7 +310,8 @@ function UploadPageContent() {
         }
         formData.append("metadata", JSON.stringify(metadata));
 
-        const response = await uploadFormDataWithProgress(`${API_BASE}/ingest/batch`, formData);
+        // Use backend direct URL for batch uploads to avoid Next proxy body-size limits.
+        const response = await uploadFormDataWithProgress(`${API_BACKEND_BASE}/ingest/batch`, formData);
         if (!response.ok) {
           setResult({ error: response.data?.detail || `批量上传失败（HTTP ${response.status}）` });
           setUploading(false);
@@ -344,7 +347,7 @@ function UploadPageContent() {
       setCurrentStep(1);
       setReportStatus("数据上传完成，后台开始分析...");
 
-      const source = new EventSource(`${API_BASE}/events/ingest-progress/${recordId}`);
+      const source = new EventSource(`${API_BACKEND_BASE}/events/ingest-progress/${recordId}`);
 
       const timeoutId = window.setTimeout(() => {
         source.close();
@@ -383,7 +386,7 @@ function UploadPageContent() {
         const start = Date.now();
         const poll = setInterval(async () => {
           try {
-            const res = await fetch(`${API_BASE}/emr?record_id=${recordId}`);
+            const res = await fetch(`${API_BACKEND_BASE}/emr?record_id=${recordId}`);
             if (res.ok) {
               const d = await res.json() as { emr_id?: string };
               if (d?.emr_id) {
