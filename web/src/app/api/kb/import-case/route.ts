@@ -9,21 +9,42 @@ import { NextResponse } from "next/server";
 const execFileAsync = promisify(execFile);
 
 function resolveProjectRoot() {
-  // 在 standalone 模式下，process.cwd() 是 .next/standalone
-  // 需要找到真实的项目根目录 (/home/shuwen/emr)
+  // 首先尝试使用环境变量
+  if (process.env.EMR_PROJECT_ROOT) {
+    return process.env.EMR_PROJECT_ROOT;
+  }
+  
+  // 否则，运行时计算
+  // 在 standalone 模式下，需要从 .next/standalone 往上走两层到项目根
   let cwd = process.cwd();
   
-  // 如果在 .next/standalone 中，往上走两层
-  if (cwd.endsWith(".next/standalone") || cwd.includes(".next/standalone")) {
+  // 查找项目根 - 向上查找是否存在 scripts/import_case_to_kb.py
+  let current = cwd;
+  for (let i = 0; i < 5; i++) {
+    const scriptPath = path.join(current, "scripts", "import_case_to_kb.py");
+    try {
+      // 尝试访问脚本文件
+      require("node:fs").statSync(scriptPath);
+      // 找到了，current 就是项目根
+      return current;
+    } catch {
+      // 不存在，继续往上走
+      const parent = path.dirname(current);
+      if (parent === current) break; // 到达根目录
+      current = parent;
+    }
+  }
+  
+  // 降级方案：假设标准布局
+  if (cwd.includes("/.next/standalone")) {
     return path.resolve(cwd, "../..");
   }
   
-  // 如果在 web 目录中，往上走一层
   if (cwd.endsWith("/web") || cwd.includes("/web/.next")) {
     return path.resolve(cwd, "..");
   }
   
-  // 默认情况
+  // 最后的降级
   return path.resolve(cwd, "..");
 }
 
