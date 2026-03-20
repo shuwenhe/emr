@@ -34,6 +34,8 @@ KB_MD_MAX_CHARS ?= 700
 KB_MD_MIN_CHARS ?= 80
 KB_MD_INCLUDE_REGEX ?=
 KB_MD_EXCLUDE_REGEX ?=
+KB_CASE_IMPORT_FILE ?= $(CURDIR)/rag/kb/incoming_case.txt
+KB_CASE_IMPORT_SOURCE ?= 病例原文导入
 RAG_USE_GO_EMBEDDER ?= 1
 RAG_GO_EMBED_CONCURRENCY ?= 8
 RAG_EMBED_METRICS_EVERY ?= 20
@@ -55,7 +57,7 @@ TCM_WORKERS  ?= 4
 TCM_DOCX_DIR  ?= $(CURDIR)/rag/dataset/docx_corpus
 TCM_DOCX_RPF  ?= 500   # records per docx file
 
-.PHONY: help install service-setup service service-fg service-start service-stop service-status service-restart service-precheck web web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-validate kb-export-json kb-export-jsonl kb-json-watch-start kb-json-watch-stop kb-json-watch-status kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build public-domain-up public-domain-down auto-commit-start auto-commit-stop auto-commit-status logs logs-backend logs-frontend logs-auto-git-push logs-all logs-file-backend logs-file-frontend clean
+.PHONY: help install service-setup service service-fg service-start service-stop service-status service-restart service-precheck web web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-validate kb-export-json kb-export-jsonl kb-json-watch-start kb-json-watch-stop kb-json-watch-status kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-import-case kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build public-domain-up public-domain-down auto-commit-start auto-commit-stop auto-commit-status logs logs-backend logs-frontend logs-auto-git-push logs-all logs-file-backend logs-file-frontend clean
 
 help:
 	@echo "Available targets:"
@@ -92,6 +94,7 @@ help:
 	@echo "  make kb-import-docs-build # import docs then rebuild structured vector KB"
 	@echo "  make kb-import-md      # batch import .md into knowledge_base.jsonl (upsert by id)"
 	@echo "  make kb-import-md-build # import markdown then rebuild structured vector KB"
+	@echo "  make kb-import-case KB_CASE_IMPORT_FILE=rag/kb/incoming_case.txt # split one pasted case into 3 rows + sync"
 	@echo "  make kb-rebuild       # alias of kb-build"
 	@echo "  make kb-clean         # remove generated KB artifacts"
 	@echo "  make tcm-docx         # convert TCM corpus JSON → .docx files (direct path)"
@@ -291,6 +294,15 @@ kb-import-md:
 	@$(MAKE) kb-export-json
 
 kb-import-md-build: kb-import-md kb-build-structured
+
+kb-import-case:
+	@PYTHONPATH="$(CURDIR):$$PYTHONPATH" \
+	"$(KB_PY)" scripts/import_case_to_kb.py \
+		--case-file "$(KB_CASE_IMPORT_FILE)" \
+		--kb-jsonl "$(STRUCTURED_KB_JSONL)" \
+		--kb-json "$(CURDIR)/rag/kb/knowledge_base.json" \
+		--source-name "$(KB_CASE_IMPORT_SOURCE)"
+	@$(MAKE) kb-validate
 
 kb-rebuild: kb-build
 
