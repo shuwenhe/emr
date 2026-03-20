@@ -57,7 +57,7 @@ TCM_WORKERS  ?= 4
 TCM_DOCX_DIR  ?= $(CURDIR)/rag/dataset/docx_corpus
 TCM_DOCX_RPF  ?= 500   # records per docx file
 
-.PHONY: help install service-setup service service-fg service-start service-stop service-status service-restart service-precheck web web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-validate kb-export-json kb-export-jsonl kb-json-watch-start kb-json-watch-stop kb-json-watch-status kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-import-case kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build public-domain-up public-domain-down auto-commit-start auto-commit-stop auto-commit-status logs logs-backend logs-frontend logs-auto-git-push logs-all logs-file-backend logs-file-frontend clean
+.PHONY: help install service-setup service service-fg service-start service-stop service-status service-restart service-precheck web web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-validate kb-export-json kb-export-jsonl kb-json-watch-start kb-json-watch-stop kb-json-watch-status kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-import-case kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build public-domain-up public-domain-down auto-commit-start auto-commit-stop auto-commit-status auto-deploy-install auto-deploy-start auto-deploy-stop auto-deploy-status logs logs-backend logs-frontend logs-auto-git-push logs-auto-deploy logs-all logs-file-backend logs-file-frontend clean
 
 help:
 	@echo "Available targets:"
@@ -108,11 +108,16 @@ help:
 	@echo "    env: AUTO_COMMIT_TYPE=feat|fix (commit type is restricted to feat/fix)"
 	@echo "  make auto-commit-stop   # stop background auto-commit watcher"
 	@echo "  make auto-commit-status # show watcher status"
+	@echo "  make auto-deploy-install # install+enable user service: emr-auto-deploy"
+	@echo "  make auto-deploy-start   # start auto-deploy service"
+	@echo "  make auto-deploy-stop    # stop auto-deploy service"
+	@echo "  make auto-deploy-status  # show auto-deploy service status"
 	@echo "  make logs             # follow backend + frontend logs"
 	@echo "  make logs-backend     # follow backend logs (systemd journal)"
 	@echo "  make logs-frontend    # tail frontend log files"
 	@echo "  make logs-auto-git-push # follow auto git push logs (systemd journal)"
-	@echo "  make logs-all         # follow backend + frontend + auto git push logs"
+	@echo "  make logs-auto-deploy # follow auto deploy logs (systemd journal)"
+	@echo "  make logs-all         # follow backend + frontend logs"
 	@echo "  make logs-file-backend  # tail backend log files"
 	@echo "  make logs-file-frontend # tail frontend log files"
 	@echo "  make clean            # remove generated files"
@@ -379,6 +384,18 @@ auto-commit-stop:
 auto-commit-status:
 	@bash -c 'set -e; PID_FILE="$(CURDIR)/.git/.auto_commit.pid"; if [ -f "$$PID_FILE" ] && kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[auto-commit] running pid=$$(cat "$$PID_FILE")"; else echo "[auto-commit] not running"; fi; LOG_FILE="$(CURDIR)/.git/auto_commit.log"; if [ -f "$$LOG_FILE" ]; then echo "[auto-commit] recent log:"; tail -n 10 "$$LOG_FILE"; fi'
 
+auto-deploy-install:
+	@bash "$(CURDIR)/scripts/deployment/install_auto_deploy_user_service.sh"
+
+auto-deploy-start:
+	@systemctl --user enable --now emr-auto-deploy
+
+auto-deploy-stop:
+	@systemctl --user stop emr-auto-deploy
+
+auto-deploy-status:
+	@systemctl --user --no-pager --full status emr-auto-deploy | sed -n '1,30p'
+
 logs: logs-backend
 
 logs-backend:
@@ -389,6 +406,9 @@ logs-frontend:
 
 logs-auto-git-push:
 	@journalctl --user -u emr-auto-git-push -f
+
+logs-auto-deploy:
+	@journalctl --user -u emr-auto-deploy -f
 
 logs-all:
 	@bash -c 'tail -f "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log" "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"'

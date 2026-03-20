@@ -8,6 +8,7 @@ Type=simple
 WorkingDirectory=__PROJECT_ROOT__/web
 # 每次启动前自动把局域网IP写入二维码URL文件
 ExecStartPre=/usr/bin/env bash __PROJECT_ROOT__/web/scripts/sync_lan_self_register_base.sh
+ExecStartPre=/usr/bin/env bash __PROJECT_ROOT__/web/scripts/prepare_standalone_static.sh
 ExecStart=/usr/bin/npm run start
 Restart=always
 RestartSec=5

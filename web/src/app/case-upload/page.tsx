@@ -1,6 +1,7 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useMemo, useState } from "react";
+import mammoth from "mammoth";
 
 type ImportResponse = {
   ok: boolean;
@@ -21,6 +22,53 @@ const DEFAULT_TEMPLATE = `一、病历概述
 四、随访情况
 建议2周复评疼痛和睡眠质量，1个月评估功能恢复；若疼痛反跳或出现新发神经体征，提前专科复诊。`;
 
+function decodeByEncoding(buffer: ArrayBuffer, encoding: string): string {
+  try {
+    return new TextDecoder(encoding, { fatal: false }).decode(buffer);
+  } catch {
+    return "";
+  }
+}
+
+function replacementRatio(text: string): number {
+  if (!text) return 1;
+  const replacements = (text.match(/\uFFFD/g) || []).length;
+  return replacements / text.length;
+}
+
+async function parseImportFile(file: File): Promise<string> {
+  const lowerName = file.name.toLowerCase();
+  const mime = file.type.toLowerCase();
+  const isDocx =
+    lowerName.endsWith(".docx") ||
+    mime === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+  if (isDocx) {
+    const arrayBuffer = await file.arrayBuffer();
+    const { value } = await mammoth.extractRawText({ arrayBuffer });
+    return value;
+  }
+
+  const isPlainTextLike =
+    lowerName.endsWith(".txt") ||
+    lowerName.endsWith(".md") ||
+    mime.startsWith("text/") ||
+    mime === "";
+  if (!isPlainTextLike) {
+    throw new Error("仅支持 .txt / .md / .docx 文件");
+  }
+
+  const arrayBuffer = await file.arrayBuffer();
+  const bytes = new Uint8Array(arrayBuffer);
+  if (bytes.some((b) => b === 0)) {
+    throw new Error("检测到二进制内容，请上传文本文件或 .docx");
+  }
+
+  const utf8 = decodeByEncoding(arrayBuffer, "utf-8");
+  const gb18030 = decodeByEncoding(arrayBuffer, "gb18030");
+  return replacementRatio(gb18030) < replacementRatio(utf8) ? gb18030 : utf8;
+}
+
 export default function CaseUploadPage() {
   const [sourceName, setSourceName] = useState("前端病例上传");
   const [content, setContent] = useState("");
@@ -30,15 +78,17 @@ export default function CaseUploadPage() {
 
   const canSubmit = useMemo(() => content.trim().length > 0 && !submitting, [content, submitting]);
 
-  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const text = typeof reader.result === "string" ? reader.result : "";
+    setResult(null);
+    try {
+      const text = await parseImportFile(file);
       setContent(text);
-    };
-    reader.readAsText(file, "utf-8");
+      setResult({ ok: true, message: `已读取文件：${file.name}` });
+    } catch (error) {
+      setResult({ ok: false, message: `读取文件失败：${String(error)}` });
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -112,7 +162,7 @@ export default function CaseUploadPage() {
             <span className="mb-1 block text-sm font-medium text-slate-700">从文件读取</span>
             <input
               type="file"
-              accept=".txt,.md,text/plain"
+              accept=".txt,.md,.docx,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
               onChange={handleFileChange}
               className="block w-full text-sm text-slate-700 file:mr-3 file:rounded-md file:border-0 file:bg-emerald-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-emerald-700"
             />
