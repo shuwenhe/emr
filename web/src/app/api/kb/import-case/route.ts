@@ -1,4 +1,4 @@
-import { mkdtemp, writeFile, unlink, access } from "node:fs/promises";
+import { mkdtemp, writeFile, unlink, access, rm } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -110,6 +110,7 @@ export async function POST(request: Request) {
       );
     } finally {
       await unlink(caseFile).catch(() => undefined);
+      await rm(tmpDir, { recursive: true, force: true }).catch(() => undefined);
     }
   } catch (error) {
     return NextResponse.json(
