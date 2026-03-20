@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import re
 import time
 from pathlib import Path
 
@@ -30,6 +31,12 @@ analysis_service = AnalysisService()
 ingestion_service = IngestionService()
 emr_service = EMRService()
 treatment_service = TreatmentService()
+
+
+def _strip_numeric_citations(text: str) -> str:
+    # Remove inline numeric references like [2], [5] from display text.
+    cleaned = re.sub(r"\[\d+\]", "", text)
+    return re.sub(r"\s{2,}", " ", cleaned).strip()
 
 
 def _validate_file(file: UploadFile) -> None:
@@ -62,6 +69,8 @@ def _persist_ai_result(record_id: str, analysis_result: dict, emr_result: dict, 
     for field in ("diagnosis", "doctor_opinion", "report_note", "health_advice", "treatment_plan_text", "retrieved_context"):
         value = ai_result.get(field)
         if value:
+            if field == "doctor_opinion":
+                value = _strip_numeric_citations(str(value))
             merged_report[field] = value
 
     for field in ("section_queries", "section_retrieval"):
@@ -88,7 +97,7 @@ def _persist_ai_result(record_id: str, analysis_result: dict, emr_result: dict, 
     if ai_result.get("diagnosis"):
         updates["diagnosis"] = ai_result["diagnosis"]
     if ai_result.get("doctor_opinion"):
-        updates["doctor_opinion"] = ai_result["doctor_opinion"]
+        updates["doctor_opinion"] = _strip_numeric_citations(str(ai_result["doctor_opinion"]))
 
     if ai_result.get("treatment_plan_text"):
         treatment_plan = emr_result.get("treatment_plan") if isinstance(emr_result.get("treatment_plan"), dict) else {}
