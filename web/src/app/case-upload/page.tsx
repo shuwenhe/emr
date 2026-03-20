@@ -1,0 +1,178 @@
+"use client";
+
+import { ChangeEvent, FormEvent, useMemo, useState } from "react";
+
+type ImportResponse = {
+  ok: boolean;
+  message: string;
+  new_ids?: string[];
+  output?: string;
+};
+
+const DEFAULT_TEMPLATE = `一、病历概述
+患者，男，66岁。左侧肋部灼痛2月余，夜间痛明显，VAS 7分，睡眠受影响。
+
+二、诊断信息
+临床诊断：带状疱疹后遗神经痛（肋间神经分布区）。
+
+三、治疗过程
+给予神经营养、镇痛方案与局部保护，结合睡眠管理与焦虑疏导。2周后夜间痛降至VAS 4分。
+
+四、随访情况
+建议2周复评疼痛和睡眠质量，1个月评估功能恢复；若疼痛反跳或出现新发神经体征，提前专科复诊。`;
+
+export default function CaseUploadPage() {
+  const [sourceName, setSourceName] = useState("前端病例上传");
+  const [content, setContent] = useState("");
+  const [dryRun, setDryRun] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [result, setResult] = useState<ImportResponse | null>(null);
+
+  const canSubmit = useMemo(() => content.trim().length > 0 && !submitting, [content, submitting]);
+
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = typeof reader.result === "string" ? reader.result : "";
+      setContent(text);
+    };
+    reader.readAsText(file, "utf-8");
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!canSubmit) return;
+
+    setSubmitting(true);
+    setResult(null);
+
+    try {
+      const response = await fetch("/api/kb/import-case", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          source_name: sourceName,
+          case_text: content,
+          dry_run: dryRun,
+        }),
+      });
+      const payload = (await response.json().catch(() => ({}))) as ImportResponse;
+      if (!response.ok) {
+        setResult({
+          ok: false,
+          message: payload.message || `导入失败 (HTTP ${response.status})`,
+          output: payload.output,
+        });
+        return;
+      }
+      setResult({
+        ok: true,
+        message: payload.message || "病例导入成功",
+        new_ids: payload.new_ids,
+        output: payload.output,
+      });
+      if (!dryRun) {
+        setContent("");
+      }
+    } catch (error) {
+      setResult({
+        ok: false,
+        message: `导入失败: ${String(error)}`,
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <main className="mx-auto max-w-5xl p-6">
+      <header className="mb-6 rounded-2xl border border-slate-200 bg-gradient-to-r from-emerald-50 via-white to-cyan-50 p-5">
+        <h1 className="text-2xl font-semibold text-slate-900">上传病例入库</h1>
+        <p className="mt-2 text-sm text-slate-600">
+          贴入病例原文后，系统将自动拆分为 3 条 KB 记录（模板、治疗、随访）并写入知识库。
+        </p>
+      </header>
+
+      <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="grid gap-4 md:grid-cols-2">
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-slate-700">来源名称</span>
+            <input
+              value={sourceName}
+              onChange={(e) => setSourceName(e.target.value)}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+              placeholder="例如：门诊病例导入"
+              maxLength={80}
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-slate-700">从文件读取</span>
+            <input
+              type="file"
+              accept=".txt,.md,text/plain"
+              onChange={handleFileChange}
+              className="block w-full text-sm text-slate-700 file:mr-3 file:rounded-md file:border-0 file:bg-emerald-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-emerald-700"
+            />
+          </label>
+        </div>
+
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium text-slate-700">病例原文</span>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={16}
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm leading-6 focus:border-emerald-500 focus:outline-none"
+            placeholder="请粘贴病例原文"
+          />
+        </label>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={dryRun}
+              onChange={(e) => setDryRun(e.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+            />
+            仅预览（dry-run，不写入）
+          </label>
+
+          <button
+            type="button"
+            onClick={() => setContent(DEFAULT_TEMPLATE)}
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            填充示例模板
+          </button>
+
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+          >
+            {submitting ? "导入中..." : "上传并导入"}
+          </button>
+        </div>
+      </form>
+
+      {result && (
+        <section className={`mt-5 rounded-xl border p-4 ${result.ok ? "border-emerald-200 bg-emerald-50" : "border-rose-200 bg-rose-50"}`}>
+          <h2 className={`text-sm font-semibold ${result.ok ? "text-emerald-800" : "text-rose-800"}`}>
+            {result.ok ? "导入结果" : "错误信息"}
+          </h2>
+          <p className={`mt-1 text-sm ${result.ok ? "text-emerald-700" : "text-rose-700"}`}>{result.message}</p>
+          {result.new_ids && result.new_ids.length > 0 && (
+            <p className="mt-2 text-xs text-slate-700">新增 ID: {result.new_ids.join(", ")}</p>
+          )}
+          {result.output && (
+            <pre className="mt-2 max-h-64 overflow-auto rounded-lg bg-slate-900 p-3 text-xs text-slate-100">{result.output}</pre>
+          )}
+        </section>
+      )}
+    </main>
+  );
+}
