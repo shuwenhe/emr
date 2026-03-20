@@ -67,7 +67,7 @@ export async function POST(request: Request) {
     // 使用 mammoth 提取文本
     try {
       const { value } = await mammoth.extractRawText({
-        arrayBuffer: docxBuffer as unknown as ArrayBuffer,
+        buffer: docxBuffer,
       });
 
       return NextResponse.json({
