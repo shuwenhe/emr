@@ -55,7 +55,7 @@ TCM_WORKERS  ?= 4
 TCM_DOCX_DIR  ?= $(CURDIR)/rag/dataset/docx_corpus
 TCM_DOCX_RPF  ?= 500   # records per docx file
 
-.PHONY: help install service-setup service service-fg service-start service-stop service-status service-restart service-precheck web web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-validate kb-export-json kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build public-domain-up public-domain-down auto-commit-start auto-commit-stop auto-commit-status logs logs-backend logs-frontend logs-auto-git-push logs-all logs-file-backend logs-file-frontend clean
+.PHONY: help install service-setup service service-fg service-start service-stop service-status service-restart service-precheck web web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-validate kb-export-json kb-json-watch-start kb-json-watch-stop kb-json-watch-status kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build public-domain-up public-domain-down auto-commit-start auto-commit-stop auto-commit-status logs logs-backend logs-frontend logs-auto-git-push logs-all logs-file-backend logs-file-frontend clean
 
 help:
 	@echo "Available targets:"
@@ -84,6 +84,9 @@ help:
 	@echo "  make kb-build-structured # build vector KB from rag/kb/knowledge_base.jsonl"
 	@echo "  make kb-validate       # validate rag/kb/knowledge_base.jsonl schema/integrity"
 	@echo "  make kb-export-json    # generate rag/kb/knowledge_base.json from jsonl"
+	@echo "  make kb-json-watch-start  # start local watcher: auto export JSON on JSONL save"
+	@echo "  make kb-json-watch-stop   # stop local KB watcher"
+	@echo "  make kb-json-watch-status # show local KB watcher status"
 	@echo "  make kb-import-docs    # batch import .docx/.pdf into knowledge_base.jsonl (upsert by id)"
 	@echo "  make kb-import-docs-build # import docs then rebuild structured vector KB"
 	@echo "  make kb-import-md      # batch import .md into knowledge_base.jsonl (upsert by id)"
@@ -125,6 +128,9 @@ service-setup: install
 SERVICE_PORT ?= 8000
 SERVICE_PID_FILE ?= $(CURDIR)/.run/service.pid
 SERVICE_LOG_FILE ?= $(CURDIR)/.run/service.log
+KB_JSON_WATCH_PID_FILE ?= $(CURDIR)/.git/.kb_json_watch.pid
+KB_JSON_WATCH_LOG_FILE ?= $(CURDIR)/.git/kb_json_watch.log
+KB_JSON_WATCH_INTERVAL ?= 2
 
 
 service-fg: service-precheck
@@ -229,6 +235,15 @@ kb-export-json:
 	"$(KB_PY)" scripts/kb_jsonl_to_json.py \
 		--input-jsonl "$(STRUCTURED_KB_JSONL)" \
 		--output-json "$(CURDIR)/rag/kb/knowledge_base.json"
+
+kb-json-watch-start:
+	@bash -c 'set -e; PID_FILE="$(KB_JSON_WATCH_PID_FILE)"; LOG_FILE="$(KB_JSON_WATCH_LOG_FILE)"; if [ -f "$$PID_FILE" ] && kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[kb-watch] already running (pid=$$(cat "$$PID_FILE"))"; exit 0; fi; mkdir -p "$$(dirname "$$LOG_FILE")"; nohup env REPO_DIR="$(CURDIR)" KB_PY="$(KB_PY)" KB_WATCH_INTERVAL="$(KB_JSON_WATCH_INTERVAL)" KB_JSONL_PATH="$(STRUCTURED_KB_JSONL)" KB_JSON_PATH="$(CURDIR)/rag/kb/knowledge_base.json" bash "$(CURDIR)/scripts/kb_jsonl_watch_sync.sh" > "$$LOG_FILE" 2>&1 & echo $$! > "$$PID_FILE"; echo "[kb-watch] started pid=$$(cat "$$PID_FILE") log=$$LOG_FILE"'
+
+kb-json-watch-stop:
+	@bash -c 'set -e; PID_FILE="$(KB_JSON_WATCH_PID_FILE)"; if [ ! -f "$$PID_FILE" ]; then echo "[kb-watch] not running"; exit 0; fi; PID="$$(cat "$$PID_FILE")"; if kill -0 "$$PID" 2>/dev/null; then kill "$$PID"; echo "[kb-watch] stopped pid=$$PID"; else echo "[kb-watch] stale pid file removed"; fi; rm -f "$$PID_FILE"'
+
+kb-json-watch-status:
+	@bash -c 'set -e; PID_FILE="$(KB_JSON_WATCH_PID_FILE)"; LOG_FILE="$(KB_JSON_WATCH_LOG_FILE)"; if [ -f "$$PID_FILE" ] && kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[kb-watch] running pid=$$(cat "$$PID_FILE")"; else echo "[kb-watch] not running"; fi; if [ -f "$$LOG_FILE" ]; then echo "[kb-watch] recent log:"; tail -n 10 "$$LOG_FILE"; fi'
 
 kb-build-structured: kb-validate
 	@PYTHONPATH="$(CURDIR):$$PYTHONPATH" \
