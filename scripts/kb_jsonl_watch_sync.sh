@@ -6,15 +6,48 @@ KB_JSONL_PATH="${KB_JSONL_PATH:-$REPO_DIR/rag/kb/knowledge_base.jsonl}"
 KB_JSON_PATH="${KB_JSON_PATH:-$REPO_DIR/rag/kb/knowledge_base.json}"
 KB_WATCH_INTERVAL="${KB_WATCH_INTERVAL:-2}"
 KB_PY="${KB_PY:-python3}"
+KB_REBUILD_COMMAND="${KB_REBUILD_COMMAND:-make kb-build-structured}"
+
+last_rebuilt_jsonl_sig=""
 
 log() {
   printf '[kb-watch][%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
+}
+
+jsonl_sig() {
+  if [[ -f "$KB_JSONL_PATH" ]]; then
+    stat -c '%Y:%s' "$KB_JSONL_PATH" 2>/dev/null || true
+    return 0
+  fi
+  printf ''
+}
+
+run_rebuild_if_needed() {
+  local current_sig
+  current_sig="$(jsonl_sig)"
+  if [[ -z "$current_sig" ]]; then
+    log "skip rebuild: jsonl not found"
+    return 0
+  fi
+
+  if [[ "$current_sig" == "$last_rebuilt_jsonl_sig" ]]; then
+    return 0
+  fi
+
+  log "rebuilding structured KB via: $KB_REBUILD_COMMAND"
+  if (cd "$REPO_DIR" && eval "$KB_REBUILD_COMMAND") >/dev/null 2>&1; then
+    last_rebuilt_jsonl_sig="$current_sig"
+    log "rebuild completed"
+  else
+    log "rebuild failed; keep watching"
+  fi
 }
 
 run_sync() {
   if KB_PY="$KB_PY" KB_JSON_PATH="$KB_JSON_PATH" KB_JSONL_PATH="$KB_JSONL_PATH" \
     bash "$REPO_DIR/scripts/sync_kb_json_to_jsonl.sh" >/dev/null 2>&1; then
     log "synced json <-> jsonl"
+    run_rebuild_if_needed
   else
     log "sync failed (check data validity); keep watching"
   fi
