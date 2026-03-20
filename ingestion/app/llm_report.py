@@ -890,6 +890,20 @@ def _score_section_item(
     return score
 
 
+def _is_case_treatment_item(item: Dict[str, Any]) -> bool:
+    item_id = str(item.get("id") or "")
+    title = str(item.get("title") or "")
+    source = str(item.get("source") or "")
+    category = str(item.get("category") or "").strip().lower()
+    if category != "treatment_guideline":
+        return False
+    if "-C" in item_id:
+        return True
+    if "病例" in title or "病例" in source:
+        return True
+    return False
+
+
 def _retrieve_context_for_section(
     section: str,
     query: str,
@@ -932,6 +946,29 @@ def _retrieve_context_for_section(
         reverse=True,
     )
     selected_pairs = scored[:top_k]
+
+    # Fallback: for treatment plan generation, enforce at least one case-based
+    # treatment item in the retrieved set when such items are available.
+    if section == "treatment_plan_text" and selected_pairs:
+        has_case_item = any(_is_case_treatment_item(item) for _, item in selected_pairs)
+        if not has_case_item:
+            candidate_pairs = [(score, item) for score, item in scored if _is_case_treatment_item(item)]
+            if candidate_pairs:
+                candidate_score, candidate_item = candidate_pairs[0]
+                existing_ids = {str(item.get("id") or "") for _, item in selected_pairs}
+                if str(candidate_item.get("id") or "") not in existing_ids:
+                    if len(selected_pairs) < top_k:
+                        selected_pairs.append((candidate_score, candidate_item))
+                    else:
+                        selected_pairs[-1] = (candidate_score, candidate_item)
+                    selected_pairs.sort(
+                        key=lambda pair: (
+                            pair[0],
+                            float(pair[1].get("priority") or 0),
+                            len(_to_list_of_str(pair[1].get("report_sections"))),
+                        ),
+                        reverse=True,
+                    )
     selected = [row[1] for row in selected_pairs]
     citations: List[Dict[str, Any]] = []
     context_lines: List[str] = []
