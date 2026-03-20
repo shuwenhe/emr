@@ -465,7 +465,7 @@ def _refresh_roi_labeled_image(emr: Dict[str, Any]) -> bool:
     return True
 
 
-def get_emr(emr_id: str) -> Dict[str, Any]:
+def get_emr(emr_id: str, *, ensure_report_outputs: bool = True) -> Dict[str, Any]:
     path = _emr_path(emr_id)
     if not path.exists():
         raise EmrNotFoundError("emr_not_found")
@@ -476,7 +476,7 @@ def get_emr(emr_id: str) -> Dict[str, Any]:
     emr = _normalize_emr_fields(emr)
     
     updated = _refresh_roi_labeled_image(emr)
-    report_file_updated = _ensure_report_outputs(emr)
+    report_file_updated = _ensure_report_outputs(emr) if ensure_report_outputs else False
     if updated or report_file_updated:
         with open(path, "w", encoding="utf-8") as handle:
             json.dump(emr, handle, ensure_ascii=False, indent=2)
@@ -503,7 +503,7 @@ def get_emr(emr_id: str) -> Dict[str, Any]:
 
 
 def update_emr(emr_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
-    emr = get_emr(emr_id)
+    emr = get_emr(emr_id, ensure_report_outputs=False)
     record_id = emr.get("record_id")
     report_updated = False
 
