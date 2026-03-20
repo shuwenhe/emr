@@ -85,12 +85,13 @@ def _generate_report_outputs(
 ) -> bool:
     generated_any = False
     primary_format = REPORT_PRIMARY_FORMAT if REPORT_PRIMARY_FORMAT in {"pdf", "docx"} else "pdf"
+    generated_at = datetime.now()
 
     if primary_format == "pdf":
         if not _has_valid_report_file(emr, "pdf_report_path"):
             pdf_started_at = time.perf_counter()
             try:
-                pdf_path = generate_pdf_report(report, emr)
+                pdf_path = generate_pdf_report(report, emr, generated_at=generated_at)
                 logging.info(
                     "[EMR-TIMING] record_id=%s stage=generate_pdf_report elapsed=%.3fs success=%s",
                     emr.get("record_id"),
@@ -113,7 +114,7 @@ def _generate_report_outputs(
         if EMR_ENABLE_OPTIONAL_DOCX and not _has_valid_report_file(emr, "docx_report_path"):
             docx_started_at = time.perf_counter()
             try:
-                docx_path = generate_docx_report(report, emr)
+                docx_path = generate_docx_report(report, emr, generated_at=generated_at)
                 logging.info(
                     "[EMR-TIMING] record_id=%s stage=generate_docx_report elapsed=%.3fs success=%s",
                     emr.get("record_id"),
@@ -133,7 +134,7 @@ def _generate_report_outputs(
         if not _has_valid_report_file(emr, "docx_report_path"):
             docx_started_at = time.perf_counter()
             try:
-                docx_path = generate_docx_report(report, emr)
+                docx_path = generate_docx_report(report, emr, generated_at=generated_at)
                 logging.info(
                     "[EMR-TIMING] record_id=%s stage=generate_docx_report elapsed=%.3fs success=%s",
                     emr.get("record_id"),

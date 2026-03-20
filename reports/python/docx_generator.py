@@ -337,7 +337,12 @@ def _append_source_file_link(paragraph, source: str) -> bool:
     return True
 
 
-def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
+def generate_docx_report(
+    report: Dict[str, Any],
+    emr: Dict[str, Any],
+    *,
+    generated_at: Optional[datetime] = None,
+) -> Path:
     patient = (report.get("patient") or emr.get("patient") or {})
     analysis = report.get("analysis") or {}
     metrics = (analysis.get("temperature_metrics") or {}) if isinstance(analysis, dict) else {}
@@ -347,7 +352,7 @@ def generate_docx_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
         abnormal_regions = []
 
     # 使用当前时间作为报告生成时间（而不是采集时间）
-    report_generated_dt = datetime.now()
+    report_generated_dt = generated_at or datetime.now()
     date_dir = REPORTS_DIR / report_generated_dt.strftime("%Y%m%d")
     date_dir.mkdir(parents=True, exist_ok=True)
 

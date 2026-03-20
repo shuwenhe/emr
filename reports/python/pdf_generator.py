@@ -558,11 +558,16 @@ def _advice_rows(report: Dict[str, Any], emr: Dict[str, Any]) -> List[str]:
     ) or ["以上为热图所提示可能性，请结合临床进一步诊查。"]
 
 
-def generate_pdf_report(report: Dict[str, Any], emr: Dict[str, Any]) -> Path:
+def generate_pdf_report(
+    report: Dict[str, Any],
+    emr: Dict[str, Any],
+    *,
+    generated_at: Optional[datetime] = None,
+) -> Path:
     styles = _styles()
     created_at = report.get("created_at") or emr.get("created_at")
     created_dt = _parse_datetime(created_at)
-    report_generated_dt = datetime.now()
+    report_generated_dt = generated_at or datetime.now()
     patient = report.get("patient") or emr.get("patient") or {}
     patient_name = _safe_name(str(patient.get("name") or "患者")) or "患者"
     date_dir = REPORTS_DIR / report_generated_dt.strftime("%Y%m%d")
