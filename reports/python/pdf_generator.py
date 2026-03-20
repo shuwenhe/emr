@@ -392,17 +392,22 @@ def _build_cover_table(patient: Dict[str, Any], created_dt: datetime, styles: Di
 
 
 def _risk_cards(analysis: Dict[str, Any], roi_list: Sequence[Dict[str, Any]], styles: Dict[str, ParagraphStyle]) -> Table:
-    sections = ["头面部", "颈肩部", "脊柱背部"]
+    section_cards = [
+        ("头面部", "头面部风险"),
+        ("颈肩部", "颈肩部风险"),
+        ("脊柱背部", "脊柱背部风险"),
+        ("胸腹部", "胸部风险"),
+    ]
     cards: List[List[Any]] = []
     global_level = analysis.get("risk_level")
-    for section in sections:
+    for section, title in section_cards:
         matched = [item for item in roi_list if _section_name(str(item.get("name") or "")) == section]
         score = _risk_score(global_level)
         level = _risk_level_cn(global_level)
         summary = "；".join(str(item.get("name") or "") for item in matched[:2]) or "未发现明显风险"
         cards.append(
             [
-                _paragraph(f"<b>{section}风险</b>", styles["center"]),
+                _paragraph(f"<b>{title}</b>", styles["center"]),
                 _paragraph(f"<b>{score}</b>", styles["center"]),
                 _paragraph(level, styles["center"]),
                 _paragraph(summary, styles["small"]),
