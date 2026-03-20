@@ -1,5 +1,5 @@
-import { mkdtemp, writeFile, unlink, access, rm } from "node:fs/promises";
-import { constants as fsConstants } from "node:fs";
+import { mkdtemp, writeFile, unlink, access, rm, readFile, mkdir, rename } from "node:fs/promises";
+import { constants as fsConstants, statSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { execFile } from "node:child_process";
@@ -8,44 +8,86 @@ import { NextResponse } from "next/server";
 
 const execFileAsync = promisify(execFile);
 
+type UploadedCaseFileRecord = {
+  file_hash: string;
+  file_name: string;
+  file_size: number | null;
+  source_name: string;
+  imported_at: string;
+  new_ids: string[];
+};
+
 function resolveProjectRoot() {
-  // 首先尝试使用环境变量
   if (process.env.EMR_PROJECT_ROOT) {
     return process.env.EMR_PROJECT_ROOT;
   }
-  
-  // 否则，运行时计算
-  // 在 standalone 模式下，需要从 .next/standalone 往上走两层到项目根
-  let cwd = process.cwd();
-  
-  // 查找项目根 - 向上查找是否存在 scripts/import_case_to_kb.py
+
+  const cwd = process.cwd();
   let current = cwd;
   for (let i = 0; i < 5; i++) {
     const scriptPath = path.join(current, "scripts", "import_case_to_kb.py");
     try {
-      // 尝试访问脚本文件
-      require("node:fs").statSync(scriptPath);
-      // 找到了，current 就是项目根
+      statSync(scriptPath);
       return current;
     } catch {
-      // 不存在，继续往上走
       const parent = path.dirname(current);
-      if (parent === current) break; // 到达根目录
+      if (parent === current) break;
       current = parent;
     }
   }
-  
-  // 降级方案：假设标准布局
+
   if (cwd.includes("/.next/standalone")) {
     return path.resolve(cwd, "../..");
   }
-  
+
   if (cwd.endsWith("/web") || cwd.includes("/web/.next")) {
     return path.resolve(cwd, "..");
   }
-  
-  // 最后的降级
+
   return path.resolve(cwd, "..");
+}
+
+function resolveCaseImportRegistryPath(projectRoot: string) {
+  if (process.env.EMR_CASE_IMPORT_REGISTRY?.trim()) {
+    return process.env.EMR_CASE_IMPORT_REGISTRY.trim();
+  }
+  return path.resolve(projectRoot, "rag", "kb", "uploaded_case_files.json");
+}
+
+async function loadCaseImportRegistry(registryPath: string): Promise<UploadedCaseFileRecord[]> {
+  try {
+    const raw = await readFile(registryPath, "utf-8");
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed.filter((item): item is UploadedCaseFileRecord => {
+      return Boolean(item && typeof item === "object" && typeof item.file_hash === "string" && item.file_hash.trim());
+    });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return [];
+    }
+    throw error;
+  }
+}
+
+async function saveCaseImportRegistry(registryPath: string, records: UploadedCaseFileRecord[]) {
+  await mkdir(path.dirname(registryPath), { recursive: true });
+  const tempPath = `${registryPath}.tmp`;
+  const payload = `${JSON.stringify(records, null, 2)}\n`;
+  await writeFile(tempPath, payload, "utf-8");
+  await rename(tempPath, registryPath);
+}
+
+function buildDuplicateMessage(record: UploadedCaseFileRecord) {
+  const parts = [
+    "该文件之前已经上传处理过了",
+    record.file_name ? `文件名：${record.file_name}` : "",
+    record.imported_at ? `处理时间：${record.imported_at}` : "",
+    record.new_ids.length > 0 ? `已生成 ID：${record.new_ids.join(", ")}` : "",
+  ].filter(Boolean);
+  return parts.join("\n");
 }
 
 async function resolvePythonBinary(projectRoot: string) {
@@ -85,17 +127,40 @@ export async function POST(request: Request) {
       case_text?: string;
       source_name?: string;
       dry_run?: boolean;
+      file_hash?: string;
+      file_name?: string;
+      file_size?: number;
     };
 
     const caseText = String(payload.case_text || "").trim();
     const sourceName = String(payload.source_name || "前端病例上传").trim().slice(0, 80);
     const dryRun = Boolean(payload.dry_run);
+    const fileHash = String(payload.file_hash || "").trim().toLowerCase();
+    const fileName = String(payload.file_name || "").trim().slice(0, 255);
+    const fileSize = typeof payload.file_size === "number" && Number.isFinite(payload.file_size) ? payload.file_size : null;
 
     if (!caseText) {
       return NextResponse.json({ message: "病例内容不能为空" }, { status: 400 });
     }
 
     const projectRoot = resolveProjectRoot();
+    const registryPath = resolveCaseImportRegistryPath(projectRoot);
+    const caseImportRegistry = fileHash ? await loadCaseImportRegistry(registryPath) : [];
+
+    if (fileHash) {
+      const existingRecord = caseImportRegistry.find((record) => record.file_hash === fileHash);
+      if (existingRecord) {
+        return NextResponse.json(
+          {
+            ok: false,
+            message: "该文件之前已经上传处理过了",
+            output: buildDuplicateMessage(existingRecord),
+          },
+          { status: 409 }
+        );
+      }
+    }
+
     const pythonBin = await resolvePythonBinary(projectRoot);
     const tmpDir = await mkdtemp(path.join(os.tmpdir(), "emr-case-import-"));
     const caseFile = path.join(tmpDir, "incoming_case.txt");
@@ -125,11 +190,31 @@ export async function POST(request: Request) {
         maxBuffer: 1024 * 1024,
       });
 
-      const output = [stdout, stderr].filter(Boolean).join("\n").trim();
+      let output = [stdout, stderr].filter(Boolean).join("\n").trim();
+      const newIds = parseNewIds(output);
+
+      if (!dryRun && fileHash) {
+        try {
+          caseImportRegistry.push({
+            file_hash: fileHash,
+            file_name: fileName || "未命名文件",
+            file_size: fileSize,
+            source_name: sourceName || "前端病例上传",
+            imported_at: new Date().toISOString(),
+            new_ids: newIds,
+          });
+          await saveCaseImportRegistry(registryPath, caseImportRegistry);
+        } catch (registryError) {
+          output = [output, `[WARN] duplicate registry update failed: ${String(registryError)}`]
+            .filter(Boolean)
+            .join("\n");
+        }
+      }
+
       return NextResponse.json({
         ok: true,
         message: dryRun ? "dry-run 成功，已生成 3 条预览记录" : "病例导入成功",
-        new_ids: parseNewIds(output),
+        new_ids: newIds,
         output,
       });
     } catch (error) {

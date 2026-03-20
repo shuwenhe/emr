@@ -10,6 +10,12 @@ type ImportResponse = {
   output?: string;
 };
 
+type PendingFileMeta = {
+  hash: string;
+  name: string;
+  size: number;
+};
+
 const DEFAULT_TEMPLATE = `一、病历概述
 患者，男，66岁。左侧肋部灼痛2月余，夜间痛明显，VAS 7分，睡眠受影响。
 
@@ -34,6 +40,14 @@ function replacementRatio(text: string): number {
   if (!text) return 1;
   const replacements = (text.match(/\uFFFD/g) || []).length;
   return replacements / text.length;
+}
+
+async function computeFileHash(file: File): Promise<string> {
+  const buffer = await file.arrayBuffer();
+  const digest = await crypto.subtle.digest("SHA-256", buffer);
+  return Array.from(new Uint8Array(digest))
+    .map((value) => value.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 async function parseImportFile(file: File): Promise<string> {
@@ -99,6 +113,7 @@ export default function CaseUploadPage() {
   const [dryRun, setDryRun] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<ImportResponse | null>(null);
+  const [pendingFileMeta, setPendingFileMeta] = useState<PendingFileMeta | null>(null);
 
   const canSubmit = useMemo(() => content.trim().length > 0 && !submitting, [content, submitting]);
 
@@ -107,10 +122,13 @@ export default function CaseUploadPage() {
     if (!file) return;
     setResult(null);
     try {
+      const hash = await computeFileHash(file);
       const text = await parseImportFile(file);
       setContent(text);
+      setPendingFileMeta({ hash, name: file.name, size: file.size });
       setResult({ ok: true, message: `已读取文件：${file.name}` });
     } catch (error) {
+      setPendingFileMeta(null);
       setResult({ ok: false, message: `读取文件失败：${String(error)}` });
     }
   }
@@ -130,6 +148,9 @@ export default function CaseUploadPage() {
           source_name: sourceName,
           case_text: content,
           dry_run: dryRun,
+          file_hash: pendingFileMeta?.hash,
+          file_name: pendingFileMeta?.name,
+          file_size: pendingFileMeta?.size,
         }),
       });
       const payload = (await response.json().catch(() => ({}))) as ImportResponse;
@@ -149,6 +170,7 @@ export default function CaseUploadPage() {
       });
       if (!dryRun) {
         setContent("");
+        setPendingFileMeta(null);
       }
     } catch (error) {
       setResult({
@@ -197,7 +219,10 @@ export default function CaseUploadPage() {
           <span className="mb-1 block text-sm font-medium text-slate-700">病例原文</span>
           <textarea
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(e) => {
+              setContent(e.target.value);
+              setPendingFileMeta(null);
+            }}
             rows={16}
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm leading-6 focus:border-emerald-500 focus:outline-none"
             placeholder="请粘贴病例原文"
@@ -217,7 +242,10 @@ export default function CaseUploadPage() {
 
           <button
             type="button"
-            onClick={() => setContent(DEFAULT_TEMPLATE)}
+            onClick={() => {
+              setContent(DEFAULT_TEMPLATE);
+              setPendingFileMeta(null);
+            }}
             className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
             填充示例模板
