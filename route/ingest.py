@@ -135,7 +135,11 @@ async def _generate_report_after_ingest(record_id: str, metadata: dict | None = 
     try:
         logger.info("[步骤3] 电子病历生成 开始 record_id=%s", record_id)
         t0 = time.time()
-        emr_result = await asyncio.to_thread(emr_service.create_emr, record_id) or {}
+        emr_result = await asyncio.to_thread(
+            emr_service.create_emr,
+            record_id,
+            ensure_report_outputs=False,
+        ) or {}
         elapsed = time.time() - t0
         if emr_result:
             logger.info(
@@ -162,6 +166,14 @@ async def _generate_report_after_ingest(record_id: str, metadata: dict | None = 
         await publish_ingest_progress(record_id, 4, "AI诊断报告生成完成", 80, "done")
     except Exception as exc:
         logger.exception("[步骤4] AI报告生成 失败 record_id=%s error=%s", record_id, exc)
+        try:
+            emr_result = await asyncio.to_thread(
+                emr_service.create_emr,
+                record_id,
+                ensure_report_outputs=True,
+            ) or emr_result
+        except Exception as fallback_exc:
+            logger.warning("[步骤4] AI失败后补生成基础报告失败 record_id=%s error=%s", record_id, fallback_exc)
         await publish_ingest_progress(record_id, 4, "AI报告生成失败", 80, "error")
 
     # ---- 步骤5：治疗方案 ----

@@ -170,6 +170,7 @@ def generate_emr(
     *,
     enable_roi: bool = True,
     enable_llm: bool = False,
+    ensure_report_outputs: bool = True,
 ) -> Dict[str, Any]:
     from .analysis import analyze_record
     record_dir = _record_dir(record_id)
@@ -181,13 +182,14 @@ def generate_emr(
         existing = get_emr_by_record_id(record_id)
         if existing:
             logging.info("EMR already exists for record %s (emr_id=%s), returning existing", record_id, existing.get("emr_id"))
-            try:
-                outputs_updated = _ensure_report_outputs(existing)
-                if outputs_updated:
-                    _persist_emr_and_report(existing)
-                    logging.info("Report outputs backfilled for existing EMR record=%s emr_id=%s", record_id, existing.get("emr_id"))
-            except Exception as exc:
-                logging.warning("Report output backfill skipped for existing EMR record=%s error=%s", record_id, exc)
+            if ensure_report_outputs:
+                try:
+                    outputs_updated = _ensure_report_outputs(existing)
+                    if outputs_updated:
+                        _persist_emr_and_report(existing)
+                        logging.info("Report outputs backfilled for existing EMR record=%s emr_id=%s", record_id, existing.get("emr_id"))
+                except Exception as exc:
+                    logging.warning("Report output backfill skipped for existing EMR record=%s error=%s", record_id, exc)
             return existing
 
     analysis_started_at = time.perf_counter()
@@ -263,7 +265,7 @@ def generate_emr(
 
     _persist_emr_and_report(emr)
 
-    if report:
+    if report and ensure_report_outputs:
         logging.info(
             "Attempting to generate primary report output for emr %s (report_id=%s, primary=%s, optional_docx=%s)",
             emr_id,
@@ -275,7 +277,7 @@ def generate_emr(
             _persist_emr_and_report(emr)
         else:
             logging.warning("Primary report generation failed for emr %s", emr_id)
-    else:
+    elif not report:
         logging.warning("Report is empty/None for emr %s, skipping report generation", emr_id)
 
     return emr

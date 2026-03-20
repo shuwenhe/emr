@@ -43,6 +43,7 @@ class EMRService:
         *,
         enable_roi: bool = True,
         enable_llm: bool = False,
+        ensure_report_outputs: bool = True,
     ) -> Dict[str, Any]:
         """
         Create a new EMR record.
@@ -56,11 +57,12 @@ class EMRService:
             Created EMR record
         """
         logger.info(
-            "[步骤3-EMR] 开始生成电子病历 record_id=%s patient_id=%s roi=%s llm=%s",
+            "[步骤3-EMR] 开始生成电子病历 record_id=%s patient_id=%s roi=%s llm=%s ensure_outputs=%s",
             record_id,
             patient_id,
             enable_roi,
             enable_llm,
+            ensure_report_outputs,
         )
         try:
             legacy_emr = self._legacy_emr
@@ -69,6 +71,7 @@ class EMRService:
                 force=False,
                 enable_roi=enable_roi,
                 enable_llm=enable_llm,
+                ensure_report_outputs=ensure_report_outputs,
             )
             emr_id = result.get("emr_id") if isinstance(result, dict) else None
             patient = (result.get("patient") or {}).get("name", "") if isinstance(result, dict) else ""
