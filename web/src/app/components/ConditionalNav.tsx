@@ -7,12 +7,12 @@ const NAV_LINKS = [
   { href: "/", label: "首页" },
   { href: "/patients", label: "患者登记" },
   { href: "/upload", label: "数据采集" },
-  { href: "/case-upload", label: "上传病例" },
   { href: "/emr", label: "诊断分析" },
   { href: "/treatment", label: "治疗方案" },
   { href: "/comparison", label: "疗效对比" },
   { href: "/reports", label: "历史报告" },
   { href: "/archives", label: "归档管理" },
+  { href: "/case-upload", label: "上传病例" },
 ];
 
 /** 在微信自助登记页面不显示后台导航栏 */
