@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import logging
 import os
 import re
 from datetime import datetime
@@ -26,6 +27,8 @@ if str(_DEVICE_INGESTION_DIR) not in sys.path:
 
 from app.config import DATA_DIR, REPORTS_DIR
 from reports.python.thermal_label_renderer import render_labeled_thermal_image
+
+logger = logging.getLogger(__name__)
 
 _PAGE_WIDTH, _PAGE_HEIGHT = A4
 _FONT_NAME: Optional[str] = None
@@ -558,6 +561,42 @@ def _advice_rows(report: Dict[str, Any], emr: Dict[str, Any]) -> List[str]:
     ) or ["以上为热图所提示可能性，请结合临床进一步诊查。"]
 
 
+def _collect_evidence_ids(report: Dict[str, Any], emr: Dict[str, Any]) -> List[str]:
+    collected: List[str] = []
+
+    def _add(values: Any) -> None:
+        if isinstance(values, (list, tuple)):
+            for item in values:
+                text = str(item or "").strip()
+                if text:
+                    collected.append(text)
+
+    for container in (report, emr):
+        if not isinstance(container, dict):
+            continue
+        _add(container.get("plan_evidence_item_ids"))
+        _add(container.get("health_advice_evidence_item_ids"))
+        _add(container.get("diagnosis_evidence_item_ids"))
+        _add(container.get("evidence_item_ids"))
+
+        report_payload = container.get("report")
+        if isinstance(report_payload, dict):
+            _add(report_payload.get("plan_evidence_item_ids"))
+            _add(report_payload.get("health_advice_evidence_item_ids"))
+            _add(report_payload.get("diagnosis_evidence_item_ids"))
+            _add(report_payload.get("evidence_item_ids"))
+
+    # Preserve order while deduplicating.
+    seen = set()
+    ordered: List[str] = []
+    for item in collected:
+        if item in seen:
+            continue
+        seen.add(item)
+        ordered.append(item)
+    return ordered
+
+
 def generate_pdf_report(
     report: Dict[str, Any],
     emr: Dict[str, Any],
@@ -765,8 +804,12 @@ def generate_pdf_report(
     # ── 七、保健建议 ──────────────────────────────────────────────────────────
     story.append(_paragraph("七、保健建议", styles["section"]))
     story.append(Spacer(1, 3 * mm))
-    for index, line in enumerate(_advice_rows(report, emr), start=1):
+    advice_lines = _advice_rows(report, emr)
+    evidence_ids = _collect_evidence_ids(report, emr)
+    evidence_suffix = f" [{','.join(evidence_ids)}]" if evidence_ids else " [NO_EVIDENCE_ID]"
+    for index, line in enumerate(advice_lines, start=1):
         story.append(_paragraph(f"{index}、{line}", styles["body"]))
+        logger.info("[PDF-ADVICE] %s、%s%s", index, line, evidence_suffix)
         story.append(Spacer(1, 2 * mm))  # number is added here; _split_advice_lines strips any pre-existing numbering
     story.append(Spacer(1, 8 * mm))
     story.append(_paragraph(f"评估日期：{report_generated_dt.strftime('%Y-%m-%d')}", styles["small"]))
