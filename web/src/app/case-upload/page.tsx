@@ -39,9 +39,33 @@ function replacementRatio(text: string): number {
 async function parseImportFile(file: File): Promise<string> {
   const lowerName = file.name.toLowerCase();
   const mime = file.type.toLowerCase();
+  const isDoc = lowerName.endsWith(".doc") && !lowerName.endsWith(".docx");
   const isDocx =
     lowerName.endsWith(".docx") ||
     mime === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+  // 处理 .doc 文件（旧格式）- 转换为 docx 并提取文本
+  if (isDoc || mime === "application/msword") {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("/api/convert-doc", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = (await response.json().catch(() => ({}))) as { error?: string };
+      throw new Error(errorData.error || "转换 .doc 文件失败");
+    }
+
+    const result = (await response.json()) as { text?: string; error?: string };
+    if (result.error) {
+      throw new Error(result.error);
+    }
+
+    return result.text || "";
+  }
 
   if (isDocx) {
     const arrayBuffer = await file.arrayBuffer();
@@ -55,16 +79,13 @@ async function parseImportFile(file: File): Promise<string> {
     mime.startsWith("text/") ||
     mime === "";
   if (!isPlainTextLike) {
-    if (lowerName.endsWith(".doc") || mime === "application/msword") {
-      throw new Error("仅支持 .txt / .md / .docx 文件。如果上传的是 .doc 文件，请先转换成 .docx 文件");
-    }
-    throw new Error("仅支持 .txt / .md / .docx 文件");
+    throw new Error("仅支持 .txt / .md / .docx / .doc 文件");
   }
 
   const arrayBuffer = await file.arrayBuffer();
   const bytes = new Uint8Array(arrayBuffer);
   if (bytes.some((b) => b === 0)) {
-    throw new Error("检测到二进制内容，请上传文本文件或 .docx");
+    throw new Error("检测到二进制内容，请上传文本文件或 .docx / .doc");
   }
 
   const utf8 = decodeByEncoding(arrayBuffer, "utf-8");
@@ -165,7 +186,7 @@ export default function CaseUploadPage() {
             <span className="mb-1 block text-sm font-medium text-slate-700">从文件读取</span>
             <input
               type="file"
-              accept=".txt,.md,.docx,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              accept=".txt,.md,.docx,.doc,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword"
               onChange={handleFileChange}
               className="block w-full text-sm text-slate-700 file:mr-3 file:rounded-md file:border-0 file:bg-emerald-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-emerald-700"
             />
