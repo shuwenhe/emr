@@ -2,6 +2,7 @@ import { mkdtemp, writeFile, unlink, access, rm, readFile, mkdir, rename } from 
 import { constants as fsConstants, statSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { NextResponse } from "next/server";
@@ -10,6 +11,7 @@ const execFileAsync = promisify(execFile);
 
 type UploadedCaseFileRecord = {
   file_hash: string;
+  content_hash?: string;
   file_name: string;
   file_size: number | null;
   source_name: string;
@@ -90,6 +92,14 @@ function buildDuplicateMessage(record: UploadedCaseFileRecord) {
   return parts.join("\n");
 }
 
+function normalizeCaseText(text: string) {
+  return text.replace(/\r\n/g, "\n").trim();
+}
+
+function computeCaseTextHash(text: string) {
+  return createHash("sha256").update(normalizeCaseText(text), "utf-8").digest("hex");
+}
+
 async function resolvePythonBinary(projectRoot: string) {
   const candidates = [
     process.env.KB_PYTHON?.trim() || "",
@@ -144,11 +154,20 @@ export async function POST(request: Request) {
     }
 
     const projectRoot = resolveProjectRoot();
+    const contentHash = computeCaseTextHash(caseText);
     const registryPath = resolveCaseImportRegistryPath(projectRoot);
-    const caseImportRegistry = fileHash ? await loadCaseImportRegistry(registryPath) : [];
+    const caseImportRegistry = await loadCaseImportRegistry(registryPath);
 
-    if (fileHash) {
-      const existingRecord = caseImportRegistry.find((record) => record.file_hash === fileHash);
+    if (fileHash || contentHash) {
+      const existingRecord = caseImportRegistry.find((record) => {
+        if (fileHash && record.file_hash === fileHash) {
+          return true;
+        }
+        if (record.content_hash && record.content_hash === contentHash) {
+          return true;
+        }
+        return false;
+      });
       if (existingRecord) {
         return NextResponse.json(
           {
@@ -193,10 +212,11 @@ export async function POST(request: Request) {
       let output = [stdout, stderr].filter(Boolean).join("\n").trim();
       const newIds = parseNewIds(output);
 
-      if (!dryRun && fileHash) {
+      if (!dryRun) {
         try {
           caseImportRegistry.push({
             file_hash: fileHash,
+            content_hash: contentHash,
             file_name: fileName || "未命名文件",
             file_size: fileSize,
             source_name: sourceName || "前端病例上传",
