@@ -852,17 +852,19 @@ def _score_section_item(
     if not i_tokens:
         return 0.0
     overlap = q_tokens.intersection(i_tokens)
-    if not overlap:
+    if not overlap and section != "treatment_plan_text":
         return 0.0
 
     title_tokens = set(_tokenize_text(title_text))
     tag_tokens = set(_tokenize_text(tags_text))
     hint_tokens = set(_tokenize_text(hints_text))
-    base_overlap = len(overlap) / max(1, len(q_tokens))
-    title_overlap = len(q_tokens.intersection(title_tokens)) / max(1, len(q_tokens))
-    tag_overlap = len(q_tokens.intersection(tag_tokens)) / max(1, len(q_tokens))
-    hint_overlap = len(q_tokens.intersection(hint_tokens)) / max(1, len(q_tokens))
-    score = base_overlap + (0.35 * title_overlap) + (0.25 * tag_overlap) + (0.2 * hint_overlap)
+    score = 0.0
+    if overlap:
+        base_overlap = len(overlap) / max(1, len(q_tokens))
+        title_overlap = len(q_tokens.intersection(title_tokens)) / max(1, len(q_tokens))
+        tag_overlap = len(q_tokens.intersection(tag_tokens)) / max(1, len(q_tokens))
+        hint_overlap = len(q_tokens.intersection(hint_tokens)) / max(1, len(q_tokens))
+        score = base_overlap + (0.35 * title_overlap) + (0.25 * tag_overlap) + (0.2 * hint_overlap)
 
     item_risk_levels = [_normalize_risk_level(level) for level in _to_list_of_str(item.get("risk_levels"))]
     if risk_level and item_risk_levels and risk_level in item_risk_levels:
