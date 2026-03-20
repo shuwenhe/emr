@@ -55,6 +55,9 @@ async function parseImportFile(file: File): Promise<string> {
     mime.startsWith("text/") ||
     mime === "";
   if (!isPlainTextLike) {
+    if (lowerName.endsWith(".doc") || mime === "application/msword") {
+      throw new Error("仅支持 .txt / .md / .docx 文件。如果上传的是 .doc 文件，请先转换成 .docx 文件");
+    }
     throw new Error("仅支持 .txt / .md / .docx 文件");
   }
 
