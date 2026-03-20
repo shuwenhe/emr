@@ -85,7 +85,7 @@ help:
 	@echo "  make kb-validate       # validate rag/kb/knowledge_base.jsonl schema/integrity"
 	@echo "  make kb-export-json    # generate rag/kb/knowledge_base.json from jsonl"
 	@echo "  make kb-export-jsonl   # generate rag/kb/knowledge_base.jsonl from json"
-	@echo "  make kb-json-watch-start  # start local watcher: auto bidirectional sync"
+	@echo "  make kb-json-watch-start  # start watcher: auto sync + rebuild structured KB"
 	@echo "  make kb-json-watch-stop   # stop local KB watcher"
 	@echo "  make kb-json-watch-status # show local KB watcher status"
 	@echo "  make kb-import-docs    # batch import .docx/.pdf into knowledge_base.jsonl (upsert by id)"
@@ -132,6 +132,7 @@ SERVICE_LOG_FILE ?= $(CURDIR)/.run/service.log
 KB_JSON_WATCH_PID_FILE ?= $(CURDIR)/.git/.kb_json_watch.pid
 KB_JSON_WATCH_LOG_FILE ?= $(CURDIR)/.git/kb_json_watch.log
 KB_JSON_WATCH_INTERVAL ?= 2
+KB_JSON_WATCH_REBUILD_COMMAND ?= make kb-build-structured
 
 
 service-fg: service-precheck
@@ -244,7 +245,7 @@ kb-export-jsonl:
 		--output-jsonl "$(STRUCTURED_KB_JSONL)"
 
 kb-json-watch-start:
-	@bash -c 'set -e; PID_FILE="$(KB_JSON_WATCH_PID_FILE)"; LOG_FILE="$(KB_JSON_WATCH_LOG_FILE)"; if [ -f "$$PID_FILE" ] && kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[kb-watch] already running (pid=$$(cat "$$PID_FILE"))"; exit 0; fi; mkdir -p "$$(dirname "$$LOG_FILE")"; nohup env REPO_DIR="$(CURDIR)" KB_PY="$(KB_PY)" KB_WATCH_INTERVAL="$(KB_JSON_WATCH_INTERVAL)" KB_JSONL_PATH="$(STRUCTURED_KB_JSONL)" KB_JSON_PATH="$(CURDIR)/rag/kb/knowledge_base.json" bash "$(CURDIR)/scripts/kb_jsonl_watch_sync.sh" > "$$LOG_FILE" 2>&1 & echo $$! > "$$PID_FILE"; echo "[kb-watch] started pid=$$(cat "$$PID_FILE") log=$$LOG_FILE"'
+	@bash -c 'set -e; PID_FILE="$(KB_JSON_WATCH_PID_FILE)"; LOG_FILE="$(KB_JSON_WATCH_LOG_FILE)"; if [ -f "$$PID_FILE" ] && kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[kb-watch] already running (pid=$$(cat "$$PID_FILE"))"; exit 0; fi; mkdir -p "$$(dirname "$$LOG_FILE")"; nohup env REPO_DIR="$(CURDIR)" KB_PY="$(KB_PY)" KB_WATCH_INTERVAL="$(KB_JSON_WATCH_INTERVAL)" KB_JSONL_PATH="$(STRUCTURED_KB_JSONL)" KB_JSON_PATH="$(CURDIR)/rag/kb/knowledge_base.json" KB_REBUILD_COMMAND='$(KB_JSON_WATCH_REBUILD_COMMAND)' bash "$(CURDIR)/scripts/kb_jsonl_watch_sync.sh" > "$$LOG_FILE" 2>&1 & echo $$! > "$$PID_FILE"; echo "[kb-watch] started pid=$$(cat "$$PID_FILE") log=$$LOG_FILE rebuild=$(KB_JSON_WATCH_REBUILD_COMMAND)"'
 
 kb-json-watch-stop:
 	@bash -c 'set -e; PID_FILE="$(KB_JSON_WATCH_PID_FILE)"; if [ ! -f "$$PID_FILE" ]; then echo "[kb-watch] not running"; exit 0; fi; PID="$$(cat "$$PID_FILE")"; if kill -0 "$$PID" 2>/dev/null; then kill "$$PID"; echo "[kb-watch] stopped pid=$$PID"; else echo "[kb-watch] stale pid file removed"; fi; rm -f "$$PID_FILE"'
