@@ -16,7 +16,7 @@ run_sync() {
     bash "$REPO_DIR/scripts/sync_kb_json_to_jsonl.sh" >/dev/null 2>&1; then
     log "synced json <-> jsonl"
   else
-    log "sync failed; keep watching"
+    log "sync failed (check data validity); keep watching"
   fi
 }
 

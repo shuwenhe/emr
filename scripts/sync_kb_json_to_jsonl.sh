@@ -9,13 +9,13 @@ KB_PY="${KB_PY:-python3}"
 sync_json_to_jsonl() {
   "$KB_PY" "$REPO_DIR/scripts/kb_json_to_jsonl.py" \
     --input-json "$KB_JSON_PATH" \
-    --output-jsonl "$KB_JSONL_PATH" >/dev/null 2>&1 || true
+    --output-jsonl "$KB_JSONL_PATH" >/dev/null 2>&1
 }
 
 sync_jsonl_to_json() {
   "$KB_PY" "$REPO_DIR/scripts/kb_jsonl_to_json.py" \
     --input-jsonl "$KB_JSONL_PATH" \
-    --output-json "$KB_JSON_PATH" >/dev/null 2>&1 || true
+    --output-json "$KB_JSON_PATH" >/dev/null 2>&1
 }
 
 if [[ ! -f "$KB_JSON_PATH" && ! -f "$KB_JSONL_PATH" ]]; then
