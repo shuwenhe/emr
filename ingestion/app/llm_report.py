@@ -155,6 +155,13 @@ _SECTION_TOP_K = {
     "treatment_plan_text": RAG_TOP_K_TREATMENT_PLAN,
     "health_advice": RAG_TOP_K_HEALTH_ADVICE,
 }
+_SECTION_ALLOWED_CATEGORIES: Dict[str, Set[str]] = {
+    "diagnosis": {"report_template", "interpretation_symmetry", "interpretation_hotspot"},
+    "doctor_opinion": {"report_template", "follow_up_rule", "contraindication", "safety_rule"},
+    "report_note": {"report_template", "sop_preparation", "contraindication", "safety_rule"},
+    "treatment_plan_text": {"treatment_guideline", "follow_up_rule", "contraindication"},
+    "health_advice": {"follow_up_rule", "treatment_guideline", "contraindication"},
+}
 _RISK_ALIASES = {
     "low": {"low", "低", "低风险"},
     "medium": {"medium", "mid", "中", "中风险"},
@@ -451,7 +458,7 @@ def _extract_report_features(report: Dict[str, Any], emr: Dict[str, Any]) -> Dic
 
     body_parts: List[str] = []
     patient_body_part = str(patient.get("body_part") or "").strip()
-    if patient_body_part:
+    if patient_body_part and patient_body_part not in {"全身", "全身扫描", "全身检查"}:
         body_parts.append(patient_body_part)
     if isinstance(abnormal_regions, list):
         for item in abnormal_regions:
@@ -461,6 +468,21 @@ def _extract_report_features(report: Dict[str, Any], emr: Dict[str, Any]) -> Dic
                 value = str(item.get(key) or "").strip()
                 if value and value not in body_parts:
                     body_parts.append(value)
+
+    if not body_parts:
+        # Fallback for generic records (e.g. body_part=全身): infer from EMR narratives.
+        emr_text = "\n".join(
+            [
+                str(emr.get("chief_complaint") or ""),
+                str(emr.get("diagnosis") or ""),
+                str(emr.get("doctor_opinion") or ""),
+                str(emr.get("history") or ""),
+            ]
+        )
+        for canonical, aliases in _BODY_PART_ALIASES.items():
+            if canonical in emr_text or any(alias in emr_text for alias in aliases):
+                if canonical not in body_parts:
+                    body_parts.append(canonical)
 
     risk_level = _normalize_risk_level(str(analysis.get("risk_level") or "").strip())
     return {
@@ -773,6 +795,15 @@ def _filter_items_for_section(
         if report_sections and section not in report_sections:
             continue
         selected.append(item)
+    allowed_categories = _SECTION_ALLOWED_CATEGORIES.get(section)
+    if allowed_categories:
+        scoped = [
+            item
+            for item in selected
+            if str(item.get("category") or "").strip().lower() in allowed_categories
+        ]
+        if scoped:
+            selected = scoped
     if not selected:
         return selected
 
@@ -809,6 +840,7 @@ def _score_section_item(
     item: Dict[str, Any],
     q_tokens: Set[str],
     *,
+    section: str = "",
     risk_level: str = "",
     body_parts: Optional[List[str]] = None,
 ) -> float:
@@ -845,6 +877,13 @@ def _score_section_item(
     if report_sections:
         score += 0.8
 
+    # Prefer case treatment snippets for treatment-plan generation.
+    if section == "treatment_plan_text":
+        item_id = str(item.get("id") or "")
+        title_text_lower = title_text.lower()
+        if "-C" in item_id or "病例" in title_text_lower:
+            score += 1.2
+
     score += float(item.get("priority") or 0) * 0.5
     return score
 
@@ -873,7 +912,13 @@ def _retrieve_context_for_section(
 
     scored: List[Tuple[float, Dict[str, Any]]] = []
     for item in items:
-        score = _score_section_item(item, q_tokens, risk_level=risk_level, body_parts=body_parts)
+        score = _score_section_item(
+            item,
+            q_tokens,
+            section=section,
+            risk_level=risk_level,
+            body_parts=body_parts,
+        )
         if score > 0:
             scored.append((score, item))
     scored.sort(
