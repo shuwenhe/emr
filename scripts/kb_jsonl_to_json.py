@@ -57,6 +57,14 @@ def main() -> int:
     if payload:
         payload += "\n"
 
+    if output_path.exists():
+        old = output_path.read_text(encoding="utf-8")
+        if old == payload:
+            print(
+                f"[OK] JSON already up to date: input={input_path} output={output_path} rows={len(rows)}"
+            )
+            return 0
+
     tmp_path = output_path.with_suffix(output_path.suffix + ".tmp")
     tmp_path.write_text(payload, encoding="utf-8")
     tmp_path.replace(output_path)

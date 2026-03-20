@@ -11,60 +11,66 @@ log() {
   printf '[kb-watch][%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
 }
 
-run_export() {
-  if [[ ! -f "$KB_JSONL_PATH" ]]; then
-    log "skip export: source jsonl not found: $KB_JSONL_PATH"
-    return 0
-  fi
-
-  if "$KB_PY" "$REPO_DIR/scripts/kb_jsonl_to_json.py" \
-    --input-jsonl "$KB_JSONL_PATH" \
-    --output-json "$KB_JSON_PATH" >/dev/null 2>&1; then
-    log "synced jsonl -> json"
+run_sync() {
+  if KB_PY="$KB_PY" KB_JSON_PATH="$KB_JSON_PATH" KB_JSONL_PATH="$KB_JSONL_PATH" \
+    bash "$REPO_DIR/scripts/sync_kb_json_to_jsonl.sh" >/dev/null 2>&1; then
+    log "synced json <-> jsonl"
   else
-    log "export failed; keep watching"
+    log "sync failed; keep watching"
   fi
 }
 
 watch_with_inotify() {
   local watch_dir
-  local target_name
+  local json_name
+  local jsonl_name
   watch_dir="$(dirname "$KB_JSONL_PATH")"
-  target_name="$(basename "$KB_JSONL_PATH")"
+  json_name="$(basename "$KB_JSON_PATH")"
+  jsonl_name="$(basename "$KB_JSONL_PATH")"
 
-  log "watch mode=inotify path=$KB_JSONL_PATH"
-  run_export
+  log "watch mode=inotify path=$watch_dir files=$jsonl_name,$json_name"
+  run_sync
 
   inotifywait -m -q \
     -e close_write -e moved_to -e create \
     --format '%f' "$watch_dir" | while read -r changed_name; do
-      if [[ "$changed_name" == "$target_name" ]]; then
-        run_export
+      if [[ "$changed_name" == "$jsonl_name" || "$changed_name" == "$json_name" ]]; then
+        run_sync
       fi
     done
 }
 
 watch_with_polling() {
-  local last_sig=""
-  local sig=""
+  local last_json_sig=""
+  local last_jsonl_sig=""
+  local json_sig=""
+  local jsonl_sig=""
 
-  log "watch mode=polling interval=${KB_WATCH_INTERVAL}s path=$KB_JSONL_PATH"
-  run_export
+  log "watch mode=polling interval=${KB_WATCH_INTERVAL}s files=$KB_JSONL_PATH,$KB_JSON_PATH"
+  run_sync
 
   while true; do
-    if [[ -f "$KB_JSONL_PATH" ]]; then
-      sig="$(stat -c '%Y:%s' "$KB_JSONL_PATH" 2>/dev/null || true)"
-      if [[ -n "$sig" && "$sig" != "$last_sig" ]]; then
-        last_sig="$sig"
-        run_export
-      fi
+    json_sig=""
+    jsonl_sig=""
+    if [[ -f "$KB_JSON_PATH" ]]; then
+      json_sig="$(stat -c '%Y:%s' "$KB_JSON_PATH" 2>/dev/null || true)"
     fi
+    if [[ -f "$KB_JSONL_PATH" ]]; then
+      jsonl_sig="$(stat -c '%Y:%s' "$KB_JSONL_PATH" 2>/dev/null || true)"
+    fi
+
+    if [[ "$json_sig" != "$last_json_sig" || "$jsonl_sig" != "$last_jsonl_sig" ]]; then
+      last_json_sig="$json_sig"
+      last_jsonl_sig="$jsonl_sig"
+      run_sync
+    fi
+
     sleep "$KB_WATCH_INTERVAL"
   done
 }
 
 main() {
-  log "starting KB jsonl watcher"
+  log "starting KB json/jsonl watcher"
   if command -v inotifywait >/dev/null 2>&1; then
     watch_with_inotify
   else
