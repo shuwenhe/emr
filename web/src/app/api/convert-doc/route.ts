@@ -51,7 +51,6 @@ export async function POST(request: Request) {
         inputPath,
       ], {
         timeout: 30000,
-        stdio: ["pipe", "pipe", "pipe"],
       });
     } catch (error) {
       console.error("LibreOffice conversion error:", error);
