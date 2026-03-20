@@ -692,6 +692,31 @@ def generate_pdf_report(
     # ── 一、温度指标概览 ───────────────────────────────────────────────────────
     story.append(_paragraph("一、温度指标概览", styles["section"]))
     story.append(Spacer(1, 3 * mm))
+    story.append(_paragraph("提示", styles["subsection"]))
+    story.append(Spacer(1, 2 * mm))
+    story.append(
+        _paragraph(
+            "红外热成像技术是一种功能影像学技术，它被动接受人体红外热信号，"
+            "对人体绝无任何辐射及伤害，孕妇、哺乳期妇女、儿童、老人均可进行检查。",
+            styles["small"],
+        )
+    )
+    story.append(Spacer(1, 1 * mm))
+    story.append(
+        _paragraph(
+            "本报告利用红外热成像技术检测各部位温度变化，并对此进行健康评估，"
+            "旨在帮您了解自身健康、亚健康状况，作为疾病诊断、治疗的参考依据。",
+            styles["small"],
+        )
+    )
+    story.append(Spacer(1, 1 * mm))
+    story.append(
+        _paragraph(
+            "若您存在脏器的切除史，报告中提示了该脏器风险，代表该脏器周围组织存在异常。",
+            styles["small"],
+        )
+    )
+    story.append(Spacer(1, 4 * mm))
     # 整体热图（全部图片缩略网格）
     if image_candidates:
         story.append(_image_grid(image_candidates, 170 * mm, 52 * mm))
@@ -811,31 +836,6 @@ def generate_pdf_report(
         story.append(_paragraph(f"{index}、{line}", styles["body"]))
         logger.info("[PDF-ADVICE] %s、%s%s", index, line, evidence_suffix)
         story.append(Spacer(1, 2 * mm))  # number is added here; _split_advice_lines strips any pre-existing numbering
-    story.append(Spacer(1, 4 * mm))
-    story.append(_paragraph("提示", styles["subsection"]))
-    story.append(Spacer(1, 2 * mm))
-    story.append(
-        _paragraph(
-            "红外热成像技术是一种功能影像学技术，它被动接受人体红外热信号，"
-            "对人体绝无任何辐射及伤害，孕妇、哺乳期妇女、儿童、老人均可进行检查。",
-            styles["small"],
-        )
-    )
-    story.append(Spacer(1, 1 * mm))
-    story.append(
-        _paragraph(
-            "本报告利用红外热成像技术检测各部位温度变化，并对此进行健康评估，"
-            "旨在帮您了解自身健康、亚健康状况，作为疾病诊断、治疗的参考依据。",
-            styles["small"],
-        )
-    )
-    story.append(Spacer(1, 1 * mm))
-    story.append(
-        _paragraph(
-            "若您存在脏器的切除史，报告中提示了该脏器风险，代表该脏器周围组织存在异常。",
-            styles["small"],
-        )
-    )
     story.append(Spacer(1, 8 * mm))
     story.append(_paragraph(f"评估日期：{report_generated_dt.strftime('%Y-%m-%d')}", styles["small"]))
     story.append(Spacer(1, 2 * mm))
