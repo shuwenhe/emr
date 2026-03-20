@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import json
 import logging
 import os
 import re
@@ -29,6 +30,8 @@ from app.config import DATA_DIR, REPORTS_DIR
 from reports.python.thermal_label_renderer import render_labeled_thermal_image
 
 logger = logging.getLogger(__name__)
+
+_KB_INTERPRETATION_IDS = ("KB-IR-INT-C0010", "KB-IR-INT-C0011", "KB-IR-INT-C0012")
 
 _PAGE_WIDTH, _PAGE_HEIGHT = A4
 _FONT_NAME: Optional[str] = None
@@ -602,6 +605,46 @@ def _collect_evidence_ids(report: Dict[str, Any], emr: Dict[str, Any]) -> List[s
     return ordered
 
 
+def _load_kb_interpretation_lines() -> List[str]:
+    kb_path = Path(__file__).resolve().parents[2] / "rag" / "kb" / "knowledge_base.jsonl"
+    if not kb_path.exists() or not kb_path.is_file():
+        return []
+
+    wanted = set(_KB_INTERPRETATION_IDS)
+    found: Dict[str, Dict[str, Any]] = {}
+    try:
+        for raw in kb_path.read_text(encoding="utf-8").splitlines():
+            line = raw.strip()
+            if not line:
+                continue
+            try:
+                row = json.loads(line)
+            except Exception:
+                continue
+            if not isinstance(row, dict):
+                continue
+            item_id = str(row.get("id") or "").strip()
+            if item_id in wanted:
+                found[item_id] = row
+    except Exception:
+        return []
+
+    lines: List[str] = []
+    for item_id in _KB_INTERPRETATION_IDS:
+        row = found.get(item_id)
+        if not row:
+            continue
+        title = _text(row.get("title"), "")
+        content = _text(row.get("content"), "")
+        if title:
+            lines.append(title)
+        for text_line in content.splitlines():
+            cleaned = text_line.strip()
+            if cleaned:
+                lines.append(cleaned)
+    return lines
+
+
 def generate_pdf_report(
     report: Dict[str, Any],
     emr: Dict[str, Any],
@@ -817,6 +860,15 @@ def generate_pdf_report(
         story.append(Spacer(1, 2 * mm))
         for finding in key_findings:
             story.append(_paragraph(f"· {finding}", styles["body"]))
+            story.append(Spacer(1, 1 * mm))
+
+    kb_lines = _load_kb_interpretation_lines()
+    if kb_lines:
+        story.append(Spacer(1, 5 * mm))
+        story.append(_paragraph("知识库补充解读", styles["subsection"]))
+        story.append(Spacer(1, 2 * mm))
+        for line in kb_lines:
+            story.append(_paragraph(f"· {line}", styles["small"]))
             story.append(Spacer(1, 1 * mm))
     story.append(PageBreak())
 
