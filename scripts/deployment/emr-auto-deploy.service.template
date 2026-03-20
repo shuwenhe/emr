@@ -1,0 +1,19 @@
+[Unit]
+Description=EMR Auto Update And Deploy Daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=__PROJECT_ROOT__
+Environment=PYTHONUNBUFFERED=1
+Environment=AUTO_DEPLOY_INTERVAL_SECONDS=20
+ExecStart=/usr/bin/env bash __PROJECT_ROOT__/scripts/auto_update_deploy_daemon.sh
+Restart=always
+RestartSec=5
+
+StandardOutput=append:__PROJECT_ROOT__/logs/__SERVICE_NAME__.out.log
+StandardError=append:__PROJECT_ROOT__/logs/__SERVICE_NAME__.err.log
+
+[Install]
+WantedBy=default.target

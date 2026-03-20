@@ -32,11 +32,12 @@ mkdir -p "${PROJECT_ROOT}/logs"
 install_service emr-backend
 install_service emr-frontend
 install_service emr-auto-git-push
+install_service emr-auto-deploy
 
 systemctl --user daemon-reload
 
 # Enable and start all services
-for svc in emr-backend emr-frontend emr-auto-git-push; do
+for svc in emr-backend emr-frontend emr-auto-git-push emr-auto-deploy; do
   if [[ -f "${SYSTEMD_USER_DIR}/${svc}.service" ]]; then
     systemctl --user enable --now "${svc}" 2>/dev/null || systemctl --user restart "${svc}" || true
     echo "[ok] ${svc}: $(systemctl --user is-active ${svc} 2>/dev/null || echo unknown)"
@@ -57,6 +58,7 @@ fi
 
 echo ""
 echo "All services installed. Useful commands:"
-echo "  systemctl --user status emr-backend emr-frontend emr-auto-git-push"
+echo "  systemctl --user status emr-backend emr-frontend emr-auto-git-push emr-auto-deploy"
 echo "  journalctl --user -u emr-frontend -f"
 echo "  journalctl --user -u emr-backend -f"
+echo "  journalctl --user -u emr-auto-deploy -f"
