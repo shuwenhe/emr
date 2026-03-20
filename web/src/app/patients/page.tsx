@@ -559,17 +559,21 @@ export default function PatientsPage() {
   }, [refreshPatientsIfChanged]);
 
   async function fetchPatientEmrs(patient: Patient) {
+    // Open detail modal immediately so users get instant feedback on click.
+    setSelectedPatient(patient);
+    setShowDetailModal(true);
     try {
       const response = await fetch(`${API_BASE}/emr?patient_id=${encodeURIComponent(patient.patient_id)}`);
+      if (!response.ok) {
+        throw new Error(`病历加载失败 (HTTP ${response.status})`);
+      }
       const data = await response.json();
       setEmrs(Array.isArray(data) ? data : []);
-      setSelectedPatient(patient);
-      setShowDetailModal(true);
-      if (response.ok) {
-        flashSuccessButton();
-      }
-    } catch {
+      flashSuccessButton();
+    } catch (error) {
+      console.error("加载患者病历失败:", error);
       setEmrs([]);
+      alert(`病历加载失败: ${error instanceof Error ? error.message : "未知错误"}`);
     }
   }
 
