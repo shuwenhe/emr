@@ -769,7 +769,7 @@ def generate_pdf_report(
         story.append(_paragraph(f"{index}、{line}", styles["body"]))
         story.append(Spacer(1, 2 * mm))  # number is added here; _split_advice_lines strips any pre-existing numbering
     story.append(Spacer(1, 8 * mm))
-    story.append(_paragraph(f"评估日期：{created_dt.strftime('%Y-%m-%d')}", styles["small"]))
+    story.append(_paragraph(f"评估日期：{report_generated_dt.strftime('%Y-%m-%d')}", styles["small"]))
     story.append(Spacer(1, 2 * mm))
     story.append(_paragraph("以上为热图所提示可能性，请结合临床进一步诊查。", styles["small"]))
 
