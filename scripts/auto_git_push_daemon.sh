@@ -11,7 +11,7 @@ last_snapshot=""
 changed_at=0
 
 while true; do
-  # Keep runtime JSONL in sync with editable JSON source.
+  # Keep generated JSON in sync with JSONL source of truth.
   if [[ -f "$REPO_DIR/scripts/sync_kb_json_to_jsonl.sh" ]]; then
     bash "$REPO_DIR/scripts/sync_kb_json_to_jsonl.sh" >/dev/null 2>&1 || true
   fi

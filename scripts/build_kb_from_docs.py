@@ -317,7 +317,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-file",
         default="./rag/kb/knowledge_base.jsonl",
-        help="Output file path (default: ./rag/kb/knowledge_base.jsonl; .json also supported)",
+        help="Output file path (must be .jsonl; default: ./rag/kb/knowledge_base.jsonl)",
     )
     parser.add_argument("--id-prefix", default="KB-HT", help="ID prefix (default: KB-HT)")
     parser.add_argument("--max-chars", type=int, default=700, help="Max chars per chunk (default: 700)")
@@ -335,6 +335,13 @@ def main() -> int:
     args = parse_args()
     input_dir = Path(args.input_dir).resolve()
     output_file = Path(args.output_file).resolve()
+
+    if output_file.suffix.lower() != ".jsonl":
+        print(
+            "[ERROR] --output-file must be .jsonl. "
+            "Use scripts/kb_jsonl_to_json.py to generate knowledge_base.json."
+        )
+        return 2
 
     if not input_dir.exists() or not input_dir.is_dir():
         print(f"[ERROR] input directory not found: {input_dir}")

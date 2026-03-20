@@ -55,7 +55,7 @@ TCM_WORKERS  ?= 4
 TCM_DOCX_DIR  ?= $(CURDIR)/rag/dataset/docx_corpus
 TCM_DOCX_RPF  ?= 500   # records per docx file
 
-.PHONY: help install service-setup service service-fg service-start service-stop service-status service-restart service-precheck web web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build public-domain-up public-domain-down auto-commit-start auto-commit-stop auto-commit-status logs logs-backend logs-frontend logs-auto-git-push logs-all logs-file-backend logs-file-frontend clean
+.PHONY: help install service-setup service service-fg service-start service-stop service-status service-restart service-precheck web web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-validate kb-export-json kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build public-domain-up public-domain-down auto-commit-start auto-commit-stop auto-commit-status logs logs-backend logs-frontend logs-auto-git-push logs-all logs-file-backend logs-file-frontend clean
 
 help:
 	@echo "Available targets:"
@@ -82,6 +82,8 @@ help:
 	@echo "  make text-ops-build   # compile C++ text ops extension (chunk_text + low-signal)"
 	@echo "  make kb-build-markdown # build KB and print markdown/chunk debug"
 	@echo "  make kb-build-structured # build vector KB from rag/kb/knowledge_base.jsonl"
+	@echo "  make kb-validate       # validate rag/kb/knowledge_base.jsonl schema/integrity"
+	@echo "  make kb-export-json    # generate rag/kb/knowledge_base.json from jsonl"
 	@echo "  make kb-import-docs    # batch import .docx/.pdf into knowledge_base.jsonl (upsert by id)"
 	@echo "  make kb-import-docs-build # import docs then rebuild structured vector KB"
 	@echo "  make kb-import-md      # batch import .md into knowledge_base.jsonl (upsert by id)"
@@ -217,7 +219,18 @@ kb-build-markdown:
 	$(if $(RAG_EMBED_PIPELINE_INFLIGHT),RAG_EMBED_PIPELINE_INFLIGHT="$(RAG_EMBED_PIPELINE_INFLIGHT)",) \
 	"$(KB_PY)" -c "from rag.kb_builder import build_kb; build_kb(source_dir='$(KB_SOURCE_DIR)', out_dir='$(KB_OUT_DIR)', provider='$(KB_PROVIDER)', embed_model='$(KB_EMBED_MODEL)', base_url='$(KB_BASE_URL)' or None, api_key='$(KB_API_KEY)' or None, max_len=int('$(KB_MAX_LEN)'), overlap=int('$(KB_OVERLAP)'), batch_size=int('$(KB_BATCH_SIZE)'), show_markdown=True)"
 
-kb-build-structured:
+kb-validate:
+	@PYTHONPATH="$(CURDIR):$$PYTHONPATH" \
+	"$(KB_PY)" scripts/validate_kb_jsonl.py \
+		--kb "$(STRUCTURED_KB_JSONL)"
+
+kb-export-json:
+	@PYTHONPATH="$(CURDIR):$$PYTHONPATH" \
+	"$(KB_PY)" scripts/kb_jsonl_to_json.py \
+		--input-jsonl "$(STRUCTURED_KB_JSONL)" \
+		--output-json "$(CURDIR)/rag/kb/knowledge_base.json"
+
+kb-build-structured: kb-validate
 	@PYTHONPATH="$(CURDIR):$$PYTHONPATH" \
 	"$(KB_PY)" -m rag.build_kb_from_structured \
 		--kb "$(STRUCTURED_KB_JSONL)" \
@@ -235,6 +248,8 @@ kb-import-docs:
 		--max-chars $(KB_DOC_MAX_CHARS) \
 		--min-chars $(KB_DOC_MIN_CHARS) \
 		--upsert
+	@$(MAKE) kb-validate
+	@$(MAKE) kb-export-json
 
 kb-import-docs-build: kb-import-docs kb-build-structured
 
@@ -249,6 +264,8 @@ kb-import-md:
 		$(if $(KB_MD_INCLUDE_REGEX),--include-regex "$(KB_MD_INCLUDE_REGEX)",) \
 		$(if $(KB_MD_EXCLUDE_REGEX),--exclude-regex "$(KB_MD_EXCLUDE_REGEX)",) \
 		--upsert
+	@$(MAKE) kb-validate
+	@$(MAKE) kb-export-json
 
 kb-import-md-build: kb-import-md kb-build-structured
 
