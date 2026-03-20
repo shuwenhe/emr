@@ -9,7 +9,22 @@ import { NextResponse } from "next/server";
 const execFileAsync = promisify(execFile);
 
 function resolveProjectRoot() {
-  return path.resolve(process.cwd(), "..");
+  // 在 standalone 模式下，process.cwd() 是 .next/standalone
+  // 需要找到真实的项目根目录 (/home/shuwen/emr)
+  let cwd = process.cwd();
+  
+  // 如果在 .next/standalone 中，往上走两层
+  if (cwd.endsWith(".next/standalone") || cwd.includes(".next/standalone")) {
+    return path.resolve(cwd, "../..");
+  }
+  
+  // 如果在 web 目录中，往上走一层
+  if (cwd.endsWith("/web") || cwd.includes("/web/.next")) {
+    return path.resolve(cwd, "..");
+  }
+  
+  // 默认情况
+  return path.resolve(cwd, "..");
 }
 
 async function resolvePythonBinary(projectRoot: string) {
