@@ -1,0 +1,6067 @@
+[
+  {
+    "id": "KB-HT-001",
+    "title": "热成像检查前准备要点",
+    "content": "红外热成像检查前建议静息15-20分钟，避免剧烈运动、热水浴、外用刺激性药膏与大量饮酒。环境温度宜相对稳定，减少体表温度短时波动对判读的影响。",
+    "category": "sop_preparation",
+    "report_sections": [
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "检查准备",
+      "热成像",
+      "流程"
+    ],
+    "source": "院内热成像检查SOP v1.0",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "门诊常规热成像采集前"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "检查前准备",
+      "静息15到20分钟",
+      "避免热刺激"
+    ]
+  },
+  {
+    "id": "KB-HT-002",
+    "title": "体表温度判读的相对性原则",
+    "content": "体表温度受环境、年龄、代谢和姿势影响，临床判读应重点关注左右对称差异、局部异常热点/冷点与动态变化，不宜仅凭单次绝对温度下结论。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "判读原则",
+      "温度指标",
+      "对称性"
+    ],
+    "source": "热成像判读规范（试行）",
+    "source_type": "guideline",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "左右对称ROI可比较",
+      "采集姿势与环境基本稳定"
+    ],
+    "contraindications": [
+      "近期外部热刺激或环境波动未校正时慎用单次结论"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "左右对称差异",
+      "相对温差",
+      "不要只看绝对温度"
+    ]
+  },
+  {
+    "id": "KB-HT-003",
+    "title": "ROI温差提示意义",
+    "content": "当左右对应ROI温差持续大于约0.5°C时，可提示局部循环或炎症相关风险增加。建议结合主诉、触诊和必要的实验室/影像检查综合评估。",
+    "category": "interpretation_symmetry",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "ROI",
+      "左右温差",
+      "风险提示"
+    ],
+    "source": "区域温度对比共识（摘要）",
+    "source_type": "consensus",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "存在可比较的左右对应ROI",
+      "温差结果稳定"
+    ],
+    "contraindications": [
+      "单次采集质量不足时不宜直接强化解释"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "腰背",
+      "膝关节",
+      "四肢"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "consensus",
+    "retrieval_hints": [
+      "ROI温差大于0.5",
+      "左右温差",
+      "局部循环风险"
+    ],
+    "structured_advice": {
+      "threshold_delta_c": 0.5,
+      "interpretation_focus": "left_right_roi_delta"
+    }
+  },
+  {
+    "id": "KB-HT-004",
+    "title": "高温异常区域处理建议",
+    "content": "若局部区域温度明显高于周围组织，医生意见可提示炎症或应激可能，并建议减少局部负荷、观察48-72小时变化；若伴红肿热痛或全身不适，建议进一步就医评估。",
+    "category": "interpretation_hotspot",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment_plan_text",
+      "health_advice"
+    ],
+    "tags": [
+      "异常区域",
+      "高温",
+      "医生意见"
+    ],
+    "source": "院内门诊随访建议单",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "存在局部热点或高温异常区域"
+    ],
+    "contraindications": [
+      "近期理疗、热敷、运动后短期热增高需谨慎解释"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "腰背",
+      "膝关节"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "局部高温",
+      "异常热点",
+      "炎症或应激"
+    ],
+    "structured_advice": {
+      "observe_hours_min": 48,
+      "observe_hours_max": 72,
+      "action": "reduce_local_load"
+    }
+  },
+  {
+    "id": "KB-HT-005",
+    "title": "低温异常区域处理建议",
+    "content": "局部低温可与末梢循环下降、受压或慢性供血不足相关。治疗方案建议可包含保暖、适度活动和局部理疗评估；若出现麻木、苍白或持续疼痛，应尽快专科评估。",
+    "category": "interpretation_coldspot",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment_plan_text",
+      "health_advice"
+    ],
+    "tags": [
+      "异常区域",
+      "低温",
+      "治疗建议"
+    ],
+    "source": "慢性疼痛管理手册（节选）",
+    "source_type": "expert_opinion",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "存在局部冷点或低温异常"
+    ],
+    "contraindications": [
+      "寒冷环境暴露后单次结果需谨慎解释"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "四肢",
+      "腰背"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "expert_opinion",
+    "retrieval_hints": [
+      "局部低温",
+      "末梢循环下降",
+      "冷点处理"
+    ],
+    "structured_advice": {
+      "action": "warm_keep_and_physical_therapy_assessment"
+    }
+  },
+  {
+    "id": "KB-HT-006",
+    "title": "医生意见书写模板要点",
+    "content": "医生意见建议采用“发现-解释-建议-复评”结构：先描述热图发现，再给出谨慎解释，随后提供可执行建议，最后明确复评时间和红旗症状。应包含“仅供参考，需结合临床”提示。",
+    "category": "doctor_opinion_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "医生意见",
+      "报告写作",
+      "模板"
+    ],
+    "source": "病历书写规范补充条款",
+    "source_type": "guideline",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "生成医生意见或报告说明"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "发现解释建议复评",
+      "仅供参考需结合临床",
+      "医生意见模板"
+    ],
+    "structured_advice": {
+      "writing_structure": [
+        "发现",
+        "解释",
+        "建议",
+        "复评"
+      ]
+    }
+  },
+  {
+    "id": "KB-HT-007",
+    "title": "治疗方案建议的结构化字段",
+    "content": "治疗建议可结构化为频次、疗程、目标区域、强度和复评节点。例如：每周2-3次，2周为一疗程，重点关注异常ROI区域，1-2周后复测热成像并调整方案。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "health_advice"
+    ],
+    "tags": [
+      "治疗方案",
+      "频次",
+      "疗程",
+      "复评"
+    ],
+    "source": "康复治疗路径建议（内部版）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "需要输出治疗建议",
+      "无明确禁忌"
+    ],
+    "contraindications": [
+      "存在红旗症状或需转诊情形时不应仅给常规方案"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "腰背",
+      "膝关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "每周2到3次",
+      "2周一疗程",
+      "异常ROI复测"
+    ],
+    "structured_advice": {
+      "sessions_per_week": "2-3",
+      "course_duration_weeks": 2,
+      "follow_up_weeks": "1-2"
+    }
+  },
+  {
+    "id": "KB-HT-008",
+    "title": "禁忌与转诊提醒",
+    "content": "若患者存在发热、急性外伤、活动性出血、严重感染、肿瘤治疗期或妊娠等特殊情况，报告应提示谨慎干预，必要时优先专科评估或转诊，不建议仅依赖热成像结论。",
+    "category": "contraindication",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment_plan_text",
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "禁忌症",
+      "转诊",
+      "安全"
+    ],
+    "source": "临床安全边界清单 v2",
+    "source_type": "guideline",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "存在特殊病情或红旗症状"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "female"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "发热外伤出血感染妊娠",
+      "优先转诊",
+      "谨慎干预"
+    ],
+    "structured_advice": {
+      "action": "refer_specialist",
+      "urgency": "high"
+    }
+  },
+  {
+    "id": "KB-HT-009",
+    "title": "复评时间与疗效跟踪",
+    "content": "建议将复评周期写入报告：轻度异常可在7-14天复评，中重度异常可在3-7天复评。复评时对比温度范围、异常区域数量和ROI温差变化，作为疗效趋势依据。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "复评",
+      "疗效跟踪",
+      "趋势分析"
+    ],
+    "source": "门诊随访流程规范",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "需要给出随访或复评建议"
+    ],
+    "contraindications": [
+      "出现快速加重症状时不应按常规复评周期处理"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "7到14天复评",
+      "3到7天复评",
+      "趋势跟踪"
+    ],
+    "structured_advice": {
+      "low_follow_up_days_min": 7,
+      "low_follow_up_days_max": 14,
+      "high_follow_up_days_min": 3,
+      "high_follow_up_days_max": 7
+    }
+  },
+  {
+    "id": "KB-HT-010",
+    "title": "报告结论的风险分层表达",
+    "content": "诊断结论建议按低/中/高风险分层输出。低风险强调生活方式调整，中风险强调短期复评与针对性干预，高风险需明确进一步检查与及时就医建议。避免使用绝对化措辞。",
+    "category": "risk_stratification",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "风险分层",
+      "诊断结论",
+      "报告质量"
+    ],
+    "source": "红外热成像评估报告模板说明",
+    "source_type": "guideline",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "生成最终诊断结论"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "低中高风险表达",
+      "避免绝对化措辞",
+      "报告风险分层"
+    ],
+    "structured_advice": {
+      "output_style": "risk_layered",
+      "language_constraint": "avoid_absolute_claims"
+    }
+  },
+  {
+    "id": "KB-IR-SOP-0001",
+    "title": "热成像检查前静息要求",
+    "content": "红外热成像检查前宜静息15至20分钟，避免剧烈运动、热水浴、饮酒及外用刺激性药物，以减少短时体表温度波动对判读的干扰。",
+    "category": "sop_preparation",
+    "report_sections": [
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "检查准备",
+      "静息",
+      "环境控制"
+    ],
+    "source": "院内热成像检查SOP v1.0",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "门诊常规热成像采集"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "检查前准备",
+      "静息20分钟",
+      "避免热刺激"
+    ]
+  },
+  {
+    "id": "KB-IR-INT-0001",
+    "title": "左右对称差异优先于绝对温度",
+    "content": "体表温度判读应优先关注左右对称区域的相对温差、局部热点或冷点分布及动态变化，不宜仅依据单次绝对温度值直接下结论。",
+    "category": "interpretation_symmetry",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "对称性",
+      "温差",
+      "判读原则"
+    ],
+    "source": "热成像判读规范（试行）",
+    "source_type": "guideline",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "左右对称ROI可比较",
+      "采集姿势一致"
+    ],
+    "contraindications": [
+      "环境温度波动明显时慎用单次结论"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "左右温差",
+      "ROI对称",
+      "相对温度"
+    ],
+    "structured_advice": {
+      "interpretation_focus": "symmetry_before_absolute_temperature"
+    }
+  },
+  {
+    "id": "KB-IR-INT-0002",
+    "title": "局部高温区提示炎症或应激风险",
+    "content": "若局部区域温度明显高于周围组织或对侧对应区域，可提示炎症反应、应激负荷增加或局部循环活跃，应结合主诉、触诊及必要的实验室或影像检查综合评估。",
+    "category": "interpretation_hotspot",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "热点",
+      "高温",
+      "炎症风险"
+    ],
+    "source": "区域温度异常判读共识（摘要）",
+    "source_type": "consensus",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "存在局部热点",
+      "图像质量可判读"
+    ],
+    "contraindications": [
+      "近期外部热刺激未排除时慎解释"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "腰背",
+      "膝关节"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "consensus",
+    "retrieval_hints": [
+      "局部热点",
+      "温度升高",
+      "炎症可能"
+    ]
+  },
+  {
+    "id": "KB-IR-RISK-0001",
+    "title": "报告结论按风险等级表达",
+    "content": "热成像报告结论宜按低、中、高风险分层表达。低风险强调生活方式调整与观察，中风险强调短期复评及针对性干预，高风险应明确建议进一步检查或及时专科就诊。",
+    "category": "risk_stratification",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "风险分层",
+      "报告结论",
+      "措辞规范"
+    ],
+    "source": "红外热成像评估报告模板说明",
+    "source_type": "guideline",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "生成最终报告结论"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "低中高风险",
+      "风险分层",
+      "结论表达"
+    ],
+    "structured_advice": {
+      "output_style": "risk_layered"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0001",
+    "title": "中等风险病例建议短期复评",
+    "content": "对于中等风险热成像异常，治疗建议宜包含减轻局部负荷、针对异常区域的理疗或灸疗评估，并建议于7至14天内复测热成像，比较ROI温差及异常区域范围变化。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "复评",
+      "中风险",
+      "治疗建议"
+    ],
+    "source": "门诊随访流程规范",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "风险等级为medium"
+    ],
+    "contraindications": [
+      "出现红旗症状时不应仅安排常规复评"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "腰背"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "7到14天复评",
+      "中风险复查",
+      "趋势比较"
+    ],
+    "structured_advice": {
+      "follow_up_days_min": 7,
+      "follow_up_days_max": 14,
+      "action": "复测热成像并比较ROI变化"
+    }
+  },
+  {
+    "id": "KB-IR-SAFE-0001",
+    "title": "存在红旗情况时优先转诊评估",
+    "content": "若患者存在发热、急性外伤、活动性出血、严重感染、持续剧烈疼痛、神经功能异常或肿瘤治疗期等情况，报告应提示谨慎解释热成像结果，并优先建议专科评估或转诊。",
+    "category": "contraindication",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment_plan_text",
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "禁忌",
+      "转诊",
+      "安全边界"
+    ],
+    "source": "临床安全边界清单 v2",
+    "source_type": "guideline",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "存在红旗症状或特殊病情"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "转诊提醒",
+      "红旗症状",
+      "谨慎干预"
+    ],
+    "structured_advice": {
+      "action": "refer_specialist",
+      "urgency": "high"
+    }
+  },
+  {
+    "id": "KB-IR-HA-0001",
+    "title": "颈肩部低风险居家保健建议",
+    "content": "对于颈肩部低风险热成像异常，建议以作息调整和轻负荷活动为主。每日进行2至3次颈肩牵伸与肩胛稳定练习，每次10至15分钟；避免久坐超过45分钟，工作间歇做短时活动。若症状持续或加重，应提前复评。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "health_advice",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "颈肩",
+      "低风险",
+      "作息调整",
+      "拉伸"
+    ],
+    "source": "门诊居家管理建议单 v1.1",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "风险等级为low",
+      "颈肩部存在轻度异常"
+    ],
+    "contraindications": [
+      "急性外伤或神经症状明显时不宜仅居家处理"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "颈肩拉伸",
+      "每45分钟活动",
+      "低风险居家管理"
+    ],
+    "structured_advice": {
+      "action": "stretch_and_posture_breaks",
+      "sessions_per_day": "2-3",
+      "duration_minutes": "10-15",
+      "follow_up_days_min": 7,
+      "follow_up_days_max": 14
+    }
+  },
+  {
+    "id": "KB-IR-HA-0002",
+    "title": "腰背部低风险活动与保暖建议",
+    "content": "腰背部低风险异常可优先采用保暖与节律性活动。建议避免久坐久站，采用分段活动策略；每日快走20至30分钟，配合核心稳定训练。夜间注意腰背保暖，避免受凉后症状波动。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "health_advice",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "腰背",
+      "低风险",
+      "保暖",
+      "快走"
+    ],
+    "source": "慢性疼痛门诊健康教育手册",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "风险等级为low",
+      "腰背部温度异常轻度"
+    ],
+    "contraindications": [
+      "伴进行性下肢无力或大小便异常时需尽快就医"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "腰背"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "腰背保暖",
+      "快走20到30分钟",
+      "核心稳定"
+    ],
+    "structured_advice": {
+      "action": "warm_keep_and_walk",
+      "walk_minutes": "20-30",
+      "follow_up_days_min": 7,
+      "follow_up_days_max": 14
+    }
+  },
+  {
+    "id": "KB-IR-HA-0003",
+    "title": "中风险病例短期复评计划",
+    "content": "中风险热成像异常建议在7至14天内进行一次复评，重点比较异常区域范围、左右ROI温差和主诉变化。居家期间建议记录每日疼痛评分、活动耐受和睡眠质量，作为复评决策依据。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "health_advice",
+      "treatment_plan_text",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "中风险",
+      "复评",
+      "趋势跟踪"
+    ],
+    "source": "门诊随访流程规范",
+    "source_type": "guideline",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "风险等级为medium"
+    ],
+    "contraindications": [
+      "出现红旗症状时不应等待常规复评"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "7到14天复评",
+      "记录疼痛评分",
+      "趋势对比"
+    ],
+    "structured_advice": {
+      "action": "scheduled_recheck",
+      "follow_up_days_min": 7,
+      "follow_up_days_max": 14,
+      "tracking_items": [
+        "pain_score",
+        "activity_tolerance",
+        "sleep_quality"
+      ]
+    }
+  },
+  {
+    "id": "KB-IR-HA-0004",
+    "title": "高风险病例就医与监测建议",
+    "content": "高风险热成像异常不建议仅依赖居家观察。应尽快安排专科评估，并在等待就医期间减少高负荷活动，记录症状变化和诱发因素。若出现夜间痛醒、进行性加重或神经症状，应立即就医。",
+    "category": "contraindication",
+    "report_sections": [
+      "health_advice",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "高风险",
+      "及时就医",
+      "监测"
+    ],
+    "source": "临床安全边界清单 v2",
+    "source_type": "guideline",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "风险等级为high"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "高风险尽快就医",
+      "夜间痛醒",
+      "神经症状"
+    ],
+    "structured_advice": {
+      "action": "urgent_specialist_assessment",
+      "urgency": "high",
+      "self_monitoring": "symptom_diary_until_visit"
+    }
+  },
+  {
+    "id": "KB-IR-HA-0005",
+    "title": "四肢冷点的保暖与循环管理",
+    "content": "四肢低温异常可先行末梢循环管理。建议保持肢端温暖，避免长时间静止体位，每60分钟进行3至5分钟踝泵或握拳伸指活动；可进行温和热敷，但避免高温烫伤。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "health_advice",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "四肢",
+      "冷点",
+      "循环管理",
+      "热敷"
+    ],
+    "source": "慢性疼痛管理手册（节选）",
+    "source_type": "expert_opinion",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "四肢存在低温异常",
+      "无急性血管事件表现"
+    ],
+    "contraindications": [
+      "明显肿胀变色或剧烈疼痛时应尽快评估"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "四肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "expert_opinion",
+    "retrieval_hints": [
+      "四肢保暖",
+      "每60分钟活动",
+      "末梢循环"
+    ],
+    "structured_advice": {
+      "action": "peripheral_circulation_support",
+      "break_interval_minutes": 60,
+      "micro_activity_minutes": "3-5"
+    }
+  },
+  {
+    "id": "KB-IR-HA-0006",
+    "title": "热点区域负荷管理建议",
+    "content": "局部热点区域建议短期内减少重复负荷和高强度动作，采用分次活动方式并观察48至72小时变化。活动后若红肿热痛明显加重，应停止高负荷训练并及时就医。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "health_advice",
+      "doctor_opinion",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "热点",
+      "负荷管理",
+      "48到72小时观察"
+    ],
+    "source": "院内门诊随访建议单",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "存在局部热点或高温异常"
+    ],
+    "contraindications": [
+      "伴发热或全身不适时不宜仅观察"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "腰背",
+      "膝关节"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "减少局部负荷",
+      "48到72小时观察",
+      "红肿热痛加重"
+    ],
+    "structured_advice": {
+      "action": "load_reduction_and_observe",
+      "observe_hours_min": 48,
+      "observe_hours_max": 72
+    }
+  },
+  {
+    "id": "KB-IR-HA-0007",
+    "title": "膝关节异常的运动分级建议",
+    "content": "膝关节异常建议采用低冲击活动优先原则。可选择平地步行、固定单车或水中运动，避免跳跃和急停急转。每周3至5次，每次20至30分钟，并根据疼痛和次日反应调整强度。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "health_advice",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "膝关节",
+      "低冲击运动",
+      "强度分级"
+    ],
+    "source": "康复运动处方建议（内部版）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "膝关节存在温度异常",
+      "无急性创伤红旗"
+    ],
+    "contraindications": [
+      "关节明显肿胀发热或负重困难时需先评估"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "膝关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "低冲击运动",
+      "每周3到5次",
+      "20到30分钟"
+    ],
+    "structured_advice": {
+      "action": "graded_low_impact_exercise",
+      "sessions_per_week": "3-5",
+      "duration_minutes": "20-30"
+    }
+  },
+  {
+    "id": "KB-IR-HA-0008",
+    "title": "睡眠与疼痛共管建议",
+    "content": "睡眠不足会放大疼痛感受并影响恢复。建议固定入睡和起床时间，睡前1小时减少电子屏幕刺激，必要时进行呼吸放松训练。若连续1周睡眠质量差且症状加重，建议提前复评。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "睡眠管理",
+      "疼痛共管",
+      "复评"
+    ],
+    "source": "门诊健康教育手册",
+    "source_type": "guideline",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "存在慢性疼痛主诉",
+      "恢复期管理"
+    ],
+    "contraindications": [
+      "严重失眠伴情绪症状需多学科评估"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "固定作息",
+      "睡前放松",
+      "连续1周睡眠差"
+    ],
+    "structured_advice": {
+      "action": "sleep_hygiene_and_relaxation",
+      "review_trigger_days": 7
+    }
+  },
+  {
+    "id": "KB-IR-HA-0009",
+    "title": "办公人群姿势与间歇活动建议",
+    "content": "长期伏案人群建议采用45至60分钟工作、5分钟活动的节律，调整屏幕高度与坐姿支撑，避免持续耸肩或含胸。每日安排2次肩颈和胸椎活动训练，可降低姿势负荷相关症状。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "health_advice"
+    ],
+    "tags": [
+      "办公人群",
+      "姿势管理",
+      "间歇活动"
+    ],
+    "source": "职业相关肌骨健康建议",
+    "source_type": "consensus",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "久坐久站职业暴露",
+      "颈肩或胸背不适"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "腰背"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "consensus",
+    "retrieval_hints": [
+      "45到60分钟间歇",
+      "屏幕高度",
+      "肩颈活动"
+    ],
+    "structured_advice": {
+      "action": "ergonomic_breaks",
+      "work_block_minutes": "45-60",
+      "break_minutes": 5
+    }
+  },
+  {
+    "id": "KB-IR-HA-0010",
+    "title": "体重与活动负荷联动建议",
+    "content": "对腰背或膝关节反复异常者，建议将体重管理纳入保健计划。通过饮食结构优化与规律活动逐步降低负荷，可改善长期症状波动。建议每周记录体重和活动量，关注趋势而非单次变化。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "health_advice",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "体重管理",
+      "负荷控制",
+      "趋势记录"
+    ],
+    "source": "慢性疼痛综合管理路径",
+    "source_type": "guideline",
+    "priority": 7,
+    "status": "active",
+    "applicable_conditions": [
+      "腰背或膝关节反复异常"
+    ],
+    "contraindications": [
+      "短期极端减重方案不推荐"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "腰背",
+      "膝关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "体重管理",
+      "活动负荷",
+      "每周趋势"
+    ],
+    "structured_advice": {
+      "action": "weight_and_load_management",
+      "tracking_items": [
+        "weekly_weight",
+        "weekly_activity"
+      ]
+    }
+  },
+  {
+    "id": "KB-IR-HA-0011",
+    "title": "饮食与水分管理建议",
+    "content": "恢复期建议保证规律饮食与充足饮水，避免长期高糖高脂饮食及过量酒精摄入。可优先选择高质量蛋白、蔬果和全谷物，支持组织修复与代谢稳定。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "饮食",
+      "补水",
+      "恢复期"
+    ],
+    "source": "门诊营养与康复建议",
+    "source_type": "guideline",
+    "priority": 7,
+    "status": "active",
+    "applicable_conditions": [
+      "慢性疼痛或亚健康管理"
+    ],
+    "contraindications": [
+      "合并特殊代谢疾病者需个体化营养方案"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "规律饮食",
+      "减少酒精",
+      "高质量蛋白"
+    ],
+    "structured_advice": {
+      "action": "nutrition_and_hydration_optimization"
+    }
+  },
+  {
+    "id": "KB-IR-HA-0012",
+    "title": "复测前一致性条件建议",
+    "content": "为保证复测可比性，建议在相近时间段、相近环境温度和相似活动状态下进行热成像复测。检查前应维持与首次检查一致的静息准备流程，减少外界因素干扰。",
+    "category": "sop_preparation",
+    "report_sections": [
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "复测一致性",
+      "环境控制",
+      "静息准备"
+    ],
+    "source": "热成像复测流程建议",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "计划进行热成像复评"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "同时间段复测",
+      "相似环境温度",
+      "复测前准备一致"
+    ],
+    "structured_advice": {
+      "action": "retest_under_consistent_conditions"
+    }
+  },
+  {
+    "id": "KB-IR-HA-0013",
+    "title": "高风险等待就医期间自我保护建议",
+    "content": "在已安排专科就医但尚未就诊期间，建议避免高强度训练、重体力劳动和可能诱发症状加重的动作，优先保证休息和症状监测。若出现快速恶化，应立即急诊评估。",
+    "category": "contraindication",
+    "report_sections": [
+      "health_advice",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "高风险",
+      "等待就医",
+      "自我保护"
+    ],
+    "source": "临床安全边界清单 v2",
+    "source_type": "guideline",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "风险等级为high",
+      "已建议转诊"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "避免高强度活动",
+      "症状快速恶化",
+      "急诊评估"
+    ],
+    "structured_advice": {
+      "action": "protective_rest_until_specialist_visit",
+      "urgency": "high"
+    }
+  },
+  {
+    "id": "KB-IR-HA-0014",
+    "title": "晨僵与活动耐受监测建议",
+    "content": "若存在晨僵或活动耐受下降，建议每日固定时段记录晨僵持续时间、步行耐受和疼痛评分变化。连续3至5天恶化可作为提前复评信号，避免延迟干预。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "health_advice",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "晨僵",
+      "活动耐受",
+      "提前复评"
+    ],
+    "source": "门诊随访流程规范",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "有晨僵或活动受限主诉"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "腰背",
+      "膝关节",
+      "四肢"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "晨僵持续时间",
+      "3到5天恶化",
+      "提前复评"
+    ],
+    "structured_advice": {
+      "action": "daily_function_tracking",
+      "deterioration_window_days": "3-5"
+    }
+  },
+  {
+    "id": "KB-IR-HA-0015",
+    "title": "颈肩部夜间症状管理建议",
+    "content": "颈肩部夜间不适者建议优化枕高与睡姿，避免长时间单侧卧位和上肢过度外展。睡前可进行温和牵伸与呼吸放松，减少夜间痛醒频率。若夜间症状进行性加重，应尽快复评。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "health_advice"
+    ],
+    "tags": [
+      "颈肩",
+      "夜间痛醒",
+      "睡姿调整"
+    ],
+    "source": "门诊康复护理建议",
+    "source_type": "expert_opinion",
+    "priority": 7,
+    "status": "active",
+    "applicable_conditions": [
+      "颈肩部夜间不适"
+    ],
+    "contraindications": [
+      "合并明显神经压迫表现时需先专科评估"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "expert_opinion",
+    "retrieval_hints": [
+      "枕高调整",
+      "睡姿优化",
+      "夜间痛醒管理"
+    ],
+    "structured_advice": {
+      "action": "sleep_posture_optimization"
+    }
+  },
+  {
+    "id": "KB-IR-HA-0016",
+    "title": "腰背部搬举动作保护建议",
+    "content": "腰背部异常期间应避免突然扭转和弯腰提重物。确需搬举时建议采用屈髋屈膝、贴近身体和分次搬运原则，减少瞬时负荷。活动后若症状明显上升，建议缩减负荷并复评。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "health_advice",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "腰背",
+      "搬举保护",
+      "负荷控制"
+    ],
+    "source": "职业相关肌骨保护建议",
+    "source_type": "consensus",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "腰背部存在异常或疼痛"
+    ],
+    "contraindications": [
+      "急性外伤后不建议自行负重活动"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "腰背"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "consensus",
+    "retrieval_hints": [
+      "屈髋屈膝搬举",
+      "避免突然扭转",
+      "分次搬运"
+    ],
+    "structured_advice": {
+      "action": "safe_lifting_mechanics"
+    }
+  },
+  {
+    "id": "KB-IR-HA-0017",
+    "title": "四肢麻木或无力出现时处置建议",
+    "content": "若在保健管理期间出现新发麻木、无力、步态异常或精细动作下降，不建议继续仅居家观察，应尽快完成神经系统相关评估，必要时急诊处理。",
+    "category": "contraindication",
+    "report_sections": [
+      "health_advice",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "麻木",
+      "无力",
+      "神经症状",
+      "转诊"
+    ],
+    "source": "临床安全边界清单 v2",
+    "source_type": "guideline",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "出现神经功能异常征象"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "四肢"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "新发麻木无力",
+      "步态异常",
+      "尽快神经评估"
+    ],
+    "structured_advice": {
+      "action": "urgent_neurologic_evaluation",
+      "urgency": "high"
+    }
+  },
+  {
+    "id": "KB-IR-HA-0018",
+    "title": "中风险运动恢复分阶段建议",
+    "content": "中风险人群建议分阶段恢复活动：第1阶段以低强度有氧和活动度训练为主，第2阶段逐步加入抗阻训练。每阶段至少维持5至7天，并依据症状与次日恢复情况调整进度。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "health_advice",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "中风险",
+      "分阶段恢复",
+      "抗阻训练"
+    ],
+    "source": "康复治疗路径建议（内部版）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "风险等级为medium",
+      "无红旗症状"
+    ],
+    "contraindications": [
+      "活动后症状明显恶化时应暂停升级训练"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "腰背",
+      "膝关节",
+      "四肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "分阶段恢复",
+      "5到7天一阶段",
+      "活动后次日评估"
+    ],
+    "structured_advice": {
+      "action": "staged_activity_progression",
+      "stage_days_min": 5,
+      "stage_days_max": 7
+    }
+  },
+  {
+    "id": "KB-IR-HA-0019",
+    "title": "低风险异常的自我管理边界",
+    "content": "低风险异常以生活方式干预和短期观察为主，但若出现持续加重、功能受限扩大或影响日常生活，应从低风险路径转入复评路径，不建议长期拖延。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "health_advice",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "低风险",
+      "观察边界",
+      "转入复评"
+    ],
+    "source": "红外热成像评估报告模板说明",
+    "source_type": "guideline",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "风险等级为low"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "低风险观察边界",
+      "功能受限扩大",
+      "转入复评"
+    ],
+    "structured_advice": {
+      "action": "watchful_waiting_with_escalation",
+      "escalation_trigger": "worsening_or_functional_decline"
+    }
+  },
+  {
+    "id": "KB-IR-HA-0020",
+    "title": "保健建议结尾规范用语",
+    "content": "保健建议末尾应强调“以上建议仅供参考，需结合临床评估与个体情况执行”，并提示出现红旗症状时及时就医，以避免患者将热成像结果作为唯一决策依据。",
+    "category": "doctor_opinion_rule",
+    "report_sections": [
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "规范用语",
+      "仅供参考",
+      "就医提醒"
+    ],
+    "source": "病历书写规范补充条款",
+    "source_type": "guideline",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "输出保健建议或报告说明"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "仅供参考",
+      "结合临床评估",
+      "红旗症状及时就医"
+    ],
+    "structured_advice": {
+      "action": "append_safety_disclaimer",
+      "language_constraint": "must_include_reference_only_clause"
+    }
+  },
+  {
+    "id": "KB-IR-RPT-0001",
+    "title": "低风险结论模板（颈肩）",
+    "content": "结论可表述为：热成像提示颈肩部轻度温度分布不均，当前整体风险偏低。建议以姿势调整与低负荷活动为主，7至14天复评。以上结论需结合临床表现综合判断。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "低风险模板",
+      "颈肩",
+      "结论措辞"
+    ],
+    "source": "红外热成像评估报告模板说明",
+    "source_type": "guideline",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "风险等级为low",
+      "部位为颈肩"
+    ],
+    "contraindications": [
+      "出现神经症状或夜间痛醒加重时不应沿用低风险模板"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "低风险结论",
+      "7到14天复评",
+      "结合临床判断"
+    ],
+    "structured_advice": {
+      "template_key": "low_neck_shoulder",
+      "follow_up_days_min": 7,
+      "follow_up_days_max": 14
+    }
+  },
+  {
+    "id": "KB-IR-RPT-0002",
+    "title": "中风险结论模板（腰背）",
+    "content": "结论可表述为：热成像显示腰背部存在中度异常温度分布，提示近期负荷相关风险升高。建议短期减负并执行针对性康复训练，7至14天内复评热成像变化。若症状持续加重，建议专科评估。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "中风险模板",
+      "腰背",
+      "减负"
+    ],
+    "source": "门诊随访流程规范",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "风险等级为medium",
+      "部位为腰背"
+    ],
+    "contraindications": [
+      "进行性神经症状时不应仅安排常规复评"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "腰背"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "中风险腰背",
+      "短期减负",
+      "7到14天复评"
+    ],
+    "structured_advice": {
+      "template_key": "medium_lumbar",
+      "follow_up_days_min": 7,
+      "follow_up_days_max": 14
+    }
+  },
+  {
+    "id": "KB-IR-RPT-0003",
+    "title": "高风险结论模板（需转诊）",
+    "content": "结论可表述为：热成像提示高风险异常信号，存在需要进一步明确病因的可能。建议尽快进行专科评估，不建议仅依赖居家观察。若伴进行性疼痛、无力或感觉异常，应立即就医。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "高风险模板",
+      "转诊",
+      "安全边界"
+    ],
+    "source": "临床安全边界清单 v2",
+    "source_type": "guideline",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "风险等级为high"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "高风险需转诊",
+      "不建议仅居家观察",
+      "立即就医"
+    ],
+    "structured_advice": {
+      "template_key": "high_risk_referral",
+      "action": "refer_specialist",
+      "urgency": "high"
+    }
+  },
+  {
+    "id": "KB-IR-RPT-0004",
+    "title": "报告说明模板（数据边界）",
+    "content": "报告说明建议固定包含：本次结论基于当前采集时段与环境条件，仅反映体表温度分布特征，不可替代临床诊断；需结合病史、体征及必要检查综合判断。",
+    "category": "report_template",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "报告说明",
+      "边界声明",
+      "合规措辞"
+    ],
+    "source": "病历书写规范补充条款",
+    "source_type": "guideline",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "所有报告均应附带边界说明"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "不可替代临床诊断",
+      "结合病史体征",
+      "边界说明"
+    ],
+    "structured_advice": {
+      "template_key": "report_disclaimer",
+      "must_include": true
+    }
+  },
+  {
+    "id": "KB-IR-REF-0001",
+    "title": "神经功能异常触发24小时内转诊",
+    "content": "若出现新发肌力下降、步态异常、持续麻木或精细动作明显下降，报告应提示24小时内完成神经系统相关专科评估，不建议延迟观察。",
+    "category": "referral_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "神经症状",
+      "24小时转诊",
+      "红旗"
+    ],
+    "source": "临床安全边界清单 v2",
+    "source_type": "guideline",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "存在神经功能异常体征"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "四肢",
+      "腰背",
+      "颈肩"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "肌力下降",
+      "步态异常",
+      "24小时内专科评估"
+    ],
+    "structured_advice": {
+      "action": "refer_neurology",
+      "referral_window_hours": 24
+    }
+  },
+  {
+    "id": "KB-IR-REF-0002",
+    "title": "夜间痛醒进行性加重触发快速转诊",
+    "content": "若夜间痛醒频率上升且疼痛程度持续加重，需在报告中提示72小时内完成专科评估，以排除进行性病理过程。",
+    "category": "referral_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "夜间痛醒",
+      "进行性加重",
+      "72小时转诊"
+    ],
+    "source": "门诊随访流程规范",
+    "source_type": "consensus",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "存在夜间痛醒并近3天加重"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "腰背",
+      "膝关节"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "consensus",
+    "retrieval_hints": [
+      "夜间痛醒加重",
+      "72小时内专科",
+      "排除进行性病变"
+    ],
+    "structured_advice": {
+      "action": "refer_specialist",
+      "referral_window_hours": 72
+    }
+  },
+  {
+    "id": "KB-IR-REF-0003",
+    "title": "急性外伤伴温差异常触发当日评估",
+    "content": "急性外伤后若出现局部明显温差异常并伴活动受限或肿胀，应提示当日完成影像与专科评估，不建议按常规康复路径处理。",
+    "category": "referral_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "急性外伤",
+      "当日评估",
+      "影像检查"
+    ],
+    "source": "急性损伤处置路径（内部版）",
+    "source_type": "internal_sop",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "外伤史明确",
+      "存在肿胀或活动受限"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "膝关节",
+      "四肢",
+      "腰背"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "外伤后温差异常",
+      "当日专科评估",
+      "不走常规康复"
+    ],
+    "structured_advice": {
+      "action": "same_day_referral",
+      "requires_imaging": true
+    }
+  },
+  {
+    "id": "KB-IR-REF-0004",
+    "title": "发热合并局部热点触发感染排查",
+    "content": "若体温升高并伴局部持续热点，报告应提示优先排查感染或活动性炎症过程，建议尽快完善相关实验室检查并专科就诊。",
+    "category": "referral_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "发热",
+      "局部热点",
+      "感染排查"
+    ],
+    "source": "临床安全边界清单 v2",
+    "source_type": "guideline",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "体温异常",
+      "热点持续存在"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "腰背",
+      "膝关节",
+      "四肢"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "发热+热点",
+      "感染排查",
+      "尽快就诊"
+    ],
+    "structured_advice": {
+      "action": "infection_workup_referral",
+      "urgency": "high"
+    }
+  },
+  {
+    "id": "KB-IR-ACQ-0001",
+    "title": "采集体位一致性质量门槛",
+    "content": "同次检查内前后视图应保持体位、距离和受检区域暴露方式一致。若体位差异明显导致对称区域不可比，应在报告中标注“图像可比性受限”，避免给出强化风险分层结论。",
+    "category": "sop_acquisition",
+    "report_sections": [
+      "report_note",
+      "diagnosis"
+    ],
+    "tags": [
+      "体位一致性",
+      "可比性",
+      "质量门槛"
+    ],
+    "source": "热成像采集SOP补充条款",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "同次检查存在多视图对比"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "体位不一致",
+      "图像可比性受限",
+      "避免强化分层"
+    ],
+    "structured_advice": {
+      "quality_gate": "pose_consistency_required",
+      "degrade_output_if_failed": true
+    }
+  },
+  {
+    "id": "KB-IR-ACQ-0002",
+    "title": "采集前活动干预排除规则",
+    "content": "若受检者在采集前30分钟内存在剧烈活动、局部热敷或冷刺激，结果可能出现短时偏移。报告应增加“短时干预影响”提示，并建议在标准准备后复测。",
+    "category": "sop_acquisition",
+    "report_sections": [
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "采集前干预",
+      "复测建议",
+      "结果偏移"
+    ],
+    "source": "院内热成像检查SOP v1.0",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "采集前存在活动或冷热刺激"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "30分钟内剧烈活动",
+      "热敷冷刺激",
+      "标准准备后复测"
+    ],
+    "structured_advice": {
+      "quality_gate": "pre_scan_interference_excluded",
+      "retest_recommended": true
+    }
+  },
+  {
+    "id": "KB-IR-CAL-0001",
+    "title": "环境温度波动超阈值时降级结论",
+    "content": "若采集期间环境温度波动超过约2°C，报告应降级为“趋势参考”，不宜输出明确风险分层结论。建议在环境稳定后重新采集。",
+    "category": "sop_calibration",
+    "report_sections": [
+      "report_note",
+      "diagnosis"
+    ],
+    "tags": [
+      "环境波动",
+      "校准",
+      "降级结论"
+    ],
+    "source": "热成像设备质控规范（内部版）",
+    "source_type": "internal_sop",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "采集期间环境温度波动显著"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "环境温度波动超过2度",
+      "趋势参考",
+      "重新采集"
+    ],
+    "structured_advice": {
+      "quality_gate": "ambient_temp_stability",
+      "max_delta_temp_c": 2.0,
+      "degrade_output_if_failed": true
+    }
+  },
+  {
+    "id": "KB-IR-CAL-0002",
+    "title": "黑体校准异常时禁止解释性输出",
+    "content": "若设备自检或黑体校准失败，报告不得给出解释性结论，仅可输出“本次数据不满足判读条件，建议校准后复测”的说明。",
+    "category": "sop_calibration",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "黑体校准",
+      "设备自检",
+      "禁止判读"
+    ],
+    "source": "热成像设备质控规范（内部版）",
+    "source_type": "internal_sop",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "设备校准状态异常"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "校准失败",
+      "不满足判读条件",
+      "校准后复测"
+    ],
+    "structured_advice": {
+      "quality_gate": "device_calibration_passed",
+      "block_interpretation_if_failed": true
+    }
+  },
+  {
+    "id": "KB-IR-RPT-0101",
+    "title": "颈肩部报告模板（发现-解释-建议-复评）",
+    "content": "颈肩部模板建议写作：发现：颈肩区域出现局部温度分布不均或对称差异。解释：提示肌筋膜负荷或局部循环应激可能。建议：减少持续伏案与耸肩负荷，进行低强度牵伸训练。复评：建议7至14天复测并结合症状变化综合评估。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "颈肩",
+      "模板",
+      "发现解释建议复评"
+    ],
+    "source": "红外热成像评估报告模板说明",
+    "source_type": "guideline",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "部位为颈肩",
+      "图像质量可判读"
+    ],
+    "contraindications": [
+      "伴上肢进行性无力或麻木时不应仅给常规模板"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "颈肩模板",
+      "伏案负荷",
+      "7到14天复评"
+    ],
+    "structured_advice": {
+      "template_key": "neck_shoulder_standard",
+      "writing_structure": [
+        "发现",
+        "解释",
+        "建议",
+        "复评"
+      ]
+    }
+  },
+  {
+    "id": "KB-IR-RPT-0102",
+    "title": "腰背部报告模板（负荷管理导向）",
+    "content": "腰背部模板建议写作：发现：腰背区域可见异常温度带或对称差异。解释：提示负荷相关软组织应激风险升高。建议：分段活动与核心稳定训练，避免弯腰扭转叠加负重。复评：建议7至14天复评，若加重则提前专科评估。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "腰背",
+      "负荷管理",
+      "模板"
+    ],
+    "source": "门诊随访流程规范",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "部位为腰背",
+      "风险等级为low或medium"
+    ],
+    "contraindications": [
+      "出现大小便功能异常或进行性下肢症状时不适用"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "腰背"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "腰背模板",
+      "核心稳定",
+      "避免弯腰扭转负重"
+    ],
+    "structured_advice": {
+      "template_key": "lumbar_load_management",
+      "follow_up_days_min": 7,
+      "follow_up_days_max": 14
+    }
+  },
+  {
+    "id": "KB-IR-RPT-0103",
+    "title": "膝关节报告模板（运动分级导向）",
+    "content": "膝关节模板建议写作：发现：膝关节周围存在局部热点或冷点异常。解释：提示负荷分配不均或炎性应激可能。建议：优先低冲击运动并分级恢复，避免跳跃及急停急转。复评：建议1至2周复评，依据疼痛与活动耐受调整强度。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "膝关节",
+      "运动分级",
+      "模板"
+    ],
+    "source": "康复运动处方建议（内部版）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "部位为膝关节",
+      "无急性创伤红旗"
+    ],
+    "contraindications": [
+      "明显肿胀发热伴负重困难时不应沿用常规模板"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "膝关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "膝关节模板",
+      "低冲击运动",
+      "1到2周复评"
+    ],
+    "structured_advice": {
+      "template_key": "knee_graded_exercise",
+      "follow_up_weeks": "1-2"
+    }
+  },
+  {
+    "id": "KB-IR-RPT-0104",
+    "title": "四肢报告模板（末梢循环导向）",
+    "content": "四肢模板建议写作：发现：四肢远端出现局部低温或温差异常。解释：提示末梢循环调节可能受影响。建议：加强保暖与间歇性活动，观察麻木、疼痛或功能变化。复评：建议7至14天复评，若出现进行性神经症状应立即就医。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "四肢",
+      "末梢循环",
+      "模板"
+    ],
+    "source": "慢性疼痛管理手册（节选）",
+    "source_type": "expert_opinion",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "部位为四肢",
+      "存在冷点或温差异常"
+    ],
+    "contraindications": [
+      "新发进行性无力或步态异常时不应继续观察"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "四肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "expert_opinion",
+    "retrieval_hints": [
+      "四肢模板",
+      "末梢循环",
+      "保暖与间歇活动"
+    ],
+    "structured_advice": {
+      "template_key": "limb_perfusion",
+      "follow_up_days_min": 7,
+      "follow_up_days_max": 14
+    }
+  },
+  {
+    "id": "KB-IR-REF-0101",
+    "title": "高风险转诊阈值：当日评估",
+    "content": "当风险分层为high且伴进行性神经功能异常、持续静息痛或急性外伤后功能受限时，报告应明确“当日完成专科评估”，不建议等待常规复评。",
+    "category": "referral_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "高风险",
+      "当日转诊",
+      "专科评估"
+    ],
+    "source": "临床安全边界清单 v2",
+    "source_type": "guideline",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "风险等级为high",
+      "存在红旗症状"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "腰背",
+      "膝关节",
+      "四肢"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "高风险当日评估",
+      "不等待复评",
+      "红旗症状"
+    ],
+    "structured_advice": {
+      "action": "same_day_referral",
+      "referral_window_hours": 12
+    }
+  },
+  {
+    "id": "KB-IR-REF-0102",
+    "title": "中高风险转诊阈值：24小时内",
+    "content": "当风险等级为medium且症状呈持续加重趋势，或high但暂无急性危急征象时，报告应建议24小时内专科评估，以降低延误风险。",
+    "category": "referral_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "中高风险",
+      "24小时",
+      "加重趋势"
+    ],
+    "source": "门诊随访流程规范",
+    "source_type": "consensus",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "风险等级为medium或high",
+      "存在加重趋势"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "腰背",
+      "膝关节",
+      "四肢"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "consensus",
+    "retrieval_hints": [
+      "24小时内专科",
+      "症状持续加重",
+      "降低延误风险"
+    ],
+    "structured_advice": {
+      "action": "urgent_referral",
+      "referral_window_hours": 24
+    }
+  },
+  {
+    "id": "KB-IR-REF-0103",
+    "title": "中风险转诊阈值：72小时内",
+    "content": "当风险等级为medium且无急危征象，但夜间痛醒增多、活动耐受下降或复测趋势恶化时，报告应建议72小时内完成专科评估。",
+    "category": "referral_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "中风险",
+      "72小时",
+      "趋势恶化"
+    ],
+    "source": "门诊随访流程规范",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "风险等级为medium",
+      "无急危征象"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "腰背",
+      "膝关节",
+      "四肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "72小时专科评估",
+      "夜间痛醒增多",
+      "活动耐受下降"
+    ],
+    "structured_advice": {
+      "action": "time_limited_referral",
+      "referral_window_hours": 72
+    }
+  },
+  {
+    "id": "KB-IR-REF-0104",
+    "title": "颈肩部高风险转诊：当日",
+    "content": "颈肩部异常若伴上肢进行性无力、持续麻木或精细动作下降，报告应标注“当日神经相关专科评估”，不建议继续仅居家干预。",
+    "category": "referral_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "颈肩",
+      "当日转诊",
+      "上肢神经症状"
+    ],
+    "source": "临床安全边界清单 v2",
+    "source_type": "guideline",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "部位为颈肩",
+      "存在神经功能下降"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "颈肩当日转诊",
+      "上肢无力麻木",
+      "神经专科评估"
+    ],
+    "structured_advice": {
+      "action": "same_day_referral",
+      "specialty": "neurology_or_spine"
+    }
+  },
+  {
+    "id": "KB-IR-REF-0105",
+    "title": "腰背部中高风险转诊：24小时",
+    "content": "腰背部异常若出现进行性下肢症状、夜间痛醒加重或步行能力明显下降，报告应建议24小时内完成脊柱或骨科专科评估。",
+    "category": "referral_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "腰背",
+      "24小时转诊",
+      "步行能力下降"
+    ],
+    "source": "门诊随访流程规范",
+    "source_type": "consensus",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "部位为腰背",
+      "风险等级为medium或high"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "腰背"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "consensus",
+    "retrieval_hints": [
+      "腰背24小时转诊",
+      "夜间痛醒加重",
+      "步行能力下降"
+    ],
+    "structured_advice": {
+      "action": "urgent_referral",
+      "referral_window_hours": 24,
+      "specialty": "orthopedics_or_spine"
+    }
+  },
+  {
+    "id": "KB-IR-REF-0106",
+    "title": "膝与四肢中风险转诊：72小时",
+    "content": "膝关节或四肢中风险异常在72小时内若仍呈加重趋势，或出现新发负重困难与感觉异常，报告应建议72小时内专科评估并复核治疗路径。",
+    "category": "referral_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "health_advice",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "膝关节",
+      "四肢",
+      "72小时转诊",
+      "路径复核"
+    ],
+    "source": "康复治疗路径建议（内部版）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "部位为膝关节或四肢",
+      "风险等级为medium"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "膝关节",
+      "四肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "膝四肢72小时转诊",
+      "负重困难",
+      "治疗路径复核"
+    ],
+    "structured_advice": {
+      "action": "time_limited_referral",
+      "referral_window_hours": 72
+    }
+  },
+  {
+    "id": "KB-IR-RPT-0201",
+    "title": "老年颈肩低风险模板",
+    "content": "老年人颈肩部低风险报告建议表述为：热成像提示轻度温度分布不均，当前风险偏低。建议以安全范围内的关节活动与姿势调整为主，避免长时间固定体位；7至14天复评并结合功能变化综合评估。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "老年",
+      "颈肩",
+      "低风险模板"
+    ],
+    "source": "门诊康复护理建议",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "年龄>=60岁",
+      "部位为颈肩",
+      "风险等级为low"
+    ],
+    "contraindications": [
+      "出现进行性上肢无力或步态异常时不应沿用低风险模板"
+    ],
+    "patient_scope": [
+      "elderly"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "老年颈肩低风险",
+      "避免固定体位",
+      "功能变化复评"
+    ],
+    "structured_advice": {
+      "template_key": "elderly_neck_low",
+      "follow_up_days_min": 7,
+      "follow_up_days_max": 14
+    }
+  },
+  {
+    "id": "KB-IR-RPT-0202",
+    "title": "老年腰背中风险模板",
+    "content": "老年腰背中风险报告建议表述为：热成像提示腰背负荷相关异常，近期功能受限风险升高。建议进行低冲击活动和核心稳定训练，避免弯腰搬重；7天内随访，必要时14天内复测。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "老年",
+      "腰背",
+      "中风险模板"
+    ],
+    "source": "门诊随访流程规范",
+    "source_type": "guideline",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "年龄>=60岁",
+      "部位为腰背",
+      "风险等级为medium"
+    ],
+    "contraindications": [
+      "出现大小便功能异常或进行性下肢无力时需快速转诊"
+    ],
+    "patient_scope": [
+      "elderly"
+    ],
+    "body_parts": [
+      "腰背"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "老年腰背中风险",
+      "低冲击活动",
+      "7天随访"
+    ],
+    "structured_advice": {
+      "template_key": "elderly_lumbar_medium",
+      "follow_up_days_min": 7,
+      "follow_up_days_max": 14
+    }
+  },
+  {
+    "id": "KB-IR-RPT-0203",
+    "title": "女性颈肩亚健康模板",
+    "content": "女性颈肩亚健康模板建议表述为：热成像显示颈肩局部温度分布异常，提示姿势负荷与恢复不足相关可能。建议优化作息、减轻伏案负担并配合温和牵伸训练，1至2周复评。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "女性",
+      "颈肩",
+      "亚健康"
+    ],
+    "source": "职业相关肌骨健康建议",
+    "source_type": "consensus",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "性别为female",
+      "部位为颈肩",
+      "风险等级为low或medium"
+    ],
+    "contraindications": [
+      "合并明显神经症状时不宜仅给生活方式建议"
+    ],
+    "patient_scope": [
+      "female"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "consensus",
+    "retrieval_hints": [
+      "女性颈肩模板",
+      "伏案负担",
+      "1到2周复评"
+    ],
+    "structured_advice": {
+      "template_key": "female_neck_subhealth",
+      "follow_up_weeks": "1-2"
+    }
+  },
+  {
+    "id": "KB-IR-RPT-0204",
+    "title": "女性周期波动说明模板",
+    "content": "女性报告说明可加入：体表温度受周期性激素波动影响，建议结合月经周期阶段与临床症状解释热成像变化，必要时在相近周期阶段复测以提升可比性。",
+    "category": "report_template",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "女性",
+      "周期波动",
+      "可比性"
+    ],
+    "source": "门诊健康教育手册",
+    "source_type": "expert_opinion",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "性别为female",
+      "需解释多次热图差异"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "female"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "expert_opinion",
+    "retrieval_hints": [
+      "月经周期阶段",
+      "相近周期复测",
+      "提升可比性"
+    ],
+    "structured_advice": {
+      "template_key": "female_cycle_note",
+      "retest_at_similar_cycle_phase": true
+    }
+  },
+  {
+    "id": "KB-IR-RPT-0205",
+    "title": "糖代谢异常四肢模板",
+    "content": "糖代谢异常人群四肢温度异常报告建议表述为：热成像提示末梢循环调节可能受影响，建议强化足部/肢端保护、规律活动与代谢管理；同时结合血糖控制情况综合评估，7至14天复评。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "糖代谢异常",
+      "四肢",
+      "末梢循环"
+    ],
+    "source": "慢病综合管理路径",
+    "source_type": "guideline",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "合并糖代谢异常",
+      "部位为四肢"
+    ],
+    "contraindications": [
+      "出现皮肤破溃、明显变色或静息痛时应加速转诊"
+    ],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "四肢"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "糖代谢异常四肢",
+      "末梢循环",
+      "血糖控制结合评估"
+    ],
+    "structured_advice": {
+      "template_key": "dysglycemia_limb",
+      "follow_up_days_min": 7,
+      "follow_up_days_max": 14
+    }
+  },
+  {
+    "id": "KB-IR-REF-0201",
+    "title": "糖代谢异常伴四肢高风险24小时转诊",
+    "content": "糖代谢异常患者若四肢出现高风险温度异常并伴感觉减退、皮肤颜色改变或持续疼痛，报告应建议24小时内完成血管或相关专科评估。",
+    "category": "referral_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "糖代谢异常",
+      "四肢",
+      "24小时转诊"
+    ],
+    "source": "慢病综合管理路径",
+    "source_type": "guideline",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "合并糖代谢异常",
+      "部位为四肢",
+      "风险等级为high"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "四肢"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "糖代谢异常24小时转诊",
+      "感觉减退",
+      "皮肤颜色改变"
+    ],
+    "structured_advice": {
+      "action": "urgent_referral",
+      "referral_window_hours": 24,
+      "specialty": "vascular_or_endocrine"
+    }
+  },
+  {
+    "id": "KB-IR-RPT-0206",
+    "title": "骨关节退变膝关节模板",
+    "content": "骨关节退变背景下膝关节报告建议表述为：热成像可见局部温度异常，提示慢性负荷与退变相关应激可能。建议低冲击运动、体重与负荷管理并结合功能评估制定干预计划，1至2周复评。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "骨关节退变",
+      "膝关节",
+      "慢性负荷"
+    ],
+    "source": "康复治疗路径建议（内部版）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "合并骨关节退变",
+      "部位为膝关节"
+    ],
+    "contraindications": [
+      "急性肿胀发热和负重困难时需优先专科评估"
+    ],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "膝关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "骨关节退变膝",
+      "低冲击运动",
+      "1到2周复评"
+    ],
+    "structured_advice": {
+      "template_key": "oa_knee_template",
+      "follow_up_weeks": "1-2"
+    }
+  },
+  {
+    "id": "KB-IR-RPT-0207",
+    "title": "骨关节退变腰背模板",
+    "content": "骨关节退变合并腰背温度异常时，报告建议强调功能导向管理：分段活动、核心稳定训练和日常负重优化，并根据晨僵与活动耐受变化动态调整计划。",
+    "category": "report_template",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment_plan_text",
+      "health_advice"
+    ],
+    "tags": [
+      "骨关节退变",
+      "腰背",
+      "功能导向"
+    ],
+    "source": "门诊随访流程规范",
+    "source_type": "consensus",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "合并骨关节退变",
+      "部位为腰背"
+    ],
+    "contraindications": [
+      "出现快速神经功能恶化时不宜仅按慢病路径管理"
+    ],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "腰背"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "consensus",
+    "retrieval_hints": [
+      "骨关节退变腰背",
+      "核心稳定",
+      "晨僵活动耐受"
+    ],
+    "structured_advice": {
+      "template_key": "oa_lumbar_functional",
+      "tracking_items": [
+        "morning_stiffness",
+        "activity_tolerance"
+      ]
+    }
+  },
+  {
+    "id": "KB-IR-RPT-0208",
+    "title": "老年合并糖代谢异常高风险模板",
+    "content": "老年合并糖代谢异常且风险分层为high时，报告建议表述为：存在需要快速明确病因的高风险异常信号。建议尽快专科评估并同步优化慢病管理，不建议延迟观察；应明确转诊时限与复评节点。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "老年",
+      "糖代谢异常",
+      "高风险模板"
+    ],
+    "source": "临床安全边界清单 v2",
+    "source_type": "guideline",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "年龄>=60岁",
+      "合并糖代谢异常",
+      "风险等级为high"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "elderly"
+    ],
+    "body_parts": [
+      "四肢",
+      "膝关节",
+      "腰背"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "老年糖代谢高风险",
+      "尽快专科评估",
+      "不延迟观察"
+    ],
+    "structured_advice": {
+      "template_key": "elderly_dysglycemia_high",
+      "action": "urgent_referral",
+      "referral_window_hours": 24
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0201",
+    "title": "糖代谢异常复评频率规则",
+    "content": "糖代谢异常人群若存在四肢或膝关节温度异常，建议缩短复评窗口：中风险3至7天复评，高风险24至72小时内完成专科评估并安排复测。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "糖代谢异常",
+      "复评频率",
+      "分层随访"
+    ],
+    "source": "慢病综合管理路径",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "合并糖代谢异常"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "四肢",
+      "膝关节"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "糖代谢异常3到7天复评",
+      "高风险24到72小时",
+      "分层随访"
+    ],
+    "structured_advice": {
+      "medium_follow_up_days_min": 3,
+      "medium_follow_up_days_max": 7,
+      "high_referral_hours_min": 24,
+      "high_referral_hours_max": 72
+    }
+  },
+  {
+    "id": "KB-IR-RPT-0301",
+    "title": "肋部带状疱疹后神经痛病例模板",
+    "content": "对于老年合并糖代谢异常患者，若肋部沿皮节分布出现针刺样或烧灼样疼痛，并伴簇集性皮疹后遗留持续疼痛、痛觉过敏或痛觉超敏，报告可提示带状疱疹后神经痛可能。医生意见应强调高龄、基础病和睡眠受损会延缓恢复，需结合疼痛评分、皮肤感觉异常范围及随访变化综合评估。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "肋部",
+      "带状疱疹后神经痛",
+      "糖尿病",
+      "老年"
+    ],
+    "source": "个案经验总结：肋部带状疱疹后遗神经痛（2017-03）",
+    "source_type": "expert_opinion",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "肋部沿皮节分布疼痛",
+      "存在痛觉过敏或超敏",
+      "既往带状疱疹病史明确"
+    ],
+    "contraindications": [
+      "无皮节分布特征或伴不明原因体重下降时需进一步排除其他病因"
+    ],
+    "patient_scope": [
+      "adult",
+      "elderly",
+      "male"
+    ],
+    "body_parts": [
+      "肋部"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "expert_opinion",
+    "retrieval_hints": [
+      "肋间神经痛",
+      "烧灼样针刺样疼痛",
+      "带状疱疹后神经痛",
+      "VAS 6分",
+      "糖尿病基础病"
+    ],
+    "structured_advice": {
+      "template_key": "postherpetic_neuralgia_rib",
+      "pain_pattern": "burning_stabbing",
+      "clinical_focus": [
+        "allodynia",
+        "hyperalgesia",
+        "sleep_impairment"
+      ]
+    }
+  },
+  {
+    "id": "KB-IR-TX-0301",
+    "title": "带状疱疹后神经痛局部干预建议",
+    "content": "肋部带状疱疹后神经痛病例可将局部镇痛、软组织松解和心理支持并行纳入治疗建议。报告中的治疗方案可强调：在规范评估基础上进行局部温和处理，围绕疼痛区域开展减敏与放松干预，同时关注睡眠改善和情绪支持，以降低持续性神经痛对生活质量的影响。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "带状疱疹后神经痛",
+      "局部干预",
+      "心理支持",
+      "睡眠管理"
+    ],
+    "source": "个案经验总结：肋部带状疱疹后遗神经痛（2017-03）",
+    "source_type": "expert_opinion",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "诊断考虑带状疱疹后神经痛",
+      "局部疼痛范围明确"
+    ],
+    "contraindications": [
+      "局部感染活动期、皮肤破溃明显或疼痛快速升级时应先专科评估"
+    ],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肋部"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "expert_opinion",
+    "retrieval_hints": [
+      "局部镇痛",
+      "减敏干预",
+      "心理支持",
+      "睡眠改善"
+    ],
+    "structured_advice": {
+      "action": "local_pain_relief_and_desensitization",
+      "supportive_care": [
+        "sleep_support",
+        "psychological_support"
+      ],
+      "course_days": 5
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0301",
+    "title": "带状疱疹后神经痛随访节点规则",
+    "content": "带状疱疹后神经痛报告建议明确短中期随访节点。若初诊疼痛明显且存在睡眠受损，可在2周内复评疼痛评分和感觉异常范围；1个月内继续随访，确认疼痛是否持续下降、生活质量是否改善及是否存在复燃或迁延。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "带状疱疹后神经痛",
+      "2周复评",
+      "1月随访",
+      "VAS"
+    ],
+    "source": "个案经验总结：肋部带状疱疹后遗神经痛（2017-03）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "存在持续性神经痛",
+      "初诊VAS>=4"
+    ],
+    "contraindications": [
+      "疼痛快速加剧或出现新的神经功能异常时不应等待常规随访"
+    ],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肋部"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "2周后VAS复评",
+      "1月后随访",
+      "疼痛减轻",
+      "生活质量改善"
+    ],
+    "structured_advice": {
+      "follow_up_days_min": 14,
+      "follow_up_days_max": 30,
+      "tracking_items": [
+        "VAS",
+        "allodynia_range",
+        "sleep_quality"
+      ]
+    }
+  },
+  {
+    "id": "KB-IR-RPT-0302",
+    "title": "痛风急性发作病例模板（第一跖趾关节）",
+    "content": "对于中年男性，若第一跖趾关节反复出现红、肿、热、痛，且常在饮酒或高嘌呤饮食后诱发，并伴血尿酸升高、炎症指标升高，报告可提示急性痛风性关节炎发作可能。医生意见应强调饮食诱因、体重管理及复发风险，结合疼痛评分、关节活动受限程度和实验室指标综合评估。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "痛风",
+      "第一跖趾关节",
+      "高尿酸血症",
+      "急性发作"
+    ],
+    "source": "个案经验总结：痛风性关节炎急性发作（2025-08）",
+    "source_type": "expert_opinion",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "第一跖趾关节红肿热痛",
+      "饮酒或高嘌呤饮食后诱发",
+      "血尿酸升高"
+    ],
+    "contraindications": [
+      "关节化脓性病变、外伤急性损伤或不明原因持续高热时需先排除其他急症"
+    ],
+    "patient_scope": [
+      "adult",
+      "male"
+    ],
+    "body_parts": [
+      "足部",
+      "第一跖趾关节"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "expert_opinion",
+    "retrieval_hints": [
+      "右足第一拇趾",
+      "红肿热痛",
+      "尿酸620",
+      "饮酒海鲜诱发",
+      "VAS 8分"
+    ],
+    "structured_advice": {
+      "template_key": "gout_first_mtp_flare",
+      "clinical_focus": [
+        "urate_elevation",
+        "trigger_foods",
+        "joint_swelling"
+      ],
+      "pain_score_reference": 8
+    }
+  },
+  {
+    "id": "KB-IR-TX-0302",
+    "title": "痛风急性发作综合干预建议",
+    "content": "痛风急性发作病例的治疗建议应同时覆盖急性疼痛控制、局部关节保护和复发诱因干预。报告中的治疗方案可强调：在规范药物治疗基础上减少患关节负荷，短期关注红肿热痛缓解，并同步进行饮食限制、戒酒、多饮水和体重管理，以降低后续复发概率。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "痛风",
+      "急性发作",
+      "饮食控制",
+      "多饮水"
+    ],
+    "source": "个案经验总结：痛风性关节炎急性发作（2025-08）",
+    "source_type": "expert_opinion",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "诊断考虑痛风性关节炎急性发作",
+      "关节红肿热痛明显"
+    ],
+    "contraindications": [
+      "持续高热、症状迅速恶化或无法负重时应及时专科评估"
+    ],
+    "patient_scope": [
+      "adult",
+      "male"
+    ],
+    "body_parts": [
+      "足部",
+      "第一跖趾关节"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "expert_opinion",
+    "retrieval_hints": [
+      "高嘌呤饮食限制",
+      "戒酒",
+      "每日饮水2000到3000ml",
+      "关节保护"
+    ],
+    "structured_advice": {
+      "action": "acute_gout_flare_management",
+      "hydration_ml_per_day": "2000-3000",
+      "lifestyle_focus": [
+        "low_purine_diet",
+        "alcohol_cessation",
+        "weight_control"
+      ]
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0302",
+    "title": "痛风急性发作复评与复发预防规则",
+    "content": "痛风急性发作病例建议设置短期症状复评与中期代谢随访双节点。若初诊疼痛明显且炎症反应活跃，可在5至7天内复评疼痛、红肿和关节活动；1至3个月内复查血尿酸并评估饮食控制、饮水、体重及复发情况。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "痛风",
+      "复评",
+      "血尿酸",
+      "复发预防"
+    ],
+    "source": "个案经验总结：痛风性关节炎急性发作（2025-08）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "存在急性痛风发作",
+      "初诊疼痛评分较高"
+    ],
+    "contraindications": [
+      "症状快速加重或持续无法负重时不应等待常规复评"
+    ],
+    "patient_scope": [
+      "adult",
+      "male"
+    ],
+    "body_parts": [
+      "足部",
+      "第一跖趾关节"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "5到7天复评",
+      "1到3个月复查尿酸",
+      "避免高嘌呤饮食",
+      "复发预防"
+    ],
+    "structured_advice": {
+      "symptom_follow_up_days_min": 5,
+      "symptom_follow_up_days_max": 7,
+      "lab_follow_up_months_min": 1,
+      "lab_follow_up_months_max": 3,
+      "tracking_items": [
+        "VAS",
+        "joint_swelling",
+        "serum_uric_acid"
+      ]
+    }
+  },
+  {
+    "id": "KB-IR-RPT-C0001",
+    "title": "病例模板：患者，李女士，45岁，女性。",
+    "content": "病例要点：临床诊断：颈椎病。。报告建议结合病史与体征，重点描述疼痛特征、受累部位及诱发因素。对高风险信号应提示及时专科评估，避免绝对化诊断表达。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "病例模板",
+      "真实病例",
+      "个体化"
+    ],
+    "applicable_conditions": [
+      "存在相似主诉与体征",
+      "需要病例化措辞"
+    ],
+    "contraindications": [
+      "关键诊断信息缺失时需补充检查"
+    ],
+    "retrieval_hints": [
+      "临床诊断：颈椎病。",
+      "病例经验",
+      "个体化表达"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_template",
+      "diagnosis_anchor": "临床诊断：颈椎病。"
+    },
+    "source": "前端导入测试",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "female"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-TX-C0001",
+    "title": "病例治疗建议：患者，李女士，45岁，女性。",
+    "content": "病例治疗建议：给予颈椎牵引、物理治疗。2周后症状改善。报告可强调减轻负荷、改善睡眠与情绪支持，并根据症状变化动态调整方案。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "病例治疗",
+      "个体化",
+      "方案优化"
+    ],
+    "applicable_conditions": [
+      "临床诊断已明确",
+      "需输出可执行治疗建议"
+    ],
+    "contraindications": [
+      "症状快速恶化时应先专科评估"
+    ],
+    "retrieval_hints": [
+      "治疗过程",
+      "局部干预",
+      "生活方式管理"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_treatment",
+      "supports": [
+        "symptom_relief",
+        "function_recovery"
+      ]
+    },
+    "source": "前端导入测试",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "female"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-FUP-C0001",
+    "title": "病例随访规则：患者，李女士，45岁，女性。",
+    "content": "病例随访建议：建议1个月后复查MRI。随访时建议记录疼痛评分、活动受限范围与生活质量变化。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "病例随访",
+      "复评",
+      "疗效跟踪"
+    ],
+    "applicable_conditions": [
+      "需输出复评计划",
+      "存在可量化症状指标"
+    ],
+    "contraindications": [
+      "出现红旗症状时不应等待常规随访"
+    ],
+    "retrieval_hints": [
+      "随访情况",
+      "复评节点",
+      "疗效趋势"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_followup",
+      "tracking_items": [
+        "VAS",
+        "functional_status",
+        "quality_of_life"
+      ]
+    },
+    "source": "前端导入测试",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "female"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-RPT-C0002",
+    "title": "病例模板：姓名：[王XX]",
+    "content": "病例要点：中医辨病辨证依据如下：  辨病依据：患者的主要症状是肩部疼痛和活动受限，结合其年龄及临床表现，符合中医中“肩痹”的范畴。患者夜间肩部疼痛加剧，舌苔淡红，苔薄白，脉象弦紧。根据这些症状，可以辨证为风寒湿痹证。这主要是因为风寒湿邪侵袭了肩部的经络，寒邪的特性是凝滞和主收引，导致气血运行不畅，从而产生疼痛。夜间阳气内藏，阴气盛，寒邪的影响更为明显，因此疼痛会加重。  西医诊断依据包括：  患者肩部疼痛且活动受限，疼痛呈渐进性加重。肩关节周围有明显的压痛感，肩关节的活动度显著减小，搭肩试验和直尺试验均为阳性。肩关节X线片检查排除了骨质病变，但显示有轻度骨质疏松。  中医诊断结果为：  肩痹（风寒湿痹证）。  西医诊断结果为：  肩关节周围炎。报告建议结合病史与体征，重点描述疼痛特征、受累部位及诱发因素。对高风险信号应提示及时专科评估，避免绝对化诊断表达。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "病例模板",
+      "真实病例",
+      "个体化"
+    ],
+    "applicable_conditions": [
+      "存在相似主诉与体征",
+      "需要病例化措辞"
+    ],
+    "contraindications": [
+      "关键诊断信息缺失时需补充检查"
+    ],
+    "retrieval_hints": [
+      "中医辨病辨证依据如下：  辨病依据：患者的主要症状是肩部疼痛和活动受限，结合其年龄及临床表现，符合中医中“肩痹”的范畴。",
+      "病例经验",
+      "个体化表达"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_template",
+      "diagnosis_anchor": "中医辨病辨证依据如下：  辨病依据：患者的主要症状是肩部疼痛和活动受限，结合其年龄及临床表现，符合中医中“肩痹”的范畴。患者夜间肩部疼痛加剧，舌苔淡红，苔薄白，脉象弦紧。根据这些症状，可以辨证为风寒湿痹证。这主要是因为风寒湿邪侵袭了肩部的经"
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "male"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-TX-C0002",
+    "title": "病例治疗建议：姓名：[王XX]",
+    "content": "病例治疗建议：治疗：在肩部疼痛处均匀涂抹跌打损伤型药膏，以消炎消肿止痛。点按放松风池穴、紧张的上斜方肌及胸锁乳突肌。用手法在肩部进行轻柔、循序渐进的推法，推开筋膜淤堵和粘连。2、用药罐刮法放松斜方肌。在肩部疼痛点后侧进行轻柔拔药罐，配合抖法以舒张肌肉、加速气血循环。3、正：检查肩部平衡后，点按天宗穴，配合手法对肩关节进行短暂牵拉。在斜方肌及肩部涂抹通络透骨喷剂后，先拍打大椎穴，再拍打肩前（胸小肌）、肩后（后束）。4、贴：最后在肩部疼痛处贴敷疏通通络膏报告可强调减轻负荷、改善睡眠与情绪支持，并根据症状变化动态调整方案。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "病例治疗",
+      "个体化",
+      "方案优化"
+    ],
+    "applicable_conditions": [
+      "临床诊断已明确",
+      "需输出可执行治疗建议"
+    ],
+    "contraindications": [
+      "症状快速恶化时应先专科评估"
+    ],
+    "retrieval_hints": [
+      "治疗过程",
+      "局部干预",
+      "生活方式管理"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_treatment",
+      "supports": [
+        "symptom_relief",
+        "function_recovery"
+      ]
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "male"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-FUP-C0002",
+    "title": "病例随访规则：姓名：[王XX]",
+    "content": "病例随访建议：建议设置短期症状复评和中期功能随访双节点。随访时建议记录疼痛评分、活动受限范围与生活质量变化。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "病例随访",
+      "复评",
+      "疗效跟踪"
+    ],
+    "applicable_conditions": [
+      "需输出复评计划",
+      "存在可量化症状指标"
+    ],
+    "contraindications": [
+      "出现红旗症状时不应等待常规随访"
+    ],
+    "retrieval_hints": [
+      "随访情况",
+      "复评节点",
+      "疗效趋势"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_followup",
+      "tracking_items": [
+        "VAS",
+        "functional_status",
+        "quality_of_life"
+      ]
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "male"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-RPT-C0003",
+    "title": "病例模板：腰椎疼痛病的病例",
+    "content": "病例要点：1. 腰椎间盘突出（L4-5、L5-S1）  2. 腰肌劳损。报告建议结合病史与体征，重点描述疼痛特征、受累部位及诱发因素。对高风险信号应提示及时专科评估，避免绝对化诊断表达。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "病例模板",
+      "真实病例",
+      "个体化"
+    ],
+    "applicable_conditions": [
+      "存在相似主诉与体征",
+      "需要病例化措辞"
+    ],
+    "contraindications": [
+      "关键诊断信息缺失时需补充检查"
+    ],
+    "retrieval_hints": [
+      "1. 腰椎间盘突出（L4-5、L5-S1）  2. 腰肌劳损",
+      "病例经验",
+      "个体化表达"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_template",
+      "diagnosis_anchor": "1. 腰椎间盘突出（L4-5、L5-S1）  2. 腰肌劳损"
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "腰背"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-TX-C0003",
+    "title": "病例治疗建议：腰椎疼痛病的病例",
+    "content": "病例治疗建议：涂：在腰部疼痛位置涂抹跌打损伤型药膏，进行局部消炎消肿止痛。在腰肌部位、夹脊穴及环跳穴进行点按放松。从上到下缓慢推按，可进行斜向牵拉，拉开椎间隙。\n\n刮：使用药罐在腰肌上进行刮法，帮助排风寒湿邪。在腰部患处轻轻拔药罐，配合抖罐技术，促进穴位渗透。\n\n正：在脊柱两侧夹脊穴用手法进行拨法，以正骨理筋。拍委中穴（每侧36下）然后在涂抹了温阳通络型药物的腰肌上进行拍打，促进吸收，并轻叩环跳穴。贴：使用传统黑膏药贴敷腰部。因面积大，可在腰部主要疼报告可强调减轻负荷、改善睡眠与情绪支持，并根据症状变化动态调整方案。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "病例治疗",
+      "个体化",
+      "方案优化"
+    ],
+    "applicable_conditions": [
+      "临床诊断已明确",
+      "需输出可执行治疗建议"
+    ],
+    "contraindications": [
+      "症状快速恶化时应先专科评估"
+    ],
+    "retrieval_hints": [
+      "治疗过程",
+      "局部干预",
+      "生活方式管理"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_treatment",
+      "supports": [
+        "symptom_relief",
+        "function_recovery"
+      ]
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "腰背"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-FUP-C0003",
+    "title": "病例随访规则：腰椎疼痛病的病例",
+    "content": "病例随访建议：患者于治疗后1个月、3个月、6个月进行随访，腰痛症状持续缓解，无复发。随访时建议记录疼痛评分、活动受限范围与生活质量变化。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "病例随访",
+      "复评",
+      "疗效跟踪"
+    ],
+    "applicable_conditions": [
+      "需输出复评计划",
+      "存在可量化症状指标"
+    ],
+    "contraindications": [
+      "出现红旗症状时不应等待常规随访"
+    ],
+    "retrieval_hints": [
+      "随访情况",
+      "复评节点",
+      "疗效趋势"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_followup",
+      "tracking_items": [
+        "VAS",
+        "functional_status",
+        "quality_of_life"
+      ]
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "腰背"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-RPT-C0004",
+    "title": "病例模板：患者信息：王某，女，60 岁，家庭主妇，",
+    "content": "病例要点：膝关节炎病历。报告建议结合病史与体征，重点描述疼痛特征、受累部位及诱发因素。对高风险信号应提示及时专科评估，避免绝对化诊断表达。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "病例模板",
+      "真实病例",
+      "个体化"
+    ],
+    "applicable_conditions": [
+      "存在相似主诉与体征",
+      "需要病例化措辞"
+    ],
+    "contraindications": [
+      "关键诊断信息缺失时需补充检查"
+    ],
+    "retrieval_hints": [
+      "膝关节炎病历",
+      "病例经验",
+      "个体化表达"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_template",
+      "diagnosis_anchor": "膝关节炎病历"
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly",
+      "female"
+    ],
+    "body_parts": [
+      "膝关节"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-TX-C0004",
+    "title": "病例治疗建议：患者信息：王某，女，60 岁，家庭主妇，",
+    "content": "病例治疗建议：以规范药物治疗与局部保护为基础，联合生活方式管理。报告可强调减轻负荷、改善睡眠与情绪支持，并根据症状变化动态调整方案。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "病例治疗",
+      "个体化",
+      "方案优化"
+    ],
+    "applicable_conditions": [
+      "临床诊断已明确",
+      "需输出可执行治疗建议"
+    ],
+    "contraindications": [
+      "症状快速恶化时应先专科评估"
+    ],
+    "retrieval_hints": [
+      "治疗过程",
+      "局部干预",
+      "生活方式管理"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_treatment",
+      "supports": [
+        "symptom_relief",
+        "function_recovery"
+      ]
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly",
+      "female"
+    ],
+    "body_parts": [
+      "膝关节"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-FUP-C0004",
+    "title": "病例随访规则：患者信息：王某，女，60 岁，家庭主妇，",
+    "content": "病例随访建议：随访 3 个月，未复发，Lysholm 膝关节评分由治疗前 55 分升至 90 分。\n\n此案体现 “中西医协同、防治结合” 原则，药物与理疗缓解症状，功能锻炼延缓进展，数据证实该方案可降低骨关节炎急性发作率 32%，为中老年骨关节炎诊疗提供实用模板。随访时建议记录疼痛评分、活动受限范围与生活质量变化。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "病例随访",
+      "复评",
+      "疗效跟踪"
+    ],
+    "applicable_conditions": [
+      "需输出复评计划",
+      "存在可量化症状指标"
+    ],
+    "contraindications": [
+      "出现红旗症状时不应等待常规随访"
+    ],
+    "retrieval_hints": [
+      "随访情况",
+      "复评节点",
+      "疗效趋势"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_followup",
+      "tracking_items": [
+        "VAS",
+        "functional_status",
+        "quality_of_life"
+      ]
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly",
+      "female"
+    ],
+    "body_parts": [
+      "膝关节"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-RPT-C0005",
+    "title": "病例模板：患者信息：赵某，女，42 岁，办公室职员，",
+    "content": "病例要点：中医诊断为项痹病（气滞血瘀证）；西医诊断为神经根型颈椎病（C5-C6）。。报告建议结合病史与体征，重点描述疼痛特征、受累部位及诱发因素。对高风险信号应提示及时专科评估，避免绝对化诊断表达。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "病例模板",
+      "真实病例",
+      "个体化"
+    ],
+    "applicable_conditions": [
+      "存在相似主诉与体征",
+      "需要病例化措辞"
+    ],
+    "contraindications": [
+      "关键诊断信息缺失时需补充检查"
+    ],
+    "retrieval_hints": [
+      "中医诊断为项痹病（气滞血瘀证）；西医诊断为神经根型颈椎病（C5-C6）。",
+      "病例经验",
+      "个体化表达"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_template",
+      "diagnosis_anchor": "中医诊断为项痹病（气滞血瘀证）；西医诊断为神经根型颈椎病（C5-C6）。"
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "female"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-TX-C0005",
+    "title": "病例治疗建议：患者信息：赵某，女，42 岁，办公室职员，",
+    "content": "病例治疗建议：涂：根据颈椎酸胀疼痛的主诉，首先在颈部均匀涂抹跌打损伤型通络透骨喷剂，以消炎消肿止痛。随后，针对因伏案、受寒导致的肌肉紧张，可再涂抹按揉展筋型药物。用手法点按风池穴、颈部两侧夹脊穴及大椎穴。用轻柔手法推按肩颈肌肉筋膜，感受并疏通淤阻，放松胸锁乳突肌、斜方肌等。使用刮法，药罐（而非压着）在肩颈部位轻轻刮拭，以疏通并排出风寒湿邪。在大椎穴上轻轻拔罐，并可配合轻微颤抖（约二三十秒），作为“药罐”以促进药物吸收渗透。触诊发现小关节错位（C5\\C报告可强调减轻负荷、改善睡眠与情绪支持，并根据症状变化动态调整方案。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "病例治疗",
+      "个体化",
+      "方案优化"
+    ],
+    "applicable_conditions": [
+      "临床诊断已明确",
+      "需输出可执行治疗建议"
+    ],
+    "contraindications": [
+      "症状快速恶化时应先专科评估"
+    ],
+    "retrieval_hints": [
+      "治疗过程",
+      "局部干预",
+      "生活方式管理"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_treatment",
+      "supports": [
+        "symptom_relief",
+        "function_recovery"
+      ]
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "female"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-FUP-C0005",
+    "title": "病例随访规则：患者信息：赵某，女，42 岁，办公室职员，",
+    "content": "病例随访建议：建议设置短期症状复评和中期功能随访双节点。随访时建议记录疼痛评分、活动受限范围与生活质量变化。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "病例随访",
+      "复评",
+      "疗效跟踪"
+    ],
+    "applicable_conditions": [
+      "需输出复评计划",
+      "存在可量化症状指标"
+    ],
+    "contraindications": [
+      "出现红旗症状时不应等待常规随访"
+    ],
+    "retrieval_hints": [
+      "随访情况",
+      "复评节点",
+      "疗效趋势"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_followup",
+      "tracking_items": [
+        "VAS",
+        "functional_status",
+        "quality_of_life"
+      ]
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "female"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-RPT-C0007",
+    "title": "病例模板：患者信息：王某，女，60 岁，家庭主妇，",
+    "content": "病例要点：膝关节炎病历。报告建议结合病史与体征，重点描述疼痛特征、受累部位及诱发因素。对高风险信号应提示及时专科评估，避免绝对化诊断表达。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "病例模板",
+      "真实病例",
+      "个体化"
+    ],
+    "applicable_conditions": [
+      "存在相似主诉与体征",
+      "需要病例化措辞"
+    ],
+    "contraindications": [
+      "关键诊断信息缺失时需补充检查"
+    ],
+    "retrieval_hints": [
+      "膝关节炎病历",
+      "病例经验",
+      "个体化表达"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_template",
+      "diagnosis_anchor": "膝关节炎病历"
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly",
+      "female"
+    ],
+    "body_parts": [
+      "膝关节"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-TX-C0007",
+    "title": "病例治疗建议：患者信息：王某，女，60 岁，家庭主妇，",
+    "content": "病例治疗建议：以规范药物治疗与局部保护为基础，联合生活方式管理。报告可强调减轻负荷、改善睡眠与情绪支持，并根据症状变化动态调整方案。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "病例治疗",
+      "个体化",
+      "方案优化"
+    ],
+    "applicable_conditions": [
+      "临床诊断已明确",
+      "需输出可执行治疗建议"
+    ],
+    "contraindications": [
+      "症状快速恶化时应先专科评估"
+    ],
+    "retrieval_hints": [
+      "治疗过程",
+      "局部干预",
+      "生活方式管理"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_treatment",
+      "supports": [
+        "symptom_relief",
+        "function_recovery"
+      ]
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly",
+      "female"
+    ],
+    "body_parts": [
+      "膝关节"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-FUP-C0007",
+    "title": "病例随访规则：患者信息：王某，女，60 岁，家庭主妇，",
+    "content": "病例随访建议：随访 3 个月，未复发，Lysholm 膝关节评分由治疗前 55 分升至 90 分。\n\n此案体现 “中西医协同、防治结合” 原则，药物与理疗缓解症状，功能锻炼延缓进展，数据证实该方案可降低骨关节炎急性发作率 32%，为中老年骨关节炎诊疗提供实用模板。随访时建议记录疼痛评分、活动受限范围与生活质量变化。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "病例随访",
+      "复评",
+      "疗效跟踪"
+    ],
+    "applicable_conditions": [
+      "需输出复评计划",
+      "存在可量化症状指标"
+    ],
+    "contraindications": [
+      "出现红旗症状时不应等待常规随访"
+    ],
+    "retrieval_hints": [
+      "随访情况",
+      "复评节点",
+      "疗效趋势"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_followup",
+      "tracking_items": [
+        "VAS",
+        "functional_status",
+        "quality_of_life"
+      ]
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly",
+      "female"
+    ],
+    "body_parts": [
+      "膝关节"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-RPT-C0006",
+    "title": "病例模板：患者信息：王某，女，60 岁，家庭主妇，",
+    "content": "病例要点：膝关节炎病历。报告建议结合病史与体征，重点描述疼痛特征、受累部位及诱发因素。对高风险信号应提示及时专科评估，避免绝对化诊断表达。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "病例模板",
+      "真实病例",
+      "个体化"
+    ],
+    "applicable_conditions": [
+      "存在相似主诉与体征",
+      "需要病例化措辞"
+    ],
+    "contraindications": [
+      "关键诊断信息缺失时需补充检查"
+    ],
+    "retrieval_hints": [
+      "膝关节炎病历",
+      "病例经验",
+      "个体化表达"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_template",
+      "diagnosis_anchor": "膝关节炎病历"
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly",
+      "female"
+    ],
+    "body_parts": [
+      "膝关节"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-TX-C0006",
+    "title": "病例治疗建议：患者信息：王某，女，60 岁，家庭主妇，",
+    "content": "病例治疗建议：以规范药物治疗与局部保护为基础，联合生活方式管理。报告可强调减轻负荷、改善睡眠与情绪支持，并根据症状变化动态调整方案。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "病例治疗",
+      "个体化",
+      "方案优化"
+    ],
+    "applicable_conditions": [
+      "临床诊断已明确",
+      "需输出可执行治疗建议"
+    ],
+    "contraindications": [
+      "症状快速恶化时应先专科评估"
+    ],
+    "retrieval_hints": [
+      "治疗过程",
+      "局部干预",
+      "生活方式管理"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_treatment",
+      "supports": [
+        "symptom_relief",
+        "function_recovery"
+      ]
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly",
+      "female"
+    ],
+    "body_parts": [
+      "膝关节"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-FUP-C0006",
+    "title": "病例随访规则：患者信息：王某，女，60 岁，家庭主妇，",
+    "content": "病例随访建议：随访 3 个月，未复发，Lysholm 膝关节评分由治疗前 55 分升至 90 分。\n\n此案体现 “中西医协同、防治结合” 原则，药物与理疗缓解症状，功能锻炼延缓进展，数据证实该方案可降低骨关节炎急性发作率 32%，为中老年骨关节炎诊疗提供实用模板。随访时建议记录疼痛评分、活动受限范围与生活质量变化。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "病例随访",
+      "复评",
+      "疗效跟踪"
+    ],
+    "applicable_conditions": [
+      "需输出复评计划",
+      "存在可量化症状指标"
+    ],
+    "contraindications": [
+      "出现红旗症状时不应等待常规随访"
+    ],
+    "retrieval_hints": [
+      "随访情况",
+      "复评节点",
+      "疗效趋势"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_followup",
+      "tracking_items": [
+        "VAS",
+        "functional_status",
+        "quality_of_life"
+      ]
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly",
+      "female"
+    ],
+    "body_parts": [
+      "膝关节"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-RPT-C0008",
+    "title": "病例模板：患者信息：赵某，女，42 岁，办公室职员，",
+    "content": "病例要点：中医诊断为项痹病（气滞血瘀证）；西医诊断为神经根型颈椎病（C5-C6）。。报告建议结合病史与体征，重点描述疼痛特征、受累部位及诱发因素。对高风险信号应提示及时专科评估，避免绝对化诊断表达。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "病例模板",
+      "真实病例",
+      "个体化"
+    ],
+    "applicable_conditions": [
+      "存在相似主诉与体征",
+      "需要病例化措辞"
+    ],
+    "contraindications": [
+      "关键诊断信息缺失时需补充检查"
+    ],
+    "retrieval_hints": [
+      "中医诊断为项痹病（气滞血瘀证）；西医诊断为神经根型颈椎病（C5-C6）。",
+      "病例经验",
+      "个体化表达"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_template",
+      "diagnosis_anchor": "中医诊断为项痹病（气滞血瘀证）；西医诊断为神经根型颈椎病（C5-C6）。"
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "female"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-TX-C0008",
+    "title": "病例治疗建议：患者信息：赵某，女，42 岁，办公室职员，",
+    "content": "病例治疗建议：涂：根据颈椎酸胀疼痛的主诉，首先在颈部均匀涂抹跌打损伤型通络透骨喷剂，以消炎消肿止痛。随后，针对因伏案、受寒导致的肌肉紧张，可再涂抹按揉展筋型药物。用手法点按风池穴、颈部两侧夹脊穴及大椎穴。用轻柔手法推按肩颈肌肉筋膜，感受并疏通淤阻，放松胸锁乳突肌、斜方肌等。使用刮法，药罐（而非压着）在肩颈部位轻轻刮拭，以疏通并排出风寒湿邪。在大椎穴上轻轻拔罐，并可配合轻微颤抖（约二三十秒），作为“药罐”以促进药物吸收渗透。触诊发现小关节错位（C5\\C报告可强调减轻负荷、改善睡眠与情绪支持，并根据症状变化动态调整方案。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "病例治疗",
+      "个体化",
+      "方案优化"
+    ],
+    "applicable_conditions": [
+      "临床诊断已明确",
+      "需输出可执行治疗建议"
+    ],
+    "contraindications": [
+      "症状快速恶化时应先专科评估"
+    ],
+    "retrieval_hints": [
+      "治疗过程",
+      "局部干预",
+      "生活方式管理"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_treatment",
+      "supports": [
+        "symptom_relief",
+        "function_recovery"
+      ]
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "female"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-FUP-C0008",
+    "title": "病例随访规则：患者信息：赵某，女，42 岁，办公室职员，",
+    "content": "病例随访建议：建议设置短期症状复评和中期功能随访双节点。随访时建议记录疼痛评分、活动受限范围与生活质量变化。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "病例随访",
+      "复评",
+      "疗效跟踪"
+    ],
+    "applicable_conditions": [
+      "需输出复评计划",
+      "存在可量化症状指标"
+    ],
+    "contraindications": [
+      "出现红旗症状时不应等待常规随访"
+    ],
+    "retrieval_hints": [
+      "随访情况",
+      "复评节点",
+      "疗效趋势"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_followup",
+      "tracking_items": [
+        "VAS",
+        "functional_status",
+        "quality_of_life"
+      ]
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "female"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-RPT-C0009",
+    "title": "病例模板：患者信息：王某，女，60 岁，家庭主妇，",
+    "content": "病例要点：膝关节炎病历。报告建议结合病史与体征，重点描述疼痛特征、受累部位及诱发因素。对高风险信号应提示及时专科评估，避免绝对化诊断表达。",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "病例模板",
+      "真实病例",
+      "个体化"
+    ],
+    "applicable_conditions": [
+      "存在相似主诉与体征",
+      "需要病例化措辞"
+    ],
+    "contraindications": [
+      "关键诊断信息缺失时需补充检查"
+    ],
+    "retrieval_hints": [
+      "膝关节炎病历",
+      "病例经验",
+      "个体化表达"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_template",
+      "diagnosis_anchor": "膝关节炎病历"
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly",
+      "female"
+    ],
+    "body_parts": [
+      "膝关节"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-TX-C0009",
+    "title": "病例治疗建议：患者信息：王某，女，60 岁，家庭主妇，",
+    "content": "病例治疗建议：以规范药物治疗与局部保护为基础，联合生活方式管理。报告可强调减轻负荷、改善睡眠与情绪支持，并根据症状变化动态调整方案。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "病例治疗",
+      "个体化",
+      "方案优化"
+    ],
+    "applicable_conditions": [
+      "临床诊断已明确",
+      "需输出可执行治疗建议"
+    ],
+    "contraindications": [
+      "症状快速恶化时应先专科评估"
+    ],
+    "retrieval_hints": [
+      "治疗过程",
+      "局部干预",
+      "生活方式管理"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_treatment",
+      "supports": [
+        "symptom_relief",
+        "function_recovery"
+      ]
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly",
+      "female"
+    ],
+    "body_parts": [
+      "膝关节"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-FUP-C0009",
+    "title": "病例随访规则：患者信息：王某，女，60 岁，家庭主妇，",
+    "content": "病例随访建议：随访 3 个月，未复发，Lysholm 膝关节评分由治疗前 55 分升至 90 分。\n\n此案体现 “中西医协同、防治结合” 原则，药物与理疗缓解症状，功能锻炼延缓进展，数据证实该方案可降低骨关节炎急性发作率 32%，为中老年骨关节炎诊疗提供实用模板。随访时建议记录疼痛评分、活动受限范围与生活质量变化。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "病例随访",
+      "复评",
+      "疗效跟踪"
+    ],
+    "applicable_conditions": [
+      "需输出复评计划",
+      "存在可量化症状指标"
+    ],
+    "contraindications": [
+      "出现红旗症状时不应等待常规随访"
+    ],
+    "retrieval_hints": [
+      "随访情况",
+      "复评节点",
+      "疗效趋势"
+    ],
+    "structured_advice": {
+      "template_key": "case_based_followup",
+      "tracking_items": [
+        "VAS",
+        "functional_status",
+        "quality_of_life"
+      ]
+    },
+    "source": "前端病例上传",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly",
+      "female"
+    ],
+    "body_parts": [
+      "膝关节"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "weak_observation"
+  },
+  {
+    "id": "KB-IR-INT-C0010",
+    "title": "头面部异常解读：充血与炎性反应特征",
+    "content": "头面部\n1、鼻部充血性改变，鼻部炎性反应。 [程度：轻] [特征面积: 128]\n2、口腔周围充血性改变，口腔炎、口周牙周炎性反应。 [程度：轻] [特征面积: 71]\n3、视疲劳、用眼过度、视力下降、眼睛炎性反应。 [程度：中] [特征面积: 不对称性:59]",
+    "category": "interpretation_hotspot",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "头面部",
+      "鼻部充血",
+      "口周炎性",
+      "视疲劳",
+      "眼部炎性反应"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "头面部"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "头面部异常",
+      "鼻部炎性",
+      "口腔周围充血",
+      "视疲劳",
+      "眼睛炎性反应"
+    ]
+  },
+  {
+    "id": "KB-IR-INT-C0011",
+    "title": "颈肩部异常解读：颈部疲劳与炎性热反应",
+    "content": "颈肩部\n1、颈部异常热源（颈肌疲劳热反应，颈椎或颈部肌筋膜炎性反应） [程度：轻] [特征面积: 364]",
+    "category": "interpretation_hotspot",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "颈肩部",
+      "颈部异常热源",
+      "颈肌疲劳",
+      "肌筋膜炎性反应"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "颈部异常热源",
+      "颈肌疲劳热反应",
+      "颈椎炎性反应",
+      "颈部肌筋膜炎性反应"
+    ]
+  },
+  {
+    "id": "KB-IR-INT-C0012",
+    "title": "脊柱背部异常解读：肩背部高温与肌筋膜炎性反应",
+    "content": "脊柱背部\n1、肩背部明显异常高温，肌筋膜炎性反应。 [程度：轻] [特征面积: 863]",
+    "category": "interpretation_hotspot",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "脊柱背部",
+      "肩背部",
+      "异常高温",
+      "肌筋膜炎性反应"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "脊柱背部",
+      "肩背"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "肩背部明显异常高温",
+      "肌筋膜炎性反应",
+      "脊柱背部异常"
+    ]
+  },
+  {
+    "id": "KB-IR-INT-C0013",
+    "title": "头面部眼部热特征解读：双眼内眦生理热区扩大",
+    "content": "一、头面部\n项目：眼\n热源描述：双眼内眦生理热区扩大\n评估提示：视疲劳、用眼过度、视力下降、眼睛炎性反应\n热特征度：中\n面积：不对称性:59\n均值：32.98\n相对值：0.79\n标准差：0.56",
+    "category": "interpretation_hotspot",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "头面部",
+      "眼",
+      "双眼内眦",
+      "视疲劳",
+      "炎性反应"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "头面部",
+      "眼"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "双眼内眦生理热区扩大",
+      "视疲劳",
+      "用眼过度",
+      "视力下降",
+      "眼睛炎性反应",
+      "面积不对称性59",
+      "均值32.98",
+      "相对值0.79",
+      "标准差0.56"
+    ]
+  },
+  {
+    "id": "KB-IR-INT-C0014",
+    "title": "口腔热特征解读：口周与牙区异常热区",
+    "content": "口腔\n口腔周围，牙区可见异常热区。\n口腔周围充血性改变，口腔炎、口周牙周炎性反应。",
+    "category": "interpretation_hotspot",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "口腔",
+      "牙区",
+      "异常热区",
+      "口腔炎",
+      "牙周炎性反应"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "头面部",
+      "口腔"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "口腔周围异常热区",
+      "牙区可见异常热区",
+      "口腔周围充血性改变",
+      "口腔炎",
+      "口周牙周炎性反应"
+    ]
+  },
+  {
+    "id": "KB-IR-INT-C0015",
+    "title": "头面部鼻部热特征解读：双鼻孔温度不对称",
+    "content": "一、头面部\n项目：鼻\n热源描述：双鼻孔温度不对称。鼻部异常高温区。\n评估提示：鼻部充血性改变，鼻部炎性反应。",
+    "category": "interpretation_hotspot",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "头面部",
+      "鼻",
+      "双鼻孔温度不对称",
+      "鼻部异常高温",
+      "鼻部炎性反应"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "头面部",
+      "鼻部"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "双鼻孔温度不对称",
+      "鼻部异常高温区",
+      "鼻部充血性改变",
+      "鼻部炎性反应"
+    ]
+  },
+  {
+    "id": "KB-IR-INT-C0016",
+    "title": "颈肩部热特征解读：颈部高热态分布或不对称",
+    "content": "二、颈肩部\n热源描述：颈部高热态分布或分布不对称。\n评估提示：颈部异常热源（颈肌疲劳热反应，颈椎或颈部肌筋膜炎性反应）。",
+    "category": "interpretation_hotspot",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "颈肩部",
+      "颈部高热态",
+      "分布不对称",
+      "颈肌疲劳",
+      "肌筋膜炎性反应"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "颈部高热态分布",
+      "颈部分布不对称",
+      "颈部异常热源",
+      "颈肌疲劳热反应",
+      "颈椎炎性反应",
+      "颈部肌筋膜炎性反应"
+    ]
+  },
+  {
+    "id": "KB-IR-INT-C0017",
+    "title": "脊柱背部热特征解读：肩背部片状热区扩大",
+    "content": "脊柱背部\n热源描述：背肩背部见片状热区扩大。\n评估提示：肩背部明显异常高温，肌筋膜炎性反应。",
+    "category": "interpretation_hotspot",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "脊柱背部",
+      "肩背部",
+      "片状热区扩大",
+      "异常高温",
+      "肌筋膜炎性反应"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "脊柱背部",
+      "肩背"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "背肩背部片状热区扩大",
+      "肩背部明显异常高温",
+      "肌筋膜炎性反应",
+      "脊柱背部异常"
+    ]
+  },
+  {
+    "id": "KB-IR-HA-C0018",
+    "title": "保健建议：鼻部充血与炎性反应日常护理",
+    "content": "保健建议\n鼻部充血性改变，鼻部炎性反应。\n1、多开窗，保持室内空气流通，避免吸入烟雾、粉尘等有害物质，避免接触过敏源；\n2、适当进行体育锻炼，增强体质，注意个人防护，避免冷空气对呼吸道的刺激；\n3、吸入热蒸汽，有助鼻腔通畅；使用加湿器，可预防鼻腔干燥；补充水分，可稀释粘液，保持呼吸道通畅；",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "health_advice",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "保健建议",
+      "鼻部充血",
+      "鼻部炎性反应",
+      "呼吸道护理",
+      "过敏源规避"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "头面部",
+      "鼻部"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "鼻部充血性改变",
+      "鼻部炎性反应",
+      "保持空气流通",
+      "避免过敏源",
+      "吸入热蒸汽",
+      "使用加湿器",
+      "补充水分"
+    ]
+  },
+  {
+    "id": "KB-IR-HA-C0019",
+    "title": "保健建议：口腔炎与口周牙周炎日常管理",
+    "content": "保健建议\n口腔周围充血性改变，口腔炎、口周牙周炎性反应。\n1、搞好口腔卫生：早晚刷牙，饭后漱口，刷牙时间不少于3分钟，纠正不良的刷牙姿势；\n2、注意饮食与营养：食物多样化，适量食用粗粮，多食蔬菜水果、豆类、乳制品，少食甜食；\n3、纠正不良习惯：戒烟酒，避免食用强烈刺激性的食物，不用牙齿咬硬物，进食时宜细嚼慢咽，避免损伤口腔粘膜；\n4、定期口腔检查。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "health_advice",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "保健建议",
+      "口腔炎",
+      "口周牙周炎",
+      "口腔卫生",
+      "饮食管理"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "头面部",
+      "口腔"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "口腔周围充血性改变",
+      "口腔炎",
+      "口周牙周炎性反应",
+      "搞好口腔卫生",
+      "注意饮食与营养",
+      "纠正不良习惯",
+      "定期口腔检查"
+    ]
+  },
+  {
+    "id": "KB-IR-HA-C0020",
+    "title": "保健建议：视疲劳与眼部炎性反应日常护理",
+    "content": "保健建议\n视疲劳、用眼过度、视力下降、眼睛炎性反应。\n1、合理营养，注意营养搭配，不要偏食；\n2、注意用眼卫生，避免长时间近距离用眼（如看电视、打电脑、看书）；避免在乘车或在光线不足及强光下看书；\n3、劳逸结合，睡眠充足，经常参加户外活动；经常远眺绿色植物及主动做眼保健操；\n4、避免使用不洁手帕与毛巾，洗脸用具专人专用；\n5、定期做视力检查，眼疲劳时可使用明目与抗视疲劳的眼药水；\n6、多吃胡萝卜、香蕉，热敷眼部，对视疲劳缓解有较好的作用。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "health_advice",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "保健建议",
+      "视疲劳",
+      "用眼过度",
+      "视力下降",
+      "眼睛炎性反应"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "头面部",
+      "眼部"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "视疲劳",
+      "用眼过度",
+      "视力下降",
+      "眼睛炎性反应",
+      "注意用眼卫生",
+      "眼保健操",
+      "定期做视力检查"
+    ]
+  },
+  {
+    "id": "KB-IR-HA-C0021",
+    "title": "保健建议：颈部异常热源与颈肌炎性反应日常管理",
+    "content": "保健建议\n颈部异常热源（颈肌疲劳热反应，颈椎或颈部肌筋膜炎性反应）。\n1、睡眠时枕头的高低要合适；\n2、避免长时间处于单一姿势，防止颈部因过伸而疲劳，预防落枕；\n3、注意颈部保暖，避免电扇或空调对着直吹，防止受风寒外邪侵犯；\n4、加强颈部功能锻炼，如做“米”字操、“凤”字操；\n5、适当补充钙制品：宜多食牛奶、蛋类、豆制品、蔬菜和水果；\n6、可使用针灸、推拿、颈部牵引或理疗等方法，以缓解症状。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "health_advice",
+      "doctor_opinion",
+      "report_note",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "保健建议",
+      "颈部异常热源",
+      "颈肌疲劳热反应",
+      "颈椎炎性反应",
+      "颈部肌筋膜炎"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "颈肩",
+      "颈部"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "颈部异常热源",
+      "颈肌疲劳热反应",
+      "颈椎或颈部肌筋膜炎性反应",
+      "注意颈部保暖",
+      "颈部功能锻炼",
+      "针灸推拿牵引理疗"
+    ]
+  },
+  {
+    "id": "KB-IR-HA-C0022",
+    "title": "保健建议：肩背部异常高温与肌筋膜炎性反应管理",
+    "content": "保健建议\n肩背部明显异常高温，肌筋膜炎性反应。\n1、合理锻炼，保持正确的伏案工作姿势，注意休息；\n2、必要时，进一步检查及至专科就诊。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "health_advice",
+      "doctor_opinion",
+      "report_note",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "保健建议",
+      "肩背部明显异常高温",
+      "肌筋膜炎性反应",
+      "姿势管理",
+      "专科就诊"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "颈肩",
+      "肩背"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "肩背部明显异常高温",
+      "肌筋膜炎性反应",
+      "合理锻炼",
+      "保持正确姿势",
+      "进一步检查",
+      "专科就诊"
+    ]
+  },
+  {
+    "id": "KB-IR-INT-C0023",
+    "title": "头面颈正面客观热源数据表：正面部位观测项",
+    "content": "你身体的客观热源数据表 正面部位\n右正面\n左正面\n右头额\n左头额\n右后脑\n右眼睛\n左眼睛\n鼻\n右面颈部\n口腔\n右脸颊\n左脸颊",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "客观热源数据表",
+      "正面部位",
+      "头面部",
+      "眼睛",
+      "鼻",
+      "口腔",
+      "脸颊"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "口腔",
+      "眼部",
+      "鼻部"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "客观热源数据表正面部位",
+      "右正面左正面",
+      "右头额左头额",
+      "右眼睛左眼睛",
+      "鼻",
+      "右面颈部",
+      "口腔",
+      "右脸颊左脸颊"
+    ]
+  },
+  {
+    "id": "KB-IR-INT-C0024",
+    "title": "躯干四肢背面客观热源数据表：背面部位观测项",
+    "content": "你身体的客观热源数据表\n背面部位\n左后脑外侧\n左后脑\n右后脑外侧\n左后脑内侧\n右后脑内侧\n左后颈部\n右后颈部\n左后肩\n右后肩\n左面颈部\n左后背区域\n右后背区域\n右胸肺\n右上腹部\n左手\n右手\n左上腹部\n右腹部\n左后上臂\n左后肘\n左腹部\n右手掌\n左后下臂\n右后上臂\n右后肘\n右后下臂\n脊柱\n左肾\n右肾\n左腰\n右腰\n右臀",
+    "category": "report_template",
+    "report_sections": [
+      "diagnosis",
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "客观热源数据表",
+      "背面部位",
+      "后脑",
+      "颈部",
+      "后背",
+      "上腹部",
+      "脊柱",
+      "肾区",
+      "腰部"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "脊柱背部",
+      "腹部",
+      "四肢",
+      "肾区",
+      "腰部",
+      "臀部"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "客观热源数据表背面部位",
+      "左后脑外侧",
+      "右后背区域",
+      "右胸肺",
+      "脊柱",
+      "左肾右肾",
+      "左腰右腰",
+      "右臀"
+    ]
+  },
+  {
+    "id": "KB-IR-TX-C0025",
+    "title": "病例治疗参考：右肘关节骨关节炎与软组织慢性损伤",
+    "content": "病例：肘关节关节病。\n专科检查：右肘关节外观无明显肿胀，皮肤无发红发热；肘关节周围压痛明显，以肱骨外上髁、尺骨鹰嘴处为甚。屈伸肘关节时可闻及摩擦音，活动范围较左侧明显减小，伸直约160°（正常约180°），屈曲约110°（正常约140°），前臂旋前、旋后功能受限。\n辅助检查：X线示右肘关节间隙变窄、关节边缘骨质增生、肱骨外上髁骨赘形成；MRI示关节软骨磨损变薄、局部软骨下骨水肿、周围软组织轻度炎症。血沉（ESR）及C反应蛋白（CRP）正常，初步排除感染性关节炎。\n诊断：1）右肘关节骨关节炎；2）肘关节软组织慢性损伤。\n治疗过程：1、涂法：用跌打损伤型药涂疼痛处，点按风池穴、斜方肌、胸锁乳突肌放松；2、推法：轻柔推揉肩部，疏通筋膜淤堵；3、刮拔正法：刮斜方肌，后侧轻柔拔抖，天宗穴点按后牵拉肩部；4、拍打贴：涂风寒湿邪型喷剂，拍打大椎穴及肩前后，贴非遗通络贴6-8小时。\n功能锻炼：进行肘关节屈伸、旋转康复训练，每日3组，每组10-15次。\n生活方式调整：减少肘关节过度活动，避免提重物等加重关节负担动作。\n疗效与随访：经手法复位治疗与中药外敷及康复训练后，肘关节功能明显恢复，建议继续康复训练与定期随访。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "report_note",
+      "diagnosis"
+    ],
+    "tags": [
+      "病例",
+      "肘关节关节病",
+      "右肘关节骨关节炎",
+      "软组织慢性损伤",
+      "康复训练"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 10,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "四肢",
+      "上肢",
+      "肘关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "右肘关节骨关节炎",
+      "肘关节软组织慢性损伤",
+      "关节间隙变窄",
+      "骨赘形成",
+      "摩擦音",
+      "肘关节活动受限",
+      "屈伸旋转康复训练"
+    ]
+  },
+  {
+    "id": "KB-IR-TX-C0026",
+    "title": "病例治疗参考：肩关节关节病（肩周炎）现病史",
+    "content": "病例：肩关节关节病。\n现病史：患者2个月前开始出现右肩疼痛，起初疼痛较轻，呈间歇性隐痛，未引起重视。随后疼痛逐渐加剧，转为持续性酸痛，并可放射至颈部及上肢，夜间疼痛尤为明显，严重影响睡眠。同期出现肩关节活动受限，上举、外展、后伸等动作受限，导致穿衣、梳头、洗脸等日常活动明显受影响。患者曾尝试热敷和贴敷膏药，症状未见明显缓解。就诊后诊断为肩关节周围炎并收入院治疗。病程中无畏寒、发热、头晕、头痛、胸闷、心慌等症状，饮食及二便正常。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "diagnosis",
+      "report_note"
+    ],
+    "tags": [
+      "病例",
+      "肩关节关节病",
+      "肩关节周围炎",
+      "右肩疼痛",
+      "肩关节活动受限"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 10,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "颈肩",
+      "上肢",
+      "肩关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "肩关节周围炎",
+      "右肩持续性酸痛",
+      "夜间疼痛明显",
+      "上举外展后伸受限",
+      "放射至颈部及上肢",
+      "热敷贴膏无明显缓解"
+    ]
+  },
+  {
+    "id": "KB-IR-TX-C0027",
+    "title": "病例治疗参考：肩关节关节病既往史",
+    "content": "既往史：患者否认患有高血压、糖尿病、冠心病等慢性疾病；否认肝炎、结核等传染病史。无手术史和外伤史，无药物及食物过敏史，预防接种史不详。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "diagnosis",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "病例",
+      "既往史",
+      "肩关节关节病",
+      "慢性病否认史",
+      "过敏史"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "颈肩",
+      "肩关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "既往史",
+      "否认高血压糖尿病冠心病",
+      "否认肝炎结核",
+      "无手术外伤史",
+      "无药物食物过敏史",
+      "预防接种史不详"
+    ]
+  },
+  {
+    "id": "KB-IR-TX-C0028",
+    "title": "病例治疗参考：肩关节关节病个人史",
+    "content": "个人史：患者出生并长期居住在原籍，无疫区接触史。生活习惯良好，无吸烟、饮酒等不良嗜好。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "diagnosis",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "病例",
+      "个人史",
+      "肩关节关节病",
+      "无疫区接触史",
+      "无烟酒嗜好"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "颈肩",
+      "肩关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "个人史",
+      "长期居住原籍",
+      "无疫区接触史",
+      "无吸烟饮酒",
+      "生活习惯良好"
+    ]
+  },
+  {
+    "id": "KB-IR-TX-C0029",
+    "title": "病例治疗参考：肩关节关节病家族史与婚育史",
+    "content": "家族史、婚育史：患者已婚并育有2子，配偶及子女均体健。家族中无类似疾病患者，否认家族性遗传病史。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "diagnosis",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "病例",
+      "家族史",
+      "婚育史",
+      "无家族遗传病史",
+      "配偶子女体健"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "颈肩",
+      "肩关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "家族史婚育史",
+      "已婚育有2子",
+      "配偶及子女体健",
+      "无类似疾病家族患者",
+      "否认家族性遗传病史"
+    ]
+  },
+  {
+    "id": "KB-IR-TX-C0030",
+    "title": "病例治疗参考：肩关节关节病体格检查",
+    "content": "体格检查：患者体温5℃，脉搏76次/分，呼吸18次/分，血压136/82mmHg。神志清醒，精神状况良好，营养状况中等，发育正常。右肩外观无红肿，但肩关节周围有明显压痛，喙突、肩峰下和结节间沟等部位尤为明显。肩关节活动度：前屈上举约76度，外展约60度，后伸约35度。搭肩试验和直尺试验阳性。上肢感觉、肌力和肌张力正常，肱二头肌与肱三头肌反射正常。舌苔淡红、苔薄白，脉象弦紧。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "diagnosis",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "病例",
+      "体格检查",
+      "肩关节关节病",
+      "肩关节活动受限",
+      "搭肩试验阳性"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "颈肩",
+      "上肢",
+      "肩关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "体格检查",
+      "右肩关节周围压痛",
+      "喙突肩峰下结节间沟压痛",
+      "前屈上举76度",
+      "外展60度后伸35度",
+      "搭肩试验阳性",
+      "直尺试验阳性"
+    ]
+  },
+  {
+    "id": "KB-IR-TX-C0031",
+    "title": "病例治疗参考：肩关节关节病辅助检查",
+    "content": "辅助检查：肩关节X线片显示肩关节骨质无异常，肩关节间隙正常，周围软组织无钙化影，但可见轻度骨质疏松。血常规检查结果显示各项指标均在正常范围内。血生化检查显示肝功能、肾功能、血糖及血脂等指标均处于正常范围。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "diagnosis",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "病例",
+      "辅助检查",
+      "肩关节X线",
+      "轻度骨质疏松",
+      "血常规正常",
+      "血生化正常"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "颈肩",
+      "肩关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "辅助检查",
+      "肩关节X线片",
+      "肩关节间隙正常",
+      "周围软组织无钙化影",
+      "轻度骨质疏松",
+      "血常规正常",
+      "血生化正常"
+    ]
+  },
+  {
+    "id": "KB-IR-INT-C0032",
+    "title": "中医辨病辨证依据：肩痹（风寒湿痹证）",
+    "content": "中医辨病辨证依据如下。\n辨病依据：患者主要症状为肩部疼痛与活动受限，结合年龄及临床表现，符合中医“肩痹”范畴。\n辨证依据：患者夜间肩部疼痛加剧，舌苔淡红、苔薄白，脉象弦紧，可辨证为风寒湿痹证。风寒湿邪侵袭肩部经络，寒邪凝滞、主收引，致气血运行不畅而痛；夜间阳气内藏、阴气偏盛，寒邪影响更显，故疼痛加重。",
+    "category": "interpretation_hotspot",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "中医辨病辨证",
+      "肩痹",
+      "风寒湿痹证",
+      "肩部疼痛",
+      "夜间痛加重"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "颈肩",
+      "肩关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "肩痹",
+      "风寒湿痹证",
+      "肩部疼痛活动受限",
+      "夜间疼痛加剧",
+      "舌苔淡红苔薄白",
+      "脉象弦紧",
+      "风寒湿邪侵袭经络"
+    ]
+  },
+  {
+    "id": "KB-IR-TX-C0033",
+    "title": "病例治疗参考：肩关节关节病治疗过程",
+    "content": "治疗过程：\n1、治疗：在肩部疼痛处均匀涂抹跌打损伤型药膏，以消炎消肿止痛；点按放松风池穴、紧张的上斜方肌及胸锁乳突肌；采用轻柔、循序渐进的推法，推开筋膜淤堵和粘连。\n2、药罐刮法：放松斜方肌；在肩部疼痛点后侧进行轻柔拔药罐，配合抖法以舒张肌肉、加速气血循环。\n3、手法调整：检查肩部平衡后，点按天宗穴，配合手法对肩关节进行短暂牵拉；在斜方肌及肩部涂抹通络透骨喷剂后，先拍打大椎穴，再拍打肩前（胸小肌）与肩后（后束）。\n4、贴敷：在肩部疼痛处贴敷疏通通络膏药，贴敷时间6-8小时。\n5、生活方式调整：减少肩关节过度活动，避免提重物等加重关节负担动作。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "病例",
+      "治疗过程",
+      "肩关节关节病",
+      "手法治疗",
+      "药罐刮法",
+      "贴敷"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 10,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "颈肩",
+      "上肢",
+      "肩关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "肩关节关节病治疗过程",
+      "跌打损伤型药膏",
+      "风池穴斜方肌胸锁乳突肌",
+      "药罐刮法",
+      "天宗穴牵拉",
+      "通络透骨喷剂",
+      "贴敷6-8小时",
+      "减少肩关节过度活动"
+    ]
+  },
+  {
+    "id": "KB-IR-TX-C0034",
+    "title": "病例治疗参考：肩关节关节病治疗效果",
+    "content": "治疗效果：经过手法复位治疗和中药外敷，肩关节功能得到了很好的恢复。建议继续养护和定期随访。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note",
+      "treatment_plan_text",
+      "health_advice"
+    ],
+    "tags": [
+      "病例",
+      "治疗效果",
+      "肩关节功能恢复",
+      "手法复位",
+      "中药外敷",
+      "定期随访"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "颈肩",
+      "肩关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "治疗效果",
+      "手法复位治疗",
+      "中药外敷",
+      "肩关节功能恢复",
+      "继续养护",
+      "定期随访"
+    ]
+  },
+  {
+    "id": "KB-IR-TX-C0035",
+    "title": "病例治疗参考：肩关节关节病随访情况",
+    "content": "随访情况：于一月、两月后分别进行了两次随访。检查结果显示右肩关节功能良好，无明显异常。建议继续注意保护肩关节部位，避免再次受伤。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note",
+      "treatment_plan_text",
+      "health_advice"
+    ],
+    "tags": [
+      "病例",
+      "随访情况",
+      "肩关节功能良好",
+      "无明显异常",
+      "避免再次受伤"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "颈肩",
+      "肩关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "随访情况",
+      "一月两月后两次随访",
+      "右肩关节功能良好",
+      "无明显异常",
+      "保护肩关节部位",
+      "避免再次受伤"
+    ]
+  },
+  {
+    "id": "KB-IR-TX-C0036",
+    "title": "病例治疗参考：腰部疼痛现病史",
+    "content": "现病史：患者于3个月前无明显诱因出现腰部疼痛，呈持续性，活动后加剧，休息后可缓解。疼痛以腰部正中为主，无明显放射痛。曾自行服用止痛药，症状略有缓解但未彻底治愈。近1周来腰痛加重，夜间明显并影响睡眠。患者自述无发热、畏寒、咳嗽、咳痰等症状，饮食及二便正常。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "病例",
+      "现病史",
+      "腰部疼痛",
+      "活动后加重",
+      "夜间痛",
+      "无放射痛"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "腰背",
+      "脊柱背部"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "腰部疼痛现病史",
+      "活动后加剧休息后缓解",
+      "腰部正中疼痛",
+      "无明显放射痛",
+      "近1周加重",
+      "夜间明显影响睡眠"
+    ]
+  },
+  {
+    "id": "KB-IR-TX-C0037",
+    "title": "病例治疗参考：腰椎间盘突出与腰肌劳损诊断",
+    "content": "诊断：1、腰椎间盘突出（L4-5、L5-S1）；2、腰肌劳损。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "病例",
+      "诊断",
+      "腰椎间盘突出",
+      "L4-5",
+      "L5-S1",
+      "腰肌劳损"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 10,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "腰背",
+      "脊柱背部"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "腰椎间盘突出",
+      "L4-5",
+      "L5-S1",
+      "腰肌劳损",
+      "腰部病例诊断"
+    ]
+  },
+  {
+    "id": "KB-IR-TX-C0038",
+    "title": "病例治疗参考：腰椎间盘突出与腰肌劳损治疗过程",
+    "content": "治疗过程：1、涂：在腰部疼痛位置涂抹跌打损伤型药膏，进行局部消炎消肿止痛；在腰肌部位、夹脊穴及环跳穴进行点按放松；从上到下缓慢推按，可进行斜向牵拉，拉开椎间隙。2、刮：使用药罐在腰肌上进行刮法，帮助排风寒湿邪；在腰部患处轻轻拔药罐，配合抖罐技术，促进穴位渗透。3、正：在脊柱两侧夹脊穴用手法进行拨法，以正骨理筋；拍委中穴（每侧36下），然后在涂抹了温阳通络型药物的腰肌上进行拍打，促进吸收，并轻叩环跳穴。4、贴：使用传统黑膏药贴敷腰部；因面积较大，可在腰部主要疼痛处及骶骨八髎穴各贴一贴，持续6-8小时。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "病例",
+      "治疗过程",
+      "腰椎间盘突出",
+      "腰肌劳损",
+      "夹脊穴",
+      "环跳穴",
+      "八髎穴"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 10,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "腰背",
+      "脊柱背部"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "腰部治疗过程",
+      "跌打损伤型药膏",
+      "夹脊穴环跳穴",
+      "药罐刮法",
+      "正骨理筋",
+      "委中穴",
+      "骶骨八髎穴",
+      "黑膏药贴敷6-8小时"
+    ]
+  }
+]
