@@ -75,7 +75,6 @@ nginx.log
 # ==================== RAG ====================
 /rag/dataset/
 /rag/kb/*
-!/rag/kb/knowledge_base.jsonl
 !/rag/kb/knowledge_base.json
 rag/so/
 rag/go_embedder
