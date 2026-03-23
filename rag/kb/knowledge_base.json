@@ -9783,5 +9783,51 @@
       "减少高温干扰",
       "检查前准备"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0092",
+    "title": "手术针灸理疗和手法治疗可导致局部温度改变",
+    "content": "手术、针灸、热源性理疗及手法治疗等干预，均可能导致局部温度发生改变，并在热图上形成异常高温或低温表现。判读时应结合近期治疗史，避免将治疗后温度变化误认为原发病理改变。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "手术",
+      "针灸",
+      "热源性理疗",
+      "手法治疗",
+      "局部温度改变",
+      "治疗史"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "手术针灸理疗手法治疗",
+      "局部温度改变",
+      "近期治疗史",
+      "异常高温或低温表现",
+      "避免误判病理改变"
+    ]
   }
 ]
