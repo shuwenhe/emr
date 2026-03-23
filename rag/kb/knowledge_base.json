@@ -11652,5 +11652,45 @@
       "颈肩腰腿痛辨证分型",
       "慢性腰肌劳损诊断分期疗效评价"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0136",
+    "title": "急慢性颈肩痛患者热像表现可存在差异",
+    "content": "通过观察颈肩痛患者的红外热像图可发现，急性颈肩痛患者疼痛部位温度通常明显高于周围组织；而慢性颈肩痛患者疼痛部位的热像表现则不尽相同，多数呈低温改变，少数可呈高温改变。判读时应结合病程长短及临床表现综合分析。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "颈肩痛",
+      "急性疼痛",
+      "慢性疼痛",
+      "高温改变",
+      "低温改变",
+      "热像差异"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "急性颈肩痛疼痛部位温度高",
+      "慢性颈肩痛多呈低温改变",
+      "少数呈高温改变",
+      "颈肩痛热像特征"
+    ]
   }
 ]
