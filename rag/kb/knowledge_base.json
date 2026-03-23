@@ -10891,6 +10891,52 @@
     ]
   },
   {
+    "id": "KB-IR-BG-0119",
+    "title": "平片基础上辅以CT检查的适用情形",
+    "content": "多数情况下，在平片基础上，如需进一步了解较小范围的骨质破坏及髓腔情况、骨内或软组织内的钙化或骨化，以及软组织病变时，通常需要辅以CT检查，以提高病变显示与评估的准确性。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "平片",
+      "CT检查",
+      "骨质破坏",
+      "髓腔",
+      "钙化",
+      "骨化",
+      "软组织病变"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "脊柱背部",
+      "四肢",
+      "骨盆",
+      "胸腹部"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "平片基础上辅以CT",
+      "较小范围骨质破坏",
+      "髓腔情况",
+      "骨内或软组织内钙化骨化",
+      "软组织病变"
+    ]
+  },
+  {
     "id": "KB-IR-BG-0120",
     "title": "CT及CT脊髓造影可清楚显示脊髓与椎管结构关系",
     "content": "由于脊髓被骨性椎管及其邻近结构遮挡，普通脊柱X线片较难直接显示。CT扫描可形成轴位图像，联合CT脊髓造影后，可较清楚地显示脊髓与骨性椎管及周围结构之间的相互关系，为相关病变判断提供依据。",
@@ -11194,52 +11240,6 @@
       "热图检查设备",
       "局部热异常",
       "功能评估与随访"
-    ]
-  },
-  {
-    "id": "KB-IR-BG-0119",
-    "title": "平片基础上辅以CT检查的适用情形",
-    "content": "多数情况下，在平片基础上，如需进一步了解较小范围的骨质破坏及髓腔情况、骨内或软组织内的钙化或骨化，以及软组织病变时，通常需要辅以CT检查，以提高病变显示与评估的准确性。",
-    "category": "interpretation_rule",
-    "report_sections": [
-      "diagnosis",
-      "doctor_opinion",
-      "report_note"
-    ],
-    "tags": [
-      "平片",
-      "CT检查",
-      "骨质破坏",
-      "髓腔",
-      "钙化",
-      "骨化",
-      "软组织病变"
-    ],
-    "source": "设备操作说明（用户补充）",
-    "source_type": "internal_sop",
-    "priority": 8,
-    "status": "active",
-    "patient_scope": [
-      "adult"
-    ],
-    "body_parts": [
-      "脊柱背部",
-      "四肢",
-      "骨盆",
-      "胸腹部"
-    ],
-    "risk_levels": [
-      "low",
-      "medium",
-      "high"
-    ],
-    "evidence_level": "internal_sop",
-    "retrieval_hints": [
-      "平片基础上辅以CT",
-      "较小范围骨质破坏",
-      "髓腔情况",
-      "骨内或软组织内钙化骨化",
-      "软组织病变"
     ]
   }
 ]
