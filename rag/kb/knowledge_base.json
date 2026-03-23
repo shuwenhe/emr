@@ -11734,5 +11734,46 @@
       "尚不能准确定位病变椎间盘",
       "综合判断"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0138",
+    "title": "红外热像对膝关节骨性关节炎具有一定诊断价值",
+    "content": "红外热像图能够较准确地呈现膝关节骨性关节炎患者局部温度及热像图变化，对膝关节疾病评估具有一定的辅助诊断价值。判读时仍应结合临床症状、体征及其他检查结果综合分析。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "红外热像图",
+      "膝关节骨性关节炎",
+      "局部温度",
+      "热像变化",
+      "辅助诊断",
+      "膝关节疾病"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "膝关节",
+      "下肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "红外热像图对膝关节骨性关节炎",
+      "局部温度及热像图变化",
+      "有一定诊断价值",
+      "膝关节疾病评估"
+    ]
   }
 ]
