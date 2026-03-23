@@ -7466,5 +7466,48 @@
       "人体红外辐射",
       "红外热成像基础"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0037",
+    "title": "正常人体热态的稳定性与热场特征",
+    "content": "正常人体的热态和温度分布通常具有一定的稳定性与特征性。由于机体各部位温度并不完全相同，因此会形成具有区域差异的人体热场，这也是红外热成像判读体表温度分布的重要基础。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "正常人体热态",
+      "温度分布",
+      "热场",
+      "稳定性",
+      "区域差异"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "正常人体热态",
+      "温度分布稳定性",
+      "人体热场",
+      "区域差异",
+      "红外热成像判读基础"
+    ]
   }
 ]
