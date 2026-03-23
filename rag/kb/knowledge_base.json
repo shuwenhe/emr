@@ -14840,5 +14840,45 @@
       "负压改善气血",
       "颈椎病非手术治疗"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0221",
+    "title": "神经根型颈椎病常用非手术治疗：针刀治疗",
+    "content": "针刀治疗可用于神经根型颈椎病的非手术干预，通过针刀剥离颈部软组织粘连、松解挛缩，以消除局部病理因素，从而缓解颈肩疼痛、麻木等临床症状。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "神经根型颈椎病",
+      "非手术治疗",
+      "针刀",
+      "剥离粘连",
+      "颈部粘连",
+      "缓解症状"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "针刀剥离颈部粘连",
+      "缓解神经根型颈椎病症状",
+      "针刀非手术治疗",
+      "颈椎病针刀松解"
+    ]
   }
 ]
