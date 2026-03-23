@@ -10416,6 +10416,50 @@
     ]
   },
   {
+    "id": "KB-IR-BG-0109",
+    "title": "X线检查对脊柱和关节骨结构病变诊断具有重要作用",
+    "content": "骨组织属于人体硬组织，含钙量较多、密度较高，X线不易穿透。由于脊柱和关节病变常可反映为骨结构改变，因此X线检查在相关疾病诊断中具有重要作用。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "骨组织",
+      "X线检查",
+      "脊柱",
+      "关节",
+      "骨结构改变",
+      "影像诊断"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "脊柱背部",
+      "四肢",
+      "膝关节",
+      "骶髂关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "骨组织含钙量多密度高",
+      "X线不易穿透",
+      "骨结构改变",
+      "X线检查对诊断重要"
+    ]
+  },
+  {
     "id": "KB-IR-BG-0104",
     "title": "手肘部背侧位标准图可作为采集参考",
     "content": "手肘部背侧位热成像采集时，宜参照背侧位标准图进行体位摆放和图像采集，以保证肘后区、鹰嘴周围及邻近软组织区域显示清晰，便于观察后侧温度分布和局部异常热区。",
