@@ -11948,5 +11948,45 @@
       "寒热信息客观化可视化数据化",
       "广泛应用前提"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0143",
+    "title": "红外热成像在中医药量化和现代化研究中具有发展前景",
+    "content": "红外热成像技术在中医药领域研究中具有较大的发展空间和良好的应用前景。该技术有望为中医药量化研究和现代化研究提供有力支持，并可能成为现代中医临床诊疗中的重要辅助工具。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "红外热成像技术",
+      "中医药量化",
+      "中医药现代化",
+      "发展前景",
+      "辅助工具",
+      "中医临床"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "中医药领域更大发展空间",
+      "中医药量化和现代化研究",
+      "良好发展前景",
+      "现代中医临床诊疗辅助工具",
+      "中医CT"
+    ]
   }
 ]
