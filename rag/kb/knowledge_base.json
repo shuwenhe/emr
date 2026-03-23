@@ -13828,5 +13828,46 @@
       "不能配合治疗",
       "不宜施治"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0193",
+    "title": "膝关节镜可用于膝关节病变的观察与微创处理",
+    "content": "膝关节镜是一种用于膝关节内部结构观察、诊断及微创治疗操作的专用设备，可辅助评估关节软骨、半月板、滑膜及韧带等病变情况。其在膝关节疾病诊疗中具有较重要的应用价值。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "treatment_plan_text",
+      "report_note"
+    ],
+    "tags": [
+      "膝关节镜",
+      "膝关节",
+      "微创处理",
+      "半月板",
+      "滑膜",
+      "韧带"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "膝关节",
+      "下肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "膝关节镜",
+      "膝关节内部结构观察",
+      "微创治疗操作",
+      "半月板滑膜韧带病变"
+    ]
   }
 ]
