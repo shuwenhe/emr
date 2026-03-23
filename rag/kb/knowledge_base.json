@@ -7951,5 +7951,44 @@
       "高温点温度",
       "图像信息传送计算机"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0049",
+    "title": "现代医学数字红外热成像技术的探测平台与标准化建设",
+    "content": "现代医学数字红外热成像技术通常采用非制冷焦平面阵列探测器，通过遥感测量方式采集人体热态信息。在技术应用过程中，可逐步建立健康人群能量热态分布图数据库、常规定标值以及标准化评估诊断系统，从而为临床判读和科研分析提供统一基础。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "diagnosis"
+    ],
+    "tags": [
+      "非制冷焦平面阵列",
+      "遥感测量",
+      "热态分布图数据库",
+      "定标值",
+      "标准化评估",
+      "诊断系统"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "非制冷焦平面阵列探测器",
+      "遥感测量",
+      "健康人群热态分布图数据库",
+      "常规定标值",
+      "标准化评估诊断系统"
+    ]
   }
 ]
