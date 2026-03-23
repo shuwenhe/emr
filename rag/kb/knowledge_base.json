@@ -16831,5 +16831,49 @@
       "C5/6神经根受压关系评估",
       "颈椎术前影像路径规划"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0267",
+    "title": "典型病例4（霍某）：术前颈椎MR矢状位及轴位像（T2-WI）",
+    "content": "术前完成颈椎MR矢状位及轴位T2加权成像（T2-WI）检查，用于评估椎间盘突出形态、脊髓及神经根受压情况，并与临床症状体征进行节段对应分析，为后续治疗方案选择提供依据。",
+    "category": "case_study",
+    "report_sections": [
+      "diagnosis",
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "典型病例",
+      "霍某",
+      "术前检查",
+      "颈椎MR",
+      "矢状位",
+      "轴位",
+      "T2-WI",
+      "神经根受压评估"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "male"
+    ],
+    "body_parts": [
+      "颈椎",
+      "脊髓",
+      "神经根"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "术前颈椎MR矢状位轴位T2-WI",
+      "颈椎T2加权像评估神经根脊髓",
+      "神经根型颈椎病术前MRI"
+    ]
   }
 ]
