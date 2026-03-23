@@ -13639,5 +13639,45 @@
       "桡骨茎突狭窄性腱鞘炎",
       "滑囊炎"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0188",
+    "title": "相关微创治疗可用于部分下肢疾病",
+    "content": "在下肢疾病中，相关微创治疗技术可应用于膝关节骨性关节炎、跟痛症等情况。具体适应证仍应结合病变性质、疼痛程度及功能受限情况综合判断。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment_plan_text",
+      "report_note"
+    ],
+    "tags": [
+      "下肢",
+      "膝关节骨性关节炎",
+      "跟痛症",
+      "微创治疗",
+      "适应证"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "下肢",
+      "膝关节",
+      "足部"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "下肢适应证",
+      "膝关节骨性关节炎",
+      "跟痛症",
+      "微创治疗"
+    ]
   }
 ]
