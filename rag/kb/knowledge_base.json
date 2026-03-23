@@ -8501,5 +8501,48 @@
       "结合临床背景",
       "提高判读准确性"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0062",
+    "title": "红外热像检查中的标准体位",
+    "content": "红外热像检查应采用标准体位进行采集，以保证不同受检者之间以及同一受检者不同时间点热图结果的可比性。标准体位有助于减少姿势差异带来的温度分布偏差，提高图像分析和临床判读质量。",
+    "category": "sop_acquisition",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "标准体位",
+      "姿势差异",
+      "结果可比性",
+      "图像分析",
+      "临床判读"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "标准体位",
+      "结果可比性",
+      "姿势差异",
+      "温度分布偏差",
+      "红外热像检查"
+    ]
   }
 ]
