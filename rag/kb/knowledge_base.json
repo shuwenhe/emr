@@ -7311,5 +7311,44 @@
       "无辐射伤害",
       "红外热成像检查安全"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0033",
+    "title": "热成像诊断系统的主要功能",
+    "content": "热成像诊断系统通常具备图像采集、图像分析、温区测定、图像存储、图像查询和图像比较等多种功能，可满足临床诊断辅助和科学研究的基本需要。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "热成像诊断系统",
+      "图像采集",
+      "图像分析",
+      "温区测定",
+      "图像存储",
+      "图像比较"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 6,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "热成像诊断系统",
+      "图像采集",
+      "图像分析",
+      "温区测定",
+      "图像存储",
+      "图像查询",
+      "图像比较"
+    ]
   }
 ]
