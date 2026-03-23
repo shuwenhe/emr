@@ -6317,5 +6317,41 @@
       "热图指向作用",
       "明确诊疗方向"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0007",
+    "title": "脊柱关节肌骨病红外热成像彩色图谱",
+    "content": "脊柱关节肌骨病红外热成像彩色图谱。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note"
+    ],
+    "tags": [
+      "图谱",
+      "红外热成像",
+      "脊柱关节肌骨病"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 5,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "脊柱关节肌骨病红外热成像彩色图谱",
+      "图谱",
+      "红外热成像"
+    ]
   }
 ]
