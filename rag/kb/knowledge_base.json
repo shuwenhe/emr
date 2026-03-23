@@ -10760,6 +10760,52 @@
     ]
   },
   {
+    "id": "KB-IR-BG-0117",
+    "title": "三维C臂及NaviLink3D可提升骨科导航精度与流程效率",
+    "content": "具有190°运动轨道的三维C臂适用于上肢、下肢骨与关节、胸部、腰椎、骨盆与臀部以及上颌区域等部位的三维成像。该类C臂可配备NaviLink3D等直接3D导航界面，将C臂成像能力与高精度外科导航结合，无需对三维成像解剖结构进行人工配准，有助于提高骨科导航准确性并优化临床工作流程。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "三维C臂",
+      "190度运动轨道",
+      "NaviLink3D",
+      "3D导航界面",
+      "骨科导航",
+      "工作流程优化"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "上肢",
+      "下肢",
+      "胸腹部",
+      "腰背",
+      "骨盆"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "三维成像190度运动轨道",
+      "三维C臂",
+      "NaviLink3D",
+      "直接3D导航界面",
+      "提高骨科导航准确性"
+    ]
+  },
+  {
     "id": "KB-IR-BG-0104",
     "title": "手肘部背侧位标准图可作为采集参考",
     "content": "手肘部背侧位热成像采集时，宜参照背侧位标准图进行体位摆放和图像采集，以保证肘后区、鹰嘴周围及邻近软组织区域显示清晰，便于观察后侧温度分布和局部异常热区。",
