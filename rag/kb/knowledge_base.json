@@ -11429,5 +11429,51 @@
       "体表温度分布",
       "异常区域筛查"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0131",
+    "title": "红外热成像可通过信号转换形成可分析的热图图像",
+    "content": "红外热成像技术的工作原理是利用红外探测器接收目标发出的红外辐射能量，并经过信号处理，将其转换为便于测量和分析的电信号，再通过数字信号处理、模数转换等过程，最终形成可直观查看和分析的热图图像。通过对热信息的分析，可辅助判断目标内部功能或结构异常情况。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "红外热成像",
+      "红外探测器",
+      "数字信号处理",
+      "模数转换",
+      "热图图像",
+      "热信息分析"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "红外探测器接收红外辐射能",
+      "数字信号处理和模数转换",
+      "形成可分析热图图像",
+      "通过热信息分析探查内部情况"
+    ]
   }
 ]
