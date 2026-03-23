@@ -12479,5 +12479,156 @@
       "规范操作增强针感提高疗效",
       "预防异常情况发生"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0157",
+    "title": "针刀疗法形成于20世纪70年代并逐步发展为针刀医学",
+    "content": "针刀诞生于20世纪70年代中期，1986年开始在全国推广。2003年，针刀疗法经国家鉴定定名为“针刀医学”，标志着针刀医学作为相对独立的诊疗体系逐步形成。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "针刀",
+      "针刀疗法",
+      "针刀医学",
+      "发展沿革",
+      "20世纪70年代",
+      "2003年"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "针刀诞生于20世纪70年代",
+      "1986年全国推广",
+      "2003年定名针刀医学",
+      "针刀医学诞生"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0158",
+    "title": "针刀是融合针灸针与手术刀特点的医疗器械",
+    "content": "针刀是中西医结合背景下形成的一种医疗器械，可理解为将针灸针与手术刀的特点融为一体。其基本含义是在以针的方式进入人体的同时，在体内完成类似手术刀的功能。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "针刀",
+      "中西医结合",
+      "针灸针",
+      "手术刀",
+      "医疗器械",
+      "器械定义"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "针刀是中西医结合的产物",
+      "将针灸针和手术刀融为一体",
+      "以针的方式进入人体",
+      "体内完成手术刀功能"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0159",
+    "title": "针刀一般由刃体柄组成并可按临床需要选择规格",
+    "content": "针刀一般由刃、体和柄三部分组成，器械种类较多。临床应用中可根据不同病情、治疗部位和操作需求，选择相应类型及规格的针刀。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "针刀结构",
+      "刃",
+      "体",
+      "柄",
+      "器械规格",
+      "临床选择"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "针刀由刃体柄组成",
+      "针刀种类较多",
+      "根据临床需要选择不同类型及规格"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0160",
+    "title": "判断是否属于针刀范畴关键在于理论与诊治方法",
+    "content": "从器械角度看，部分刃针或较细针具在外形上可能与针刀存在相似之处，但针刀医学的核心并不只在于工具本身。判断是否属于针刀范畴，更关键的是其所依据的指导理论和独特诊治方法，而非仅凭器械形态相似。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "针刀医学",
+      "指导理论",
+      "诊治方法",
+      "器械范畴",
+      "刃针",
+      "工具属性"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "是否属于针刀范畴关键在于指导理论",
+      "独特诊治方法",
+      "不只看器械形态",
+      "针刀医学核心"
+    ]
   }
 ]
