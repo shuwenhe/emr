@@ -11515,5 +11515,52 @@
       "疗效评价",
       "随访观察"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0133",
+    "title": "红外热成像技术可为中医药学提供新的诊疗与科研手段",
+    "content": "红外热成像技术已较广泛地应用于中医药学领域，可为中医诊断、中医临床疗效评价及中医科研等方面提供新的思路和技术手段。通过体表热图信息分析，可为中医辨证及疗效观察提供辅助参考。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "红外热成像技术",
+      "中医药学",
+      "中医诊断",
+      "疗效评价",
+      "中医科研",
+      "辅助参考"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "红外热成像技术应用于中医药学",
+      "中医诊断",
+      "中医临床疗效评价",
+      "中医科研",
+      "新的思路和手段"
+    ]
   }
 ]
