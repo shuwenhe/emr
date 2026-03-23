@@ -7990,5 +7990,53 @@
       "常规定标值",
       "标准化评估诊断系统"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0050",
+    "title": "基于热态空间分布的自动识别与分级测评发展趋势",
+    "content": "依据不同研究对象（如病种或证候），对人体热态进行自动识别和分级测评，并以数字化图像形式显示某一系统或局部区域的温度分布场，是红外热成像技术发展的重要方向。基于人体热态空间分布状态开展计算机自动分析，并判断其与疾病之间的相关性，被视为该领域进一步发展的必然趋势。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "diagnosis"
+    ],
+    "tags": [
+      "自动识别",
+      "分级测评",
+      "热态空间分布",
+      "数字化图像",
+      "计算机自动分析",
+      "发展趋势"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "热态自动识别",
+      "分级测评",
+      "温度分布场",
+      "计算机自动分析",
+      "疾病相关性判断",
+      "发展趋势"
+    ]
   }
 ]
