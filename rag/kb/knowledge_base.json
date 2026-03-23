@@ -8296,5 +8296,48 @@
       "检查顺序",
       "减少热图干扰"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0057",
+    "title": "待检及检查期间避免按压抓挠摩擦身体部位",
+    "content": "受检者在待检和检查期间不宜按压、抓挠或摩擦身体各部位，以免引起局部温度变化，从而影响红外热像检查结果。",
+    "category": "sop_preparation",
+    "report_sections": [
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "按压",
+      "抓挠",
+      "摩擦",
+      "局部温度变化",
+      "检查期间注意事项"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "待检期间不得按压抓挠摩擦",
+      "检查期间注意事项",
+      "局部温度变化",
+      "影响检查结果",
+      "红外热像检查"
+    ]
   }
 ]
