@@ -11241,5 +11241,52 @@
       "局部热异常",
       "功能评估与随访"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0127",
+    "title": "医用红外热像技术可将人体红外辐射信息转化为热图",
+    "content": "医用红外热像技术是医学技术、红外摄像技术及计算机多媒体技术相结合的产物。该技术利用人体自身可作为天然红外辐射源的特点，通过光学扫描系统采集人体体表红外辐射能量，经过光电信号转换与处理，最终以红外热图形式记录人体体表红外辐射信息，是一种先进的非接触成像探测技术。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "医用红外热像技术",
+      "红外辐射",
+      "热图",
+      "非接触成像",
+      "光电转换",
+      "探测技术"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "医用红外热像技术",
+      "人体天然红外辐射源",
+      "光学扫描系统采集体表红外辐射",
+      "红外热图",
+      "非接触成像探测技术"
+    ]
   }
 ]
