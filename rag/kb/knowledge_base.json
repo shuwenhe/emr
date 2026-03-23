@@ -7386,5 +7386,49 @@
       "体表温度分布",
       "热图像"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0035",
+    "title": "皮肤温度变化对深层组织生理状态的提示意义",
+    "content": "皮肤是人体深层组织与外界环境之间的重要界面，在维持和反映深层组织温度状态方面具有重要作用。观测皮肤温度变化，有助于了解多种人体生理问题，尤其是与热调节、循环和代谢相关的功能状态。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "皮肤温度",
+      "深层组织",
+      "热调节",
+      "循环",
+      "代谢",
+      "生理状态"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "皮肤温度变化",
+      "深层组织",
+      "热调节",
+      "循环与代谢",
+      "生理状态提示"
+    ]
   }
 ]
