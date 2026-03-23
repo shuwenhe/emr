@@ -11775,5 +11775,52 @@
       "有一定诊断价值",
       "膝关节疾病评估"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0139",
+    "title": "红外热成像技术具有无创无辐射和动态评估等特点",
+    "content": "红外热成像技术具有无创、无接触、无有害辐射、可重复检查、信息量较大及动态评估等特点。其能够较直观地反映体表温度分布和相对差异，适用于功能状态观察、异常区域筛查及治疗前后变化的辅助评估。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "红外热成像技术",
+      "无创",
+      "无辐射",
+      "动态评估",
+      "体表温度分布",
+      "可重复检查"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "红外热成像技术特点",
+      "无创无接触无有害辐射",
+      "可重复检查",
+      "动态评估",
+      "体表温度分布"
+    ]
   }
 ]
