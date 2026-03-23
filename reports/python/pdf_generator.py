@@ -176,6 +176,7 @@ def _severity_from_value(value: Any) -> str:
 _ADVICE_NUM_RE = re.compile(r"^\s*(?:\d+[.、。)）]\s*)+")
 _ADVICE_REF_RE = re.compile(r"\[(?:\s*\d+\s*(?:,\s*\d+\s*)*)\]")
 _ADVICE_NOISE_RE = re.compile(r"\[\s*['\"]?\s*['\"]?(?:\s*,\s*['\"]?\s*['\"]?)*\s*\]")
+_LEADING_BULLET_RE = re.compile(r"^\s*[·•]\s*")
 
 
 def _strip_advice_num(line: str) -> str:
@@ -191,6 +192,15 @@ def _clean_advice_text(line: str) -> str:
     # Normalize extra spaces left after marker removal.
     text = re.sub(r"\s{2,}", " ", text)
     return text.strip()
+
+
+def _format_pdf_list_line(line: str) -> str:
+    text = _LEADING_BULLET_RE.sub("", str(line or "")).strip()
+    if not text:
+        return ""
+    if _ADVICE_NUM_RE.match(text):
+        return text
+    return f"· {text}"
 
 
 def _expand_advice_value(value: Any) -> List[str]:
@@ -868,8 +878,10 @@ def generate_pdf_report(
         story.append(_paragraph("补充解读", styles["subsection"]))
         story.append(Spacer(1, 2 * mm))
         for line in kb_lines:
-            story.append(_paragraph(f"· {line}", styles["small"]))
-            story.append(Spacer(1, 1 * mm))
+            formatted = _format_pdf_list_line(line)
+            if formatted:
+                story.append(_paragraph(formatted, styles["small"]))
+                story.append(Spacer(1, 1 * mm))
     story.append(PageBreak())
 
     # ── 六、医生意见 ──────────────────────────────────────────────────────────
