@@ -11862,5 +11862,45 @@
       "中医辨证辅助",
       "应用前景"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0141",
+    "title": "红外热成像技术具有安全环保和费用较低等优点",
+    "content": "红外热成像技术不会对人体造成创伤，也不会污染环境，具有无辐射、非接触、安全、实用及费用相对较低等优点。该特点使其适用于临床筛查、功能评估及重复随访等应用场景。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "红外热成像技术",
+      "无辐射",
+      "非接触",
+      "安全",
+      "费用低廉",
+      "环保"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "红外热成像技术不会伤害人体",
+      "不会污染环境",
+      "无辐射非接触",
+      "安全实用费用低廉",
+      "重复随访"
+    ]
   }
 ]
