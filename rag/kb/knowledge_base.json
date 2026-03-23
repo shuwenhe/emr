@@ -8676,5 +8676,51 @@
       "显示疼痛部位性质程度",
       "反映炎症部位范围程度"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0066",
+    "title": "红外热像读图应结合患者主诉和体征",
+    "content": "红外热像读图时应与临床紧密结合，重点了解患者主诉、查体体征与热图表现是否相互契合。只有将热图结果与临床信息综合分析，才能提高判读的准确性和实际参考价值。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "diagnosis",
+      "report_note"
+    ],
+    "tags": [
+      "读图原则",
+      "患者主诉",
+      "查体体征",
+      "临床结合",
+      "综合分析"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "读图应与临床紧密结合",
+      "患者主诉",
+      "查体体征",
+      "热图是否相契合",
+      "综合分析"
+    ]
   }
 ]
