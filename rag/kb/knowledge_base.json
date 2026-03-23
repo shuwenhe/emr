@@ -7640,5 +7640,41 @@
       "温度分布可视化",
       "仪器工作原理"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0041",
+    "title": "红外热成像仪作为被动式探测仪器的原理",
+    "content": "红外热成像仪基于自然界中一切高于绝对零度（-273.15℃）的物体都会辐射红外线这一现象工作。设备利用红外探测器探测目标、背景以及目标各部分之间红外热辐射温度差异，并将这种差异转换和成像，因此属于一种被动式探测仪器。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "被动式探测",
+      "绝对零度",
+      "红外线辐射",
+      "温度差异",
+      "红外探测器"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "被动式探测仪器",
+      "高于绝对零度都会辐射红外线",
+      "目标背景温度差异",
+      "红外探测器",
+      "红外热成像仪原理"
+    ]
   }
 ]
