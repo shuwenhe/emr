@@ -12784,5 +12784,114 @@
       "解除神经卡压",
       "恢复软组织动态平衡"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0165",
+    "title": "针刀治疗应注重针刺与刀刃的综合效应",
+    "content": "针刀治疗中应重视针刺效应与刀刃效应的综合发挥。在合适情况下，同时运用两种作用机制，往往有助于提高整体治疗效果。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "针刀",
+      "综合效应",
+      "针刺效应",
+      "刀刃效应",
+      "治疗效果"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "针刀综合效应",
+      "针刺与刀刃综合发挥",
+      "提高整体治疗效果"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0166",
+    "title": "针刀可对敏感穴位与病变组织联合施治",
+    "content": "当患者同时存在敏感穴位和病变组织时，可利用小针刀的针灸样效应刺激相关穴位，同时利用刀刃样效应对病变组织进行处理，从而综合发挥两类作用，争取更好的治疗效果。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "小针刀",
+      "敏感穴位",
+      "病变组织",
+      "联合施治",
+      "针灸样效应",
+      "刀刃样效应"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "敏感穴位和病变组织联合施治",
+      "小针刀针灸效应",
+      "手术刀效应",
+      "综合发挥两种效应"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0167",
+    "title": "坚持中西医结合是针刀医学发展的基础",
+    "content": "坚持中西医结合的道路，是针刀医学立足与持续发展的基础。针刀医学的形成与应用，强调在中医理论指导下融合现代医学方法，以提升临床诊疗效果。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "针刀医学",
+      "中西医结合",
+      "发展基础",
+      "中医理论",
+      "现代医学方法"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "中西医结合是针刀医学立足发展之本",
+      "针刀医学发展基础",
+      "融合现代医学方法"
+    ]
   }
 ]
