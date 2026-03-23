@@ -8464,5 +8464,42 @@
       "减少遮挡和外界干扰",
       "热图采集质量"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0061",
+    "title": "受检者应如实告知既往病史手术和用药情况",
+    "content": "在红外热像检查过程中，如医生询问受检者既往病史、手术情况和用药情况，受检者应如实告知，以便结合临床背景正确理解热图表现并提高判读准确性。",
+    "category": "sop_preparation",
+    "report_sections": [
+      "report_note",
+      "health_advice",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "既往病史",
+      "手术情况",
+      "用药情况",
+      "如实告知",
+      "判读准确性"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "如实告知既往病史",
+      "手术情况",
+      "用药情况",
+      "结合临床背景",
+      "提高判读准确性"
+    ]
   }
 ]
