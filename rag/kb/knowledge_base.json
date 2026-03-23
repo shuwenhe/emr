@@ -9307,5 +9307,54 @@
       "局部接触刺激",
       "避免误判病理变化"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0081",
+    "title": "外界条件与受检者状态共同影响干扰热图形成",
+    "content": "红外热像检查与外界温度、湿度、空气流动等条件密切相关，同时也直接受受检者生理状态、情绪状态、饮食情况、运动状态及既往病史等因素影响。若患者检查前准备不足，容易出现干扰热图，从而成为影响诊断判断的重要因素。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "外界温度",
+      "湿度",
+      "空气流动",
+      "情绪状态",
+      "饮食状态",
+      "运动状态",
+      "既往病史",
+      "干扰热图"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "外界温度湿度空气流动",
+      "受检者生理状态情绪饮食运动",
+      "既往病史",
+      "患者准备不足",
+      "干扰热图",
+      "影响诊断因素"
+    ]
   }
 ]
