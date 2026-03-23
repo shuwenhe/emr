@@ -74,7 +74,6 @@ nginx.log
 
 # ==================== RAG ====================
 /rag/dataset/
-/rag/脊柱关节肌骨病红外热成像彩色图谱/
 /rag/kb/*
 /rag/kb/脊柱关节肌骨病红外热成像彩色图谱/
 !/rag/kb/knowledge_base.jsonl
