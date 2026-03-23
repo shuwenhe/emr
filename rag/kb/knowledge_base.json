@@ -12893,5 +12893,152 @@
       "针刀医学发展基础",
       "融合现代医学方法"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0168",
+    "title": "射频等离子手术系统技术源于高能等离子相关研究",
+    "content": "射频等离子手术系统的技术原理可追溯至高能等离子相关研究，早期与带电粒子等领域研究有关，后经医学与电子工程等多学科协作发展，逐步转化应用于医学临床。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "射频等离子手术系统",
+      "电外科能量平台",
+      "技术来源",
+      "高能等离子",
+      "多学科协作"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "射频等离子手术系统技术原理",
+      "高能等离子技术",
+      "医学和电子工程师联合研制",
+      "转化应用于医学临床"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0169",
+    "title": "射频等离子技术已成为现代微创治疗的重要方式之一",
+    "content": "射频等离子技术现已应用于医学临床，并被视为现代微创治疗的重要方式之一。相较于部分传统治疗手段，其数字化、能量控制和微创处理特点使其在临床应用中具有一定优势。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "射频等离子技术",
+      "微创治疗",
+      "数字化",
+      "能量控制",
+      "临床应用"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "射频等离子技术现代微创治疗",
+      "数字化射频等离子",
+      "能量控制",
+      "临床优势"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0170",
+    "title": "射频等离子系统可与针刀等微创技术联合应用",
+    "content": "在临床实践中，射频等离子手术系统可与针刀、银质针等微创技术联合应用，以形成不同治疗思路的互补。该联合应用有助于整合现代微创技术与传统治疗经验，从而拓展综合治疗方案。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment_plan_text",
+      "report_note"
+    ],
+    "tags": [
+      "射频等离子手术系统",
+      "针刀",
+      "银质针",
+      "联合应用",
+      "微创技术",
+      "综合治疗"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "射频等离子和针刀银质针联合应用",
+      "微创技术联合应用",
+      "综合治疗方案"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0171",
+    "title": "射频等离子与传统经验结合体现多路径融合治疗思路",
+    "content": "射频等离子技术与针刀等传统经验技术的结合，体现了现代微观治疗方法与传统整体治疗思路的融合。其价值在于丰富临床干预手段，而具体疗效仍需结合适应证、操作规范及个体情况综合评估。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment_plan_text",
+      "report_note"
+    ],
+    "tags": [
+      "射频等离子",
+      "针刀",
+      "融合治疗",
+      "多路径治疗",
+      "适应证",
+      "综合评估"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "现代微观和传统整体治疗思路融合",
+      "射频等离子与针刀结合",
+      "多路径融合治疗思路",
+      "综合评估"
+    ]
   }
 ]
