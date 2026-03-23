@@ -10208,5 +10208,47 @@
       "标准体位",
       "采集参考"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0102",
+    "title": "足踝部正侧位标准图可作为采集参考",
+    "content": "足踝部热成像采集时，宜参照足踝部正位图和侧位图的标准体位进行拍摄，以保证踝关节、足背、足底及周围软组织区域显示清晰，便于比较双侧温度分布和识别局部异常热区。",
+    "category": "sop_preparation",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "足踝部",
+      "正位",
+      "侧位",
+      "标准图",
+      "采集参考",
+      "体位要求"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "踝关节",
+      "足部",
+      "下肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "足踝部正侧位",
+      "足踝部正位图",
+      "足踝部侧位图",
+      "标准体位",
+      "采集参考"
+    ]
   }
 ]
