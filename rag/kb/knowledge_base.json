@@ -13869,5 +13869,45 @@
       "微创治疗操作",
       "半月板滑膜韧带病变"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0194",
+    "title": "神经根型颈椎病可表现为颈肩及上肢放射性症状",
+    "content": "神经根型颈椎病是颈椎病常见类型之一，通常与神经根受压或刺激有关，可表现为颈肩部疼痛、上肢放射痛、麻木及感觉异常等症状。临床评估应结合病史、体征及影像学检查综合判断。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "神经根型颈椎病",
+      "颈椎病",
+      "神经根受压",
+      "上肢放射痛",
+      "麻木",
+      "感觉异常"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "上肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "神经根型颈椎病",
+      "神经根受压或刺激",
+      "颈肩痛上肢放射痛",
+      "麻木感觉异常"
+    ]
   }
 ]
