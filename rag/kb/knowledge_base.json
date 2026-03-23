@@ -7274,5 +7274,42 @@
       "科学研究",
       "红外热成像技术成熟"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0032",
+    "title": "红外热成像检查的被动接收与无创安全性",
+    "content": "红外热成像设备在检查过程中仅被动接收受检者自身辐射的红外信号，不向人体主动发射有害能量，因此对受检者通常无创、无接触、无辐射伤害。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "被动接收",
+      "无创",
+      "无接触",
+      "安全性",
+      "无辐射伤害"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "被动接收红外信号",
+      "无创安全性",
+      "无接触",
+      "无辐射伤害",
+      "红外热成像检查安全"
+    ]
   }
 ]
