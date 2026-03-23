@@ -13221,5 +13221,114 @@
       "使坚硬结缔组织延伸松软",
       "组织松解基础"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0177",
+    "title": "射频等离子波可通过弥散作用影响生物膜通透性",
+    "content": "弥散作用是指射频等离子波作用后，可提高生物膜通透性，并影响细胞膜对相关离子的通透状态，从而改变局部物质交换过程。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "弥散作用",
+      "射频等离子波",
+      "生物膜通透性",
+      "细胞膜",
+      "物质交换"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "弥散作用",
+      "提高生物膜通透性",
+      "射频等离子波",
+      "物质交换过程"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0178",
+    "title": "射频等离子弥散作用可增强离子交换并加速代谢",
+    "content": "射频等离子波作用后，细胞膜对钾、钙等离子的通透性可发生改变，从而增强生物膜弥散过程及相关交换，促进局部代谢活动。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment_plan_text",
+      "report_note"
+    ],
+    "tags": [
+      "离子通透性",
+      "钾离子",
+      "钙离子",
+      "弥散过程",
+      "局部代谢",
+      "交换"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "细胞膜对钾钙离子通透性改变",
+      "增强生物膜弥散过程",
+      "加速代谢"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0179",
+    "title": "射频等离子弥散作用有助于组织修复和炎症消退",
+    "content": "通过促进交换与代谢，射频等离子弥散作用有助于受损细胞和组织的清理、激活与修复，同时可改善局部微循环，并在一定程度上促进炎症消退。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment_plan_text",
+      "report_note"
+    ],
+    "tags": [
+      "组织修复",
+      "清理",
+      "激活",
+      "微循环",
+      "炎症消退",
+      "弥散作用"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "受损细胞组织清理激活修复",
+      "促进微循环",
+      "有助于炎症消除",
+      "射频等离子弥散作用"
+    ]
   }
 ]
