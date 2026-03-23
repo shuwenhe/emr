@@ -14709,5 +14709,48 @@
       "颈椎病牵引治疗",
       "神经根型颈椎病非手术治疗"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0218",
+    "title": "神经根型颈椎病常用非手术治疗：针灸治疗",
+    "content": "针灸治疗神经根型颈椎病时，主要沿颈夹脊穴行针刺操作，并配合选用肩部与上臂部相关穴位，以疏通经络、缓解颈肩疼痛及上肢放射症状。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "神经根型颈椎病",
+      "非手术治疗",
+      "针灸治疗",
+      "颈夹脊穴",
+      "肩部穴位",
+      "上臂部穴位"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "上肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "针灸治疗颈椎病",
+      "颈夹脊针刺",
+      "肩部上臂部穴位",
+      "疏通经络缓解颈肩疼痛",
+      "神经根型颈椎病非手术治疗"
+    ]
   }
 ]
