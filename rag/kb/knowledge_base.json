@@ -8214,5 +8214,41 @@
       "体表温度分布",
       "热图结果准确性"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0055",
+    "title": "红外热像检查前的饮酒与饮食限制",
+    "content": "受检者在待检前应避免饮酒和食用辛辣刺激性食物，并在检查前1小时避免进食过凉或过热食物，以减少短时饮食刺激对体表温度分布的干扰。",
+    "category": "sop_preparation",
+    "report_sections": [
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "饮酒限制",
+      "辛辣食物",
+      "过凉食物",
+      "过热食物",
+      "检查前饮食"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "检查前禁止饮酒",
+      "辛辣刺激性食物",
+      "检查前1小时禁食过凉过热食物",
+      "饮食限制",
+      "体表温度干扰"
+    ]
   }
 ]
