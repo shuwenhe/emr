@@ -13441,5 +13441,85 @@
       "病变组织液化消融",
       "局部处理病灶"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0183",
+    "title": "射频等离子等微创治疗可用于部分头颈部疾病",
+    "content": "在头颈部疾病中，相关微创治疗技术可应用于颈椎病、颈椎术后综合征等情况。具体适应证仍应结合病情特点、影像学结果及临床评估综合判断。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment_plan_text",
+      "report_note"
+    ],
+    "tags": [
+      "头颈部",
+      "颈椎病",
+      "颈椎术后综合征",
+      "微创治疗",
+      "适应证"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "头颈部适应证",
+      "颈椎病",
+      "颈椎术后综合征",
+      "微创治疗"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0184",
+    "title": "射频等离子等微创治疗可用于部分腰背部疾病",
+    "content": "在腰背部疾病中，相关微创治疗技术可用于腰椎间盘突出症、腰椎管狭窄症、腰椎小关节退变、腰三横突综合征、臀上皮神经嵌压综合征及腰椎棘上韧带损伤等情况。具体应用时应结合病变性质、病情程度及治疗目标综合选择。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment_plan_text",
+      "report_note"
+    ],
+    "tags": [
+      "腰背部",
+      "腰椎间盘突出症",
+      "腰椎管狭窄症",
+      "腰三横突综合征",
+      "臀上皮神经嵌压",
+      "棘上韧带损伤"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "腰背",
+      "脊柱背部"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "腰背部适应证",
+      "腰椎间盘突出症",
+      "腰椎管狭窄症",
+      "腰三横突综合征",
+      "臀上皮神经嵌压综合征",
+      "腰椎棘上韧带损伤"
+    ]
   }
 ]
