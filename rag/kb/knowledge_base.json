@@ -11475,5 +11475,45 @@
       "形成可分析热图图像",
       "通过热信息分析探查内部情况"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0132",
+    "title": "红外热成像自20世纪60年代起已用于医学辅助诊断",
+    "content": "自20世纪60年代起，红外热成像技术便已应用于现代医学，可作为炎症、肿瘤等疾病的辅助诊断手段，并在疗效评价和随访观察中发挥作用。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "红外热成像",
+      "20世纪60年代",
+      "辅助诊断",
+      "炎症",
+      "肿瘤",
+      "疗效评价"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "20世纪60年代红外热成像应用",
+      "现代医学辅助诊断",
+      "炎症肿瘤",
+      "疗效评价",
+      "随访观察"
+    ]
   }
 ]
