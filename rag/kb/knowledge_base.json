@@ -9218,5 +9218,50 @@
       "生理性低温",
       "与病理异常区分"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0079",
+    "title": "体表温度受时间状态环境和情绪等因素动态影响",
+    "content": "体表温度并非固定不变，而是会随着时间、生理状态、外界环境温度以及情绪变化等因素不断波动。因此，红外热像判读应结合具体背景进行灵活掌握和应用，避免机械化解释。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "体表温度变化",
+      "时间因素",
+      "生理状态",
+      "环境温度",
+      "情绪变化",
+      "灵活判读"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "体表温度并非一成不变",
+      "时间生理状态环境情绪变化",
+      "动态影响",
+      "灵活掌握及应用",
+      "避免机械化解释"
+    ]
   }
 ]
