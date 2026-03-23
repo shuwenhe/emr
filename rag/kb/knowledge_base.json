@@ -10505,6 +10505,47 @@
     ]
   },
   {
+    "id": "KB-IR-BG-0111",
+    "title": "脊柱X线检查主要包括平片检查和脊髓造影",
+    "content": "脊柱X线检查的常用方式主要包括平片检查和脊髓造影。临床上可根据病变部位、症状特点及诊断需要，选择适当的检查方式，以辅助判断脊柱结构及相关病变情况。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "脊柱X线检查",
+      "平片检查",
+      "脊髓造影",
+      "检查方式",
+      "脊柱病变",
+      "影像学"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "脊柱背部"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "脊柱X线检查主要有平片检查和脊髓造影",
+      "平片检查",
+      "脊髓造影",
+      "脊柱影像检查方式"
+    ]
+  },
+  {
     "id": "KB-IR-BG-0104",
     "title": "手肘部背侧位标准图可作为采集参考",
     "content": "手肘部背侧位热成像采集时，宜参照背侧位标准图进行体位摆放和图像采集，以保证肘后区、鹰嘴周围及邻近软组织区域显示清晰，便于观察后侧温度分布和局部异常热区。",
