@@ -8722,5 +8722,52 @@
       "热图是否相契合",
       "综合分析"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0067",
+    "title": "异常热图判读前应先区分生理热图干扰热图和病理热图",
+    "content": "当热图存在异常变化时，应先判断其属于正常生理热图、干扰热图还是病理热图，并逐一加以排除和鉴别。因此，红外热像判读应首先掌握生理热图与干扰热图的基本表现，再进一步分析病理意义。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "diagnosis",
+      "report_note"
+    ],
+    "tags": [
+      "生理热图",
+      "干扰热图",
+      "病理热图",
+      "异常变化",
+      "鉴别判断"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "异常热图",
+      "生理热图",
+      "干扰热图",
+      "病理热图",
+      "逐一排除和鉴别",
+      "判读原则"
+    ]
   }
 ]
