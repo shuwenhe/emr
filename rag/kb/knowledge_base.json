@@ -8893,5 +8893,44 @@
       "对称性",
       "判读基础"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0071",
+    "title": "生理热图的对称性及胸部左右温度特点",
+    "content": "正常生理热图通常以人体中线为轴，两侧温度基本保持对称。胸部两侧温度一般也呈左右对称，但由于心脏位于胸腔左侧，左侧胸部温度可较右侧略高。",
+    "category": "interpretation_symmetry",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note",
+      "diagnosis"
+    ],
+    "tags": [
+      "对称性",
+      "人体中线",
+      "胸部左右对称",
+      "心脏位于左侧",
+      "生理差异"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "胸腹部"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "生理热图对称性",
+      "以人体中线为轴",
+      "胸部左右对称",
+      "左胸温度略高于右侧",
+      "心脏位于左侧"
+    ]
   }
 ]
