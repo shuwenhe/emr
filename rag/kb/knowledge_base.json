@@ -14667,5 +14667,47 @@
       "摇法扳法滑利关节",
       "颈椎病非手术治疗"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0217",
+    "title": "神经根型颈椎病常用非手术治疗：牵引治疗",
+    "content": "牵引治疗可用于缓解颈肩肌肉痉挛，同时可适度扩大椎间隙，减轻对神经根的压迫，从而辅助改善相关症状。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "神经根型颈椎病",
+      "非手术治疗",
+      "牵引治疗",
+      "肌肉痉挛",
+      "椎间隙",
+      "神经根压迫"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "上肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "牵引可缓解肌肉痉挛",
+      "扩大椎间隙减轻神经根压迫",
+      "颈椎病牵引治疗",
+      "神经根型颈椎病非手术治疗"
+    ]
   }
 ]
