@@ -11988,5 +11988,45 @@
       "现代中医临床诊疗辅助工具",
       "中医CT"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0144",
+    "title": "颈椎弧度牵引治疗仪可用于颈椎功能恢复辅助治疗",
+    "content": "颈椎弧度牵引治疗仪是一种用于颈椎疾病康复与功能恢复的辅助治疗设备，可通过相对符合颈椎生理曲度的牵引方式，帮助缓解颈部肌肉紧张、减轻局部负荷并改善颈椎功能状态。具体应用时应结合患者病情和适应证综合评估。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "颈椎弧度牵引治疗仪",
+      "颈椎",
+      "牵引治疗",
+      "功能恢复",
+      "康复设备",
+      "辅助治疗"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "颈椎弧度牵引治疗仪",
+      "颈椎牵引治疗",
+      "功能恢复辅助治疗",
+      "康复设备"
+    ]
   }
 ]
