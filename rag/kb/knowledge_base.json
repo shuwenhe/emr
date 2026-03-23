@@ -10674,6 +10674,50 @@
     ]
   },
   {
+    "id": "KB-IR-BG-0115",
+    "title": "腰椎斜位功能位及张口位可用于特定脊柱结构观察",
+    "content": "腰椎斜位片主要用于观察椎弓、峡部有无骨折或断裂，以及椎关节突关节情况。过屈位和过伸位功能片主要适用于需要了解某段椎体间稳定性时，与常规侧位片对比进行动态观察。张口正位片则主要用于观察寰枢关节结构。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "腰椎斜位片",
+      "椎弓",
+      "峡部",
+      "功能位",
+      "张口正位片",
+      "寰枢关节"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "脊柱背部",
+      "颈肩",
+      "腰背"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "腰椎斜位片观察什么",
+      "椎弓峡部骨折断裂",
+      "过屈过伸功能位",
+      "椎体间稳定性",
+      "张口正位片观察寰枢关节"
+    ]
+  },
+  {
     "id": "KB-IR-BG-0104",
     "title": "手肘部背侧位标准图可作为采集参考",
     "content": "手肘部背侧位热成像采集时，宜参照背侧位标准图进行体位摆放和图像采集，以保证肘后区、鹰嘴周围及邻近软组织区域显示清晰，便于观察后侧温度分布和局部异常热区。",
