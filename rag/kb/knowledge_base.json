@@ -7748,5 +7748,48 @@
       "热分布结果",
       "测温算法"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0044",
+    "title": "医用红外热像中人体散热方式与远红外波段特征",
+    "content": "红外热像仪应用于医疗领域时，人体散热主要以皮肤热辐射方式为主，传导、对流和蒸发所占作用相对次要，尤其在室温低于体温时更为明显。通常人体辐射能量较强的波段位于远红外区，可作为医用红外热成像采集和分析的重要物理基础。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "医用红外热像",
+      "人体散热",
+      "皮肤热辐射",
+      "远红外区",
+      "物理基础"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "人体散热主要靠皮肤热辐射",
+      "远红外区",
+      "医用红外热像",
+      "室温低于体温",
+      "物理基础"
+    ]
   }
 ]
