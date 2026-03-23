@@ -7509,5 +7509,52 @@
       "区域差异",
       "红外热成像判读基础"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0038",
+    "title": "局部疾病与血流变化引起的温度异常表现",
+    "content": "当人体某一部位发生疾病或功能状态改变时，该处血流量可能随之发生变化，从而导致局部温度改变，表现为温度分布偏高或偏低。红外热成像正是通过捕捉这类局部温度异常，为病变识别和辅助判断提供参考。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "diagnosis"
+    ],
+    "tags": [
+      "局部疾病",
+      "血流变化",
+      "温度异常",
+      "温度偏高",
+      "温度偏低",
+      "红外热成像"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "局部疾病导致血流变化",
+      "温度偏高或偏低",
+      "局部温度异常",
+      "红外热成像病变识别",
+      "血流量变化"
+    ]
   }
 ]
