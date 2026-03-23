@@ -8850,5 +8850,48 @@
       "颜色梯度",
       "温度高低对应关系"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0070",
+    "title": "生理热图特征",
+    "content": "生理热图是指在正常生理状态下形成的热图表现，其温度分布通常符合人体热态的基本规律，具有相对稳定性、对称性和区域特征。掌握生理热图特征是区分病理热图和干扰热图的重要基础。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "生理热图",
+      "稳定性",
+      "对称性",
+      "区域特征",
+      "判读基础"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "生理热图特征",
+      "正常生理状态",
+      "温度分布规律",
+      "对称性",
+      "判读基础"
+    ]
   }
 ]
