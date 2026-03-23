@@ -8972,5 +8972,47 @@
       "生理热态特征",
       "温度递减规律"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0073",
+    "title": "生理凹陷部位温度可略高于周围区域",
+    "content": "正常生理热图中，一些凹陷部位温度可略高于周围区域，例如锁骨上窝、腋窝、脐部和腹股沟等。判读时应将这类生理性温度偏高与病理异常相区分。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "锁骨上窝",
+      "腋窝",
+      "脐部",
+      "腹股沟",
+      "生理凹陷",
+      "温度偏高"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "胸腹部",
+      "腹股沟"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "生理凹陷处温度稍高",
+      "锁骨上窝",
+      "腋窝",
+      "脐部",
+      "腹股沟",
+      "与病理异常区分"
+    ]
   }
 ]
