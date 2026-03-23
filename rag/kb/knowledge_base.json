@@ -9136,5 +9136,48 @@
       "生理性低温",
       "避免误认为异常冷区"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0077",
+    "title": "导热功能差或血供较少组织的生理性低温特点",
+    "content": "在正常热图中，脂肪较丰厚处、肌肉较发达处、液体潴留区域以及部分空腔器官部位，因导热功能相对较差，可表现为温度偏低；同时，血液供应较少的组织温度也往往偏低。判读时应注意将这类生理或结构性低温与病理性冷区区别开来。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "脂肪丰厚",
+      "肌肉发达",
+      "液体潴留",
+      "空腔器官",
+      "血液供应少",
+      "生理性低温"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "脂肪丰厚处温度偏低",
+      "肌肉发达处温度偏低",
+      "液体潴留",
+      "空腔器官部位",
+      "血液供应少的组织温度偏低",
+      "生理性低温"
+    ]
   }
 ]
