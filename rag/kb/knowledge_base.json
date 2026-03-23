@@ -7791,5 +7791,41 @@
       "室温低于体温",
       "物理基础"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0045",
+    "title": "人体红外辐射与皮肤绝对温度关系的物理基础",
+    "content": "在红外热成像中，可将人体视为红外辐射源，并利用红外探测器将红外辐射能转换为电信号。根据普朗克黑体辐射相关定律，人体辐射功率与皮肤绝对温度之间具有明确关系，温度变化会直接影响红外辐射强度，这为红外热像测温和热图分析提供了理论依据。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "人体红外辐射",
+      "皮肤绝对温度",
+      "普朗克定律",
+      "红外探测器",
+      "辐射功率"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "人体作为红外辐射源",
+      "皮肤绝对温度",
+      "普朗克黑体辐射定律",
+      "辐射功率",
+      "红外探测器转换电信号"
+    ]
   }
 ]
