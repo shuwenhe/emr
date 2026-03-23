@@ -9619,5 +9619,42 @@
       "低温干扰",
       "环境因素所致异常"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0088",
+    "title": "低温干扰因素应通过询问与告知尽量避免",
+    "content": "对于常见低温干扰因素，应在检查前通过询问病史和告知注意事项的方式尽量避免，以减少非病理性低温表现对热图判读的影响。",
+    "category": "sop_preparation",
+    "report_sections": [
+      "report_note",
+      "health_advice",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "低温干扰",
+      "询问",
+      "告知",
+      "检查前准备",
+      "避免干扰"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "低温干扰因素应尽量避免",
+      "询问及告知",
+      "检查前准备",
+      "非病理性低温",
+      "减少判读影响"
+    ]
   }
 ]
