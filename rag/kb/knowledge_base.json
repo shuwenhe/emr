@@ -11902,5 +11902,51 @@
       "安全实用费用低廉",
       "重复随访"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0142",
+    "title": "红外热图可将人体寒热信息客观化可视化和数据化",
+    "content": "红外热成像技术能够较精确地呈现人体体表各部位温度分布，并形成颜色鲜明的热图。人体寒热信息由此实现客观化、可视化和数据化，这些特点构成了该技术得以广泛应用的重要基础。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "红外热图",
+      "温度分布",
+      "客观化",
+      "可视化",
+      "数据化",
+      "寒热信息"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "体表各部位温度精确呈现",
+      "热图颜色鲜明",
+      "寒热信息客观化可视化数据化",
+      "广泛应用前提"
+    ]
   }
 ]
