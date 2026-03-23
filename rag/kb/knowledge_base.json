@@ -16243,5 +16243,182 @@
       "交感型颈椎病诊断要点",
       "交感型颈椎病保守治疗"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0254",
+    "title": "典型病例3（马某）：主诉与病史——颈项部不适半年加重，伴头部温汗异常感觉",
+    "content": "患者马某，男，35岁，2015年9月23日就诊。主诉颈项部不适加重半年，以右侧为重。自觉头部偏左侧发凉、易出汗，较对侧明显；并诉头部异常感觉存在侧别差异。整体表现提示颈部症状合并自主神经相关异常。",
+    "category": "case_study",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "典型病例",
+      "马某",
+      "35岁",
+      "颈项部不适",
+      "半年加重",
+      "头部发凉",
+      "出汗异常",
+      "自主神经症状"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "male"
+    ],
+    "body_parts": [
+      "颈椎",
+      "头部",
+      "颈肩"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "马某 2015年9月23日就诊",
+      "颈项部不适半年加重",
+      "头部偏左发凉易出汗",
+      "交感相关症状侧别差异"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0255",
+    "title": "典型病例3（马某）：MRI结果——C2/3-C6/7椎间盘后突出与多节段退变",
+    "content": "2015年9月30日行颅脑及颈椎MRI检查（图7.1）提示：颅脑MRI脑实质未见确切异常；颈椎示①C2/3-C6/7椎间盘后突出；②C4/5-C6/7水平脊髓信号欠均，建议结合临床随访；③颈椎病，C2/3-T3/4椎间盘变性。影像学提示多节段退变背景下的颈椎病变。",
+    "category": "case_study",
+    "report_sections": [
+      "diagnosis",
+      "report_note"
+    ],
+    "tags": [
+      "典型病例",
+      "马某",
+      "MRI",
+      "图7.1",
+      "C2/3-C6/7椎间盘后突出",
+      "脊髓信号欠均",
+      "椎间盘变性",
+      "多节段退变"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "male"
+    ],
+    "body_parts": [
+      "颈椎",
+      "颅脑"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "马某 MRI 图7.1",
+      "C2/3到C6/7椎间盘后突出",
+      "C4/5到C6/7脊髓信号欠均",
+      "C2/3到T3/4椎间盘变性"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0256",
+    "title": "典型病例3（马某）：查体结果——颈肩枕区压痛与神经反射基本正常",
+    "content": "查体所见：双侧胸锁乳突肌轻压痛，右侧斜方肌压痛，右侧枕大神经轻压痛，右侧肩胛骨内缘轻压痛；双侧动态霍夫曼征阴性；双上肢肱二头肌腱反射、肱三头肌腱反射及桡骨膜反射正常引出；屈颈旋转试验阴性。提示以软组织压痛与局部神经卡压体征为主，锥体束受累体征不明显。",
+    "category": "case_study",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "典型病例",
+      "马某",
+      "胸锁乳突肌压痛",
+      "斜方肌压痛",
+      "枕大神经压痛",
+      "霍夫曼征阴性",
+      "腱反射正常",
+      "屈颈旋转试验阴性"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "male"
+    ],
+    "body_parts": [
+      "颈椎",
+      "颈肩",
+      "枕部",
+      "上肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "马某查体结果",
+      "右侧枕大神经轻压痛",
+      "动态霍夫曼征阴性",
+      "上肢腱反射正常",
+      "屈颈旋转试验阴性"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0257",
+    "title": "典型病例3（马某）：初步印象——交感神经型颈椎病并头部发汗不对称待查",
+    "content": "初步印象：①交感神经型颈椎病；②头部发汗不对称待查。结合病史中的头部发凉与出汗侧别差异、颈肩枕区压痛体征及影像学多节段颈椎退变表现，支持交感神经相关颈椎病临床判断，并需对发汗不对称进行进一步评估与随访。",
+    "category": "diagnosis_criteria",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "follow_up",
+      "report_note"
+    ],
+    "tags": [
+      "典型病例",
+      "马某",
+      "交感神经型颈椎病",
+      "头部发汗不对称",
+      "初步印象",
+      "待查",
+      "随访评估"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "male"
+    ],
+    "body_parts": [
+      "颈椎",
+      "头部",
+      "颈肩"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "初步印象交感神经型颈椎病",
+      "头部发汗不对称待查",
+      "马某交感型颈椎病病例",
+      "自主神经症状随访"
+    ]
   }
 ]
