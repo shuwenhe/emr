@@ -11562,5 +11562,50 @@
       "中医科研",
       "新的思路和手段"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0134",
+    "title": "红外热成像技术可用于骨伤及关节疾病评估",
+    "content": "红外热成像技术在骨伤及关节疾病中具有一定应用价值，可用于观察局部体表温度变化、热异常分布及左右对称差异。其可辅助评估炎症反应、损伤范围、功能状态及治疗前后变化，但判读时仍应结合主诉、查体及其他影像检查综合分析。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "红外热成像技术",
+      "骨伤",
+      "关节疾病",
+      "体表温度变化",
+      "热异常",
+      "综合评估"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "关节",
+      "四肢",
+      "脊柱背部",
+      "腰背"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "红外热成像技术在骨伤及关节疾病中的应用",
+      "局部体表温度变化",
+      "热异常分布",
+      "左右对称差异",
+      "治疗前后变化"
+    ]
   }
 ]
