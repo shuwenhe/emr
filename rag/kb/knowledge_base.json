@@ -13595,5 +13595,49 @@
       "能量干预",
       "治疗方式"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0187",
+    "title": "相关微创治疗可用于部分上肢软组织及关节疾病",
+    "content": "在上肢疾病中，相关微创治疗技术可应用于肩周炎、冈上肌肌腱炎、肱骨外上髁炎、屈指肌腱狭窄性腱鞘炎、桡骨茎突狭窄性腱鞘炎及滑囊炎等情况。具体适应证应结合病情特点、功能受限程度及临床评估综合判断。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment_plan_text",
+      "report_note"
+    ],
+    "tags": [
+      "上肢",
+      "肩周炎",
+      "冈上肌肌腱炎",
+      "肱骨外上髁炎",
+      "狭窄性腱鞘炎",
+      "滑囊炎"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "上肢",
+      "肩关节",
+      "肘关节",
+      "腕关节"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "上肢适应证",
+      "肩周炎",
+      "冈上肌肌腱炎",
+      "肱骨外上髁炎",
+      "桡骨茎突狭窄性腱鞘炎",
+      "滑囊炎"
+    ]
   }
 ]
