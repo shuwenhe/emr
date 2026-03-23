@@ -206,6 +206,22 @@ def _format_pdf_list_line(line: str) -> str:
 def _expand_advice_value(value: Any) -> List[str]:
     if value is None:
         return []
+    if isinstance(value, dict):
+        preferred_keys = (
+            "advice",
+            "text",
+            "content",
+            "message",
+            "doctor_opinion",
+            "report_note",
+        )
+        lines: List[str] = []
+        for key in preferred_keys:
+            if key in value:
+                lines.extend(_expand_advice_value(value.get(key)))
+        if lines:
+            return lines
+        return _expand_advice_value(list(value.values()))
     if isinstance(value, (list, tuple)):
         lines: List[str] = []
         for item in value:
@@ -222,6 +238,16 @@ def _expand_advice_value(value: Any) -> List[str]:
         except Exception:
             parsed = None
         if isinstance(parsed, (list, tuple)):
+            return _expand_advice_value(parsed)
+        if isinstance(parsed, dict):
+            return _expand_advice_value(parsed)
+
+    if text[:1] == "{" and text[-1:] == "}":
+        try:
+            parsed = ast.literal_eval(text)
+        except Exception:
+            parsed = None
+        if isinstance(parsed, dict):
             return _expand_advice_value(parsed)
 
     return [text]
