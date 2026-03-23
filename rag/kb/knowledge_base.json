@@ -7430,5 +7430,41 @@
       "循环与代谢",
       "生理状态提示"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0036",
+    "title": "人体作为自然生物红外辐射源的物理学基础",
+    "content": "从物理学原理分析，人体本身是一个自然的生物红外辐射源，能够持续向周围环境发射并吸收红外辐射。红外热成像技术正是基于这一基础特性，对人体表面红外能量分布进行采集和分析。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "人体红外辐射",
+      "生物红外辐射源",
+      "物理学基础",
+      "红外发射",
+      "红外吸收"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "人体是自然生物红外辐射源",
+      "物理学原理",
+      "红外发射与吸收",
+      "人体红外辐射",
+      "红外热成像基础"
+    ]
   }
 ]
