@@ -7350,5 +7350,41 @@
       "图像查询",
       "图像比较"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0034",
+    "title": "红外热成像技术成像原理",
+    "content": "红外热成像技术通过接收人体表面自然辐射的红外能量，经探测器完成信号采集、转换与处理后，形成反映体表温度分布特征的热图像。该原理为温度异常区域识别、动态比较和临床辅助评估提供了基础。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "红外热成像",
+      "成像原理",
+      "红外辐射",
+      "温度分布",
+      "热图像"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "红外热成像技术成像原理",
+      "红外辐射",
+      "探测器信号转换",
+      "体表温度分布",
+      "热图像"
+    ]
   }
 ]
