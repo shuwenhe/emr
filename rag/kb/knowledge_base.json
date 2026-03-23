@@ -8544,5 +8544,48 @@
       "温度分布偏差",
       "红外热像检查"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0063",
+    "title": "红外热像标准摄图体位与临床需求调整",
+    "content": "红外热像摄图过程中既有一定的标准摄图体位，也可结合临床需求进行适当调整。例如可拍摄胸腹部正位和侧位、头面部前位后位及双侧位；对于肩关节疼痛患者，还可拍摄局部肩关节前位、后位、左位和右位，以满足局部病变观察需求。",
+    "category": "sop_acquisition",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "diagnosis"
+    ],
+    "tags": [
+      "摄图体位",
+      "标准体位",
+      "胸腹部",
+      "头面部",
+      "肩关节",
+      "临床需求调整"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "胸腹部",
+      "肩关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "标准摄图体位",
+      "临床需求调整",
+      "胸腹部正侧位",
+      "头面部前后位双侧位",
+      "肩关节前后左右位"
+    ]
   }
 ]
