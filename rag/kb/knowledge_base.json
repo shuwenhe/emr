@@ -8038,5 +8038,50 @@
       "疾病相关性判断",
       "发展趋势"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0051",
+    "title": "红外热像仪操作及使用规范",
+    "content": "红外热像仪在临床和科研应用中应遵循统一的操作及使用规范，包括环境控制、受检者准备、设备调试、标准体位采集和图像判读等环节。规范化操作有助于提高热图数据的稳定性、可比性和临床参考价值。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "操作规范",
+      "使用规范",
+      "环境控制",
+      "受检者准备",
+      "标准体位",
+      "图像判读"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "红外热像仪操作及使用规范",
+      "环境控制",
+      "受检者准备",
+      "标准体位采集",
+      "图像判读",
+      "规范化操作"
+    ]
   }
 ]
