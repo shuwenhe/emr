@@ -9179,5 +9179,44 @@
       "血液供应少的组织温度偏低",
       "生理性低温"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0078",
+    "title": "气体流通区域可表现为生理性低温",
+    "content": "在正常热图中，气体流通较明显的区域可呈现相对低温，例如鼻腔和气管投影区域。判读时应将这类与气体交换和流通相关的低温表现与病理异常区分开。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "气体流通区域",
+      "鼻腔",
+      "气管",
+      "生理性低温",
+      "低温鉴别"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "气体流通区域温度偏低",
+      "鼻腔",
+      "气管",
+      "生理性低温",
+      "与病理异常区分"
+    ]
   }
 ]
