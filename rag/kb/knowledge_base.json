@@ -9872,5 +9872,50 @@
       "手术瘢痕",
       "结合手术史识别"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0094",
+    "title": "治疗后不宜随即进行红外热像检查",
+    "content": "热源性理疗后局部常可出现高温改变，针灸治疗后也可能出现高温或低温变化。因此，为减少治疗因素对热图结果的干扰，应尽量避免在治疗结束后立即进行红外热像检查。",
+    "category": "sop_preparation",
+    "report_sections": [
+      "report_note",
+      "health_advice",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "热源性理疗",
+      "针灸",
+      "高温改变",
+      "低温改变",
+      "检查时机",
+      "减少干扰"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "理疗后高温改变",
+      "针灸后高温或低温改变",
+      "避免治疗后随即进行红外检查",
+      "检查时机",
+      "减少热图干扰"
+    ]
   }
 ]
