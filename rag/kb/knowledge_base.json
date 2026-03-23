@@ -7915,5 +7915,41 @@
       "温度分布特征",
       "红外热成像辅助判断"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0048",
+    "title": "红外热成像测温仪的成像计算流程",
+    "content": "红外热成像测温仪的工作流程通常包括：先利用红外热像设备对被测目标成像，再将采集到的图像信息传送至计算机，最后通过后处理软件对热图进行计算分析，得出图像中高温点或目标区域的温度结果。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "测温流程",
+      "红外成像",
+      "计算机处理",
+      "后处理软件",
+      "高温点温度"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "红外热成像测温仪工作原理",
+      "成像计算流程",
+      "后处理软件",
+      "高温点温度",
+      "图像信息传送计算机"
+    ]
   }
 ]
