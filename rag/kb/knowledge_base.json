@@ -9489,5 +9489,48 @@
       "局部温度降低",
       "低温干扰热图"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0085",
+    "title": "佩戴饰品可形成低温干扰热图",
+    "content": "受检者佩戴项链、玉器、指环等饰品时，相关部位在热图上可表现为低温改变，属于常见的低温干扰因素之一。检查前应尽量摘除饰品，以减少对热图判读的影响。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "低温干扰",
+      "项链",
+      "玉器",
+      "指环",
+      "饰品",
+      "检查前摘除"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "佩戴饰品低温改变",
+      "项链",
+      "玉器",
+      "指环",
+      "低温干扰热图",
+      "检查前摘除饰品"
+    ]
   }
 ]
