@@ -13149,5 +13149,77 @@
       "治疗组合",
       "综合判断"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0175",
+    "title": "射频等离子在介质中前进时可产生机械效应",
+    "content": "机械效应是指射频等离子在介质中前进过程中所产生的一类物理作用。该作用可引起机体局部一系列反应，并进一步影响细胞内部结构和功能状态。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "射频等离子",
+      "机械效应",
+      "介质",
+      "物理作用",
+      "细胞反应"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "机械效应",
+      "射频等离子在介质中前进",
+      "机体反应",
+      "细胞内部结构变化"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0176",
+    "title": "射频等离子机械效应可促进结缔组织延展和松软",
+    "content": "在机械效应作用下，细胞内部结构可能发生变化，进而影响其功能状态，并促使较坚硬的结缔组织出现延展和松软等改变。这一效应可为组织松解及相关治疗操作提供基础。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment_plan_text",
+      "report_note"
+    ],
+    "tags": [
+      "机械效应",
+      "细胞结构变化",
+      "功能变化",
+      "结缔组织",
+      "延展",
+      "松软"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "细胞内部结构发生变化",
+      "使坚硬结缔组织延伸松软",
+      "组织松解基础"
+    ]
   }
 ]
