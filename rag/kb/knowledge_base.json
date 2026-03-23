@@ -14377,5 +14377,46 @@
       "伴头痛呕吐恶心耳闷胀感眼球震颤",
       "劳累睡眠不足情绪波动灯光强声诱发"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0210",
+    "title": "神经根型颈椎病鉴别诊断：心绞痛",
+    "content": "鉴别诊断时应注意心绞痛。患者常有冠心病病史，发作时可出现心前区剧烈疼痛，并伴胸闷、气短、出虚汗及心电图异常表现；含服硝酸甘油后症状多可缓解。出现上述特征时应优先进行心血管急症评估。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "神经根型颈椎病",
+      "鉴别诊断",
+      "心绞痛",
+      "冠心病病史",
+      "心电图异常",
+      "硝酸甘油"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 10,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "胸腹部",
+      "颈肩"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "心绞痛",
+      "心前区剧烈疼痛",
+      "伴胸闷气短出虚汗",
+      "心电图异常",
+      "硝酸甘油缓解"
+    ]
   }
 ]
