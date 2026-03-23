@@ -12328,5 +12328,156 @@
       "固定腧穴位置",
       "辅助针身进针"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0153",
+    "title": "押手主要用于固定腧穴位置和辅助进针",
+    "content": "针刺操作中，左手有所依附并协助进针者称为“押手”，其主要作用是按压所刺部位、固定腧穴位置并辅助针身进针，以提高针刺操作的稳定性和准确性。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "押手",
+      "固定腧穴",
+      "辅助进针",
+      "针刺操作",
+      "稳定性"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "押手是什么意思",
+      "固定腧穴位置",
+      "辅助进针",
+      "右主推之左持而御之"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0154",
+    "title": "针刺治疗作用重在调气和得气",
+    "content": "毫针针刺的治疗作用主要在于“调气”，而得气与否又与针刺疗效密切相关，直接影响治疗效果。针刺入腧穴后，应通过适当行针促使得气，以增强治疗反应。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "调气",
+      "得气",
+      "针刺疗效",
+      "毫针",
+      "治疗作用"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "用针之类在于调气",
+      "得气与否与疗效密切相关",
+      "针刺治疗作用",
+      "促使得气"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0155",
+    "title": "针刺行针可采用提插捻转及多种辅助手法",
+    "content": "针刺入腧穴后，为促使得气并调节针感，可运用提插、捻转等基本手法，并辅以循法、刮柄法、弹柄法、搓柄法、摇柄法及震颤法等操作，同时可结合补泻手法进行调节。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "行针",
+      "提插",
+      "捻转",
+      "刮柄法",
+      "弹柄法",
+      "补泻手法"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "行针基本手法",
+      "提插捻转",
+      "刮柄法弹柄法",
+      "补泻操作",
+      "调节针感"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0156",
+    "title": "针刺方向角度和深浅应结合病情体质规范掌握",
+    "content": "针刺过程中，针刺方向、角度和深浅度均需准确掌握，并应根据施术部位、病情需要、治疗目的、患者体质及形体胖瘦等具体情况灵活确定。规范操作有助于增强针感、提高疗效，并预防异常情况发生。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "针刺方向",
+      "针刺角度",
+      "针刺深浅",
+      "规范操作",
+      "提高疗效",
+      "预防异常"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "针刺方向角度深浅必须准确掌握",
+      "根据施术部位病情体质而定",
+      "规范操作增强针感提高疗效",
+      "预防异常情况发生"
+    ]
   }
 ]
