@@ -14297,5 +14297,45 @@
       "落枕与神经根型颈椎病鉴别",
       "应及早诊疗"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0205",
+    "title": "神经根型颈椎病鉴别诊断：内听动脉栓塞",
+    "content": "鉴别诊断时需注意内听动脉栓塞。其常表现为突发耳鸣、耳聋及眩晕，且症状多较重并持续不缓解；若出现此类表现，应优先考虑耳科/神经科急症评估，不宜仅按颈源性疼痛处理。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "神经根型颈椎病",
+      "鉴别诊断",
+      "内听动脉栓塞",
+      "突发耳鸣",
+      "突发耳聋",
+      "眩晕"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 10,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "内听动脉栓塞",
+      "突发耳鸣耳聋眩晕",
+      "症状严重且持续不减",
+      "与颈椎病鉴别"
+    ]
   }
 ]
