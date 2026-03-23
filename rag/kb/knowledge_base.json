@@ -8769,5 +8769,50 @@
       "逐一排除和鉴别",
       "判读原则"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0068",
+    "title": "红外热图不同颜色的意义",
+    "content": "红外热图中不同颜色通常用于表示不同温度水平和温度分布状态。颜色变化可帮助观察局部高温区、低温区及温度过渡带，是判读体表热态异常和分析病变范围的重要视觉依据。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "颜色意义",
+      "温度水平",
+      "高温区",
+      "低温区",
+      "温度分布",
+      "视觉判读"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "红外热图不同颜色的意义",
+      "颜色表示温度水平",
+      "高温区低温区",
+      "温度过渡带",
+      "视觉依据"
+    ]
   }
 ]
