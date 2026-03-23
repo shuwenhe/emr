@@ -10718,6 +10718,48 @@
     ]
   },
   {
+    "id": "KB-IR-BG-0116",
+    "title": "X线断层片可用于显示普通平片不清的细微结构",
+    "content": "X线断层片主要用于显示普通平片不易清楚显示的细微结构，例如齿状突基底部骨折，以及椎体内有无死骨存在等情况。对于需要进一步明确局部细节的病变，断层片可提供补充影像依据。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "X线断层片",
+      "细微结构",
+      "齿状突基底部骨折",
+      "死骨",
+      "补充影像",
+      "脊柱影像"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "脊柱背部",
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "X线断层片主要用于什么",
+      "普通平片显示不清的细微结构",
+      "齿状突基底部骨折",
+      "椎体内有无死骨"
+    ]
+  },
+  {
     "id": "KB-IR-BG-0104",
     "title": "手肘部背侧位标准图可作为采集参考",
     "content": "手肘部背侧位热成像采集时，宜参照背侧位标准图进行体位摆放和图像采集，以保证肘后区、鹰嘴周围及邻近软组织区域显示清晰，便于观察后侧温度分布和局部异常热区。",
@@ -10754,47 +10796,6 @@
       "手肘部背侧位",
       "肘后区",
       "鹰嘴",
-      "标准体位",
-      "采集参考"
-    ]
-  },
-  {
-    "id": "KB-IR-BG-0105",
-    "title": "手肘部桡侧位标准图可作为采集参考",
-    "content": "手肘部桡侧位热成像采集时，宜参照桡侧位标准图进行体位摆放和图像采集，以保证肘外侧、桡骨头周围及邻近软组织区域显示清晰，便于观察桡侧温度分布和局部异常热区。",
-    "category": "sop_preparation",
-    "report_sections": [
-      "report_note",
-      "doctor_opinion",
-      "health_advice"
-    ],
-    "tags": [
-      "手肘部",
-      "桡侧位",
-      "标准图",
-      "采集参考",
-      "体位要求",
-      "桡骨头"
-    ],
-    "source": "设备操作说明（用户补充）",
-    "source_type": "internal_sop",
-    "priority": 8,
-    "status": "active",
-    "patient_scope": [
-      "adult"
-    ],
-    "body_parts": [
-      "上肢",
-      "肘关节"
-    ],
-    "risk_levels": [
-      "low"
-    ],
-    "evidence_level": "internal_sop",
-    "retrieval_hints": [
-      "手肘部桡侧位",
-      "肘外侧",
-      "桡骨头",
       "标准体位",
       "采集参考"
     ]
