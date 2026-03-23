@@ -14337,5 +14337,45 @@
       "症状严重且持续不减",
       "与颈椎病鉴别"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0206",
+    "title": "神经根型颈椎病鉴别诊断：梅尼埃综合征",
+    "content": "鉴别诊断时应注意梅尼埃综合征。其常表现为旋转性眩晕，闭目后症状可部分缓解，并可伴头痛、呕吐、恶心、耳闷胀感及眼球震颤等；发作常与劳累、睡眠不足、情绪波动以及灯光或强声刺激有关。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "神经根型颈椎病",
+      "鉴别诊断",
+      "梅尼埃综合征",
+      "旋转性眩晕",
+      "眼球震颤",
+      "耳闷胀感"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 10,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "梅尼埃综合征",
+      "旋转性眩晕闭目可缓解",
+      "伴头痛呕吐恶心耳闷胀感眼球震颤",
+      "劳累睡眠不足情绪波动灯光强声诱发"
+    ]
   }
 ]
