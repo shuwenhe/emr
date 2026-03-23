@@ -6397,5 +6397,130 @@
       "脊柱关节病检查设备",
       "常用治疗设备"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0009",
+    "title": "总论基础篇：红外热成像设备组成与成像原理",
+    "content": "总论基础篇中关于红外热成像技术的核心内容包括设备研制简史、设备分类、红外热成像技术成像原理，以及红外热成像仪和红外热成像测温仪的工作原理。这部分内容可作为理解热图采集、热信号呈现和设备性能差异的基础理论框架。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "设备组成",
+      "研制简史",
+      "设备分类",
+      "成像原理",
+      "测温原理"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 6,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "设备组成",
+      "设备分类",
+      "成像原理",
+      "红外热成像仪原理",
+      "测温仪工作原理"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0010",
+    "title": "总论基础篇：红外热像检查操作规范与读图基础",
+    "content": "总论基础篇中关于操作规范的内容包括检查室环境要求、受检者检查前注意事项、标准体位，以及读图原则。这些内容用于规范热图采集条件、减少外界干扰，并为后续热图判读提供统一基础。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "操作规范",
+      "检查环境",
+      "检查前注意事项",
+      "标准体位",
+      "读图原则"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "检查室环境要求",
+      "受检者检查前注意事项",
+      "标准体位",
+      "读图原则",
+      "热像检查操作规范"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0011",
+    "title": "总论基础篇：脊柱关节病相关检查设备与治疗设备",
+    "content": "总论基础篇目录还包括脊柱关节病相关检查诊断设备与常用治疗设备。检查设备涉及X线、数字减影血管造影技术（DSA）、医用红外热成像仪、肌骨超声、软组织张力仪、3D扫描仪和膝关节镜等；治疗设备涉及美式整脊床、颈椎弧度牵引治疗仪、毫针、等离子体针刀系统及射频治疗仪等。该部分可作为脊柱关节肌骨病多模态检查与干预设备的目录性参考。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "检查设备",
+      "治疗设备",
+      "X线",
+      "DSA",
+      "肌骨超声",
+      "整脊床",
+      "针刀",
+      "射频治疗仪"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 6,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "脊柱背部",
+      "腰背",
+      "膝关节",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "脊柱关节病检查设备",
+      "脊柱关节病治疗设备",
+      "X线 DSA 肌骨超声",
+      "整脊床 牵引治疗仪",
+      "针刀 射频治疗仪"
+    ]
   }
 ]
