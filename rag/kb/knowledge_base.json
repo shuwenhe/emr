@@ -11692,5 +11692,47 @@
       "少数呈高温改变",
       "颈肩痛热像特征"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0137",
+    "title": "红外热像可辅助评估腰椎间盘突出症但定位能力有限",
+    "content": "红外热像图可作为腰椎间盘突出症的辅助诊断途径，能够反映该病引起的体表温度变化。但现有实验观察提示，红外热像图尚不能对病变椎间盘进行准确定位，因此应结合临床表现及其他影像学检查综合判断。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "腰椎间盘突出症",
+      "红外热像图",
+      "辅助诊断",
+      "体表温度变化",
+      "定位能力有限",
+      "综合判断"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "腰背",
+      "脊柱背部"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "红外热像图作为腰椎间盘突出症辅助诊断",
+      "体表温度变化",
+      "尚不能准确定位病变椎间盘",
+      "综合判断"
+    ]
   }
 ]
