@@ -7676,5 +7676,41 @@
       "红外探测器",
       "红外热成像仪原理"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0042",
+    "title": "红外热成像仪的温度分辨率与目标识别能力",
+    "content": "红外热成像仪的温度分辨率可达到较高水平，例如约0.01℃。当目标与背景之间存在约0.01℃的温差时，可辅助观察目标轮廓；当目标内部不同部位之间存在类似温差时，也有助于识别其层次和细节结构。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "温度分辨率",
+      "0.01℃",
+      "目标轮廓",
+      "层次识别",
+      "细节结构"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "温度分辨率0.01℃",
+      "目标与背景温差",
+      "目标轮廓",
+      "层次识别",
+      "红外热成像仪识别能力"
+    ]
   }
 ]
