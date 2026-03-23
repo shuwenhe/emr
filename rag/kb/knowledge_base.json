@@ -12028,5 +12028,124 @@
       "功能恢复辅助治疗",
       "康复设备"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0145",
+    "title": "颈椎弧度牵引治疗仪参照中医临床推广技术设计",
+    "content": "该治疗仪参照国家中医药管理局中医临床推广技术项目《仰卧拔伸手法治疗颈椎病技术》设计而成，旨在将传统颈椎病治疗思路与现代设备结构相结合，用于颈椎病相关康复治疗。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "颈椎弧度牵引治疗仪",
+      "中医临床推广技术",
+      "仰卧拔伸手法",
+      "颈椎病",
+      "设计依据"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "参照仰卧拔伸手法治疗颈椎病技术设计",
+      "国家中医药管理局中医临床推广技术项目",
+      "颈椎弧度牵引治疗仪设计依据"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0146",
+    "title": "颈椎弧度牵引治疗仪可通过额颈受力和局部加热协同治疗",
+    "content": "该设备将牵引着力点设计在额部及颈部。治疗过程中，颈托内的纤维加热布可对颈椎局部进行加热，辅助缓解疼痛及麻木症状；同时可配合中药封包使用，以增强治疗辅助效果。自动升降的颈托可托住颈部，使颈椎在保持一定生理曲度状态下进行牵引；具有伸缩功能的机械手可在牵引时固定额部，以减少传统悬吊式牵引的局部压迫。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "额部及颈部牵引",
+      "纤维加热布",
+      "中药封包",
+      "自动升降颈托",
+      "机械手固定额部",
+      "减轻压迫"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "额部及颈部着力点",
+      "纤维加热布缓解疼痛麻木",
+      "中药封包",
+      "自动升降颈托",
+      "机械手固定额部"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0147",
+    "title": "电脑数控弧度牵引对老年及症状较重颈椎病患者有一定适用性",
+    "content": "新型弧度牵引采用电脑数控技术，由程序控制治疗过程，具有安全、简单、可靠等特点。对于年老及部分症状较重的颈椎病患者，该类设备具有一定应用价值。院内示例设备型号可见HKM-2100-2型颈椎弧度牵引治疗仪。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "电脑数控技术",
+      "安全简单可靠",
+      "老年患者",
+      "颈椎病",
+      "HKM-2100-2"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "电脑数控弧度牵引",
+      "安全简单可靠",
+      "年老颈椎病患者",
+      "HKM-2100-2型颈椎弧度牵引治疗仪"
+    ]
   }
 ]
