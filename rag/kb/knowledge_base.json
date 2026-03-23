@@ -7827,5 +7827,48 @@
       "辐射功率",
       "红外探测器转换电信号"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0046",
+    "title": "由辐射功率反算温度并生成二维彩色热图的过程",
+    "content": "根据红外探测器接收到的辐射功率，可反算出对应的温度值。对人体全身进行连续扫描后，系统将热能信息转换为数据，进一步描记出人体二维温度分布，并以彩色图像形式显示各部位温度状态。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "辐射功率",
+      "温度反算",
+      "全身扫描",
+      "二维温度",
+      "彩色热图"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "辐射功率反算温度",
+      "全身连续扫描",
+      "二维温度分布",
+      "彩色图像显示",
+      "热能信息转换数据"
+    ]
   }
 ]
