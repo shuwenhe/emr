@@ -8126,5 +8126,50 @@
       "红外热像检查前注意事项",
       "干扰因素控制"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0053",
+    "title": "环境调控、仪器操作与体位摆放对热图质量的影响",
+    "content": "环境温湿度调控、仪器操作方式以及受检者体位摆放，直接关系到所拍摄热图能否满足疾病诊断和科研应用要求。因此，红外热像研究者和使用者应遵守统一的操作规范，以保证热图质量和结果可比性。",
+    "category": "sop_acquisition",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "环境温湿度",
+      "仪器操作",
+      "体位摆放",
+      "热图质量",
+      "操作规范",
+      "结果可比性"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "环境温湿度调控",
+      "仪器操作",
+      "体位摆放",
+      "热图质量",
+      "疾病诊断及科研要求",
+      "统一操作规范"
+    ]
   }
 ]
