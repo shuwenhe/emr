@@ -14799,5 +14799,46 @@
       "物理疗法减轻疼痛",
       "颈椎病非手术治疗"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0220",
+    "title": "神经根型颈椎病常用非手术治疗：拔罐治疗",
+    "content": "拔罐治疗可用于缓解神经根型颈椎病患者颈肩部的肌肉痉挛，通过负压吸附改善局部气血运行，有助于减轻颈肩肌群紧张与疼痛症状。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "神经根型颈椎病",
+      "非手术治疗",
+      "拔罐",
+      "颈肩肌肉痉挛",
+      "负压",
+      "气血运行"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "拔罐缓解肌肉痉挛",
+      "颈肩部拔罐治疗",
+      "负压改善气血",
+      "颈椎病非手术治疗"
+    ]
   }
 ]
