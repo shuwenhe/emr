@@ -9656,5 +9656,48 @@
       "非病理性低温",
       "减少判读影响"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0089",
+    "title": "腰围护膝及局部衣物包裹可造成高温干扰",
+    "content": "常见的高温干扰可见于腰围、护膝或局部衣物包裹后，未经过足够静息等待即进行检查的情况。由于局部保温作用，相关区域可能出现温度升高，从而形成高温干扰热图。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "高温干扰",
+      "腰围",
+      "护膝",
+      "局部衣物包裹",
+      "局部保温",
+      "静息等待"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "腰背",
+      "膝关节",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "高温干扰",
+      "腰围护膝",
+      "局部衣物包裹",
+      "未充分休息等待",
+      "局部温度升高",
+      "高温干扰热图"
+    ]
   }
 ]
