@@ -9532,5 +9532,50 @@
       "低温干扰热图",
       "检查前摘除饰品"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0086",
+    "title": "大量活动出汗蒸发可形成斑片状低温干扰",
+    "content": "患者在检查前若有大量活动并出汗较多，汗水蒸发会带走热量，使汗液分布区域在热图上呈现斑片状低温改变。这类表现属于常见低温干扰，应与病理性冷区相区分。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "低温干扰",
+      "大量活动",
+      "出汗",
+      "汗水蒸发",
+      "斑片状低温",
+      "冷区鉴别"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "大量活动后出汗较多",
+      "汗水蒸发带走热量",
+      "斑片状低温改变",
+      "低温干扰",
+      "病理性冷区区分"
+    ]
   }
 ]
