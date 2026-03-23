@@ -14880,5 +14880,880 @@
       "针刀非手术治疗",
       "颈椎病针刀松解"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0222",
+    "title": "神经根型颈椎病手术治疗适应证与方式",
+    "content": "对于诊断明确、反复发作，经规范非手术治疗无效的颈椎病患者，可考虑选用手术治疗。手术方式可根据病情选择微创手术或开放式手术。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "神经根型颈椎病",
+      "手术治疗",
+      "微创手术",
+      "开放式手术",
+      "非手术治疗无效",
+      "手术适应证"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "颈椎病手术治疗",
+      "非手术治疗无效可手术",
+      "微创或开放式手术",
+      "颈椎病手术适应证",
+      "反复发作颈椎病"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0223",
+    "title": "典型病例红外热成像图分析：正常人体热图基本特征",
+    "content": "正常人体红外热成像图以中线为对称标志，两侧相对应测温点的颜色基本相同。项背部温度分布均匀，可见浅橙黄色的生理热区；上肢肘窝部位均可见生理热区，左右两侧对应点色码相同，双手色码亦相同。上述特征可作为判读热图是否存在异常的基准参考。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "典型病例",
+      "红外热成像",
+      "正常热图",
+      "中线对称",
+      "生理热区",
+      "项背部",
+      "肘窝",
+      "双手色码"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "脊柱背部",
+      "颈肩",
+      "上肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "正常人体热成像图特征",
+      "中线两侧色码相同",
+      "项背部生理热区",
+      "肘窝生理热区",
+      "双手色码相同",
+      "热图对称性判读"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0224",
+    "title": "神经根型颈椎病热成像图总体特征：患肢温度低于健肢",
+    "content": "神经根型颈椎病在热成像图上的总体表现为：受累节段不同，上肢及手部温度表现各异；患肢生理热区温度降低，且患肢温度普遍低于健肢，可作为判断神经根受累侧别及程度的参考依据。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "神经根型颈椎病",
+      "热成像图",
+      "患肢温度降低",
+      "健肢对比",
+      "生理热区"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "上肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "神经根型颈椎病热图总体特征",
+      "患肢温度低于健肢",
+      "上肢手部温度变化",
+      "生理热区温度降低"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0225",
+    "title": "神经根型颈椎病热成像图：C4神经根受累热节变化区域",
+    "content": "神经根型颈椎病C4神经根受累时，红外热成像图上热节变化区域主要位于肩部，可表现为肩部局部温度异常，与健侧比较存在色码差异。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "神经根型颈椎病",
+      "C4神经根",
+      "热节变化",
+      "肩部",
+      "热成像图"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "C4神经根受累热图",
+      "肩部热节变化",
+      "C4颈椎病热成像"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0226",
+    "title": "神经根型颈椎病热成像图：C5神经根受累热节变化区域",
+    "content": "神经根型颈椎病C5神经根受累时，红外热成像图上热节变化区域主要位于肱三头肌处，可表现为该区域温度异常，与健侧比较存在色码差异。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "神经根型颈椎病",
+      "C5神经根",
+      "热节变化",
+      "肱三头肌",
+      "热成像图"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "上肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "C5神经根受累热图",
+      "肱三头肌热节变化",
+      "C5颈椎病热成像"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0227",
+    "title": "神经根型颈椎病热成像图：C6神经根受累热节变化区域",
+    "content": "神经根型颈椎病C6神经根受累时，红外热成像图上热节变化区域主要位于大鱼际、拇指及食指，可表现为上述区域温度异常，与健侧比较存在色码差异。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "神经根型颈椎病",
+      "C6神经根",
+      "热节变化",
+      "大鱼际",
+      "拇指",
+      "食指",
+      "热成像图"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "上肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "C6神经根受累热图",
+      "大鱼际拇指食指热节变化",
+      "C6颈椎病热成像"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0228",
+    "title": "神经根型颈椎病热成像图：C7神经根受累热节变化区域",
+    "content": "神经根型颈椎病C7神经根受累时，红外热成像图上热节变化区域主要位于前臂尺侧缘和手掌，可表现为该区域温度异常，与健侧比较存在色码差异。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "神经根型颈椎病",
+      "C7神经根",
+      "热节变化",
+      "前臂尺侧缘",
+      "手掌",
+      "热成像图"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "上肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "C7神经根受累热图",
+      "前臂尺侧缘手掌热节变化",
+      "C7颈椎病热成像"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0229",
+    "title": "神经根型颈椎病热成像图：C8神经根受累热节变化区域",
+    "content": "神经根型颈椎病C8神经根受累时，红外热成像图上热节变化区域主要位于肩下部、上肢伸侧和手的背侧，可表现为上述区域温度异常，与健侧比较存在色码差异。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "神经根型颈椎病",
+      "C8神经根",
+      "热节变化",
+      "肩下部",
+      "上肢伸侧",
+      "手背侧",
+      "热成像图"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "上肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "C8神经根受累热图",
+      "肩下部上肢伸侧手背热节变化",
+      "C8颈椎病热成像"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0230",
+    "title": "典型病例（神经根型颈椎病）：主诉与基本信息——朱某某",
+    "content": "患者朱某某，主诉颈肩部疼痛伴左上肢桡尺侧麻木4个月余。为神经根型颈椎病典型病例，以颈肩痛合并单侧上肢放射性麻木为主要表现，VAS评分7分，病程已超过4个月。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "典型病例",
+      "神经根型颈椎病",
+      "颈肩疼痛",
+      "左上肢麻木",
+      "桡尺侧麻木",
+      "VAS评分"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "上肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "颈肩疼痛伴左上肢麻木",
+      "桡尺侧麻木4个月",
+      "VAS评分7分",
+      "神经根型颈椎病典型病例"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0231",
+    "title": "典型病例（神经根型颈椎病）：颈肩部查体阳性体征",
+    "content": "查体见颈椎僵直，颈椎肌肉紧张；颈5/6棘间至颈6/7间左侧旁开1.5cm处压痛，并向左上肢放射至手部；左侧冈上肌、冈下肌、斜方肌中部、胸锁乳突肌均有压痛；左上肢皮肤感觉减弱。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "典型病例",
+      "神经根型颈椎病",
+      "颈椎僵直",
+      "颈肌紧张",
+      "压痛放射",
+      "皮肤感觉减弱",
+      "冈上肌",
+      "胸锁乳突肌"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "上肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "颈椎僵直肌肉紧张",
+      "颈5/6至6/7压痛放射",
+      "冈上肌冈下肌斜方肌压痛",
+      "上肢皮肤感觉减弱",
+      "神经根型颈椎病查体"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0232",
+    "title": "典型病例（神经根型颈椎病）：神经系统检查与特殊试验",
+    "content": "神经系统检查：左臂丛神经牵拉试验阳性，左椎间孔挤压试验阳性，左手握力V-级；左肱二头肌和左肱三头肌腱反射减弱，双侧霍夫曼征未引出。上述体征符合神经根受累表现。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "典型病例",
+      "神经根型颈椎病",
+      "臂丛神经牵拉试验",
+      "椎间孔挤压试验",
+      "握力减弱",
+      "肱二头肌反射",
+      "霍夫曼征"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "上肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "臂丛神经牵拉试验阳性",
+      "椎间孔挤压试验阳性",
+      "握力V-级",
+      "肱二头肌肱三头肌反射减弱",
+      "霍夫曼征未引出"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0233",
+    "title": "典型病例（神经根型颈椎病）：颈椎活动度检查结果",
+    "content": "颈椎活动度检查结果：前屈20°，后伸20°，左屈20°，右屈20°，左旋30°，右旋30°。各方向活动度均受限，提示颈椎功能受损。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "典型病例",
+      "神经根型颈椎病",
+      "颈椎活动度",
+      "前屈后伸",
+      "左屈右屈",
+      "左旋右旋",
+      "活动受限"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "颈椎活动度受限",
+      "前屈后伸各20度",
+      "左屈右屈各20度",
+      "左旋右旋各30度",
+      "神经根型颈椎病活动度"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0234",
+    "title": "典型病例（神经根型颈椎病）：X线影像所见",
+    "content": "颈椎X线片示：颈椎生理曲度变直，椎体后缘连线不整；C5-6椎体边缘唇样骨质增生；C4-7椎间隙狭窄；双侧C6/7椎间孔变窄。上述影像表现与神经根型颈椎病诊断相符。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "典型病例",
+      "神经根型颈椎病",
+      "X线",
+      "生理曲度变直",
+      "唇样增生",
+      "椎间隙狭窄",
+      "椎间孔变窄",
+      "C5-6",
+      "C4-7",
+      "C6/7"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "颈椎生理曲度变直",
+      "椎体后缘连线不整",
+      "C5-6唇样骨质增生",
+      "C4-7椎间隙狭窄",
+      "C6/7椎间孔变窄",
+      "神经根型颈椎病X线"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0235",
+    "title": "典型病例（神经根型颈椎病）：颈椎MRI影像所见",
+    "content": "颈椎MRI示：颈椎骨质增生，颈椎间盘退行性变；C2/3至C7/T1及T2/3椎间盘稍向后突出，继发相应水平椎管狭窄。上述MRI表现与神经根型颈椎病影像学诊断相符，可结合X线及临床体征综合评估。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "典型病例",
+      "神经根型颈椎病",
+      "颈椎MRI",
+      "骨质增生",
+      "椎间盘退变",
+      "椎间盘后突",
+      "椎管狭窄",
+      "C2/3",
+      "C7/T1",
+      "T2/3"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "脊柱背部"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "颈椎MRI骨质增生椎间盘退变",
+      "C2/3至C7/T1椎间盘后突",
+      "T2/3椎间盘后突",
+      "继发椎管狭窄",
+      "神经根型颈椎病MRI表现"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0236",
+    "title": "典型病例（神经根型颈椎病）：红外热成像图所见——患肢前臂尺侧缘和手掌温度降低",
+    "content": "该典型病例红外热成像图显示：患肢（左侧）前臂尺侧缘和手掌温度低于健肢（右侧），患肢生理热区温度降低。上述热图表现与C7神经根受累所对应的热节变化区域相符，可作为神经根型颈椎病影像学辅助诊断依据之一。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "典型病例",
+      "神经根型颈椎病",
+      "红外热成像",
+      "患肢温度降低",
+      "前臂尺侧缘",
+      "手掌",
+      "生理热区",
+      "C7神经根"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "上肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "患肢前臂尺侧缘手掌温度低于健肢",
+      "患肢生理热区温度降低",
+      "神经根型颈椎病热图病例",
+      "C7神经根热图表现",
+      "红外热成像辅助诊断"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0237",
+    "title": "典型病例（神经根型颈椎病）：治疗方案及一个疗程后症状改善情况",
+    "content": "予微针针刺、拔罐及颈椎旋提手法治疗一个疗程后，患者诉颈肩部及左上肢桡尺侧疼痛和麻木明显缓解。查体见颈椎肌肉有所舒缓，颈部压痛减轻，左上肢放射痛减轻，左上肢皮肤感觉可。VAS评分由7分降至5分。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "典型病例",
+      "神经根型颈椎病",
+      "微针针刺",
+      "拔罐",
+      "颈椎旋提手法",
+      "治疗效果",
+      "症状缓解",
+      "VAS评分"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "上肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "微针针刺拔罐旋提手法治疗一疗程",
+      "颈肩疼麻缓解",
+      "VAS评分由7降至5",
+      "颈椎肌肉舒缓",
+      "放射痛减轻"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0238",
+    "title": "典型病例（神经根型颈椎病）：一个疗程后神经系统检查及特殊试验结果",
+    "content": "治疗一个疗程后复查：左臂丛神经牵拉试验转阴性，左椎间孔挤压试验仍为阳性，左手握力恢复至V级；颈椎活动度改善；左肱二头肌和左肱三头肌腱反射可。提示神经根受压症状部分缓解。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "典型病例",
+      "神经根型颈椎病",
+      "臂丛神经牵拉试验阴性",
+      "椎间孔挤压试验阳性",
+      "握力恢复",
+      "腱反射改善",
+      "治疗后复查"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "上肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "臂丛牵拉试验转阴性",
+      "椎间孔挤压试验仍阳性",
+      "握力恢复V级",
+      "肱二头肌肱三头肌反射可",
+      "治疗后神经系统复查"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0239",
+    "title": "典型病例（神经根型颈椎病）：治疗后复查红外热成像图——患肢温度较前提升",
+    "content": "治疗一个疗程后复查红外热成像图显示：患肢（左侧）前臂尺侧缘和手掌温度仍略低于健肢（右侧），但患肢生理热区温度较治疗前明显提升。热图改善与临床症状缓解相对应，可作为疗效评估的参考依据。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note",
+      "follow_up"
+    ],
+    "tags": [
+      "典型病例",
+      "神经根型颈椎病",
+      "复查热成像图",
+      "患肢温度提升",
+      "前臂尺侧缘",
+      "手掌",
+      "生理热区",
+      "疗效评估"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "上肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "治疗后热图患肢温度提升",
+      "前臂尺侧缘手掌温度略低于健肢",
+      "生理热区温度较前提升",
+      "热图评估疗效",
+      "神经根型颈椎病治疗前后热图对比"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0240",
+    "title": "典型病例（神经根型颈椎病）：第二疗程后症状进一步改善——VAS降至2分",
+    "content": "继续予微针针刺、拔罐及颈椎旋提手法治疗第二个疗程后，患者诉颈肩部及左上肢桡尺侧疼痛麻木偶发，较前明显好转。VAS评分由5分降至2分。患者基本恢复正常工作与生活，精神状态较前明显改善。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "典型病例",
+      "神经根型颈椎病",
+      "第二疗程",
+      "微针针刺",
+      "拔罐",
+      "颈椎旋提手法",
+      "VAS评分",
+      "症状明显好转",
+      "生活工作恢复"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "上肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "第二疗程治疗后症状明显好转",
+      "偶见颈肩疼麻",
+      "VAS评分由5降至2",
+      "工作生活恢复正常",
+      "神经根型颈椎病两疗程疗效"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0241",
+    "title": "典型病例（神经根型颈椎病）：第二疗程后查体所见",
+    "content": "第二疗程结束后复查体征：颈部肌肉柔韧有弹性，颈部压痛及左上肢放射痛不明显；双上肢皮肤感觉无明显差异；颈椎活动度可；左肱二头肌和左肱三头肌腱反射可。体征显示颈椎功能及神经功能基本恢复。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "典型病例",
+      "神经根型颈椎病",
+      "第二疗程查体",
+      "颈肌柔韧",
+      "压痛不明显",
+      "放射痛不明显",
+      "皮肤感觉正常",
+      "腱反射可"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "上肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "颈部肌肉柔韧有弹性",
+      "颈部压痛放射痛不明显",
+      "双上肢皮肤感觉无差异",
+      "肱二头肌肱三头肌反射可",
+      "第二疗程后查体改善"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0242",
+    "title": "典型病例（神经根型颈椎病）：第二疗程后特殊试验及第二次复查红外热成像",
+    "content": "第二疗程结束后复查：左臂丛神经牵拉试验阴性，左椎间孔挤压试验阴性，左手握力V级。各项特殊试验均转阴，握力完全恢复。同期行第二次复查红外热成像，与第一次复查热图对比，患肢生理热区温度进一步提升，可作为临床疗效评估的客观依据。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note",
+      "follow_up"
+    ],
+    "tags": [
+      "典型病例",
+      "神经根型颈椎病",
+      "臂丛牵拉试验阴性",
+      "椎间孔挤压试验阴性",
+      "握力V级",
+      "第二次复查热成像",
+      "患肢温度提升",
+      "疗效评估"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "上肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "臂丛牵拉试验转阴性",
+      "椎间孔挤压试验转阴性",
+      "握力V级完全恢复",
+      "第二次复查热图患肢温度提升",
+      "两疗程后特殊试验全阴"
+    ]
   }
 ]
