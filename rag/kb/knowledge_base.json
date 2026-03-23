@@ -7556,5 +7556,53 @@
       "红外热成像病变识别",
       "血流量变化"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0039",
+    "title": "热成像系统采集分析流程对临床诊断的支持作用",
+    "content": "基于人体红外辐射成像原理，热成像系统可采集人体红外辐射并将其转换为数字信号，进一步形成伪色彩热成像图。借助专用分析软件并结合专业医师判读，可辅助判断病灶部位、疾病性质及病变程度，为临床诊断提供参考依据。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "diagnosis"
+    ],
+    "tags": [
+      "采集流程",
+      "数字信号",
+      "伪色彩图",
+      "分析软件",
+      "医师判读",
+      "临床诊断"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "热成像系统采集流程",
+      "数字信号",
+      "伪色彩热成像图",
+      "分析软件",
+      "医师判读",
+      "临床诊断依据"
+    ]
   }
 ]
