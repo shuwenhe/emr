@@ -14624,5 +14624,48 @@
       "正红花油万花油",
       "颈椎病常用外用药"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0216",
+    "title": "神经根型颈椎病常用非手术治疗：手法治疗",
+    "content": "手法治疗可作为常用非手术治疗方式之一。常用揉法、滚法、拿法等手法放松颈肩肌群；可配合点穴与拨筋法松解软组织粘连；并可采用摇法、扳法等关节手法以改善关节活动度、促进关节滑利。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice",
+      "report_note"
+    ],
+    "tags": [
+      "神经根型颈椎病",
+      "非手术治疗",
+      "手法治疗",
+      "揉法滚法拿法",
+      "点穴拨筋",
+      "摇法扳法"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "上肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "手法治疗",
+      "揉法滚法拿法放松颈肩",
+      "点穴拨筋松解粘连",
+      "摇法扳法滑利关节",
+      "颈椎病非手术治疗"
+    ]
   }
 ]
