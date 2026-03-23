@@ -13679,5 +13679,154 @@
       "跟痛症",
       "微创治疗"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0189",
+    "title": "严重内科功能不全患者通常不宜接受相关微创治疗",
+    "content": "存在严重内科疾病者通常不宜接受相关微创治疗，例如中风早期患者，以及严重心、肝、肾功能不全者。治疗前应进行基础病情评估与风险判断。",
+    "category": "contraindication",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "禁忌证",
+      "严重内科疾病",
+      "中风早期",
+      "心功能不全",
+      "肝功能不全",
+      "肾功能不全"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 10,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "严重内科疾病禁忌",
+      "中风早期",
+      "心肝肾功能不全",
+      "不宜微创治疗"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0190",
+    "title": "血液病及严重糖尿病患者应慎用或禁用相关治疗",
+    "content": "血液病患者，如血友病患者，以及严重糖尿病患者，通常应慎用或禁用相关微创治疗，以避免出血、愈合不良及感染等风险增加。",
+    "category": "contraindication",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "禁忌证",
+      "血液病",
+      "血友病",
+      "严重糖尿病",
+      "出血风险",
+      "愈合不良"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 10,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "血液病禁忌",
+      "血友病",
+      "严重糖尿病",
+      "出血和感染风险"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0191",
+    "title": "局部感染妊娠及体内植入物等情况通常列为治疗禁忌",
+    "content": "施术部位存在皮肤病或局部感染者，心脏内有植入物者，以及怀孕患者，通常不宜接受相关治疗。具体是否禁忌仍应结合设备特性、治疗方式及风险评估综合判断。",
+    "category": "contraindication",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "禁忌证",
+      "局部感染",
+      "皮肤病",
+      "心脏植入物",
+      "怀孕",
+      "风险评估"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 10,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "female"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "施术部位皮肤病或局部感染",
+      "心脏内植入物",
+      "怀孕患者",
+      "治疗禁忌"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0192",
+    "title": "肿瘤感染性骨病及无法配合治疗者通常不宜施治",
+    "content": "肿瘤、结核、骨髓炎患者，以及精神疾病患者或不能配合治疗者，通常不宜接受相关治疗。实施前应重点评估基础疾病性质、治疗风险及患者配合程度。",
+    "category": "contraindication",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "treatment_plan_text"
+    ],
+    "tags": [
+      "禁忌证",
+      "肿瘤",
+      "结核",
+      "骨髓炎",
+      "精神疾病",
+      "不能配合治疗"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 10,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "肿瘤结核骨髓炎",
+      "精神疾病患者",
+      "不能配合治疗",
+      "不宜施治"
+    ]
   }
 ]
