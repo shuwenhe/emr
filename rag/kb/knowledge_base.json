@@ -8932,5 +8932,45 @@
       "左胸温度略高于右侧",
       "心脏位于左侧"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0072",
+    "title": "正常人体由中心到末梢的温度递减规律",
+    "content": "正常人体热图中，头面部和躯干中心区域温度通常相对较高，而四肢手足随着离躯干中心距离增加，温度往往逐渐递减。这种由中心到末梢的温度梯度属于常见生理热态特征。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "头面部",
+      "躯干中心",
+      "四肢手足",
+      "温度递减",
+      "生理梯度"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "胸腹部",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "头面部躯干中心温度偏高",
+      "四肢手足温度递减",
+      "中心到末梢温度梯度",
+      "生理热态特征",
+      "温度递减规律"
+    ]
   }
 ]
