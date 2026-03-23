@@ -10546,6 +10546,48 @@
     ]
   },
   {
+    "id": "KB-IR-BG-0112",
+    "title": "脊柱平片常规摄片可包括正位侧位和斜位",
+    "content": "脊柱平片检查的常规摄片体位一般包括正位、侧位和左右斜位。根据病情需要，还可加拍张口位、过屈位、过伸位等功能位以及体层摄影片，以提高对特定病变的显示和判断能力。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "脊柱平片",
+      "正位",
+      "侧位",
+      "左右斜位",
+      "张口位",
+      "功能位"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "脊柱背部"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "脊柱平片检查常规摄片",
+      "正位侧位左右斜位",
+      "张口位",
+      "过屈过伸功能位",
+      "体层摄影片"
+    ]
+  },
+  {
     "id": "KB-IR-BG-0104",
     "title": "手肘部背侧位标准图可作为采集参考",
     "content": "手肘部背侧位热成像采集时，宜参照背侧位标准图进行体位摆放和图像采集，以保证肘后区、鹰嘴周围及邻近软组织区域显示清晰，便于观察后侧温度分布和局部异常热区。",
