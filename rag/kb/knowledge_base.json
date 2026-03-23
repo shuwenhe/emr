@@ -9263,5 +9263,49 @@
       "灵活掌握及应用",
       "避免机械化解释"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0080",
+    "title": "干扰热图特征",
+    "content": "干扰热图是指由外界环境、检查前行为、局部接触刺激或其他非病理因素所引起的异常热图表现。识别干扰热图特征，是避免误判病理变化并提高红外热像判读准确性的关键环节。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "干扰热图",
+      "非病理因素",
+      "外界环境",
+      "局部刺激",
+      "误判避免"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "干扰热图特征",
+      "非病理因素",
+      "外界环境干扰",
+      "局部接触刺激",
+      "避免误判病理变化"
+    ]
   }
 ]
