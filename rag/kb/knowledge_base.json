@@ -8587,5 +8587,49 @@
       "头面部前后位双侧位",
       "肩关节前后左右位"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0064",
+    "title": "无特殊要求时应尽量按照标准体位拍摄",
+    "content": "如无特殊临床要求，红外热像拍摄应尽量按照标准摄图体位进行。标准体位有利于病变部位的合理暴露；对于需要进行治疗前后对比观察的患者，更应注意保持标准体位一致，以提高前后热图比较的可靠性。",
+    "category": "sop_acquisition",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "follow_up"
+    ],
+    "tags": [
+      "标准体位",
+      "病变暴露",
+      "治疗前后对比",
+      "前后观察",
+      "热图比较"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "无特殊要求尽量按照标准体位拍摄",
+      "病变部位合理暴露",
+      "治疗前后对比",
+      "标准体位一致",
+      "热图比较可靠性"
+    ]
   }
 ]
