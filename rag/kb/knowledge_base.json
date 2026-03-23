@@ -7870,5 +7870,50 @@
       "彩色图像显示",
       "热能信息转换数据"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0047",
+    "title": "体温状态对体内生理变化和局部病变的提示价值",
+    "content": "体温状态能够在一定程度上反映体内生理变化和局部病变情况，因此温度分布特征可为临床诊断提供有效信息。红外热成像通过对体表温度状态的观察，为识别异常区域和辅助判断病变性质提供参考。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "report_note",
+      "doctor_opinion",
+      "diagnosis"
+    ],
+    "tags": [
+      "体温状态",
+      "生理变化",
+      "局部病变",
+      "临床诊断",
+      "温度分布"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 7,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "头面部",
+      "颈肩",
+      "胸腹部",
+      "脊柱背部",
+      "腰背",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "体温状态反映生理变化",
+      "局部病变提示",
+      "临床诊断有效信息",
+      "温度分布特征",
+      "红外热成像辅助判断"
+    ]
   }
 ]
