@@ -865,7 +865,7 @@ def generate_pdf_report(
     kb_lines = _load_kb_interpretation_lines()
     if kb_lines:
         story.append(Spacer(1, 5 * mm))
-        story.append(_paragraph("知识库补充解读", styles["subsection"]))
+        story.append(_paragraph("补充解读", styles["subsection"]))
         story.append(Spacer(1, 2 * mm))
         for line in kb_lines:
             story.append(_paragraph(f"· {line}", styles["small"]))
