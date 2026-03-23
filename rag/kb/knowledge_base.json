@@ -9829,5 +9829,48 @@
       "异常高温或低温表现",
       "避免误判病理改变"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0093",
+    "title": "术后常见的低温区与线条样高温瘢痕表现",
+    "content": "部分术后热图可出现具有提示性的局部改变，例如胆囊摘除术后常可于右上腹见低温改变；腹部外科或妇科手术后，则常可见线条样高温改变的手术瘢痕。判读时应结合手术史识别此类术后热图特征。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note",
+      "diagnosis"
+    ],
+    "tags": [
+      "胆囊摘除术",
+      "右上腹低温",
+      "腹部外科手术",
+      "妇科手术",
+      "线条样高温",
+      "手术瘢痕"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "female"
+    ],
+    "body_parts": [
+      "胸腹部"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "胆囊摘除术后右上腹低温",
+      "腹部外科术后",
+      "妇科手术后",
+      "线条样高温改变",
+      "手术瘢痕",
+      "结合手术史识别"
+    ]
   }
 ]
