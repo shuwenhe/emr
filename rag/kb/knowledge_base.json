@@ -9699,5 +9699,89 @@
       "局部温度升高",
       "高温干扰热图"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0090",
+    "title": "贴膏药后局部皮肤过敏可导致高温干扰",
+    "content": "患者贴敷膏药后，若局部皮肤出现过敏或刺激反应，常可导致局部温度升高，并在热图上表现为高温干扰。判读时应结合膏药使用史和皮肤情况加以识别。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "report_note",
+      "health_advice"
+    ],
+    "tags": [
+      "高温干扰",
+      "贴膏药",
+      "皮肤过敏",
+      "局部刺激",
+      "局部温度升高"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "腰背",
+      "膝关节",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "贴膏药后局部皮肤过敏",
+      "高温干扰",
+      "局部温度升高",
+      "膏药使用史",
+      "皮肤刺激反应"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0091",
+    "title": "检查前应询问保暖物佩戴情况并提前摘除",
+    "content": "红外热像检查前应尽量询问患者是否佩戴腰围、护膝，以及局部是否穿衣较厚。若存在此类保暖或包裹因素，通常应提前约30分钟摘除，再进行检查，以减少局部保温造成的高温干扰。",
+    "category": "sop_preparation",
+    "report_sections": [
+      "report_note",
+      "health_advice",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "腰围",
+      "护膝",
+      "局部穿衣较厚",
+      "提前摘除",
+      "30分钟",
+      "高温干扰"
+    ],
+    "source": "用户补充",
+    "source_type": "weak_observation",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "腰背",
+      "膝关节",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "weak_observation",
+    "retrieval_hints": [
+      "询问是否佩戴腰围护膝",
+      "局部穿衣较厚",
+      "提前30分钟摘除",
+      "减少高温干扰",
+      "检查前准备"
+    ]
   }
 ]
