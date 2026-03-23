@@ -13559,5 +13559,41 @@
       "无菌绝缘",
       "针刺或针刀操作"
     ]
+  },
+  {
+    "id": "KB-IR-BG-0186",
+    "title": "射频针灸可将针刺操作与射频能量应用结合",
+    "content": "射频针灸是一种将针刺操作与射频能量应用相结合的治疗方式，可在传统针刺基础上增加能量干预，以辅助改善局部组织状态和治疗反应。具体应用应结合适应证、操作规范及安全要求综合评估。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "射频针灸",
+      "针刺操作",
+      "射频能量",
+      "能量干预",
+      "治疗反应"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "射频针灸",
+      "针刺与射频能量结合",
+      "能量干预",
+      "治疗方式"
+    ]
   }
 ]
