@@ -36310,5 +36310,72 @@
       ],
       "clinical_tip": "重复治疗前应结合症状改善幅度和热像变化决定是否调整剂量或频次。"
     }
+  },
+  {
+    "id": "KB-IR-CS-0994",
+    "title": "病例分析-常穿尖头紧鞋为本例重要诱因",
+    "content": "本文所涉及病例中，患者常穿尖头紧鞋，提示前足长期受压与鞋履不当是本例发病的重要诱因。",
+    "category": "case_study",
+    "tags": [
+      "病例分析",
+      "尖头紧鞋",
+      "鞋履诱因",
+      "前足受压"
+    ],
+    "source": "病例分析文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_tight_pointed_shoes_as_major_trigger_in_this_bursitis_case_analysis",
+      "history_points": [
+        "长期穿尖头紧鞋"
+      ],
+      "clinical_tip": "病例分析中应将鞋履习惯作为复发预防的重点干预项。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0995",
+    "title": "发病机制-反复摩擦第一跖趾关节可诱发局部急性发作",
+    "content": "本例中，第一跖趾关节长期反复摩擦后出现急性发作，提示机械性刺激可触发局部炎症反应并导致症状出现。",
+    "category": "diagnosis",
+    "tags": [
+      "发病机制",
+      "反复摩擦",
+      "第一跖趾关节",
+      "急性发作",
+      "机械性刺激"
+    ],
+    "source": "病例分析文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_repetitive_friction_at_first_mtp_as_mechanical_trigger_for_acute_flare",
+      "key_points": [
+        "反复摩擦可触发急性症状"
+      ],
+      "clinical_tip": "应结合鞋履、步态与局部受压模式评估机械性诱发因素。"
+    }
+  },
+  {
+    "id": "KB-IR-CS-0996",
+    "title": "文本完整性说明-病例分析段提示左足受累但原文后半句截断",
+    "content": "原文病例分析段写至“表现为左足”后截断，可确认本例为左足受累，但更具体的症状描述在当前文本中未完整提供。",
+    "category": "case_study",
+    "tags": [
+      "文本截断",
+      "左足受累",
+      "病例分析",
+      "信息完整性"
+    ],
+    "source": "病例分析文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_left_foot_involvement_while_preserving_truncation_note_for_incomplete_source_text",
+      "data_quality_notes": [
+        "原文后半句截断，未补写缺失症状"
+      ],
+      "clinical_tip": "对OCR截断文本应保留已知信息并显式标记缺口，避免过度推断。"
+    }
   }
 ]
