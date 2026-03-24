@@ -37611,5 +37611,30 @@
       ],
       "clinical_tip": "规范化技术路径有助于提升重复性并降低操作风险。"
     }
+  },
+  {
+    "id": "KB-IR-FUP-1048",
+    "title": "一周复诊-双腕肿胀明显缓解且双手麻木症状基本消失",
+    "content": "患者治疗后1周复诊，双腕关节肿胀较前明显缓解，双手麻木症状基本消失，提示短期疗效良好。",
+    "category": "follow_up",
+    "tags": [
+      "一周复诊",
+      "双腕肿胀缓解",
+      "双手麻木改善",
+      "短期疗效",
+      "腕管综合征"
+    ],
+    "source": "复诊记录文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_one_week_followup_showing_significant_reduction_of_bilateral_wrist_swelling_and_near_resolution_of_bilateral_hand_numbness",
+      "follow_up_timing": "1周",
+      "outcome_summary": [
+        "双腕肿胀明显缓解",
+        "双手麻木基本消失"
+      ],
+      "clinical_tip": "建议继续随访夜间症状、握力和感觉功能，评估疗效维持情况。"
+    }
   }
 ]
