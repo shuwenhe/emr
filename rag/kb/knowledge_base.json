@@ -24017,5 +24017,50 @@
       ],
       "clinical_tip": "任何怀疑马尾综合征的症状都应视为急症处理，避免延误导致永久神经损伤。"
     }
+  },
+  {
+    "id": "KB-IR-CS-0607",
+    "title": "典型病例-唐某某：腰痛伴左下肢疼痛10年,加重伴麻木3个月",
+    "content": "患者唐某某，男性，42岁，主因腰痛伴左下肢疼痛10年，加重伴左下肢麻木3个月而收入院。现病史：患者于10年前因劳累后出现腰部疼痛伴左下肢疼痛，经输液及休息后症状好转，之后反复发作。3个月前再因劳累而致腰痛伴左下肢麻木疼痛加重，经休息及口服镇痛药物治疗未见明显好转，遂来院就诊。患者病程长，症状反复发作且逐步加重，下肢出现麻木症状，提示可能存在神经根长期受压迫。",
+    "category": "case_study",
+    "tags": [
+      "腰痛",
+      "左下肢疼痛",
+      "麻木",
+      "长期病程",
+      "典型病例",
+      "劳累诱因",
+      "保守治疗无效"
+    ],
+    "source": "临床典型病例（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "analyze_typical_case_of_chronic_lumbar_disc_herniation_with_progression",
+      "patient_profile": {
+        "age": 42,
+        "gender": "male",
+        "chief_complaint": "腰痛伴左下肢疼痛10年，加重伴麻木3个月",
+        "duration": "10年"
+      },
+      "exam_findings": {
+        "left_lower_limb_pain": "present",
+        "left_lower_limb_numbness": "present for 3 months",
+        "pain_quality": "疼痛加重"
+      },
+      "clinical_assessment": [
+        "病程长（10年），症状反复",
+        "保守治疗有效但症状反复发作",
+        "下肢麻木提示神经根受压程度加重",
+        "需要评估是否需要更积极治疗"
+      ],
+      "key_points": [
+        "长期慢性腰痛病程中出现进行性神经症状",
+        "下肢麻木的出现提示神经损害加重",
+        "保守治疗虽有缓解但无法根治",
+        "该患者可考虑进一步影像学评估和手术治疗权衡"
+      ],
+      "clinical_tip": "这类长期反复发作且出现进行性神经症状的患者，应及时进行规范诊断和治疗决策，以避免不可逆的神经损伤。"
+    }
   }
 ]
