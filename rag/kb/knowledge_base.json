@@ -36210,7 +36210,7 @@
       "红外热成像复查",
       "即刻温度变化"
     ],
-    "source": "即刻红外热成像文本（用户提供）",
+    "source": "即刻红外热成像文本",
     "source_type": "clinical_case",
     "priority": "high",
     "structured_advice": {
