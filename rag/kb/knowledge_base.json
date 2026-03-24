@@ -23467,5 +23467,31 @@
       ],
       "clinical_tip": "若X线提示滑脱并伴后柱退变征象，应优先考虑退变性滑脱并结合CT/MR评估神经受压情况。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0585",
+    "title": "鉴别诊断-退变性腰椎滑脱症的疼痛特点",
+    "content": "退变性腰椎滑脱症多表现为长期腰部疼痛，可伴臀部及大腿后方牵扯痛，但其下肢放射痛通常较腰椎间盘突出症患者轻。该疼痛模式可作为两者鉴别的临床参考。",
+    "category": "diagnosis",
+    "tags": [
+      "鉴别诊断",
+      "退变性腰椎滑脱症",
+      "腰痛",
+      "牵扯痛",
+      "腰椎间盘突出症"
+    ],
+    "source": "临床鉴别要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "differentiate_degenerative_spondylolisthesis_from_ldh_by_pain_pattern",
+      "key_points": [
+        "退变性滑脱常见长期慢性腰痛",
+        "可伴臀部及大腿后方牵扯痛",
+        "下肢放射痛一般轻于腰突患者",
+        "疼痛特征可辅助鉴别诊断"
+      ],
+      "clinical_tip": "鉴别时应结合影像学滑脱征象与神经系统查体，避免仅凭疼痛强度下结论。"
+    }
   }
 ]
