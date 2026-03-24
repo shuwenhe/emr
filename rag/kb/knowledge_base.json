@@ -26378,5 +26378,149 @@
       ],
       "clinical_tip": "对同时存在椎间盘病变证据与脊柱关节病线索的患者，建议建立联合随访路径，动态评估炎性活动与神经受压变化。"
     }
+  },
+  {
+    "id": "KB-IR-TX-0672",
+    "title": "介入治疗-L5/S1椎间盘及双侧骶髂关节射频联合臭氧注射",
+    "content": "患者完善理化及影像学检查后，行L5/S1椎间盘与双侧骶髂关节射频消融联合臭氧注射治疗。该方案覆盖下腰椎责任节段及骶髂关节相关疼痛区域，旨在通过神经调制、局部减压及抗炎效应减轻腰骶痛和下肢症状。",
+    "category": "treatment",
+    "tags": [
+      "L5/S1椎间盘",
+      "双侧骶髂关节",
+      "射频消融",
+      "臭氧注射",
+      "联合介入"
+    ],
+    "source": "介入治疗记录（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_combined_radiofrequency_ablation_and_ozone_injection_for_l5_s1_disc_and_bilateral_sacroiliac_targets",
+      "target_sites": [
+        "L5/S1椎间盘",
+        "双侧骶髂关节"
+      ],
+      "procedure_components": [
+        "射频消融",
+        "臭氧注射"
+      ],
+      "treatment_goals": [
+        "减轻腰骶部疼痛",
+        "缓解神经根及骶髂关节相关症状",
+        "改善功能受限"
+      ],
+      "key_points": [
+        "多靶点覆盖复合疼痛来源",
+        "兼顾减压与抗炎效应",
+        "建立后续疗效评估基线"
+      ],
+      "clinical_tip": "对于腰椎间盘与骶髂关节复合疼痛表型，联合多靶点介入有助于提高症状控制效率，但需严格匹配责任结构证据。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0673",
+    "title": "围手术期协同治疗-中医热敷熏蒸联合复元活血汤加减",
+    "content": "患者术前术后均给予中医热敷、熏蒸等理疗，并口服中药汤剂（复元活血汤加减）进行协同治疗。该策略用于辅助镇痛、促进局部循环及软组织恢复，与介入治疗形成综合管理路径。术中同步留取影像资料用于疗效追踪与病例质控。",
+    "category": "treatment",
+    "tags": [
+      "中医热敷",
+      "中医熏蒸",
+      "复元活血汤加减",
+      "围手术期管理",
+      "术中影像留存"
+    ],
+    "source": "围手术期综合治疗记录（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_perioperative_integrative_therapy_with_tcm_physiotherapy_and_modified_fuyuan_huoxue_decoction",
+      "adjunctive_therapies": [
+        "术前术后中医热敷",
+        "术前术后熏蒸理疗",
+        "口服复元活血汤加减"
+      ],
+      "intraoperative_documentation": [
+        "术中影像资料留存"
+      ],
+      "clinical_value": [
+        "辅助镇痛与循环改善",
+        "支持软组织恢复",
+        "便于术后疗效对比评估"
+      ],
+      "key_points": [
+        "围手术期连续干预增强整体康复",
+        "中西医协同可提升症状管理完整性",
+        "影像留存有助于随访和质控"
+      ],
+      "clinical_tip": "围手术期协同治疗应与主要介入方案同向设计，重点关注疼痛变化、活动功能及不良反应的动态记录。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0674",
+    "title": "术后热成像随访-双侧骶髂关节与双足底温差趋于对称",
+    "content": "术后复查腰骶部及双下肢红外热成像显示：双侧骶髂关节温差基本对称，双足底温差亦基本对称。该结果提示术前异常热分布明显改善，局部炎性活动及远端微循环异常趋于缓解，可作为客观随访指标支持治疗有效性。",
+    "category": "follow_up",
+    "tags": [
+      "术后红外热成像",
+      "骶髂关节温差对称",
+      "双足底温差对称",
+      "功能影像随访",
+      "客观疗效指标"
+    ],
+    "source": "术后热成像复查（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_postoperative_thermography_symmetry_in_sacroiliac_joints_and_bilateral_plantar_regions",
+      "follow_up_findings": [
+        "双侧骶髂关节温差基本对称",
+        "双足底温差基本对称"
+      ],
+      "clinical_interpretation": [
+        "术前异常热分布改善",
+        "提示炎性与微循环状态好转",
+        "支持干预后功能恢复趋势"
+      ],
+      "key_points": [
+        "热成像可量化侧别差异变化",
+        "对称化通常提示恢复方向正确",
+        "应与临床症状联合判断"
+      ],
+      "clinical_tip": "术后热成像出现温差对称化时，建议同步记录疼痛和功能评分，以构建结构化疗效证据链。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0675",
+    "title": "疗效结局-VAS降至2分且左下肢酸麻消失",
+    "content": "治疗后患者VAS评分降至2分，左下肢酸麻感消失，提示疼痛和感觉异常显著改善。主观症状缓解与术后热成像对称化趋势一致，支持本次综合治疗在短期内取得良好临床疗效。",
+    "category": "follow_up",
+    "tags": [
+      "VAS2分",
+      "左下肢酸麻消失",
+      "短期疗效",
+      "症状改善",
+      "疗效评估"
+    ],
+    "source": "治疗后结局评估（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_post_treatment_outcome_with_vas_reduction_and_resolution_of_left_leg_paresthesia",
+      "outcome_metrics": [
+        "VAS评分2分",
+        "左下肢酸麻消失"
+      ],
+      "response_assessment": [
+        "疼痛显著下降",
+        "神经感觉症状明显改善",
+        "短期疗效明确"
+      ],
+      "key_points": [
+        "症状改善幅度较大",
+        "与功能影像改善方向一致",
+        "可作为后续维持治疗参考"
+      ],
+      "clinical_tip": "VAS和感觉症状同步改善提示近期疗效可靠，但仍需中期随访观察复发风险与功能稳定性。"
+    }
   }
 ]
