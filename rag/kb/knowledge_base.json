@@ -37439,5 +37439,28 @@
       ],
       "clinical_tip": "电生理提示应回到症状、查体和影像证据中进行综合判读，避免孤立下结论。"
     }
+  },
+  {
+    "id": "KB-IR-FUP-1041",
+    "title": "图像随访-治疗后复查红外热成像图",
+    "content": "治疗后进行红外热成像复查，用于与治疗前基线及中期复查结果对照，评估温度分布变化与疗效趋势。",
+    "category": "follow_up",
+    "tags": [
+      "治疗后复查",
+      "红外热成像图",
+      "图像随访",
+      "疗效趋势",
+      "温度分布对照"
+    ],
+    "source": "复查图注文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_post_treatment_thermography_recheck_image_for_followup_effect_trend_assessment",
+      "figure_reference": [
+        "治疗后复查红外热成像图"
+      ],
+      "clinical_tip": "建议保持与基线一致的体位和采集条件以提升前后可比性。"
+    }
   }
 ]
