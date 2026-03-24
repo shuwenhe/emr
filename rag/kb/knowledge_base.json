@@ -31267,5 +31267,149 @@
       ],
       "clinical_tip": "对疑似第三腰椎横突综合征患者，建议在压痛定位基础上结合负荷诱发特征进行分层评估。"
     }
+  },
+  {
+    "id": "KB-IR-CP-0801",
+    "title": "临床关联-腰部肌劳损人群中第三腰椎横突综合征较常见",
+    "content": "在腰部肌劳损相关患者中，第三腰椎横突综合征表现相对较多见。该关联提示慢性软组织负荷背景可能是本病重要临床土壤。",
+    "category": "clinical_presentation",
+    "tags": [
+      "腰部肌劳损",
+      "第三腰椎横突综合征",
+      "临床关联",
+      "常见表现"
+    ],
+    "source": "临床表现文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_common_association_of_l3_transverse_process_syndrome_in_lumbar_muscle_strain_population",
+      "clinical_points": [
+        "腰部肌劳损患者中较常见",
+        "提示慢性负荷背景关联"
+      ],
+      "key_points": [
+        "可作为初筛风险线索",
+        "需结合体征进一步确认"
+      ],
+      "clinical_tip": "遇到长期腰部劳损患者出现局灶压痛时，建议优先排查横突相关痛源。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0802",
+    "title": "病变谱扩展-L3与L4横突尖端可见类似病变，部分学者归入腰横突间综合征",
+    "content": "临床上除L3外，L4横突尖端也可出现类似病变表现。基于这一病变谱，部分观点将第三腰椎横突综合征纳入“腰横突间综合征”框架中理解。",
+    "category": "diagnosis",
+    "tags": [
+      "L3横突",
+      "L4横突",
+      "病变谱",
+      "腰横突间综合征",
+      "归类观点"
+    ],
+    "source": "临床表现文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_extended_lesion_spectrum_including_l3_l4_transverse_process_tips_and_classification_view",
+      "diagnostic_points": [
+        "L3与L4横突尖端可见类似病变",
+        "部分学者归入腰横突间综合征"
+      ],
+      "key_points": [
+        "有助于避免仅盯单一节段",
+        "分类框架可指导系统化评估"
+      ],
+      "clinical_tip": "评估横突相关疼痛时，建议进行邻近节段触诊比较，减少漏诊多节段受累。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0803",
+    "title": "流行特征-本病多见于体型瘦长青年人",
+    "content": "第三腰椎横突综合征多见于体型瘦长的青年人。该体型特征可作为临床易感线索之一，但不能替代客观查体与影像判断。",
+    "category": "clinical_presentation",
+    "tags": [
+      "流行特征",
+      "瘦长体型",
+      "青年人",
+      "易感线索"
+    ],
+    "source": "临床表现文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_body_habitus_and_age_pattern_of_slender_young_adults_in_l3_transverse_process_syndrome",
+      "epidemiologic_clues": [
+        "多见于瘦长体型",
+        "青年人相对常见"
+      ],
+      "key_points": [
+        "体型特征用于提高警觉性",
+        "仍需以体征定位为诊断核心"
+      ],
+      "clinical_tip": "对瘦长青年腰痛患者可增加横突尖端触诊步骤，提高识别率。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0804",
+    "title": "关键体征-第三腰椎棘突旁约4cm横突外缘压痛并可触及局限肌紧张/痉挛",
+    "content": "重要体征位于第三腰椎横突外缘，约在第三腰椎棘突旁4cm处。尤其瘦长型患者可触及横突尖端，并见明显压痛及局限性肌紧张或肌痉挛。",
+    "category": "clinical_presentation",
+    "tags": [
+      "第三腰椎横突外缘",
+      "棘突旁4cm",
+      "明显压痛",
+      "局限性肌紧张",
+      "肌痉挛",
+      "触诊定位"
+    ],
+    "source": "临床表现文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_key_palpation_signs_of_tender_l3_transverse_process_outer_margin_with_local_muscle_spasm",
+      "exam_findings": [
+        "L3棘突旁约4cm处压痛",
+        "可触横突尖端",
+        "局限肌紧张或肌痉挛"
+      ],
+      "key_points": [
+        "定位性压痛是核心查体证据",
+        "体型瘦长者触诊阳性率更高"
+      ],
+      "clinical_tip": "建议双侧对照触诊并记录压痛等级与肌张力变化，便于随访追踪。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0805",
+    "title": "神经牵涉痛特征-按压可刺激第二腰神经分支并放射至大腿及膝部",
+    "content": "按压病变区域时可因第二腰神经分支受刺激而出现放射痛，疼痛可达大腿及膝部。该表现提示局部机械刺激可诱发特定分布的牵涉痛模式。",
+    "category": "clinical_presentation",
+    "tags": [
+      "放射痛",
+      "第二腰神经分支",
+      "大腿痛",
+      "膝部痛",
+      "牵涉痛模式"
+    ],
+    "source": "临床表现文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_referred_pain_to_thigh_and_knee_triggered_by_l2_branch_stimulation_on_palpation",
+      "symptom_features": [
+        "按压诱发放射痛",
+        "疼痛放射至大腿和膝部"
+      ],
+      "clinical_significance": [
+        "提示神经分支刺激参与疼痛传导",
+        "有助于与单纯局部肌筋膜痛区分"
+      ],
+      "key_points": [
+        "放射路径具有定位参考价值",
+        "需结合神经查体排除其他神经源性病变"
+      ],
+      "clinical_tip": "出现按压诱发下传放射痛时，建议记录放射终点并结合节段体征进行鉴别。"
+    }
   }
 ]
