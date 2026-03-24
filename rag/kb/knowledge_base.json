@@ -21905,5 +21905,57 @@
       ],
       "clinical_tip": "侧位桡侧面可补充掌面视角信息，有助于提高局部热异常定位的完整性。"
     }
+  },
+  {
+    "id": "KB-IR-BM-0524",
+    "title": "红外热成像体位-治疗前正位背面",
+    "content": "治疗前正位背面热成像用于采集患手背侧在治疗前的基线热分布，重点观察掌指关节背侧及拇指相关背侧区域温度特征，为治疗后复查提供可比对照。",
+    "category": "basic_concept",
+    "tags": [
+      "治疗前",
+      "正位背面",
+      "红外热成像",
+      "基线评估",
+      "扳机指"
+    ],
+    "source": "临床热成像评估要点整理",
+    "source_type": "expert_consensus",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "capture_pre_treatment_dorsal_ap_thermal_baseline",
+      "key_points": [
+        "检查前统一环境温度并充分静息适应",
+        "采用标准正位背面体位进行拍摄",
+        "关注患侧与健侧背侧温度差异",
+        "保存治疗前图像用于后续同体位对比"
+      ],
+      "clinical_tip": "背面视角可补充掌面与侧面信息，有助于形成更完整的局部热分布评估。"
+    }
+  },
+  {
+    "id": "KB-IR-BM-0525",
+    "title": "红外热成像体位-治疗前侧位尺侧面",
+    "content": "治疗前侧位尺侧面热成像用于评估患手尺侧及相邻软组织在干预前的温度分布特征，可与掌面、背面及桡侧面图像互补，形成治疗前多视角热分布基线。",
+    "category": "basic_concept",
+    "tags": [
+      "治疗前",
+      "侧位尺侧面",
+      "红外热成像",
+      "基线评估",
+      "扳机指"
+    ],
+    "source": "临床热成像评估要点整理",
+    "source_type": "expert_consensus",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "capture_pre_treatment_ulnar_lateral_thermal_baseline",
+      "key_points": [
+        "采集前统一环境并完成热适应",
+        "采用标准侧位尺侧面体位拍摄",
+        "重点观察尺侧局部温度与对侧差异",
+        "与治疗后同体位图像进行对照分析"
+      ],
+      "clinical_tip": "尺侧面可补全多体位热成像信息，便于更全面评估局部温度异常范围。"
+    }
   }
 ]
