@@ -20914,5 +20914,73 @@
         "必要时联合其他治疗技术"
       ]
     }
+  },
+  {
+    "id": "KB-IR-BM-0701",
+    "title": "炎症的病理定义与临床表现",
+    "content": "炎症是由于致炎因子作用导致的局部组织变质、渗出和增生等病理变化过程。其典型临床表现为局部红、肿、热、痛及功能障碍。炎症既可作为机体防御反应的一部分，也可在持续或过度反应时造成组织损伤。临床评估炎症时应综合病因、局部体征、功能受限程度及病程演变。",
+    "category": "basic_concept",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "炎症",
+      "病理变化",
+      "红肿热痛",
+      "功能障碍",
+      "基础概念"
+    ],
+    "source": "基础医学病理学定义",
+    "source_type": "textbook",
+    "priority": 7,
+    "status": "active",
+    "applicable_conditions": [
+      "炎症相关疾病解释",
+      "临床病理基础教学"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "全身"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "textbook",
+    "retrieval_hints": [
+      "炎症定义",
+      "红肿热痛",
+      "功能障碍",
+      "渗出增生"
+    ],
+    "structured_advice": {
+      "action": "explain_inflammation_concept",
+      "pathological_changes": [
+        "组织变质",
+        "组织渗出",
+        "组织增生"
+      ],
+      "clinical_signs": [
+        "红",
+        "肿",
+        "热",
+        "痛",
+        "功能障碍"
+      ],
+      "clinical_meaning": "炎症既是防御反应，也可能造成继发性组织损伤",
+      "assessment_points": [
+        "明确致炎因子",
+        "观察局部体征",
+        "评估功能受限",
+        "结合病程判断活动度"
+      ]
+    }
   }
 ]
