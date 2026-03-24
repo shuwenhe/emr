@@ -35349,5 +35349,205 @@
       ],
       "clinical_tip": "图像对照建议固定同侧ROI并结合定量测温结果解释。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0953",
+    "title": "发病机制-足跟部无菌性炎症可导致跟痛症疼痛发生",
+    "content": "跟痛症可由足跟部无菌性炎症引发疼痛表现，炎症反应与局部组织应激共同参与疼痛形成。",
+    "category": "diagnosis",
+    "tags": [
+      "发病机制",
+      "无菌性炎症",
+      "足跟疼痛",
+      "炎症性疼痛"
+    ],
+    "source": "第二十章机制文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_aseptic_inflammation_as_core_mechanism_of_heel_pain_generation",
+      "key_points": [
+        "无菌性炎症参与疼痛形成"
+      ],
+      "clinical_tip": "病程评估应关注炎症负荷与局部组织反应程度。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0954",
+    "title": "病因学说-跟骨内静脉瘀滞致骨内高压可能是跟痛来源之一",
+    "content": "有学者认为跟痛症与跟骨内静脉瘀滞、进而形成跟骨内高压有关，该机制可解释部分持续性足跟疼痛。",
+    "category": "diagnosis",
+    "tags": [
+      "病因学说",
+      "跟骨内静脉瘀滞",
+      "骨内高压",
+      "持续性足跟痛"
+    ],
+    "source": "第二十章机制文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_intraosseous_venous_stasis_and_high_calcaneal_pressure_hypothesis_for_heel_pain",
+      "key_points": [
+        "静脉回流障碍可能增加骨内压力"
+      ],
+      "clinical_tip": "疑似骨内高压机制时可结合影像与负重痛特征综合判断。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0955",
+    "title": "复发机制-既往治疗可缓解但劳累与寒凉易再诱发足跟无菌性炎症",
+    "content": "既往手法、针灸、理疗及外用药可使症状暂时缓解，但易复发。复发与劳累及寒凉刺激诱发足跟部无菌性炎症关系密切。",
+    "category": "follow_up",
+    "tags": [
+      "复发机制",
+      "手法治疗",
+      "针灸",
+      "理疗",
+      "外用药",
+      "劳累诱发",
+      "寒凉诱发",
+      "无菌性炎症复燃"
+    ],
+    "source": "第二十章机制文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_recurrence_pattern_after_conventional_relief_with_fatigue_and_cold_triggered_aseptic_inflammation",
+      "risk_factors": [
+        "劳累",
+        "寒凉刺激"
+      ],
+      "clinical_tip": "随访期应加入负荷管理与保暖干预以降低复发风险。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0956",
+    "title": "慢性演变-长期反复炎症可致局部机化粘连及血液循环下降",
+    "content": "长期反复炎症刺激可导致足跟局部机化粘连，微循环与血流灌注下降，形成慢性疼痛维持基础。",
+    "category": "diagnosis",
+    "tags": [
+      "慢性演变",
+      "反复炎症刺激",
+      "机化粘连",
+      "血液循环下降",
+      "慢性疼痛维持"
+    ],
+    "source": "第二十章机制文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_chronic_inflammatory_repetition_leading_to_adhesion_and_reduced_local_circulation",
+      "key_points": [
+        "机化粘连形成",
+        "微循环下降"
+      ],
+      "clinical_tip": "慢性期干预应兼顾炎症控制与局部循环重建。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0957",
+    "title": "症状扩展-跟痛症可伴跟腱部位疼痛，行走时牵拉加重",
+    "content": "跟痛症除跖侧足跟痛外，也可出现跟腱部位疼痛。附着于跟骨的跟腱在行走时受牵拉可诱发或加重疼痛。",
+    "category": "clinical_presentation",
+    "tags": [
+      "症状扩展",
+      "跟腱疼痛",
+      "跟骨附着点",
+      "行走牵拉痛",
+      "足跟后方痛"
+    ],
+    "source": "第二十章机制文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_achilles_region_pain_as_possible_extension_of_heel_pain_with_walking_traction_aggravation",
+      "clinical_points": [
+        "跖侧与后跟症状可并存",
+        "步行牵拉可放大疼痛"
+      ],
+      "clinical_tip": "评估时应同时检查跖侧压痛与跟腱附着点压痛。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0958",
+    "title": "热像生理基础-正常足跟热区与周围血供分布相关，多在足跟两侧及近踝等区域呈高温色带",
+    "content": "正常足跟热区主要受血供分布影响。足跟两侧、近内外踝处血供较丰富，足跟区、足跖区及前跖区血管网较密集，因此红外热成像常见上述区域呈相对高温色带。",
+    "category": "diagnosis",
+    "tags": [
+      "热像生理基础",
+      "血供分布",
+      "足跟两侧",
+      "近内外踝",
+      "足跖区",
+      "前跖区",
+      "高温色带"
+    ],
+    "source": "第二十章热像分析文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_normal_heel_thermography_pattern_based_on_vascular_distribution",
+      "imaging_findings": [
+        "血供丰富区温度相对偏高"
+      ],
+      "clinical_tip": "热像判读应先建立正常血供热区参照，再识别异常区域。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0959",
+    "title": "慢性热像特征-跟骨部机化粘连及循环下降可表现为局部温度降低",
+    "content": "慢性跟痛症患者因跟骨部机化粘连及局部血液循环下降，红外热成像可见患处温度降低，提示慢性低灌注状态。",
+    "category": "diagnosis",
+    "tags": [
+      "慢性跟痛症",
+      "机化粘连",
+      "循环下降",
+      "局部低温",
+      "低灌注热像"
+    ],
+    "source": "第二十章热像分析文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_chronic_heel_pain_thermography_with_local_temperature_drop_due_to_adhesion_and_reduced_perfusion",
+      "imaging_findings": [
+        "局部温度下降",
+        "慢性低灌注表现"
+      ],
+      "clinical_tip": "低温灶判读需结合病程长短与局部结构改变信息。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0960",
+    "title": "治疗机制-射频针刀促代谢与修复，医用臭氧具强氧化与抗炎改善循环作用",
+    "content": "射频针刀可促进局部组织代谢与修复过程，改善微循环并增强炎症消除。医用臭氧作为强氧化剂，已广泛用于膝骨关节炎、肩周炎、腰椎间盘突出及创伤等治疗；其关节注射可迅速止痛，减少组织充血与水肿、降低局部温度，并可中和炎症中过量反应性氧化产物、拮抗炎症细胞因子，扩张血管、改善回流，促进炎症吸收与局部血流温度恢复。",
+    "category": "treatment",
+    "tags": [
+      "射频针刀机制",
+      "促进代谢修复",
+      "改善微循环",
+      "医用臭氧",
+      "强氧化剂",
+      "抗炎",
+      "减少充血水肿",
+      "扩张血管",
+      "改善回流",
+      "膝骨关节炎",
+      "肩周炎",
+      "腰椎间盘突出",
+      "创伤"
+    ],
+    "source": "第二十章机制文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_combined_rf_needleknife_and_ozone_biological_mechanisms_for_anti_inflammation_microcirculation_and_temperature_normalization",
+      "mechanism_points": [
+        "射频针刀促进组织代谢修复",
+        "臭氧多通路抗炎并改善循环"
+      ],
+      "clinical_tip": "机制型证据建议与热像及疼痛评分变化进行同周期关联分析。"
+    }
   }
 ]
