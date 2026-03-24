@@ -24260,5 +24260,47 @@
       ],
       "clinical_tip": "红外热成像提供了客观的、可量化的术前术后对比，是评估手术疗效的重要手段。"
     }
+  },
+  {
+    "id": "KB-IR-TX-0614",
+    "title": "手术方法-后路显微镜下椎间盘切除术(MED)治疗",
+    "content": "后路显微镜下椎间盘切除术（MED，Microendoscopic Discectomy）是治疗腰椎间盘突出症的一种微创手术方法。该术式在患侧后外侧椎间孔区域做小切口，利用显微镜或内窥镜放大视野，在直视下精确切除突出的椎间盘髓核，解除对神经根的压迫。MED术式的优势包括：切口小，创伤小，恢复快；能够精确定位和切除突出的髓核；保留脊柱的解剖结构和稳定性；神经根减压充分；并发症少。该术式特别适合于单纯髓核突出、无脊柱不稳定和椎管狭窄的患者。",
+    "category": "treatment",
+    "tags": [
+      "MED",
+      "显微镜下切除",
+      "椎间盘切除术",
+      "微创手术",
+      "后路手术",
+      "髓核切除",
+      "神经根减压"
+    ],
+    "source": "脊柱手术治疗指南（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "understand_microendoscopic_discectomy_med_technique_and_advantages",
+      "technique_features": {
+        "approach": "后路途径",
+        "incision_size": "小切口",
+        "visualization": "显微镜或内窥镜放大视野",
+        "target": "直视下切除突出髓核",
+        "decompression": "解除神经根压迫"
+      },
+      "advantages": [
+        "切口小，创伤最小化",
+        "显微放大视野提供精确操作",
+        "恢复快，住院时间短",
+        "保留脊柱稳定性",
+        "并发症少"
+      ],
+      "key_points": [
+        "MED是髓核突出症患者的有效微创选择",
+        "适用于单纯髓核突出无不稳定者",
+        "提供充分的神经减压",
+        "创伤和恢复时间优于开放手术"
+      ],
+      "clinical_tip": "MED术式需要较高的手术技巧和显微镜操作经验，患者选择应考虑医生的手术经验和患者的具体病情。"
+    }
   }
 ]
