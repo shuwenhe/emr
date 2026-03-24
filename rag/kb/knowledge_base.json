@@ -20130,5 +20130,73 @@
         "同时间段复查优先"
       ]
     }
+  },
+  {
+    "id": "KB-IR-IR-0605",
+    "title": "红外热成像采集体位-双肩背侧位",
+    "content": "双肩背侧位是肩部红外热成像的重要补充体位，主要用于观察肩胛区、冈上肌区、冈下肌区、肩胛内侧缘及背侧软组织温度分布。该体位有助于识别颈肩代偿性紧张、肩胛稳定肌负荷异常及背侧局部炎性活跃区域。采集时应保证双肩暴露充分、体位对称、环境温度稳定，并与前次检查保持一致参数，以提高复查对比准确性。",
+    "category": "diagnosis",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "红外热成像",
+      "双肩背侧位",
+      "肩胛区",
+      "冈上肌",
+      "冈下肌",
+      "温差评估"
+    ],
+    "source": "红外热成像体位采集规范",
+    "source_type": "guideline",
+    "priority": 7,
+    "status": "active",
+    "applicable_conditions": [
+      "肩背部疼痛评估",
+      "颈肩复合症状分析",
+      "治疗前后背侧温差比较"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "双肩",
+      "肩胛区",
+      "背侧"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "双肩背侧位",
+      "肩胛区热像",
+      "背侧温差"
+    ],
+    "structured_advice": {
+      "action": "infrared_dorsal_positioning",
+      "position": "双肩背侧位",
+      "observation_targets": [
+        "肩胛内侧缘",
+        "冈上肌区",
+        "冈下肌区",
+        "肩胛提肌区",
+        "菱形肌区"
+      ],
+      "comparison_focus": [
+        "双侧背侧温差是否对称",
+        "局部高温差区域范围",
+        "随访中温差变化趋势"
+      ],
+      "quality_control": [
+        "双肩体位对称",
+        "环境温度恒定",
+        "受检者静息后采集",
+        "复查同参数同角度"
+      ]
+    }
   }
 ]
