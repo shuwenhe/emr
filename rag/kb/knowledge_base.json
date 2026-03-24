@@ -23337,5 +23337,31 @@
       ],
       "clinical_tip": "影像退变程度与症状严重度不一定线性一致，应坚持临床-影像联合判断。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0580",
+    "title": "查体要点-直腿抬高试验及加强试验阳性",
+    "content": "直腿抬高试验阳性及加强试验阳性提示坐骨神经受牵拉后症状诱发，常见于腰椎间盘突出相关神经根受压。该体征对临床诊断与责任节段判断具有重要参考价值。",
+    "category": "diagnosis",
+    "tags": [
+      "直腿抬高试验",
+      "加强试验",
+      "腰椎间盘突出症",
+      "神经根受压",
+      "查体体征"
+    ],
+    "source": "体格检查要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "interpret_positive_slr_and_bragard_sign_for_radicular_involvement",
+      "key_points": [
+        "直腿抬高阳性提示神经根牵拉敏感",
+        "加强试验阳性提高神经根受压判断可信度",
+        "应结合放射痛分布与神经体征综合定位",
+        "可作为诊断与疗效随访的重要体征"
+      ],
+      "clinical_tip": "记录阳性角度与诱发症状部位有助于后续病情比较与治疗效果评估。"
+    }
   }
 ]
