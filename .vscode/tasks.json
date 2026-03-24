@@ -1,0 +1,42 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "KB Auto Sync Watch",
+      "type": "shell",
+      "command": "/home/shuwen/venv/bin/python",
+      "args": [
+        "/home/shuwen/emr/rag/kb/sync_jsonl_to_json.py",
+        "--watch",
+        "--prefer",
+        "newer"
+      ],
+      "options": {
+        "cwd": "/home/shuwen/emr/rag/kb"
+      },
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      },
+      "problemMatcher": [
+        {
+          "owner": "kb-sync",
+          "pattern": {
+            "regexp": "^(?!x)x$",
+            "message": 0
+          },
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "开始监听：",
+            "endsPattern": "开始监听："
+          }
+        }
+      ],
+      "runOptions": {
+        "instanceLimit": 1
+      }
+    }
+  ]
+}
