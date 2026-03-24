@@ -19689,5 +19689,109 @@
         "出现持续加重疼痛应及时复诊"
       ]
     }
+  },
+  {
+    "id": "KB-IR-TX-0406",
+    "title": "肩周炎手法治疗-通经舒筋活络止痛（活血舒筋九步法）",
+    "content": "治则为通经舒筋、活络止痛。治疗采用活血舒筋九步手法中的核心组合，重点选择摇臂、叩揉、捏拿、运肩、和络等步骤进行序贯干预。手法实施以松解肩周筋膜与肌腱粘连、改善关节周围软组织血供、降低疼痛敏感性为目的。操作时遵循先松后动、先轻后重、以痛定量原则，结合患者耐受度动态调整力度与节律。该方案适用于肩周炎疼痛伴活动受限、肌筋膜紧张及肩周压痛明显患者。",
+    "category": "treatment",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment",
+      "health_advice"
+    ],
+    "tags": [
+      "肩周炎",
+      "通经舒筋",
+      "活络止痛",
+      "九步手法",
+      "摇臂",
+      "叩揉",
+      "捏拿",
+      "运肩",
+      "和络"
+    ],
+    "source": "骨伤手法治疗经验总结",
+    "source_type": "clinical_record",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "肩周炎活动受限",
+      "肩周疼痛",
+      "软组织紧张明显"
+    ],
+    "contraindications": [
+      "急性骨折脱位未处理",
+      "局部急性感染",
+      "明显神经血管损伤体征",
+      "严重骨质疏松需谨慎"
+    ],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩关节",
+      "肩胛带",
+      "颈肩部"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "clinical_experience",
+    "retrieval_hints": [
+      "通经舒筋",
+      "活络止痛",
+      "活血舒筋九步",
+      "摇臂叩揉捏拿"
+    ],
+    "structured_advice": {
+      "action": "manual_therapy_nine_step_selection",
+      "treatment_principle": [
+        "通经舒筋",
+        "活络止痛"
+      ],
+      "selected_techniques": [
+        {
+          "name": "摇臂",
+          "purpose": "放松肩关节周围组织，诱导关节活动"
+        },
+        {
+          "name": "叩揉",
+          "purpose": "缓解局部肌筋膜紧张，改善循环"
+        },
+        {
+          "name": "捏拿",
+          "purpose": "松解条索与粘连，降低压痛"
+        },
+        {
+          "name": "运肩",
+          "purpose": "促进肩关节活动度恢复"
+        },
+        {
+          "name": "和络",
+          "purpose": "整体调和经络，稳定镇痛效果"
+        }
+      ],
+      "operation_principles": [
+        "先松后动",
+        "先轻后重",
+        "以痛定量",
+        "循序渐进"
+      ],
+      "target_outcomes": [
+        "疼痛下降",
+        "压痛减轻",
+        "肩关节活动度提升",
+        "功能动作改善"
+      ],
+      "monitoring_items": [
+        "VAS评分",
+        "压痛点强度",
+        "前屈外展外旋角度",
+        "治疗后不良反应"
+      ]
+    }
   }
 ]
