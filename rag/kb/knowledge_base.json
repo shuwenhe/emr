@@ -21853,5 +21853,31 @@
       ],
       "clinical_tip": "当正位片信息有限时，补充斜位片可提高对骨关节细节的可视化程度。"
     }
+  },
+  {
+    "id": "KB-IR-BM-0522",
+    "title": "红外热成像体位-治疗前正位掌面",
+    "content": "治疗前正位掌面热成像用于记录患手在干预前的基线热分布状态，重点观察掌面及手指屈侧区域温度分布特征，为后续疗效评估提供对照依据。",
+    "category": "basic_concept",
+    "tags": [
+      "治疗前",
+      "正位掌面",
+      "红外热成像",
+      "基线评估",
+      "扳机指"
+    ],
+    "source": "临床热成像评估要点整理",
+    "source_type": "expert_consensus",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "capture_pre_treatment_palmar_ap_thermal_baseline",
+      "key_points": [
+        "检查前保持室温稳定与适应时间",
+        "采用正位掌面标准体位采集图像",
+        "记录患侧与健侧掌面温度差异",
+        "将治疗前图像作为随访对照基线"
+      ],
+      "clinical_tip": "同一患者复查时应尽量保持一致的体位和环境条件，以提高前后对比的可解释性。"
+    }
   }
 ]
