@@ -36221,5 +36221,94 @@
       ],
       "clinical_tip": "即刻热像建议与治疗前同体位图像配对比对。"
     }
+  },
+  {
+    "id": "KB-IR-FUP-0990",
+    "title": "一周复诊-左第一跖趾关节疼痛较前明显缓解",
+    "content": "一周后患者复诊，诉左足第一跖趾关节疼痛较前明显缓解，提示前次干预后症状已有初步改善。",
+    "category": "follow_up",
+    "tags": [
+      "1周复诊",
+      "左第一跖趾关节",
+      "疼痛明显缓解",
+      "症状改善"
+    ],
+    "source": "复诊文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_one_week_followup_showing_obvious_pain_relief_in_left_first_mtp_case",
+      "outcome_points": [
+        "局部疼痛较前明显缓解"
+      ],
+      "clinical_tip": "建议固定复诊间隔记录疼痛趋势，便于疗效曲线判断。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0991",
+    "title": "功能变化-行走时疼痛较治疗前好转",
+    "content": "患者复诊时反馈行走过程中疼痛较治疗前有所好转，说明负重活动相关症状得到缓解。",
+    "category": "follow_up",
+    "tags": [
+      "功能变化",
+      "行走痛好转",
+      "负重症状改善",
+      "活动耐受提升"
+    ],
+    "source": "复诊文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_improved_walking_pain_as_functional_followup_indicator_after_intervention",
+      "outcome_points": [
+        "步行相关疼痛下降"
+      ],
+      "clinical_tip": "建议补充步行距离或耐受时长作为功能量化指标。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0992",
+    "title": "复查评估-复诊时复查红外热成像并进行疼痛评估",
+    "content": "复诊时予复查红外热成像及疼痛评估，用于对照治疗前后温度分布与主观症状变化。",
+    "category": "follow_up",
+    "tags": [
+      "复查评估",
+      "红外热成像复查",
+      "疼痛评估",
+      "治疗前后对照"
+    ],
+    "source": "复诊文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_repeat_thermography_and_pain_assessment_at_followup_for_before_after_comparison",
+      "evaluation_points": [
+        "热像变化",
+        "疼痛评分变化"
+      ],
+      "clinical_tip": "建议保持与基线一致的拍摄条件和评分方式。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0993",
+    "title": "后续治疗-复诊时继续行臭氧治疗",
+    "content": "在完成复查与疼痛评估后，患者继续接受臭氧治疗，体现该病例采用分次重复干预的治疗路径。",
+    "category": "treatment",
+    "tags": [
+      "后续治疗",
+      "复诊继续治疗",
+      "臭氧治疗",
+      "分次干预"
+    ],
+    "source": "复诊文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_repeat_ozone_session_as_continued_treatment_strategy_at_one_week_followup",
+      "followup_plan": [
+        "复诊评估后继续臭氧治疗"
+      ],
+      "clinical_tip": "重复治疗前应结合症状改善幅度和热像变化决定是否调整剂量或频次。"
+    }
   }
 ]
