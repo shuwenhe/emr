@@ -23597,5 +23597,31 @@
       ],
       "clinical_tip": "问诊应重点记录步行耐量和休息后缓解情况，并结合影像狭窄节段综合判断。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0590",
+    "title": "鉴别诊断-腰椎间盘突出症与腰肌劳损及棘上/棘间韧带损伤",
+    "content": "腰肌劳损及棘上、棘间韧带损伤多以局部腰痛和压痛为主，神经根放射痛、感觉异常及肌力减退等神经系统体征通常不典型。腰椎间盘突出症则更常伴节段性放射痛及神经受压体征。结合病史诱因、压痛部位分布与神经查体可进行鉴别。",
+    "category": "diagnosis",
+    "tags": [
+      "鉴别诊断",
+      "腰肌劳损",
+      "棘上韧带损伤",
+      "棘间韧带损伤",
+      "腰椎间盘突出症"
+    ],
+    "source": "临床鉴别要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "differentiate_ldh_from_lumbar_strain_and_supraspinous_interspinous_ligament_injury",
+      "key_points": [
+        "腰肌劳损/韧带损伤以局部痛为主",
+        "神经根症状在软组织损伤中通常不典型",
+        "腰突更常见节段性放射痛与神经体征",
+        "病史诱因与压痛定位有助于快速分流"
+      ],
+      "clinical_tip": "当患者仅有局部压痛而缺乏明确神经根体征时，应优先考虑软组织损伤相关诊断。"
+    }
   }
 ]
