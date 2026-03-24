@@ -24132,5 +24132,133 @@
       ],
       "clinical_tip": "综合神经体格检查评分的改善反映了神经根减压和脊髓功能的恢复，为评估治疗效果和判断预后提供客观依据。"
     }
+  },
+  {
+    "id": "KB-IR-TX-0610",
+    "title": "手术适应证-腰椎间盘突出症的手术治疗指征",
+    "content": "腰椎间盘突出症的手术适应证包括：1. 诊断明确，经正规非手术治疗6个月以上无效，或症状反复发作且严重。2. 根性痛剧烈无法缓解，并持续加重。3. 腰椎间盘突出合并神经根功能丧失（如下肢瘫痪、大小便功能障碍等）。4. 对患者的工作和生活影响明显，严重影响生活质量。5. 临床及影像学表现相符。在临床实践中，大多数腰椎间盘突出症患者经过保守治疗均可获得良好疗效，手术治疗通常为二线治疗选择。",
+    "category": "treatment",
+    "tags": [
+      "手术适应证",
+      "保守治疗无效",
+      "根性痛",
+      "神经功能丧失",
+      "生活质量",
+      "治疗指征"
+    ],
+    "source": "脊柱手术治疗指南（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "identify_surgical_indications_for_lumbar_disc_herniation",
+      "key_points": [
+        "诊断应明确，临床影像相符",
+        "非手术治疗应至少6个月",
+        "症状反复发作或进行性加重提示手术指征",
+        "根性痛剧烈和神经功能丧失为紧急指征",
+        "患者生活质量严重受影响也应考虑手术",
+        "大多数患者保守治疗有效，手术为二线选择"
+      ],
+      "clinical_tip": "手术时机选择应权衡保守治疗可能性与神经损伤风险，避免过度治疗。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0611",
+    "title": "治疗决策-本例患者唐某某的手术治疗指征",
+    "content": "结合该例患者唐某某的实际情况：患者于10年前起病，长期腰痛伴左下肢疼痛，保守治疗虽有缓解但症状反复发作，3个月前加重伴下肢麻木，保守治疗无明显好转，下肢出现进行性神经症状。基于患者诊断明确、保守治疗无效、症状进行性加重、神经症状出现等因素，我们为该患者施行了手术治疗。",
+    "category": "treatment",
+    "tags": [
+      "治疗决策",
+      "手术指征",
+      "本例患者",
+      "保守治疗无效",
+      "进行性加重"
+    ],
+    "source": "临床治疗决策（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_treatment_decision_and_surgical_indication_for_case",
+      "patient_context": "患者唐某某，42岁男性，10年病史，3个月加重",
+      "indications": [
+        "诊断明确的腰椎间盘突出症",
+        "长期保守治疗无法根治",
+        "症状进行性加重",
+        "出现神经根损伤表现"
+      ],
+      "key_points": [
+        "患者病程长，反复发作，保守治疗有限",
+        "新出现的下肢麻木提示神经根损伤加重",
+        "患者手术指征充分",
+        "及时手术治疗可避免不可逆的神经损伤"
+      ],
+      "clinical_tip": "这类长期反复发作且出现进行性神经症状的患者，应及时进行规范的治疗决策。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0612",
+    "title": "术后疗效-症状改善",
+    "content": "术后患者症状明显改善。术前患者主诉腰痛伴左下肢疼痛、麻木，活动受限，疼痛评分较高。术后腰痛减轻，左下肢疼痛和麻木症状明显缓解，脊柱活动度恢复，患者能够正常活动和工作，生活质量显著提高。",
+    "category": "follow_up",
+    "tags": [
+      "术后疗效",
+      "症状改善",
+      "腰痛缓解",
+      "麻木缓解",
+      "活动恢复",
+      "生活质量"
+    ],
+    "source": "术后随访记录（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_postoperative_symptom_improvement_and_functional_recovery",
+      "outcomes": {
+        "preoperative_symptoms": "腰痛伴左下肢疼痛、麻木",
+        "postoperative_status": "症状明显改善",
+        "pain_relief": "腰痛减轻、下肢疼痛麻木缓解",
+        "functional_recovery": "脊柱活动度恢复，正常活动工作",
+        "quality_of_life": "显著改善"
+      },
+      "key_points": [
+        "手术有效解除了神经根压迫",
+        "腰痛和下肢放射痛均明显缓解",
+        "脊柱功能活动恢复",
+        "患者生活有明显提高"
+      ],
+      "clinical_tip": "症状和功能的同步改善提示手术有效减压，为治疗成功的重要标志。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0613",
+    "title": "术后疗效评估-红外热成像证实手术效果",
+    "content": "通过红外热成像仪的术后检查，可以清晰观察到责任节段所在部位，红外热成像图像显示术前及术后温差有明显变化。术前左小腿外侧、后侧出现的缺血性低温改变区域，术后范围明显减小，温度分布逐渐恢复正常，热成像客观反映了手术神经减压的效果，证实了手术治疗的确切疗效。",
+    "category": "follow_up",
+    "tags": [
+      "术后疗效评估",
+      "红外热成像",
+      "温度变化",
+      "神经减压",
+      "疗效证实"
+    ],
+    "source": "术后检查评估（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "assess_postoperative_efficacy_using_infrared_thermography_temperature_changes",
+      "findings": {
+        "preoperative_thermography": "左小腿外侧、后侧缺血性低温改变",
+        "postoperative_thermography": "低温区范围明显减小",
+        "temperature_normalization": "温度分布逐渐恢复正常"
+      },
+      "key_points": [
+        "术前热成像显示神经受压导致的温度异常",
+        "术后缺血性低温区明显缩小",
+        "温度恢复正常反映微循环改善",
+        "热成像客观量化评估手术效果",
+        "印证手术成功的神经减压"
+      ],
+      "clinical_tip": "红外热成像提供了客观的、可量化的术前术后对比，是评估手术疗效的重要手段。"
+    }
   }
 ]
