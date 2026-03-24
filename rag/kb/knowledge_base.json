@@ -29585,5 +29585,42 @@
       ],
       "clinical_tip": "联合判读MRI与热成像时，应优先关注症状最匹配节段和区域，避免仅凭单一影像结果作出过度推断。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0751",
+    "title": "入院诊断-中医腰痹病（肝肾阴虚证）与西医腰椎管狭窄症",
+    "content": "入院诊断为：中医诊断腰痹病，证型诊断肝肾阴虚证，西医诊断腰椎管狭窄症。该诊断框架体现中西医并行分层，有助于在治疗上同时兼顾辨证施治与解剖病理基础。",
+    "category": "diagnosis",
+    "tags": [
+      "入院诊断",
+      "中医诊断",
+      "腰痹病",
+      "肝肾阴虚证",
+      "西医诊断",
+      "腰椎管狭窄症",
+      "中西医结合"
+    ],
+    "source": "入院诊断记录（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_admission_diagnoses_with_tcm_lumbago_bi_liver_kidney_yin_deficiency_and_western_lumbar_spinal_stenosis",
+      "diagnosis_summary": {
+        "tcm_disease": "腰痹病",
+        "tcm_pattern": "肝肾阴虚证",
+        "western_diagnosis": "腰椎管狭窄症"
+      },
+      "clinical_significance": [
+        "明确中医病名与证型，便于辨证论治和疗效随访",
+        "明确西医解剖学诊断，便于影像与手术/康复路径评估",
+        "中西医双轨诊断有助于制定综合治疗方案"
+      ],
+      "key_points": [
+        "中医病证结合：腰痹病-肝肾阴虚证",
+        "西医病种定位：腰椎管狭窄症",
+        "诊断信息可作为后续治疗与结局评价基线"
+      ],
+      "clinical_tip": "记录入院诊断时建议保持中医病名、证型与西医病种三要素完整，以支持多学科协同和标准化随访。"
+    }
   }
 ]
