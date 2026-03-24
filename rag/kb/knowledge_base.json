@@ -35640,5 +35640,165 @@
       ],
       "clinical_tip": "建议在术语标准化中设置同义词映射以减少漏检。"
     }
+  },
+  {
+    "id": "KB-IR-CP-0965",
+    "title": "临床表现-早期可无明显症状，仅局部微红或轻度肿胀",
+    "content": "趾囊炎早期常无明显症状，仅表现为局部轻微发红或稍肿，容易被忽视。",
+    "category": "clinical_presentation",
+    "tags": [
+      "早期表现",
+      "无明显症状",
+      "局部微红",
+      "轻度肿胀"
+    ],
+    "source": "临床表现文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_early_toe_bursitis_with_subtle_local_redness_or_mild_swelling",
+      "clinical_points": [
+        "早期隐匿性较强"
+      ],
+      "clinical_tip": "轻微局部改变阶段建议尽早减少受压与摩擦刺激。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0966",
+    "title": "临床表现-穿尖头鞋时有压迫感，活动时微痛",
+    "content": "患者早期可在穿尖头鞋时感到局部压迫不适，活动时出现轻度疼痛。",
+    "category": "clinical_presentation",
+    "tags": [
+      "尖头鞋压迫感",
+      "活动微痛",
+      "受压诱发"
+    ],
+    "source": "临床表现文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_pressure_related_discomfort_in_narrow_toe_box_shoes_with_mild_activity_pain",
+      "trigger_factors": [
+        "鞋头狭窄压迫",
+        "活动负荷"
+      ],
+      "clinical_tip": "鞋履调整是早期干预的重要环节。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0967",
+    "title": "临床表现-行走可出现持续疼痛，换舒适平底鞋可缓解但久行后加剧",
+    "content": "病变进展后行走时可出现持续疼痛，一般更换舒适平底鞋后可有缓解，但长时间行走后疼痛常明显加剧。",
+    "category": "clinical_presentation",
+    "tags": [
+      "行走持续痛",
+      "平底鞋缓解",
+      "久行加重",
+      "负重相关疼痛"
+    ],
+    "source": "临床表现文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_walking_pain_pattern_relief_with_comfortable_flat_shoes_and_exacerbation_after_prolonged_ambulation",
+      "clinical_points": [
+        "短期减压可缓解",
+        "持续负荷后再加重"
+      ],
+      "clinical_tip": "建议记录行走时长与疼痛阈值用于功能评估。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0968",
+    "title": "进展期表现-第一跖趾关节局部肿胀发红并出现异常压痛/触痛",
+    "content": "随着病情进展，第一跖趾关节区域可出现明显肿胀、发红及异常压痛或触痛，提示局部炎症反应加重。",
+    "category": "clinical_presentation",
+    "tags": [
+      "进展期",
+      "第一跖趾关节",
+      "局部肿胀",
+      "发红",
+      "异常压痛",
+      "触痛"
+    ],
+    "source": "临床表现文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_progressive_first_mtp_swelling_redness_and_abnormal_tenderness_in_toe_bursitis",
+      "exam_findings": [
+        "第一跖趾区炎症体征增强"
+      ],
+      "clinical_tip": "进展期应同步评估关节稳定性与活动受限程度。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0969",
+    "title": "触诊特征-病变区可触及平滑感并伴局部凉感异常",
+    "content": "病变区域在触诊时可表现为平滑感改变，并可出现局部凉感等温度异常体征。",
+    "category": "clinical_presentation",
+    "tags": [
+      "触诊特征",
+      "平滑感改变",
+      "局部凉感",
+      "温度异常"
+    ],
+    "source": "临床表现文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_palpation_features_with_surface_smoothness_change_and_local_cool_sensation",
+      "exam_findings": [
+        "触诊质地改变",
+        "温度感异常"
+      ],
+      "clinical_tip": "触诊体征建议与红外热像温度分布进行对应记录。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0970",
+    "title": "查体特征-拇趾后内侧可见三角形前突，可伴皮肤硬化或胼胝",
+    "content": "查体时可见大拇趾后方足内侧存在三角形前突，有时可合并局部皮肤硬化或胼胝形成。",
+    "category": "clinical_presentation",
+    "tags": [
+      "查体特征",
+      "拇趾后内侧",
+      "三角形前突",
+      "皮肤硬化",
+      "胼胝"
+    ],
+    "source": "临床表现文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_exam_signs_of_medial_foot_triangular_prominence_with_possible_callus_or_skin_hardening",
+      "exam_findings": [
+        "三角形前突",
+        "胼胝/皮肤硬化"
+      ],
+      "clinical_tip": "建议拍照留存形态学变化用于疗效纵向比较。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0971",
+    "title": "晚期并发-可继发第一跖趾关节骨性关节炎并影响关节活动",
+    "content": "病程晚期可继发第一跖趾关节骨性关节炎，导致关节活动受限并影响步态与日常功能。",
+    "category": "diagnosis",
+    "tags": [
+      "晚期并发",
+      "第一跖趾关节骨性关节炎",
+      "关节活动受限",
+      "步态受影响"
+    ],
+    "source": "临床表现文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_late_stage_secondary_first_mtp_osteoarthritis_with_functional_limitation",
+      "key_points": [
+        "晚期结构性损伤风险上升"
+      ],
+      "clinical_tip": "晚期患者建议增加影像评估与功能康复计划。"
+    }
   }
 ]
