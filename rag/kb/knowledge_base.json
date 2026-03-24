@@ -36097,5 +36097,129 @@
       ],
       "clinical_tip": "建议同体位、同环境重复采集以提高前后对比可靠性。"
     }
+  },
+  {
+    "id": "KB-IR-TX-0985",
+    "title": "干预手段-左第一跖趾关节行关节腔内30%臭氧注射治疗",
+    "content": "干预采用关节腔内30%浓度臭氧注射治疗。患者暴露左侧足部后进行常规术前准备，针对左足第一跖趾关节及周围痛点实施局部介入。",
+    "category": "treatment",
+    "tags": [
+      "干预手段",
+      "左第一跖趾关节",
+      "关节腔注射",
+      "30%臭氧",
+      "局部介入"
+    ],
+    "source": "干预手段文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_intraarticular_30_percent_ozone_intervention_for_left_first_mtp_bursitis_case",
+      "treatment_plan": [
+        "关节腔臭氧注射",
+        "覆盖周围痛点"
+      ],
+      "clinical_tip": "介入前应明确主责痛点与关节腔定位，减少无效穿刺。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0986",
+    "title": "术前准备与穿刺-碘伏消毒三遍，利多卡因3mL+0.9%氯化钠3mL局部浸润麻醉",
+    "content": "操作时患者暴露左侧足部，常规以碘伏消毒三遍。局部以利多卡因3mL联合0.9%氯化钠3mL进行浸润麻醉后，穿刺至左足第一跖趾关节痛点及关节腔内。",
+    "category": "treatment",
+    "tags": [
+      "碘伏消毒三遍",
+      "利多卡因3mL",
+      "0.9%氯化钠3mL",
+      "局部浸润麻醉",
+      "关节腔穿刺",
+      "痛点穿刺"
+    ],
+    "source": "干预手段文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_preparation_local_anesthesia_and_puncture_route_for_left_first_mtp_ozone_injection",
+      "procedure_steps": [
+        "足部暴露",
+        "消毒三遍",
+        "局麻浸润",
+        "穿刺至痛点及关节腔"
+      ],
+      "clinical_tip": "建议将穿刺层次与局麻范围同步记录，便于术后复盘。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0987",
+    "title": "术中参数-20mL注射器抽取15mL臭氧并注入关节腔及周围痛点",
+    "content": "术中使用20mL注射器抽取15mL臭氧，将其注射至左足第一跖趾关节腔内及周围痛点，以实现关节内外联合干预。",
+    "category": "treatment",
+    "tags": [
+      "20mL注射器",
+      "臭氧15mL",
+      "关节腔内注射",
+      "周围痛点注射",
+      "关节内外联合干预"
+    ],
+    "source": "干预手段文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_ozone_volume_and_dual_target_injection_into_joint_cavity_and_surrounding_pain_points",
+      "procedure_parameters": [
+        "臭氧15mL",
+        "20mL注射器"
+      ],
+      "clinical_tip": "建议完整记录注射阻力、分配部位与即时反应。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0988",
+    "title": "术后处理-无菌纱布覆盖包扎并观察30分钟，配合理疗",
+    "content": "注射完毕后以无菌纱布覆盖包扎，并观察30分钟。术后同时配合理疗，以辅助缓解局部症状与促进恢复。",
+    "category": "treatment",
+    "tags": [
+      "术后处理",
+      "无菌纱布包扎",
+      "观察30分钟",
+      "理疗配合",
+      "术后恢复"
+    ],
+    "source": "干预手段文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_post_injection_dressing_observation_and_combined_physical_therapy_plan",
+      "procedure_steps": [
+        "无菌包扎",
+        "观察30分钟",
+        "配合理疗"
+      ],
+      "clinical_tip": "术后观察期应记录不适主诉、局部反应及生命体征变化。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0989",
+    "title": "即刻复查-观察30分钟无明显不适后复查红外热成像",
+    "content": "患者观察30分钟后未诉明显不适，予复查红外热成像，用于评估干预后即刻温度分布变化。",
+    "category": "follow_up",
+    "tags": [
+      "即刻复查",
+      "30分钟观察",
+      "无明显不适",
+      "红外热成像复查",
+      "即刻温度变化"
+    ],
+    "source": "即刻红外热成像文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_immediate_postprocedure_thermography_recheck_after_30_minutes_without_significant_discomfort",
+      "evaluation_points": [
+        "术后即刻热像变化",
+        "短时安全性观察"
+      ],
+      "clinical_tip": "即刻热像建议与治疗前同体位图像配对比对。"
+    }
   }
 ]
