@@ -33948,5 +33948,242 @@
       ],
       "clinical_tip": "治疗计划文本截断时应先保留已确认靶点信息，再等待补全术式参数。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0899",
+    "title": "热成像与影像综合靶点-左膝髌上囊外侧高温差并与X线/MR髌上囊肿胀一致",
+    "content": "治疗前评估显示左膝关节髌上囊外侧局部较对侧高温差；同时X线与MR均提示左膝髌上囊肿胀。综合分析认为主要责任靶点位于髌上囊区域。",
+    "category": "diagnosis",
+    "tags": [
+      "髌上囊外侧高温差",
+      "X线一致",
+      "MRI一致",
+      "责任靶点",
+      "髌上囊肿胀"
+    ],
+    "source": "治疗思路补充文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_target_identification_at_left_suprapatellar_region_based_on_concordant_thermography_and_xray_mri_swelling_findings",
+      "target_basis": [
+        "热成像局部高温差",
+        "X线和MRI髌上囊肿胀一致"
+      ],
+      "clinical_tip": "靶点判定优先采用多模态一致证据，提高治疗命中率。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0900",
+    "title": "治疗方案-局部射频针刀联合臭氧介入针对左膝髌上囊责任区",
+    "content": "针对髌上囊责任区实施局部射频针刀联合臭氧介入治疗，目标为缓解疼痛肿胀并改善膝关节活动受限。",
+    "category": "treatment",
+    "tags": [
+      "射频针刀",
+      "臭氧介入",
+      "左膝髌上囊",
+      "责任靶点治疗",
+      "膝OA"
+    ],
+    "source": "治疗步骤文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_local_rf_needleknife_plus_ozone_intervention_targeting_left_suprapatellar_primary_pain_source",
+      "treatment_plan": [
+        "射频针刀",
+        "臭氧介入"
+      ],
+      "target_region": [
+        "左膝髌上囊"
+      ],
+      "clinical_tip": "靶点治疗后建议同步追踪疼痛、积液体征与活动度变化。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0901",
+    "title": "术中步骤-平卧位左膝微屈，消毒麻醉后经股四头肌与髌骨上缘薄弱处入髌上囊",
+    "content": "治疗步骤包括：患者平躺位，左膝微屈；局部皮肤消毒三遍并铺无菌单；局部皮肤麻醉后，穿刺针垂直皮肤经股四头肌与髌骨上缘交界薄弱区由内外侧进入髌上囊。",
+    "category": "treatment",
+    "tags": [
+      "平卧位",
+      "左膝微屈",
+      "消毒三遍",
+      "局麻",
+      "穿刺入路",
+      "股四头肌与髌骨上缘",
+      "髌上囊"
+    ],
+    "source": "治疗步骤文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_procedural_setup_and_suprapatellar_access_route_with_patient_supine_and_knee_slightly_flexed",
+      "procedure_steps": [
+        "体位与无菌准备",
+        "局麻",
+        "经薄弱区进针入髌上囊"
+      ],
+      "clinical_tip": "髌上囊入路应严格遵循无菌与解剖层次确认，减少并发风险。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0902",
+    "title": "术中参数-3W电刺激无异常，5/10/15/20W分档间断射频针刀（每3秒，1分钟）",
+    "content": "术中先以3W电刺激未见明显异常；随后按5W、10W、15W、20W档位，间隔3秒、总时长1分钟进行间断射频针刀治疗（图18.4）。",
+    "category": "treatment",
+    "tags": [
+      "3W电刺激",
+      "无异常",
+      "5W",
+      "10W",
+      "15W",
+      "20W",
+      "每3秒",
+      "1分钟",
+      "图18.4"
+    ],
+    "source": "治疗步骤文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_intraprocedural_stimulation_and_stepwise_rf_needleknife_power_settings_with_timing",
+      "procedure_parameters": [
+        "3W电刺激筛查",
+        "5/10/15/20W分档",
+        "每3秒间隔",
+        "总时长1分钟"
+      ],
+      "figure_reference": [
+        "图18.4"
+      ],
+      "clinical_tip": "分档参数应完整记录以支持术后复盘和方案优化。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0903",
+    "title": "术后即刻处理-注射10mL 30pg/mL臭氧并X线证实关节腔内弥散（图18.5）",
+    "content": "治疗结束后注射臭氧10mL（原文浓度记载30pg/mL），术后即刻X线示臭氧已弥散于关节腔内，以髌上囊区域更明显（图18.5）。",
+    "category": "treatment",
+    "tags": [
+      "臭氧注射10mL",
+      "30pg/mL",
+      "术后即刻X线",
+      "关节腔弥散",
+      "髌上囊明显",
+      "图18.5"
+    ],
+    "source": "治疗步骤文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_postprocedure_ozone_injection_volume_and_reported_concentration_with_immediate_xray_confirmation_of_intraarticular_diffusion",
+      "procedure_points": [
+        "臭氧10mL注射",
+        "即刻X线证实弥散"
+      ],
+      "data_quality_notes": [
+        "原文浓度记载为30pg/mL，建议后续核对单位"
+      ],
+      "figure_reference": [
+        "图18.5"
+      ],
+      "clinical_tip": "注射剂量与浓度单位应标准化记录，避免后续执行歧义。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0904",
+    "title": "7天后病情-左膝疼痛肿胀明显缓解、活动受限好转",
+    "content": "治疗7天后患者左膝关节疼痛与肿胀明显缓解，活动受限较前好转，整体状态稳定。",
+    "category": "follow_up",
+    "tags": [
+      "7天随访",
+      "疼痛缓解",
+      "肿胀减轻",
+      "活动受限好转",
+      "病情改善"
+    ],
+    "source": "治疗后病情文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_seven_day_followup_showing_significant_improvement_in_left_knee_pain_swelling_and_function",
+      "outcome_points": [
+        "疼痛减轻",
+        "肿胀减轻",
+        "活动改善"
+      ],
+      "clinical_tip": "建议继续按周复评，以确认中短期疗效稳定性。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0905",
+    "title": "7天复查查体-浮髌弱阳性，髌骨研磨与挺髌仍阳性，活动度改善至0°-100°",
+    "content": "复查见左膝肿胀减轻、髌周压痛减轻；浮髌试验弱阳性，麦氏征阴性，侧方挤压试验阴性，前后抽屉试验阴性；髌骨研磨试验阳性、挺髌试验阳性。左膝活动度改善为伸直0°、屈曲100°，双足背动脉搏动可触及，足趾活动好。",
+    "category": "clinical_presentation",
+    "tags": [
+      "浮髌弱阳性",
+      "髌骨研磨阳性",
+      "挺髌阳性",
+      "ROM改善",
+      "伸直0°",
+      "屈曲100°",
+      "复查查体"
+    ],
+    "source": "治疗后病情文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_day7_exam_with_reduced_effusion_signs_persistent_patellofemoral_positive_tests_and_rom_improvement",
+      "exam_findings": [
+        "肿胀压痛减轻",
+        "部分试验转弱或持续阳性",
+        "ROM提升"
+      ],
+      "clinical_tip": "残留髌股阳性体征提示仍需继续针对髌股关节负荷管理。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0906",
+    "title": "疗效量化-7天时VAS降至3分",
+    "content": "治疗7天后VAS评分为3分，较治疗前明显下降，提示疼痛负担获得实质性缓解。",
+    "category": "follow_up",
+    "tags": [
+      "VAS3分",
+      "疼痛量化下降",
+      "疗效量化"
+    ],
+    "source": "治疗后病情文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_day7_vas_reduction_to_three_as_quantitative_pain_improvement",
+      "outcome_points": [
+        "VAS降至3分"
+      ],
+      "clinical_tip": "建议后续持续追踪VAS与功能量表，评估长期收益。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0907",
+    "title": "图像引用-图18.6为治疗后红外热成像图",
+    "content": "治疗后红外热成像见图18.6，用于与治疗前热像对照评估靶点温差变化和疗效。",
+    "category": "diagnosis",
+    "tags": [
+      "图18.6",
+      "治疗后热成像",
+      "疗效对照",
+      "温差变化"
+    ],
+    "source": "图注文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_figure_18_6_as_post_treatment_thermography_reference_for_effect_comparison",
+      "figure_reference": [
+        "图18.6"
+      ],
+      "clinical_tip": "术后热像建议与同位点基线图做配对比较并保留原始参数。"
+    }
   }
 ]
