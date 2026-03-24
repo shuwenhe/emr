@@ -37200,5 +37200,96 @@
       ],
       "clinical_tip": "多模态证据一致时，可显著提高病例诊断可信度。"
     }
+  },
+  {
+    "id": "KB-IR-TX-1031",
+    "title": "治疗经过-外用复方七叶皂苷钠用于腕部局部处理",
+    "content": "治疗过程中予复方七叶皂苷钠外用，作为腕部局部处理措施之一。",
+    "category": "treatment",
+    "tags": [
+      "治疗经过",
+      "复方七叶皂苷钠",
+      "外用治疗",
+      "腕部局部处理"
+    ],
+    "source": "治疗经过文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_topical_compound_sodium_aescinate_use_as_local_treatment_in_cts_case",
+      "treatment_plan": [
+        "外用复方七叶皂苷钠"
+      ],
+      "clinical_tip": "局部外用药应与症状部位和软组织改变范围对应记录。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-1032",
+    "title": "治疗目的-外用药用于缓解局部软组织肿胀",
+    "content": "复方七叶皂苷钠外用的主要目的为缓解局部软组织肿胀，改善腕部局部组织状态。",
+    "category": "treatment",
+    "tags": [
+      "治疗目的",
+      "软组织肿胀",
+      "局部消肿",
+      "腕部组织状态"
+    ],
+    "source": "治疗经过文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_local_anti_swelling_purpose_of_topical_compound_sodium_aescinate_in_cts_case",
+      "treatment_plan": [
+        "缓解局部软组织肿胀"
+      ],
+      "clinical_tip": "建议同步记录肿胀范围和局部温度变化，便于评价外用药效果。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-1033",
+    "title": "治疗手段-小针刀联合穴位拔罐以松解腕管内压力",
+    "content": "进一步给予小针刀联合穴位拔罐治疗，目标为松解腕管内压力，改善局部卡压环境。",
+    "category": "treatment",
+    "tags": [
+      "小针刀",
+      "穴位拔罐",
+      "联合治疗",
+      "松解腕管内压力",
+      "局部减压"
+    ],
+    "source": "治疗经过文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_needle_knife_plus_acupoint_cupping_as_combined_decompression_strategy_for_cts",
+      "treatment_plan": [
+        "小针刀治疗",
+        "穴位拔罐治疗"
+      ],
+      "clinical_tip": "减压类操作建议与症状、诱发试验和功能变化同步复评。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-1034",
+    "title": "治疗目标-缓解正中神经压迫相关症状",
+    "content": "上述治疗的直接目标是缓解正中神经受压所致的麻木、感觉异常及相关功能不适。",
+    "category": "treatment",
+    "tags": [
+      "治疗目标",
+      "正中神经压迫",
+      "麻木缓解",
+      "感觉异常缓解",
+      "功能改善"
+    ],
+    "source": "治疗经过文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_goal_of_relieving_median_nerve_compression_symptoms_in_cts_treatment_course",
+      "treatment_plan": [
+        "减轻正中神经压迫症状"
+      ],
+      "clinical_tip": "治疗目标应与麻木分布、夜间症状和手功能指标联合追踪。"
+    }
   }
 ]
