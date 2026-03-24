@@ -36185,7 +36185,7 @@
       "理疗配合",
       "术后恢复"
     ],
-    "source": "干预手段文本（用户提供）",
+    "source": "干预手段文本",
     "source_type": "clinical_case",
     "priority": "high",
     "structured_advice": {
