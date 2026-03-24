@@ -36903,5 +36903,173 @@
       ],
       "clinical_tip": "一旦出现鱼际肌萎缩，应提高干预优先级，避免不可逆运动功能损失。"
     }
+  },
+  {
+    "id": "KB-IR-DX-1019",
+    "title": "诊断原则-腕管综合征主要依据临床症状和特征性物理检查结果判断",
+    "content": "腕管综合征的诊断主要根据临床症状和特征性的物理检查结果进行综合判断。",
+    "category": "diagnosis",
+    "tags": [
+      "诊断原则",
+      "临床症状",
+      "物理检查",
+      "综合判断"
+    ],
+    "source": "腕管综合征诊断文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_cts_diagnosis_based_primarily_on_clinical_symptoms_and_characteristic_physical_examination",
+      "criteria_summary": [
+        "临床症状",
+        "特征性查体"
+      ],
+      "clinical_tip": "诊断时应将症状、体征和辅助检查放在同一证据链中整合分析。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1020",
+    "title": "确诊依据-腕管综合征确诊需要电诊断检查支持",
+    "content": "尽管临床症状和体征对诊断很重要，但腕管综合征的确诊仍需要电诊断检查支持。",
+    "category": "diagnosis",
+    "tags": [
+      "确诊依据",
+      "电诊断检查",
+      "神经电生理",
+      "确诊支持"
+    ],
+    "source": "腕管综合征诊断文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_electrodiagnostic_testing_as_requirement_for_confirmatory_cts_diagnosis",
+      "criteria_summary": [
+        "电诊断是确诊依据"
+      ],
+      "clinical_tip": "存在治疗决策分歧或症状不典型时更应尽早完成电诊断。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1021",
+    "title": "关键诊断线索-正中神经分布区麻木不适且夜间加重最具提示价值",
+    "content": "最重要的诊断依据是患者存在典型临床症状，即正中神经分布区麻木不适，并在夜间加重。",
+    "category": "diagnosis",
+    "tags": [
+      "关键诊断线索",
+      "正中神经分布区麻木",
+      "夜间加重",
+      "典型症状"
+    ],
+    "source": "腕管综合征诊断文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_median_distribution_numbness_with_nocturnal_worsening_as_most_important_cts_clinical_clue",
+      "criteria_summary": [
+        "正中神经区麻木",
+        "夜间加重"
+      ],
+      "clinical_tip": "夜间加重和分布特异性同时存在时，腕管综合征概率显著升高。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-1022",
+    "title": "客观检查意义-除主观症状外，客观检查对腕管综合征诊断同样重要",
+    "content": "除患者主观症状外，客观检查在腕管综合征诊断中也非常重要，可帮助提高判断的可靠性。",
+    "category": "clinical_presentation",
+    "tags": [
+      "客观检查",
+      "主观症状",
+      "诊断可靠性",
+      "查体重要性"
+    ],
+    "source": "腕管综合征诊断文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_importance_of_objective_examination_beyond_subjective_symptoms_in_cts_diagnosis",
+      "clinical_points": [
+        "客观检查可提高诊断可信度"
+      ],
+      "clinical_tip": "建议标准化记录感觉、肌力和诱发试验结果。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1023",
+    "title": "重症提示-感觉减退/散失及大鱼际肌萎缩提示病情严重，应在出现前尽早干预",
+    "content": "明确出现手指感觉减退或散失，以及大鱼际肌肉萎缩，属于病情严重的表现；在这些表现出现之前就应尽早进行治疗干预。",
+    "category": "diagnosis",
+    "tags": [
+      "重症提示",
+      "感觉减退",
+      "感觉散失",
+      "大鱼际肌萎缩",
+      "尽早干预"
+    ],
+    "source": "腕管综合征诊断文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_severe_cts_signs_of_sensory_loss_and_thenar_atrophy_with_need_for_early_intervention_before_they_appear",
+      "key_points": [
+        "感觉缺失与鱼际萎缩提示重症",
+        "应早于重症体征出现前治疗"
+      ],
+      "clinical_tip": "一旦出现结构性运动受累，应避免继续延迟干预。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1024",
+    "title": "诱发试验-Tinel征、Phalen试验及正中神经压迫试验有助于诊断",
+    "content": "基于诱发诊断试验的客观性检查有利于帮助诊断，常用包括Tinel征、Phalen试验和正中神经压迫试验。",
+    "category": "diagnosis",
+    "tags": [
+      "诱发试验",
+      "Tinel征",
+      "Phalen试验",
+      "正中神经压迫试验",
+      "客观检查"
+    ],
+    "source": "腕管综合征诊断文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_provocative_tests_tinel_phalen_and_median_nerve_compression_as_diagnostic_aids_for_cts",
+      "criteria_summary": [
+        "Tinel征",
+        "Phalen试验",
+        "正中神经压迫试验"
+      ],
+      "clinical_tip": "诱发试验建议结合症状分布和电诊断结果综合解读。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1025",
+    "title": "鉴别诊断-不典型腕管综合征需与颅内肿瘤、多发性硬化、神经根型颈椎病等鉴别",
+    "content": "多数腕管综合征患者具有典型症状和体征，但仍有一些不典型患者需要与其他神经系统及相关疾病鉴别。主要鉴别诊断包括：颅内肿瘤、多发性硬化、神经根性颈椎病、颈髓空洞症、胸廓出口综合征、外周神经肿瘤、特发性臂丛神经炎及其他正中神经病变。",
+    "category": "diagnosis",
+    "tags": [
+      "鉴别诊断",
+      "颅内肿瘤",
+      "多发性硬化",
+      "神经根型颈椎病",
+      "颈髓空洞症",
+      "胸廓出口综合征",
+      "外周神经肿瘤",
+      "臂丛神经炎",
+      "其他正中神经病变"
+    ],
+    "source": "腕管综合征诊断文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_differential_diagnosis_scope_for_atypical_cts_against_central_root_plexus_and_peripheral_nerve_disorders",
+      "differential_points": [
+        "中枢性病变",
+        "神经根病变",
+        "周围神经及臂丛病变"
+      ],
+      "clinical_tip": "症状分布不典型或体征不一致时，应主动扩展鉴别诊断范围。"
+    }
   }
 ]
