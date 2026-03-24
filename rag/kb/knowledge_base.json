@@ -22739,5 +22739,135 @@
       ],
       "clinical_tip": "疼痛性质与感觉变化的动态记录有助于评估病情进展及治疗反应。"
     }
+  },
+  {
+    "id": "KB-IR-CL-0556",
+    "title": "临床表现-腰椎间盘突出相关麻木与感觉障碍的节段差异",
+    "content": "腰椎间盘突出所致麻木与感觉障碍因突出部位及受累神经根不同而表现各异。临床需结合节段定位、感觉分布及神经体征进行综合判断。",
+    "category": "clinical_presentation",
+    "tags": [
+      "腰椎间盘突出症",
+      "麻木",
+      "感觉障碍",
+      "神经根定位",
+      "节段差异"
+    ],
+    "source": "临床表现要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "evaluate_sensory_disturbance_by_affected_root_level",
+      "key_points": [
+        "感觉异常分布与受累节段相关",
+        "需结合神经根体征进行定位",
+        "疼痛麻木常呈神经根分布特点",
+        "避免仅凭单一症状判断责任节段"
+      ],
+      "clinical_tip": "体格检查应重点比较双侧皮肤感觉差异并结合影像层面验证。"
+    }
+  },
+  {
+    "id": "KB-IR-CL-0557",
+    "title": "临床表现-L4/5突出累及L5神经根的感觉异常分布",
+    "content": "L4/5椎间盘突出可累及L5神经根，其疼痛麻木等感觉异常区域多见于大腿后部、小腿外侧及足背（趾背）侧。",
+    "category": "clinical_presentation",
+    "tags": [
+      "L4/5",
+      "L5神经根",
+      "感觉异常分布",
+      "足背",
+      "小腿外侧"
+    ],
+    "source": "临床表现要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "identify_l5_root_sensory_pattern_from_l45_herniation",
+      "key_points": [
+        "L4/5突出常对应L5神经根受累",
+        "感觉异常可至大腿后部",
+        "小腿外侧常见麻木疼痛",
+        "足背及趾背侧症状具有定位价值"
+      ],
+      "clinical_tip": "L5根体征与足背感觉异常并存时，应重点评估L4/5责任节段。"
+    }
+  },
+  {
+    "id": "KB-IR-CL-0558",
+    "title": "临床表现-L5/S1突出累及S1神经根的感觉异常分布",
+    "content": "L5/S1椎间盘突出可累及S1神经根，其疼痛麻木等感觉异常区域多在大腿后侧、小腿后外侧、足背足底外侧及第4、5趾外侧。",
+    "category": "clinical_presentation",
+    "tags": [
+      "L5/S1",
+      "S1神经根",
+      "感觉异常分布",
+      "足底外侧",
+      "第4/5趾"
+    ],
+    "source": "临床表现要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "identify_s1_root_sensory_pattern_from_l5s1_herniation",
+      "key_points": [
+        "L5/S1突出常对应S1神经根受累",
+        "症状多见于大腿后侧与小腿后外侧",
+        "足背足底外侧可出现疼痛麻木",
+        "第4、5趾外侧异常有助于节段定位"
+      ],
+      "clinical_tip": "S1分布区感觉异常伴典型放射痛时，应警惕L5/S1椎间盘突出。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0559",
+    "title": "重症识别-马尾神经受压属于腰突外科干预指征",
+    "content": "向椎管后方突出的髓核或较大纤维环髓核组织脱入椎管后，可压迫马尾神经。马尾神经受压属于腰椎间盘突出症重症表现，通常为手术适应证，应紧急评估处理。",
+    "category": "diagnosis",
+    "tags": [
+      "马尾神经受压",
+      "重症腰突",
+      "手术适应证",
+      "椎管占位",
+      "紧急评估"
+    ],
+    "source": "临床重症识别要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "recognize_caudal_equina_compression_as_surgical_indication",
+      "key_points": [
+        "后突髓核或游离组织可压迫马尾",
+        "马尾受压属于腰突重症",
+        "应尽快完成神经功能评估",
+        "多数情况下需外科干预"
+      ],
+      "clinical_tip": "疑似马尾综合征时应尽快转入急诊通道，避免延误神经功能恢复时机。"
+    }
+  },
+  {
+    "id": "KB-IR-CL-0560",
+    "title": "临床表现-马尾神经受损的警示症状与严重后果",
+    "content": "马尾神经受损可表现为会阴部麻木刺痛、排尿排便无力、性功能障碍及双侧坐骨神经痛。严重者可出现大小便失禁及双下肢瘫痪，提示病情危重。",
+    "category": "clinical_presentation",
+    "tags": [
+      "马尾综合征",
+      "会阴麻木",
+      "排尿排便障碍",
+      "双侧坐骨神经痛",
+      "双下肢瘫痪"
+    ],
+    "source": "临床重症识别要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "screen_for_red_flag_symptoms_of_caudal_equina_injury",
+      "key_points": [
+        "会阴区感觉异常是关键红旗征象",
+        "排尿排便功能障碍提示重症",
+        "可伴双侧坐骨神经痛",
+        "重症可进展至失禁与下肢瘫痪"
+      ],
+      "clinical_tip": "出现会阴麻木或大小便功能障碍时，应立即按马尾综合征流程处理。"
+    }
   }
 ]
