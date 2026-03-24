@@ -30251,5 +30251,211 @@
       ],
       "clinical_tip": "门诊随访可用“抓握-提举疼痛变化”作为简易功能结局指标，便于快速评估康复进展。"
     }
+  },
+  {
+    "id": "KB-IR-CP-0770",
+    "title": "临床表现-网球肘多为缓慢起病，早期以肘外侧酸痛为主",
+    "content": "网球肘通常起病缓慢。症状初期患者多仅感到肘关节外侧酸痛，提示病变常以隐匿、渐进方式出现，而非突发性剧痛起病。",
+    "category": "clinical_presentation",
+    "tags": [
+      "网球肘",
+      "缓慢起病",
+      "早期症状",
+      "肘关节外侧酸痛",
+      "渐进性"
+    ],
+    "source": "临床表现文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_slow_onset_and_early_lateral_elbow_soreness_in_tennis_elbow",
+      "symptom_features": [
+        "起病缓慢",
+        "早期肘外侧酸痛"
+      ],
+      "clinical_significance": [
+        "符合过度使用性损伤常见病程",
+        "早期识别有助于避免症状迁延"
+      ],
+      "key_points": [
+        "初期症状可较轻",
+        "病程常为渐进性发展"
+      ],
+      "clinical_tip": "当患者主诉肘外侧反复酸痛时，应尽早评估重复负荷动作，避免延误干预。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0771",
+    "title": "疼痛特征-可向上下放散伴酸胀不适并出现不愿活动",
+    "content": "患者可自觉肘关节外上方活动时疼痛，疼痛有时可向上或向下放射，表现为酸胀不适并出现回避活动倾向。该模式提示局部肌腱附着点痛可伴邻近区域牵涉痛。",
+    "category": "clinical_presentation",
+    "tags": [
+      "疼痛放散",
+      "酸胀不适",
+      "活动痛",
+      "回避活动",
+      "牵涉痛"
+    ],
+    "source": "临床表现文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_radiating_lateral_elbow_pain_with_soreness_and_activity_avoidance",
+      "symptom_features": [
+        "活动相关疼痛",
+        "可向上或向下放散",
+        "酸胀不适",
+        "不愿活动"
+      ],
+      "clinical_significance": [
+        "提示局部病变可产生区域性牵涉痛",
+        "可能导致功能回避和生活受限"
+      ],
+      "key_points": [
+        "放散痛不等同于神经根病变",
+        "需结合体征判断疼痛来源"
+      ],
+      "clinical_tip": "对放散性肘痛应结合压痛点和负荷试验判别肌腱源性疼痛，避免过度神经化解释。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0772",
+    "title": "功能诱发痛-握物、握锹、提壶、拧毛巾等动作可明显加重疼痛",
+    "content": "手部用力握物时疼痛明显，握锹、提壶、拧毛巾、打毛衣等前臂反复用力动作可使疼痛加重，提示抓握与腕伸相关负荷是关键诱发因素。",
+    "category": "clinical_presentation",
+    "tags": [
+      "功能诱发痛",
+      "握物疼痛",
+      "握锹",
+      "提壶",
+      "拧毛巾",
+      "前臂重复用力"
+    ],
+    "source": "临床表现文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_activity_triggered_pain_with_gripping_lifting_and_twisting_tasks",
+      "trigger_actions": [
+        "用力握物",
+        "握锹",
+        "提壶",
+        "拧毛巾",
+        "打毛衣"
+      ],
+      "clinical_significance": [
+        "支持伸肌腱负荷相关疼痛机制",
+        "可用于制定动作限制与康复计划"
+      ],
+      "key_points": [
+        "抓握和旋拧动作是常见诱因",
+        "日常家务动作可显著影响症状"
+      ],
+      "clinical_tip": "随访中可记录具体诱发动作清单，作为个体化负荷管理和疗效评估依据。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0773",
+    "title": "查体体征-肱骨外上髁局限压痛，局部无红肿，前臂旋转时疼痛",
+    "content": "查体一般可见肱骨外上髁局限性压痛点，压痛有时可向下放散，伸肌腱上可有轻度压痛及活动痛。局部通常无红肿，肘关节伸屈活动多不受影响，但前臂旋转活动时可出现疼痛。",
+    "category": "clinical_presentation",
+    "tags": [
+      "肱骨外上髁压痛",
+      "压痛放散",
+      "伸肌腱压痛",
+      "无红肿",
+      "肘伸屈基本正常",
+      "前臂旋转痛"
+    ],
+    "source": "临床表现文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_exam_findings_of_localized_lateral_epicondyle_tenderness_without_swelling_and_pain_on_forearm_rotation",
+      "exam_findings": [
+        "肱骨外上髁局限压痛",
+        "压痛可向下放散",
+        "伸肌腱轻度压痛及活动痛",
+        "局部无红肿",
+        "肘伸屈多不受影响",
+        "前臂旋转时疼痛"
+      ],
+      "clinical_significance": [
+        "符合网球肘典型体征组合",
+        "有助于与关节内炎症性病变区分"
+      ],
+      "key_points": [
+        "局部压痛点是重要查体线索",
+        "旋前旋后诱发痛具有提示价值"
+      ],
+      "clinical_tip": "门诊评估时建议固定记录压痛点位置和旋转诱发痛程度，便于纵向比较。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0774",
+    "title": "重症与波动特征-伸指伸腕或执筷即可痛，少数阴雨天加重",
+    "content": "严重者在伸指、伸腕或执筷等轻负荷动作时即可引起疼痛。少数患者在阴雨天气可自觉疼痛加重，提示症状存在阈值下降与环境相关波动特点。",
+    "category": "clinical_presentation",
+    "tags": [
+      "重症表现",
+      "伸指痛",
+      "伸腕痛",
+      "执筷痛",
+      "阴雨天加重",
+      "症状波动"
+    ],
+    "source": "临床表现文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_severe_pain_with_low_load_extension_tasks_and_weather_related_fluctuation",
+      "symptom_features": [
+        "伸指时疼痛",
+        "伸腕时疼痛",
+        "执筷动作可诱发疼痛",
+        "少数患者阴雨天疼痛加重"
+      ],
+      "clinical_significance": [
+        "提示疼痛阈值下降和功能受限加重",
+        "存在个体化环境敏感性"
+      ],
+      "key_points": [
+        "低负荷动作即痛常提示病情加重",
+        "天气相关波动可影响日常功能表现"
+      ],
+      "clinical_tip": "对低负荷即痛患者应适当下调训练强度并加强疼痛教育，逐步恢复而非短期强行负荷。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0775",
+    "title": "功能受限-患手握力下降导致日常操作能力受影响",
+    "content": "患者常出现患手不能用力握物，提示握力与前臂功能输出受限。该功能障碍可直接影响提举、持物及精细操作能力，是评估疾病负担的重要维度。",
+    "category": "clinical_presentation",
+    "tags": [
+      "握力下降",
+      "不能用力握物",
+      "功能受限",
+      "日常活动影响",
+      "网球肘"
+    ],
+    "source": "临床表现文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_grip_weakness_and_daily_function_impairment_in_tennis_elbow",
+      "functional_findings": [
+        "患手不能用力握物",
+        "提举和持物能力下降"
+      ],
+      "clinical_significance": [
+        "反映疼痛对功能输出的实际影响",
+        "可作为治疗结局评估指标"
+      ],
+      "key_points": [
+        "握力受限常与疼痛并存",
+        "功能改善应作为治疗目标之一"
+      ],
+      "clinical_tip": "建议在随访中加入握力或功能量表的阶段性评估，以量化康复进展。"
+    }
   }
 ]
