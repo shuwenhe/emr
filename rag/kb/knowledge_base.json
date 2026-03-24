@@ -37846,5 +37846,32 @@
       ],
       "clinical_tip": "机制评估可结合疼痛变化、感觉症状与局部温度/灌注指标进行前后对照。"
     }
+  },
+  {
+    "id": "KB-IR-TX-1057",
+    "title": "作用机制-小针刀可撬松硬化组织并松解粘连以恢复软组织滑移",
+    "content": "软组织损伤后可发生变性与硬化，并导致组织间相互粘连。小针刀刺入组织间隙后进行撬动和松解，可松开粘连、促使硬化组织软化，改善组织层间活动性与局部力学环境，此作用通常较一般按摩手法更直接。",
+    "category": "treatment",
+    "tags": [
+      "小针刀机制",
+      "硬化组织",
+      "组织粘连",
+      "撬松松解",
+      "软组织滑移",
+      "腕管综合征"
+    ],
+    "source": "小针刀治疗机制文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_needle_knife_mechanism_of_mechanical_adhesion_release_and_sclerotic_tissue_softening_to_restore_gliding",
+      "criteria_summary": [
+        "损伤后变性硬化",
+        "组织间粘连形成",
+        "刺入后撬动松解可松开粘连",
+        "有助于硬化组织软化"
+      ],
+      "clinical_tip": "建议结合触诊张力、活动范围与症状变化评估松解效果，并注意分层操作安全。"
+    }
   }
 ]
