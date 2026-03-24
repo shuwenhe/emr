@@ -23701,5 +23701,33 @@
       ],
       "clinical_tip": "鉴别时应优先评估神经系统体征是否存在，以提高腰突与退变性骨关节病分层准确性。"
     }
+  },
+  {
+    "id": "KB-IR-TX-0594",
+    "title": "方药组成-桂枝地龙醋山甲三七粉生甘草方",
+    "content": "方药组成：桂枝6g，地龙6g，醋山甲5g，三七粉1g（冲），生甘草。用法：白剂，水煎服，日一剂，分3次口服。",
+    "category": "treatment",
+    "tags": [
+      "中药处方",
+      "桂枝",
+      "地龙",
+      "醋山甲",
+      "三七粉",
+      "生甘草",
+      "水煎服"
+    ],
+    "source": "方药记录（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "record_herbal_formula_with_decoction_and_divided_oral_dosing",
+      "key_points": [
+        "处方包含桂枝、地龙、醋山甲、三七粉及生甘草",
+        "三七粉注明冲服",
+        "给药方式为水煎服",
+        "频次为日一剂，分3次口服"
+      ],
+      "clinical_tip": "录入方药信息时应保留剂量、特殊服法与日服次数，便于后续处方比对与随访。"
+    }
   }
 ]
