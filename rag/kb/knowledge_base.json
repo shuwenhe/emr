@@ -30584,5 +30584,237 @@
       ],
       "clinical_tip": "查体时建议固定按压外上髁及伸肌总腱起点并记录疼痛等级，便于随访比较。"
     }
+  },
+  {
+    "id": "KB-IR-CS-0780",
+    "title": "典型病例-女性双肘外侧疼痛6个月，否认外伤史",
+    "content": "典型病例：女性患者，主诉双肘关节外侧疼痛6个月，否认明确外伤史。该病程与诱因特征符合慢性过度使用相关肘外侧疼痛的常见临床背景。",
+    "category": "case_study",
+    "tags": [
+      "典型病例",
+      "女性",
+      "双肘外侧疼痛6个月",
+      "否认外伤史",
+      "慢性病程"
+    ],
+    "source": "典型病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_typical_case_with_bilateral_lateral_elbow_pain_for_six_months_without_trauma_history",
+      "history_points": [
+        "双肘外侧疼痛持续6个月",
+        "否认外伤史"
+      ],
+      "clinical_significance": [
+        "慢性起病支持过度使用性病因",
+        "双侧受累提示持续负荷或重复动作暴露"
+      ],
+      "key_points": [
+        "病程时间可用于分层管理",
+        "无外伤史有助于排除急性创伤主导病因"
+      ],
+      "clinical_tip": "双侧慢性肘痛评估时建议重点追问职业与家务重复动作史，识别持续负荷来源。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0781",
+    "title": "症状特征-拧毛巾时明显加重并伴双侧股外侧疼痛",
+    "content": "患者双侧肘痛在拧毛巾等用力动作时症状明显，另诉双侧股外侧疼痛。前者符合网球肘负荷诱发痛特点；后者提示需与其他部位疼痛并行评估，不宜单一归因。",
+    "category": "clinical_presentation",
+    "tags": [
+      "拧毛巾加重",
+      "负荷诱发痛",
+      "双侧肘痛",
+      "双侧股外侧疼痛",
+      "并存症状"
+    ],
+    "source": "典型病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_wringing_towel_exacerbation_pattern_with_concurrent_bilateral_lateral_thigh_pain",
+      "symptom_features": [
+        "拧毛巾时肘痛明显加重",
+        "合并双侧股外侧疼痛"
+      ],
+      "clinical_significance": [
+        "肘痛模式支持伸肌腱负荷相关损伤",
+        "存在非肘部并行疼痛需综合评估"
+      ],
+      "key_points": [
+        "动作诱发信息可用于康复负荷设计",
+        "并存症状提示需进行系统性疼痛分层"
+      ],
+      "clinical_tip": "对多部位疼痛患者建议分区记录主诉强度和触发动作，避免治疗目标混淆。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0782",
+    "title": "既往诊疗经过-多院就诊化验无异常，封闭及NSAIDs治疗效果欠佳",
+    "content": "患者曾于北京多家医院就诊，相关化验未见明显异常。既往行局部封闭治疗并口服/外用非甾体抗炎药，症状未见明显缓解，后转至我院门诊治疗。",
+    "category": "follow_up",
+    "tags": [
+      "多院就诊",
+      "化验无明显异常",
+      "局部封闭治疗",
+      "NSAIDs",
+      "疗效欠佳",
+      "转诊"
+    ],
+    "source": "典型病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_previous_multicenter_management_with_limited_response_to_local_injection_and_nsaids",
+      "treatment_history": [
+        "多家医院就诊",
+        "相关化验无明显异常",
+        "曾行局部封闭治疗",
+        "口服和外用非甾体抗炎药"
+      ],
+      "response_assessment": [
+        "症状未明显缓解"
+      ],
+      "key_points": [
+        "提示常规保守方案疗效有限",
+        "转诊后需优化治疗路径与评估策略"
+      ],
+      "clinical_tip": "对封闭与NSAIDs反应不佳病例，建议尽早纳入分级康复和功能导向随访。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0783",
+    "title": "查体结果-双侧外上髁压痛及Mill征阳性，感觉肌力基本正常",
+    "content": "查体示：双侧肱骨外上髁压痛，双侧Mill征（+）；双肘关节屈伸活动可；双上肢皮肤感觉无减退，双上肢肌力V级。该结果支持局部肌腱附着点病变而无明确周围神经进行性功能缺损。",
+    "category": "clinical_presentation",
+    "tags": [
+      "双侧外上髁压痛",
+      "Mill征阳性",
+      "肘屈伸可",
+      "感觉正常",
+      "肌力V级",
+      "网球肘查体"
+    ],
+    "source": "典型病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_bilateral_lateral_epicondyle_tenderness_positive_mill_test_with_preserved_strength_and_sensation",
+      "exam_findings": [
+        "双侧肱骨外上髁压痛",
+        "双侧Mill征阳性",
+        "双肘屈伸活动可",
+        "双上肢感觉无减退",
+        "双上肢肌力V级"
+      ],
+      "clinical_significance": [
+        "符合网球肘典型阳性体征",
+        "未见明显神经功能缺损证据"
+      ],
+      "key_points": [
+        "Mill征在本案具支持价值",
+        "神经体征阴性有助于排除重度神经受压"
+      ],
+      "clinical_tip": "建议在复诊中持续记录Mill征和压痛强度变化，作为疗效追踪指标。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0784",
+    "title": "外院MRI-双肘关节提示轻度骨质增生",
+    "content": "患者自带外院双肘关节MRI提示轻度骨质增生。该影像结果提示退行性骨性改变存在，但需与临床症状体征结合判断其责任程度。",
+    "category": "diagnosis",
+    "tags": [
+      "外院MRI",
+      "双肘关节",
+      "轻度骨质增生",
+      "退行性改变"
+    ],
+    "source": "外院影像资料（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_outside_hospital_bilateral_elbow_mri_showing_mild_osteophyte_change",
+      "imaging_findings": [
+        "双肘MRI示轻度骨质增生"
+      ],
+      "clinical_significance": [
+        "提示存在骨性退变背景",
+        "需与肌腱源性疼痛体征综合解读"
+      ],
+      "key_points": [
+        "影像轻度改变不必然等同症状主因",
+        "临床相关性需结合压痛与诱发试验"
+      ],
+      "clinical_tip": "对轻度影像异常应避免过度解释，建议优先依据症状-体征一致性制定方案。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0785",
+    "title": "本院X线-右肘骨质增生（图13.1）",
+    "content": "本院右肘X线片示右肘骨质增生（图13.1）。该结果与外院MRI提示的轻度骨质增生方向一致，为骨性改变提供补充影像证据。",
+    "category": "diagnosis",
+    "tags": [
+      "本院X线",
+      "右肘骨质增生",
+      "图13.1",
+      "影像一致性"
+    ],
+    "source": "本院影像检查（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_inhouse_right_elbow_xray_showing_osteophyte_change_with_figure_13_1",
+      "imaging_findings": [
+        "右肘X线示骨质增生"
+      ],
+      "figure_reference": [
+        "图13.1"
+      ],
+      "clinical_significance": [
+        "为骨性退变提供本院影像依据",
+        "与既往外院MRI结论相互印证"
+      ],
+      "key_points": [
+        "建议将图号与诊断条目绑定",
+        "便于后续教学与追溯"
+      ],
+      "clinical_tip": "多模态影像结论一致时，可提高对骨性改变存在性的判断信心，但仍需结合症状定位责任病灶。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0786",
+    "title": "双肘红外热成像-外侧局部高温差提示炎症充血反应（图13.2）",
+    "content": "双肘关节红外热成像提示双肘外侧局部高温差改变，提示局部炎症和充血反应（图13.2）。该结果与肘外侧疼痛压痛等体征具有一致性。",
+    "category": "diagnosis",
+    "tags": [
+      "双肘红外热成像",
+      "外侧局部高温差",
+      "炎症反应",
+      "充血反应",
+      "图13.2",
+      "体征一致"
+    ],
+    "source": "本院红外热成像检查（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_bilateral_elbow_thermography_showing_lateral_local_hyperthermic_difference_suggesting_inflammation_and_hyperemia",
+      "exam_findings": [
+        "双肘外侧局部高温差"
+      ],
+      "figure_reference": [
+        "图13.2"
+      ],
+      "clinical_significance": [
+        "支持局部炎症充血活动存在",
+        "与临床疼痛压痛体征相匹配"
+      ],
+      "key_points": [
+        "热成像可作为功能影像补充",
+        "图像与体征一致性增强诊断可信度"
+      ],
+      "clinical_tip": "热成像结果应结合查体与功能受限同步解读，优先用于趋势观察而非孤立定性。"
+    }
   }
 ]
