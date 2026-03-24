@@ -20850,5 +20850,69 @@
         "治疗后不适反应"
       ]
     }
+  },
+  {
+    "id": "KB-IR-TX-0410",
+    "title": "肩周炎治疗技术-医用臭氧注射",
+    "content": "患者行医用臭氧注射治疗。该治疗用于缓解肩周局部炎症反应、改善微循环和减轻疼痛，可作为肩周炎综合治疗方案中的重要组成部分。实施前应评估注射适应证与禁忌证，治疗后观察局部反应及疼痛变化，并结合功能训练进行后续康复。",
+    "category": "treatment",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment",
+      "follow_up"
+    ],
+    "tags": [
+      "肩周炎",
+      "医用臭氧",
+      "臭氧注射",
+      "疼痛管理"
+    ],
+    "source": "门诊治疗记录",
+    "source_type": "clinical_record",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "肩周炎疼痛期",
+      "局部炎性反应明显",
+      "需要综合干预"
+    ],
+    "contraindications": [
+      "注射部位感染",
+      "凝血功能异常",
+      "臭氧治疗禁忌人群"
+    ],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩关节"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "clinical_experience",
+    "retrieval_hints": [
+      "医用臭氧注射",
+      "肩周炎注射治疗"
+    ],
+    "structured_advice": {
+      "action": "medical_ozone_injection",
+      "treatment_goal": [
+        "减轻疼痛",
+        "降低炎症活跃度",
+        "改善局部循环"
+      ],
+      "monitoring_items": [
+        "注射后局部反应",
+        "VAS评分变化",
+        "肩关节活动度变化"
+      ],
+      "follow_up_plan": [
+        "短期复评症状变化",
+        "结合功能训练",
+        "必要时联合其他治疗技术"
+      ]
+    }
   }
 ]
