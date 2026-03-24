@@ -21879,5 +21879,31 @@
       ],
       "clinical_tip": "同一患者复查时应尽量保持一致的体位和环境条件，以提高前后对比的可解释性。"
     }
+  },
+  {
+    "id": "KB-IR-BM-0523",
+    "title": "红外热成像体位-治疗前侧位桡侧面",
+    "content": "治疗前侧位桡侧面热成像用于评估患手桡侧软组织在干预前的温度分布，便于观察拇指屈伸相关区域及桡侧局部热异常，为后续治疗前后对比提供基线图像。",
+    "category": "basic_concept",
+    "tags": [
+      "治疗前",
+      "侧位桡侧面",
+      "红外热成像",
+      "基线评估",
+      "扳机指"
+    ],
+    "source": "临床热成像评估要点整理",
+    "source_type": "expert_consensus",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "capture_pre_treatment_radial_lateral_thermal_baseline",
+      "key_points": [
+        "采集前控制环境温度并完成适应",
+        "采用标准侧位桡侧面体位拍摄",
+        "重点观察桡侧及拇指相关区域热分布",
+        "与治疗后同体位图像进行定量或半定量对比"
+      ],
+      "clinical_tip": "侧位桡侧面可补充掌面视角信息，有助于提高局部热异常定位的完整性。"
+    }
   }
 ]
