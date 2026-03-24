@@ -23415,5 +23415,31 @@
       ],
       "clinical_tip": "热成像结果应结合症状体征与其他影像检查综合解读，以提高临床判断准确性。"
     }
+  },
+  {
+    "id": "KB-IR-BM-0583",
+    "title": "资料类型-脊柱关节肌骨病红外热成像彩色图谱",
+    "content": "脊柱关节肌骨病红外热成像彩色图谱用于可视化展示不同疾病状态下的体表热分布特征，可为疼痛定位、炎症范围识别及疗效随访提供图像参考。",
+    "category": "basic_concept",
+    "tags": [
+      "脊柱关节肌骨病",
+      "红外热成像",
+      "彩色图谱",
+      "疼痛定位",
+      "炎症评估"
+    ],
+    "source": "医用热成像应用要点整理",
+    "source_type": "expert_consensus",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "use_colored_infrared_thermography_atlas_for_msk_spinal_joint_diseases",
+      "key_points": [
+        "通过彩色热图显示热场分布差异",
+        "辅助定位疼痛及炎症相关区域",
+        "可用于不同病程与治疗前后对比",
+        "需结合临床体征与其他检查综合解读"
+      ],
+      "clinical_tip": "图谱比对应在统一采集条件下进行，以提高跨时间点和个体间比较的可靠性。"
+    }
   }
 ]
