@@ -23441,5 +23441,31 @@
       ],
       "clinical_tip": "图谱比对应在统一采集条件下进行，以提高跨时间点和个体间比较的可靠性。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0584",
+    "title": "鉴别诊断-退变性腰椎滑脱症",
+    "content": "退变性腰椎滑脱症在X线片上可见椎体滑脱表现，后滑程度一般不超过20%。常伴小关节突明显退变，后滑椎体边缘可见退变性增生改变。该影像特征有助于与单纯腰椎间盘突出症进行鉴别。",
+    "category": "diagnosis",
+    "tags": [
+      "鉴别诊断",
+      "退变性腰椎滑脱症",
+      "X线",
+      "椎体后滑",
+      "小关节突退变"
+    ],
+    "source": "临床影像鉴别要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "differentiate_lumbar_disc_herniation_from_degenerative_spondylolisthesis_on_xray",
+      "key_points": [
+        "X线可见椎体滑脱是关键鉴别点",
+        "后滑幅度通常不超过20%",
+        "小关节突退变常较明显",
+        "后滑椎体边缘可见退变增生"
+      ],
+      "clinical_tip": "若X线提示滑脱并伴后柱退变征象，应优先考虑退变性滑脱并结合CT/MR评估神经受压情况。"
+    }
   }
 ]
