@@ -37901,5 +37901,31 @@
       ],
       "clinical_tip": "治疗后建议结合功能活动度、压痛点与神经血管症状变化评估复位与减压效果。"
     }
+  },
+  {
+    "id": "KB-IR-DX-1059",
+    "title": "诊断价值-红外热像可辅助神经损伤识别与分布评估",
+    "content": "红外热像可通过体表温度分布与热纹理异常，辅助识别神经损伤相关区域变化，为临床神经损伤诊断提供补充信息，并可用于后续疗效动态监测。",
+    "category": "diagnosis",
+    "tags": [
+      "红外热像",
+      "神经损伤",
+      "辅助诊断",
+      "温度分布异常",
+      "热纹理",
+      "动态监测"
+    ],
+    "source": "红外热像辅助诊断文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_thermography_as_an_adjunct_tool_for_localizing_and_monitoring_nerve_injury_related_temperature_pattern_changes",
+      "criteria_summary": [
+        "温度分布异常提示受累区域",
+        "用于神经损伤辅助诊断",
+        "可用于动态随访监测"
+      ],
+      "clinical_tip": "建议与神经查体、电生理及影像学联合判读，以提升诊断可靠性。"
+    }
   }
 ]
