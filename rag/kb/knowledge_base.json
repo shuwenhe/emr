@@ -22973,5 +22973,83 @@
       ],
       "clinical_tip": "动态随访腰椎曲度变化有助于评估疼痛缓解与功能恢复进程。"
     }
+  },
+  {
+    "id": "KB-IR-CL-0565",
+    "title": "临床表现-腰椎间盘突出患者普遍存在腰部活动受限",
+    "content": "腰椎间盘突出患者几乎均有不同程度腰部活动受限，腰椎各方向活动均可受影响，提示疼痛、肌痉挛与神经根刺激共同参与功能障碍形成。",
+    "category": "clinical_presentation",
+    "tags": [
+      "腰椎间盘突出症",
+      "腰部活动受限",
+      "功能障碍",
+      "体征",
+      "临床表现"
+    ],
+    "source": "临床表现要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "identify_global_lumbar_motion_limitation_in_ldh",
+      "key_points": [
+        "几乎所有患者可见活动受限",
+        "前屈后伸侧屈旋转均可能受影响",
+        "受限程度与疼痛及神经刺激相关",
+        "功能评估可作为病情监测指标"
+      ],
+      "clinical_tip": "建议在随访中记录各方向活动范围变化，用于评估治疗反应。"
+    }
+  },
+  {
+    "id": "KB-IR-CL-0566",
+    "title": "临床表现-腰部前屈受限在腰突中最为明显",
+    "content": "在腰椎各方向活动受限中，前屈受限通常最明显，常成为患者主诉和查体中的核心功能障碍表现。",
+    "category": "clinical_presentation",
+    "tags": [
+      "前屈受限",
+      "腰突体征",
+      "功能受限",
+      "腰椎活动",
+      "临床特征"
+    ],
+    "source": "临床表现要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "recognize_flexion_limitation_as_prominent_lumbar_deficit",
+      "key_points": [
+        "前屈受限常重于其他方向",
+        "与症状诱发和加重关系密切",
+        "可作为查体重点观察项目",
+        "有助于功能分级与疗效评估"
+      ],
+      "clinical_tip": "查体时应比较主动与被动前屈幅度，并结合疼痛诱发情况综合判断。"
+    }
+  },
+  {
+    "id": "KB-IR-BM-0567",
+    "title": "机制解析-前屈位促使髓核后移并增加神经根牵拉",
+    "content": "前屈体位可进一步促使髓核向后方移位，并增加对已受压神经根的牵拉负荷，从而导致疼痛加重及前屈活动进一步受限。",
+    "category": "basic_concept",
+    "tags": [
+      "机制解析",
+      "前屈位",
+      "髓核后移",
+      "神经根牵拉",
+      "疼痛加重"
+    ],
+    "source": "临床机制要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "explain_flexion_induced_posterior_nucleus_shift_and_root_tension",
+      "key_points": [
+        "前屈可改变椎间盘内力学分布",
+        "髓核后移可加重后方受压",
+        "神经根牵拉增加诱发放射症状",
+        "机制上解释前屈受限最为明显"
+      ],
+      "clinical_tip": "指导患者急性期避免反复前屈负荷动作，有助于减少症状波动。"
+    }
   }
 ]
