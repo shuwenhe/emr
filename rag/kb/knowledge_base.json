@@ -23051,5 +23051,57 @@
       ],
       "clinical_tip": "指导患者急性期避免反复前屈负荷动作，有助于减少症状波动。"
     }
+  },
+  {
+    "id": "KB-IR-CL-0568",
+    "title": "临床表现-压痛及骶棘肌痉挛的定位价值",
+    "content": "约89%的腰椎间盘突出患者在病变间隙棘突间存在压痛，其旁侧约1cm处按压可诱发沿坐骨神经放射痛。约三分之一患者可伴腰部骶棘肌痉挛，导致腰部固定于强迫体位。压痛点的确定对本病诊断与定位具有重要意义。",
+    "category": "clinical_presentation",
+    "tags": [
+      "腰椎间盘突出症",
+      "压痛",
+      "骶棘肌痉挛",
+      "放射痛",
+      "定位体征"
+    ],
+    "source": "临床表现要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "use_tenderness_and_paraspinal_spasm_for_diagnostic_localization",
+      "key_points": [
+        "病变间隙棘突间压痛发生率较高",
+        "旁侧约1cm压痛可诱发坐骨神经放射痛",
+        "部分患者伴骶棘肌痉挛与强迫体位",
+        "压痛点对病变节段定位有重要参考价值"
+      ],
+      "clinical_tip": "体格检查时应系统记录压痛点位置与放射痛方向，并与影像学节段进行对照。"
+    }
+  },
+  {
+    "id": "KB-IR-CL-0569",
+    "title": "临床表现-神经系统表现",
+    "content": "腰椎间盘突出症可出现多种神经系统表现，常见包括受累神经根支配区感觉异常、肌力下降、腱反射改变及放射性疼痛。症状与体征的组合对判断受压节段与病情严重程度具有重要意义。",
+    "category": "clinical_presentation",
+    "tags": [
+      "腰椎间盘突出症",
+      "神经系统表现",
+      "感觉异常",
+      "肌力下降",
+      "腱反射改变"
+    ],
+    "source": "临床表现要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "evaluate_neurological_manifestations_in_lumbar_disc_herniation",
+      "key_points": [
+        "关注感觉异常分布与神经根对应关系",
+        "评估受累肌群肌力变化",
+        "检查膝反射与跟腱反射等腱反射改变",
+        "结合放射痛路径综合定位病变节段"
+      ],
+      "clinical_tip": "神经系统查体应与影像学结果对照解释，并动态追踪功能变化以评估进展。"
+    }
   }
 ]
