@@ -25142,5 +25142,225 @@
       ],
       "clinical_tip": "术后红外热成像图应结合疼痛、麻木、肌力和感觉恢复情况综合评估，避免孤立依据影像做出疗效判断。"
     }
+  },
+  {
+    "id": "KB-IR-FUP-0638",
+    "title": "术后热成像分区对比图-左右侧下肢不同部位手术前后温度变化",
+    "content": "左右侧下肢不同部位手术前后温度变化图可用于展示双下肢各分区在治疗前后皮温变化的动态对比。通过比较左右侧臀部、大腿、小腿及足部等不同部位的温度分布差异，能够更细致地评估术后神经根减压效果、局部血供恢复情况及微循环改善程度。该类分区热成像对比图还可用于识别术后仍持续存在的局灶性异常温区，为判断双侧恢复是否均衡以及解释残余症状提供客观影像依据。",
+    "category": "follow_up",
+    "tags": [
+      "术后热成像对比图",
+      "温度变化图",
+      "双下肢",
+      "分区评估",
+      "皮温恢复"
+    ],
+    "source": "术后热成像分区对比图（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_regional_pre_and_postoperative_temperature_changes_in_bilateral_lower_limbs",
+      "comparison_regions": [
+        "臀部",
+        "大腿",
+        "小腿",
+        "足部"
+      ],
+      "assessment_value": [
+        "比较双侧不同部位皮温变化",
+        "评估术后微循环恢复程度",
+        "识别残余异常温区"
+      ],
+      "key_points": [
+        "分区热像对比比整体观察更精细",
+        "可辅助判断双侧恢复均衡性",
+        "可作为术后疗效客观资料"
+      ],
+      "clinical_tip": "阅读左右侧下肢不同部位温度变化图时，应结合患者疼痛分布、感觉恢复和功能改善情况综合判断，避免仅凭局部热像差异过度解读。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0639",
+    "title": "检查价值-红外热成像可作为腰椎间盘突出症术前术后客观评价指标",
+    "content": "红外热成像检查能够迅速、客观、灵敏地反映腰椎间盘突出对脊神经功能的影响。结合其无创、费用低廉、操作相对简便的特点，红外热成像不仅适用于术前评估神经受压及微循环异常情况，也可用于术后随访疗效观察，因而可作为腰椎间盘突出症手术治疗前后的客观评价指标。",
+    "category": "diagnosis",
+    "tags": [
+      "红外热成像",
+      "客观评价指标",
+      "术前评估",
+      "术后评估",
+      "无创检查",
+      "低成本"
+    ],
+    "source": "检查价值总结（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "understand_infrared_thermography_as_an_objective_pre_and_postoperative_evaluation_tool_for_lumbar_disc_herniation",
+      "advantages": [
+        "检查迅速",
+        "结果客观",
+        "对神经功能变化敏感",
+        "无创且费用较低"
+      ],
+      "clinical_value": [
+        "术前评估神经受压影响",
+        "术后观察疗效变化",
+        "辅助判断微循环和神经功能恢复"
+      ],
+      "key_points": [
+        "兼具筛查和随访价值",
+        "适合作为客观评价补充指标",
+        "应结合临床和影像学综合判断"
+      ],
+      "clinical_tip": "红外热成像适合作为腰椎间盘突出症术前术后疗效评估的补充手段，但不能替代神经查体和影像学责任节段判断。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0640",
+    "title": "体格检查-腰椎局部压痛与姿势改变",
+    "content": "查体显示腰椎生理曲度变浅，腰椎肌肉紧张，提示腰椎保护性姿势和肌痉挛存在。L4/5棘间至L5/S1棘间压痛明显，左侧旁开1.5cm处压痛并放射至左下肢，左侧梨状肌压痛但无明显放射痛。这些体征提示责任节段位于下腰椎，且左侧神经根受刺激表现较为突出。",
+    "category": "diagnosis",
+    "tags": [
+      "体格检查",
+      "腰椎生理曲度变浅",
+      "压痛",
+      "左侧旁开压痛",
+      "梨状肌压痛"
+    ],
+    "source": "专科查体（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_local_lumbar_tenderness_and_postural_changes_in_physical_examination",
+      "exam_findings": [
+        "腰椎生理曲度变浅",
+        "腰椎肌肉紧张",
+        "L4/5至L5/S1棘间压痛",
+        "左侧旁开1.5cm压痛放射至左下肢",
+        "左侧梨状肌压痛"
+      ],
+      "clinical_meaning": [
+        "提示保护性肌痉挛",
+        "支持下腰椎责任节段定位",
+        "左侧神经根刺激征象较明显"
+      ],
+      "key_points": [
+        "局部压痛定位价值高",
+        "左侧体征更突出",
+        "有助于判断责任节段"
+      ],
+      "clinical_tip": "腰椎局部压痛和旁开放射痛是判断责任节段的重要体征，应结合影像学和神经系统检查综合分析。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0641",
+    "title": "神经系统查体-感觉减退、直腿抬高试验和肌力改变",
+    "content": "患者鞍区左侧皮肤感觉较对侧减弱，左小腿外侧皮肤感觉较对侧减弱，提示左侧感觉神经受累。直腿抬高试验左65°、右70°，加强试验左侧阳性、右侧阴性，支持左侧神经根受刺激。双四字试验阴性提示髋骶髂关节源性疼痛可能性较低。左足背伸肌力为Ⅳ级，右足背伸肌力Ⅴ级，进一步说明左侧神经功能已有一定程度受损。",
+    "category": "diagnosis",
+    "tags": [
+      "感觉减退",
+      "直腿抬高试验",
+      "加强试验阳性",
+      "肌力下降",
+      "左侧神经根受累"
+    ],
+    "source": "神经系统查体（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_neurological_deficits_and_nerve_root_tension_signs_in_lumbar_disc_herniation",
+      "neurological_findings": [
+        "鞍区左侧感觉减退",
+        "左小腿外侧感觉减退",
+        "直腿抬高左65度",
+        "加强试验左侧阳性",
+        "左足背伸肌力Ⅳ级"
+      ],
+      "differential_points": [
+        "右侧加强试验阴性",
+        "双四字试验阴性",
+        "更支持腰椎神经根源性病变"
+      ],
+      "key_points": [
+        "存在左侧感觉和肌力受损",
+        "神经根牵拉试验支持阳性",
+        "有助于排除部分髋部病变"
+      ],
+      "clinical_tip": "出现鞍区或小腿外侧感觉减退并伴直腿抬高试验阳性时，应重视腰椎神经根受压程度及其对功能的影响。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0642",
+    "title": "综合评估-腰椎活动度受限、反射情况及疼痛严重程度",
+    "content": "患者腰椎活动度明显受限：前屈30°、后伸5°、左屈10°、右屈10°、左旋10°、右旋10°，提示腰椎功能受限显著。左膝腱反射、右膝腱反射、左跟腱反射、右跟腱反射均可对称引出，双侧巴宾斯基征未引出，双侧髌阵挛及踝阵挛未引出，提示目前未见明确锥体束受损体征。双足背动脉搏动可触及、末梢血运良好，排除了明显外周血供障碍。VAS评分8分，说明疼痛程度较重。",
+    "category": "diagnosis",
+    "tags": [
+      "腰椎活动度",
+      "反射对称",
+      "巴宾斯基征阴性",
+      "末梢血运好",
+      "VAS8分"
+    ],
+    "source": "综合查体评估（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "summarize_functional_limitation_reflex_status_and_pain_severity_from_physical_exam",
+      "functional_assessment": [
+        "腰椎前屈后伸侧屈旋转均明显受限",
+        "VAS评分8分提示重度疼痛"
+      ],
+      "neurological_status": [
+        "膝腱和跟腱反射对称引出",
+        "巴宾斯基征未引出",
+        "髌阵挛踝阵挛未引出"
+      ],
+      "circulation_findings": [
+        "双足背动脉搏动可触及",
+        "末梢血运良好"
+      ],
+      "key_points": [
+        "功能受限明显但无锥体束阳性体征",
+        "疼痛程度较高",
+        "外周循环尚可"
+      ],
+      "clinical_tip": "在腰椎间盘突出症查体中，活动度、反射和VAS评分可共同反映病情严重程度，并帮助区分单纯神经根病变与更高位中枢神经受累。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0643",
+    "title": "入院检查-血尿便常规均正常",
+    "content": "入院检查结果显示，患者血常规、尿常规、便常规均未见明显异常。基础实验室检查正常提示当前暂无明确感染、明显血液系统异常或泌尿消化系统急性异常表现，为进一步专科评估和治疗提供了相对稳定的全身状态依据。",
+    "category": "diagnosis",
+    "tags": [
+      "入院检查",
+      "血常规正常",
+      "尿常规正常",
+      "便常规正常",
+      "基础化验"
+    ],
+    "source": "入院检查结果（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_normal_admission_routine_laboratory_results",
+      "lab_results": [
+        "血常规正常",
+        "尿常规正常",
+        "便常规正常"
+      ],
+      "clinical_significance": [
+        "未提示明显感染征象",
+        "未见显著系统性异常",
+        "支持进一步专科处理"
+      ],
+      "key_points": [
+        "基础化验作为入院评估组成部分",
+        "结果正常有助于治疗决策",
+        "需结合专科病情综合判断"
+      ],
+      "clinical_tip": "腰椎间盘突出症入院评估中，基础化验虽常无特异性异常，但对排除合并症和评估手术或介入治疗耐受性具有基础价值。"
+    }
   }
 ]
