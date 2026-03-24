@@ -29943,5 +29943,180 @@
       ],
       "clinical_tip": "当原始病历文本不完整时，应显式标注截断位置并暂停推断，确保知识库可追溯性与准确性。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0761",
+    "title": "图注记录-图12.51为患者红外热成像图",
+    "content": "文献片段标注“图12.51 患者红外热成像图”，用于对应本案热成像分析结论与图像证据来源。该图号可作为后续病例教学与证据追溯的索引锚点。",
+    "category": "diagnosis",
+    "tags": [
+      "图12.51",
+      "红外热成像图",
+      "图像索引",
+      "证据追溯"
+    ],
+    "source": "图注文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_figure_12_51_as_thermography_reference_for_case_traceability",
+      "figure_reference": [
+        "图12.51"
+      ],
+      "clinical_significance": [
+        "为热成像结论提供图像编号依据",
+        "便于教学与病历回溯时快速定位图像"
+      ],
+      "key_points": [
+        "图号应与正文分析保持一致",
+        "图像索引有助于减少信息丢失"
+      ],
+      "clinical_tip": "病例整理时建议将图号、结论和关键体征三者绑定记录，提升可检索性和可核对性。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0762",
+    "title": "复查腰椎MRI补充-部分椎体缘许莫结节合并终板炎及L1/2-L5/S1椎间盘退变",
+    "content": "复查腰椎MRI补充提示：部分椎体缘许莫结节合并终板炎，L1/2-L5/S1椎间盘退变。该结果与既往退行性改变一致，提示椎间盘-终板复合体慢性损伤及多节段退变背景持续存在。",
+    "category": "diagnosis",
+    "tags": [
+      "复查MRI补充",
+      "许莫结节",
+      "终板炎",
+      "L1/2-L5/S1",
+      "椎间盘退变",
+      "慢性损伤"
+    ],
+    "source": "复查腰椎MRI记录补充（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_followup_mri_supplement_with_schmorl_nodes_endplate_inflammation_and_multilevel_disc_degeneration",
+      "imaging_findings": [
+        "部分椎体缘许莫结节",
+        "终板炎",
+        "L1/2-L5/S1椎间盘退变"
+      ],
+      "clinical_significance": [
+        "提示慢性退变链条仍在进展或持续",
+        "终板炎可能参与疼痛发生机制",
+        "多节段受累支持全腰椎功能化管理"
+      ],
+      "key_points": [
+        "该条目用于补全上一条截断信息",
+        "终板与椎间盘应联合评估",
+        "可作为纵向随访对照节点"
+      ],
+      "clinical_tip": "当影像补充到位后，建议将截断条目与补充条目建立关联标记，避免后续重复录入或误读。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0763",
+    "title": "复查腰椎MRI补充-L1/2-L5/S1膨出并L3/4、L4/5左后突出及L5/S1后突出继发椎管和双侧椎间孔狭窄",
+    "content": "复查腰椎MRI进一步提示：L1/2-L5/S1椎间盘膨出，L3/4、L4/5椎间盘左后突出，L5/S1椎间盘后突出，继发相应水平椎管及双侧椎间孔狭窄。该表现提示多节段结构性狭窄与神经通道受限风险并存。",
+    "category": "diagnosis",
+    "tags": [
+      "复查MRI补充",
+      "L1/2-L5/S1膨出",
+      "L3/4左后突出",
+      "L4/5左后突出",
+      "L5/S1后突出",
+      "椎管狭窄",
+      "双侧椎间孔狭窄"
+    ],
+    "source": "复查腰椎MRI记录补充（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_followup_mri_multilevel_bulging_and_herniation_with_secondary_canal_and_bilateral_foraminal_stenosis",
+      "imaging_findings": [
+        "L1/2-L5/S1椎间盘膨出",
+        "L3/4与L4/5左后突出",
+        "L5/S1后突出",
+        "相应水平椎管狭窄",
+        "双侧椎间孔狭窄"
+      ],
+      "clinical_significance": [
+        "支持多节段神经受压风险评估",
+        "有助于责任节段分层与治疗优先级制定",
+        "需结合神经查体动态评估病情进展"
+      ],
+      "key_points": [
+        "结构狭窄呈多平面、多节段分布",
+        "影像应与症状侧别和节段体征对应",
+        "必要时进行阶段性复查以监测进展"
+      ],
+      "clinical_tip": "在多节段狭窄背景下，治疗决策应以临床责任节段为核心，避免仅凭影像“最重”节段做单点判断。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0764",
+    "title": "红外热成像分析-左臀外侧与左股外侧低温差且双足底温差对称",
+    "content": "红外热成像图分析显示：患者左臀外侧呈低温差，左股外侧温差较低；显示与患者症状体征、影像资料相一致。双足底温差对称分布。该结果提示局部区域性温度异常与临床侧别特征存在对应关系。",
+    "category": "diagnosis",
+    "tags": [
+      "红外热成像分析",
+      "左臀外侧低温差",
+      "左股外侧低温差",
+      "双足底温差对称",
+      "侧别对应",
+      "症状体征一致"
+    ],
+    "source": "红外热成像图分析（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_thermography_pattern_of_left_gluteal_and_lateral_thigh_low_temperature_difference_with_symmetric_plantar_distribution",
+      "exam_findings": [
+        "左臀外侧低温差",
+        "左股外侧温差较低",
+        "双足底温差对称"
+      ],
+      "clinical_significance": [
+        "温度侧别与症状体征存在一致性线索",
+        "支持局部区域功能异常评估",
+        "足底对称分布提示远端整体灌注未见明显侧差"
+      ],
+      "key_points": [
+        "热成像结果应结合神经体征解释",
+        "局部异常与整体对称可同时存在",
+        "可用于疗效前后趋势比较"
+      ],
+      "clinical_tip": "热成像出现“局部异常+远端对称”模式时，建议重点评估局部软组织与节段性神经影响的叠加效应。"
+    }
+  },
+  {
+    "id": "KB-IR-CS-0765",
+    "title": "病例局限-10年前影像资料丢失导致无法与当前影像直接对比",
+    "content": "本案不足之处在于患者10年之前影像学资料丢失，无法与现在的影像学图像直接对比。该局限限制了病变进展速度、节段演变路径及治疗反应长期轨迹的精确判断。",
+    "category": "case_study",
+    "tags": [
+      "病例局限",
+      "影像资料丢失",
+      "10年前资料缺失",
+      "无法纵向对比",
+      "证据缺口"
+    ],
+    "source": "病例总结（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_case_limitation_due_to_lost_historical_imaging_and_absent_longitudinal_comparison",
+      "limitations": [
+        "10年前影像学资料丢失",
+        "无法与当前影像直接对比"
+      ],
+      "clinical_impact": [
+        "限制病程纵向演变判断",
+        "影响责任节段进展速率评估",
+        "降低长期疗效归因精度"
+      ],
+      "key_points": [
+        "需在病历中显式标注证据缺口",
+        "后续随访应建立标准化影像时间序列",
+        "解释结论时需保留不确定性"
+      ],
+      "clinical_tip": "遇到历史影像缺失病例，建议从当前开始建立固定周期复查档案，逐步弥补纵向证据链。"
+    }
   }
 ]
