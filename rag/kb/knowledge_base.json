@@ -29328,5 +29328,138 @@
       ],
       "clinical_tip": "术中影像显示双针入路建立成功后，仍应结合侧位和正位关系复核针尖位置，确保L4/5责任椎间盘覆盖充分。"
     }
+  },
+  {
+    "id": "KB-IR-CP-0744",
+    "title": "现病情况-腰痛活动受限但无肢体疼痛麻木",
+    "content": "现病情况：腰部疼痛，活动受限，无肢体疼痛及麻木。一般情况方面，纳欠佳，寐可。另据病史记载，既往相关症状曾减轻，但未行系统治疗。",
+    "category": "clinical_presentation",
+    "tags": [
+      "腰部疼痛",
+      "活动受限",
+      "无肢体疼痛麻木",
+      "纳欠佳",
+      "寐可",
+      "未行系统治疗"
+    ],
+    "source": "住院病历现病史（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_current_status_with_low_back_pain_activity_limitation_and_no_limb_pain_or_numbness",
+      "symptom_profile": [
+        "腰部疼痛",
+        "活动受限",
+        "无肢体疼痛及麻木"
+      ],
+      "general_status": [
+        "纳欠佳",
+        "寐可"
+      ],
+      "key_points": [
+        "本次以腰部症状为主，未见肢体放射痛或麻木主诉",
+        "活动受限提示功能受影响但神经根症状当前不突出",
+        "存在未系统治疗史，后续需评估规范化治疗必要性"
+      ],
+      "clinical_tip": "当腰痛活动受限但无明显肢体神经症状时，仍应结合查体与影像评估潜在结构性病变，避免仅按单纯腰肌劳损处理。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0745",
+    "title": "中医四诊要点-舌暗淡、苔白腻、脉弦",
+    "content": "中医四诊所见：舌暗淡，苔白腻，脉弦。该组合提示体内可能存在气机不畅与痰湿、瘀滞并见的倾向，可作为辨证分型与治法选取的参考依据。",
+    "category": "diagnosis",
+    "tags": [
+      "舌暗淡",
+      "苔白腻",
+      "脉弦",
+      "中医四诊",
+      "辨证依据"
+    ],
+    "source": "住院病历中医四诊记录（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_tcm_four_diagnostic_signs_dark_pale_tongue_white_greasy_coating_and_wiry_pulse",
+      "tcm_signs": [
+        "舌暗淡",
+        "苔白腻",
+        "脉弦"
+      ],
+      "clinical_significance": [
+        "提示可能存在气机郁滞倾向",
+        "白腻苔提示痰湿内蕴或湿邪偏盛",
+        "舌暗淡可见于瘀滞或气血运行不畅"
+      ],
+      "key_points": [
+        "四诊信息可为辨证分型提供补充证据",
+        "应与主诉、体征及影像结果综合判断",
+        "避免仅凭单一舌脉信息直接下结论"
+      ],
+      "clinical_tip": "四诊结果应动态观察，复诊时建议继续记录舌脉变化，以评估证候演变和治疗反应。"
+    }
+  },
+  {
+    "id": "KB-IR-CS-0746",
+    "title": "既往史-颈椎病病史7年余且多次理疗后症状减轻",
+    "content": "既往颈椎病史7年余，曾多次行理疗后症状减轻。该病史提示患者存在长期脊柱退变背景，颈椎相关症状对当前腰部主诉的直接贡献有限，但反映其对保守治疗（理疗）可能具有一定反应性。",
+    "category": "case_study",
+    "tags": [
+      "颈椎病史7年余",
+      "理疗后症状减轻",
+      "既往史",
+      "脊柱退变背景",
+      "保守治疗反应"
+    ],
+    "source": "既往史（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_history_of_cervical_spondylosis_for_more_than_seven_years_with_partial_relief_after_physiotherapy",
+      "history_points": [
+        "颈椎病史7年余",
+        "多次理疗后症状减轻"
+      ],
+      "key_points": [
+        "提示患者存在慢性脊柱退变体质背景",
+        "既往理疗有效说明其对部分保守治疗有反应",
+        "当前腰部症状评估时应与颈椎既往问题区分"
+      ],
+      "clinical_tip": "对于合并长期颈椎病史的患者，需在评估腰痛时注意分层定位症状来源，避免将不同部位退变表现混同处理。"
+    }
+  },
+  {
+    "id": "KB-IR-CS-0747",
+    "title": "既往史-风湿关节炎病史50余年目前未服药",
+    "content": "既往风湿关节炎病史50余年，现未服药治疗。该长期免疫炎性病史可能影响疼痛阈值、关节功能及慢性症状背景，临床评估时需与退变性腰椎病变共同考虑。",
+    "category": "case_study",
+    "tags": [
+      "风湿关节炎50余年",
+      "未服药治疗",
+      "既往史",
+      "慢性炎性病史",
+      "疼痛背景"
+    ],
+    "source": "既往史（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_long_history_of_rheumatoid_arthritis_over_fifty_years_without_current_medication",
+      "history_points": [
+        "风湿关节炎病史50余年",
+        "目前未服药治疗"
+      ],
+      "clinical_significance": [
+        "长期炎性病史可能影响疼痛与功能表现",
+        "可能与退变性腰椎病变共同作用于当前症状",
+        "需在治疗方案中关注免疫相关风险及药物选择"
+      ],
+      "key_points": [
+        "既往风湿关节炎是重要合并病史",
+        "未服药状态下需评估当前疾病活动度",
+        "治疗决策应兼顾炎性病和退变病双重背景"
+      ],
+      "clinical_tip": "合并长期风湿关节炎病史的腰痛患者，建议同步评估炎症活动指标和关节受累情况，以提高病因分层和治疗个体化水平。"
+    }
   }
 ]
