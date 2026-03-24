@@ -32971,5 +32971,304 @@
       ],
       "clinical_tip": "建议长期病例建立时间轴式影像-症状联合档案，便于复发预警。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0861",
+    "title": "诊断词条-强直性脊柱炎（Ankylosing Spondylitis）",
+    "content": "新增病名词条：强直性脊柱炎（ankylosing spondylitis, AS）。该病为以脊柱和骶髂关节受累为主的慢性进行性炎性疾病。",
+    "category": "diagnosis",
+    "tags": [
+      "强直性脊柱炎",
+      "Ankylosing Spondylitis",
+      "AS",
+      "病名词条"
+    ],
+    "source": "第十六章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "add_diagnosis_term_for_ankylosing_spondylitis_with_standard_english_name",
+      "diagnosis_terms": [
+        "强直性脊柱炎",
+        "Ankylosing Spondylitis"
+      ],
+      "clinical_tip": "病名入库建议统一中英文别名，提升跨资料检索能力。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0862",
+    "title": "病名解析-骶髂关节为微动关节，AS主要侵犯脊柱并累及骶髂及周围关节",
+    "content": "骶髂关节由骶骨与髂骨耳状面构成，属微动关节。强直性脊柱炎主要侵犯脊柱，并累及骶髂关节及周围关节，呈慢性进行性炎性病程。",
+    "category": "diagnosis",
+    "tags": [
+      "病名解析",
+      "骶髂关节微动关节",
+      "脊柱受累",
+      "骶髂关节受累",
+      "周围关节受累",
+      "慢性进行性炎症"
+    ],
+    "source": "第十六章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_disease_overview_of_as_involving_spine_sacroiliac_and_peripheral_joints_with_progressive_inflammation",
+      "definition_points": [
+        "骶髂关节为微动关节",
+        "AS主要累及脊柱和骶髂关节",
+        "可累及周围关节"
+      ],
+      "clinical_tip": "评估AS时应同时关注中轴和周围关节受累证据。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0863",
+    "title": "病程特征-以双侧骶髂关节及腰背反复疼痛为主，早期可为骶髂关节炎并可伴HLA-B27阳性",
+    "content": "AS常以双侧骶髂关节及腰背部反复疼痛为主，早期可表现为骶髂关节炎，随后累及多个关节。患者可见HLA-B27阳性。",
+    "category": "diagnosis",
+    "tags": [
+      "双侧骶髂关节痛",
+      "腰背反复疼痛",
+      "早期骶髂关节炎",
+      "多关节累及",
+      "HLA-B27阳性"
+    ],
+    "source": "第十六章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_course_pattern_of_recurrent_bilateral_sacroiliac_and_low_back_pain_with_early_sacroiliitis_and_possible_hla_b27_positivity",
+      "course_points": [
+        "早期骶髂关节炎",
+        "后续多关节受累",
+        "可见HLA-B27阳性"
+      ],
+      "clinical_tip": "疑似AS患者建议结合症状节律与HLA-B27及影像综合评估。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0864",
+    "title": "临床表现-反复腰痛与腰骶僵硬，可间歇或双侧交替出现臀痛并放射至大腿",
+    "content": "AS主要症状为反复腰痛与腰骶部僵硬，可间歇性或双侧交替出现腰痛和双侧臀部疼痛，疼痛可放射至大腿。",
+    "category": "clinical_presentation",
+    "tags": [
+      "反复腰痛",
+      "腰骶僵硬",
+      "双侧交替臀痛",
+      "放射至大腿",
+      "临床表现"
+    ],
+    "source": "第十六章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_core_symptom_pattern_of_recurrent_low_back_pain_lumbosacral_stiffness_and_alternating_bilateral_buttock_pain_radiating_to_thigh",
+      "symptom_features": [
+        "反复腰痛",
+        "腰骶僵硬",
+        "臀痛放射至大腿"
+      ],
+      "clinical_tip": "建议记录疼痛侧别交替规律，有助于中轴炎症性疼痛识别。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0865",
+    "title": "体征与试验-常无明显阳性神经体征，伸直抬腿试验阴性，压迫或牵伸骶髂关节可诱痛",
+    "content": "本病可缺乏典型阳性神经体征，伸直抬腿试验多阴性；但直接按压或牵伸骶髂关节时可诱发疼痛，提示骶髂关节受累。",
+    "category": "clinical_presentation",
+    "tags": [
+      "阳性神经体征少见",
+      "直腿抬高阴性",
+      "骶髂关节压痛",
+      "骶髂牵伸痛",
+      "诱发试验"
+    ],
+    "source": "第十六章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_exam_pattern_of_negative_neurodynamic_signs_with_positive_sacroiliac_compression_or_stretch_pain",
+      "exam_findings": [
+        "SLR阴性倾向",
+        "骶髂压迫或牵伸诱痛"
+      ],
+      "clinical_tip": "当神经牵拉阴性而骶髂诱发痛阳性时，应重点评估骶髂炎症。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0866",
+    "title": "僵硬与病程进展-晨僵和黏着感多短于30分钟，进展期可致肌痉挛与功能性障碍",
+    "content": "AS可出现晨僵、黏着感和“筋伸不开”感，僵硬时间一般不超过30分钟。随病情进展可出现关节周围肌肉痉挛，导致机械性闭锁及骶髂关节功能障碍。",
+    "category": "clinical_presentation",
+    "tags": [
+      "晨僵",
+      "黏着感",
+      "僵硬<30分钟",
+      "肌痉挛",
+      "机械性闭锁",
+      "功能障碍"
+    ],
+    "source": "第十六章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_stiffness_profile_and_progressive_muscle_spasm_related_functional_impairment_in_as",
+      "course_features": [
+        "晨僵较短暂",
+        "进展后肌痉挛及功能障碍"
+      ],
+      "clinical_tip": "早期识别晨僵节律有助于炎症性腰痛与机械性腰痛区分。"
+    }
+  },
+  {
+    "id": "KB-IR-CS-0867",
+    "title": "管理提示-AS需早期诊断与及时治疗以提升生活质量",
+    "content": "由于病情可进行性发展，AS应强调早期诊断和及时治疗，以降低功能损害并改善生活质量。",
+    "category": "case_study",
+    "tags": [
+      "早期诊断",
+      "及时治疗",
+      "生活质量",
+      "功能保护"
+    ],
+    "source": "第十六章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_management_principle_of_early_diagnosis_and_timely_treatment_for_quality_of_life_improvement_in_as",
+      "key_points": [
+        "越早干预越有利于功能保护",
+        "应建立长期随访策略"
+      ],
+      "clinical_tip": "建议将疼痛、活动度和功能量表纳入长期随访指标。"
+    }
+  },
+  {
+    "id": "KB-IR-CS-0868",
+    "title": "典型病例-44岁女性反复左侧腰骶痛4年，1周前劳累后加重并牵涉左臀",
+    "content": "典型病例：李某，女性，44岁。4年前无明显诱因出现左侧腰骶部疼痛与僵硬，休息后可缓解但反复发作；1周前劳累后症状加重并牵涉至左臀部。",
+    "category": "case_study",
+    "tags": [
+      "典型病例",
+      "44岁女性",
+      "左侧腰骶痛4年",
+      "反复发作",
+      "劳累后加重",
+      "左臀牵涉痛"
+    ],
+    "source": "典型病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_typical_case_history_of_recurrent_left_lumbosacral_pain_for_four_years_with_recent_exertional_exacerbation_and_left_gluteal_referral",
+      "history_points": [
+        "长期反复病程",
+        "近期劳累诱发加重"
+      ],
+      "clinical_tip": "长期反复并活动相关加重者应尽早完成系统性炎症评估。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0869",
+    "title": "病例检查-左骶髂关节压痛并HLA-B27弱阳性",
+    "content": "入院查体可见左侧骶髂关节压痛，实验室提示HLA-B27弱阳性。该结果与AS相关性特征相符。",
+    "category": "clinical_presentation",
+    "tags": [
+      "左骶髂关节压痛",
+      "HLA-B27弱阳性",
+      "病例检查"
+    ],
+    "source": "典型病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_case_findings_of_left_sacroiliac_tenderness_with_weak_positive_hla_b27",
+      "exam_points": [
+        "左骶髂关节压痛",
+        "HLA-B27弱阳性"
+      ],
+      "clinical_tip": "HLA-B27结果应与临床与影像综合判读，避免单项过度解读。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0870",
+    "title": "图像引用-骨盆正位X线图16.1与治疗前红外热成像图16.2",
+    "content": "病例评估包含骨盆正位X线（图16.1）及治疗前红外热成像（图16.2），用于结构与功能影像联合判断。",
+    "category": "diagnosis",
+    "tags": [
+      "图16.1",
+      "骨盆正位X线",
+      "图16.2",
+      "治疗前热成像",
+      "联合评估"
+    ],
+    "source": "图注与病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_figure_references_16_1_pelvic_ap_xray_and_16_2_pre_treatment_thermography_for_combined_assessment",
+      "figure_reference": [
+        "图16.1",
+        "图16.2"
+      ],
+      "clinical_tip": "结构影像与热成像联合可提高病灶定位与分层判断能力。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0871",
+    "title": "临床诊断-以症状体征为主，骶骨压迫试验与抗阻髋外展试验阳性具有提示价值",
+    "content": "AS临床诊断主要依据症状、体征及影像。体格检查中骶骨压迫试验阳性、抗阻髋外展试验阳性可提供重要提示。",
+    "category": "diagnosis",
+    "tags": [
+      "临床诊断",
+      "骶骨压迫试验阳性",
+      "抗阻髋外展试验阳性",
+      "症状体征为主"
+    ],
+    "source": "临床诊断文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_clinical_diagnostic_basis_of_as_with_positive_sacral_compression_and_resisted_hip_abduction_tests",
+      "diagnostic_points": [
+        "症状体征主导诊断",
+        "阳性体征支持骶髂受累"
+      ],
+      "clinical_tip": "体征应与影像阶段性改变对应记录，以增强诊断一致性。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0872",
+    "title": "影像与鉴别-骶髂关节X线分期进展及MRI价值，结合类风湿关节炎要点鉴别",
+    "content": "X线随病程可由骶髂关节边缘模糊、软骨下骨质致密、关节间隙变窄进展至关节间隙融合；MRI可评估软骨退变、关节积液及周围软组织。鉴别时应注意类风湿关节炎常见晨僵更久（常>1小时）、多累及手足小关节对称受累、类风湿因子阳性等特征。",
+    "category": "diagnosis",
+    "tags": [
+      "骶髂关节X线分期",
+      "边缘模糊",
+      "软骨下骨质致密",
+      "关节间隙变窄",
+      "关节融合",
+      "MRI价值",
+      "类风湿关节炎鉴别",
+      "晨僵>1小时",
+      "对称小关节受累",
+      "类风湿因子阳性"
+    ],
+    "source": "临床诊断与鉴别文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_imaging_progression_and_mri_role_in_as_with_key_differential_points_against_rheumatoid_arthritis",
+      "imaging_points": [
+        "X线可见由轻到重分期改变",
+        "MRI可见软骨和积液软组织信息"
+      ],
+      "differential_points": [
+        "RA晨僵更久",
+        "RA多对称小关节受累",
+        "RA类风湿因子常阳性"
+      ],
+      "clinical_tip": "AS与RA鉴别建议采用“病程节律+受累分布+免疫指标+影像分期”四维综合法。"
+    }
   }
 ]
