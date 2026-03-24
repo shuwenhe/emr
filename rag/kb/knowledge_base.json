@@ -21983,5 +21983,657 @@
       ],
       "clinical_tip": "复查时保持相同采集条件可减少技术偏差，提高前后对比可信度。"
     }
+  },
+  {
+    "id": "KB-IR-TX-0527",
+    "title": "干预手段-韧针松解联合单极射频消融",
+    "content": "针对屈指肌腱狭窄性腱鞘炎，在腱鞘滑车硬结点采用韧针经皮直刺，垂直进针至病变腱鞘滑车层面，实施连续垂直刺切并结合痛点剥离进行松解；随后采用单极射频针灸进行射频消融，以进一步松解局部粘连组织。",
+    "category": "treatment",
+    "tags": [
+      "扳机指",
+      "狭窄性腱鞘炎",
+      "韧针",
+      "射频消融",
+      "松解"
+    ],
+    "source": "临床干预手段整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "release_trigger_finger_with_tough_needle_and_monopolar_rf_ablation",
+      "key_points": [
+        "定位腱鞘滑车硬结点并经皮直刺",
+        "垂直进针至病变滑车层面后连续刺切",
+        "结合痛点剥离以实现机械性松解",
+        "追加单极射频消融处理局部粘连组织"
+      ],
+      "procedure_note": "此类操作应由具备资质的临床医师在规范无菌条件下实施，并结合患者个体情况评估适应证与风险。",
+      "clinical_tip": "机械松解与能量消融联合可提高局部粘连处理完整性，术后需结合功能训练与随访评估。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0528",
+    "title": "治疗后观察30分钟复查红外热成像",
+    "content": "患者治疗后观察30分钟，未诉明显不适，遂行红外热成像复查。该流程有助于在短时窗内评估干预后局部热分布变化及患者耐受情况。",
+    "category": "follow_up",
+    "tags": [
+      "扳机指",
+      "治疗后观察",
+      "30分钟",
+      "红外热成像复查",
+      "安全性评估"
+    ],
+    "source": "临床随访流程整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "perform_30min_post_treatment_infrared_thermography_recheck",
+      "key_points": [
+        "治疗后进行至少30分钟观察",
+        "确认患者无明显不适后再复查",
+        "按同体位复查红外热成像图",
+        "结合症状与热分布变化进行疗效初评"
+      ],
+      "clinical_tip": "短期复查应与治疗前基线图像在相似环境和体位下对比，以减少技术偏差。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0529",
+    "title": "治疗方法-射频针灸治疗腱鞘炎",
+    "content": "射频针灸可用于腱鞘炎的局部干预，通过热效应与组织调控作用，辅助缓解疼痛、减轻炎性反应并改善局部粘连状态。临床应用时应结合病变部位、症状程度与既往治疗反应进行个体化方案制定。",
+    "category": "treatment",
+    "tags": [
+      "腱鞘炎",
+      "射频针灸",
+      "疼痛缓解",
+      "粘连松解",
+      "个体化治疗"
+    ],
+    "source": "临床治疗经验整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "treat_tenosynovitis_with_radiofrequency_acupuncture",
+      "key_points": [
+        "明确病变部位后实施精准干预",
+        "利用射频热效应辅助减轻疼痛与炎症",
+        "结合功能状态评估疗效变化",
+        "必要时与其他松解或康复手段联合"
+      ],
+      "procedure_note": "应由具备相关资质的临床医师在规范条件下操作，并注意术中术后不良反应监测。",
+      "clinical_tip": "治疗后建议进行阶段性功能评估与随访，以优化后续干预方案。"
+    }
+  },
+  {
+    "id": "KB-IR-BM-0530",
+    "title": "红外热成像体位-治疗后正位掌面",
+    "content": "治疗后正位掌面热成像用于记录干预后掌面热分布变化，重点评估患侧与健侧温差及局部高温区范围变化，为疗效判定提供影像学依据。",
+    "category": "basic_concept",
+    "tags": [
+      "治疗后",
+      "正位掌面",
+      "红外热成像",
+      "疗效评估",
+      "扳机指"
+    ],
+    "source": "临床热成像评估要点整理",
+    "source_type": "expert_consensus",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "capture_post_treatment_palmar_ap_thermal_image",
+      "key_points": [
+        "治疗后在相对固定时间窗内完成采集",
+        "采用与治疗前一致的正位掌面体位",
+        "对比患健侧温差及局部热异常范围",
+        "与症状改善情况联合判断短期疗效"
+      ],
+      "clinical_tip": "治疗前后图像对比应尽量保持相同环境与参数设置，以提升结果可比性。"
+    }
+  },
+  {
+    "id": "KB-IR-BM-0531",
+    "title": "红外热成像体位-治疗后正位背面",
+    "content": "治疗后正位背面热成像用于观察干预后手背侧热分布变化，重点评估患侧与健侧温差、局部高温区范围及热异常改善趋势，可与治疗前同体位图像进行对照分析。",
+    "category": "basic_concept",
+    "tags": [
+      "治疗后",
+      "正位背面",
+      "红外热成像",
+      "疗效评估",
+      "扳机指"
+    ],
+    "source": "临床热成像评估要点整理",
+    "source_type": "expert_consensus",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "capture_post_treatment_dorsal_ap_thermal_image",
+      "key_points": [
+        "治疗后在固定时间窗内完成复查采集",
+        "保持与治疗前一致的正位背面体位",
+        "比较患健侧温差及背侧局部热异常范围",
+        "结合临床症状变化综合评估疗效"
+      ],
+      "clinical_tip": "前后图像对比应尽量统一环境温度与采集参数，以提高结果可比性。"
+    }
+  },
+  {
+    "id": "KB-IR-BM-0532",
+    "title": "红外热成像体位-治疗后侧位尺侧面",
+    "content": "治疗后侧位尺侧面热成像用于评估干预后手部尺侧软组织热分布变化，可与治疗前同体位图像对照，观察局部热异常范围及温差变化趋势，为疗效评估提供补充依据。",
+    "category": "basic_concept",
+    "tags": [
+      "治疗后",
+      "侧位尺侧面",
+      "红外热成像",
+      "疗效评估",
+      "扳机指"
+    ],
+    "source": "临床热成像评估要点整理",
+    "source_type": "expert_consensus",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "capture_post_treatment_ulnar_lateral_thermal_image",
+      "key_points": [
+        "治疗后在固定时间窗进行复查采集",
+        "采用与治疗前一致的侧位尺侧面体位",
+        "比较患健侧及前后温差变化",
+        "结合症状改善情况综合评估疗效"
+      ],
+      "clinical_tip": "尺侧面复查可补充掌面、背面与桡侧面信息，提升热分布评估完整性。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0533",
+    "title": "治疗后即刻红外热成像图改变",
+    "content": "治疗后即刻红外热成像可见局部热分布变化，提示干预后微循环与炎性反应状态发生早期改变。该时点图像可作为短期疗效观察的重要依据，并与治疗前及后续复查图像联合评估。",
+    "category": "follow_up",
+    "tags": [
+      "治疗后即刻",
+      "红外热成像",
+      "热分布改变",
+      "短期疗效",
+      "扳机指"
+    ],
+    "source": "临床随访影像要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "assess_immediate_post_treatment_thermal_change",
+      "key_points": [
+        "治疗后尽快完成红外热成像采集",
+        "观察局部高温区范围与温差变化",
+        "与治疗前基线图像进行同体位对照",
+        "结合症状主诉判断早期反应"
+      ],
+      "clinical_tip": "即刻图像可反映早期变化趋势，但疗效判断仍需结合后续时间点复查结果。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0534",
+    "title": "复诊随访-治疗后一周症状明显改善",
+    "content": "治疗后一周患者复诊，主诉右手掌指关节疼痛较前明显缓解，活动受限较前明显改善，整体功能较前好转。该结果提示短期干预后临床症状与功能状态均有积极变化。",
+    "category": "follow_up",
+    "tags": [
+      "复诊",
+      "一周随访",
+      "疼痛缓解",
+      "活动改善",
+      "扳机指"
+    ],
+    "source": "临床复诊记录整理",
+    "source_type": "case_followup",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_one_week_followup_symptom_improvement",
+      "key_points": [
+        "记录复诊时间点为治疗后1周",
+        "疼痛程度较治疗前明显下降",
+        "活动受限情况较前改善",
+        "综合判断短期疗效为好转"
+      ],
+      "clinical_tip": "建议继续进行阶段性随访，结合症状评分与功能评估量表动态观察疗效稳定性。"
+    }
+  },
+  {
+    "id": "KB-IR-CS-0535",
+    "title": "病例背景-长期劳作后屈指肌腱鞘炎急性发作",
+    "content": "本例患者有长期劳作史，后出现屈指肌腱鞘炎急性发作，主要表现为右手第一掌指关节急性疼痛及屈伸活动受限。病程特点提示慢性劳损基础上的急性炎症加重。",
+    "category": "case_study",
+    "tags": [
+      "扳机指",
+      "长期劳作",
+      "急性发作",
+      "第一掌指关节",
+      "病例背景"
+    ],
+    "source": "病例分析整理",
+    "source_type": "case_report",
+    "priority": "high",
+    "structured_advice": {
+      "action": "identify_acute_flare_on_chronic_overuse_trigger_finger",
+      "key_points": [
+        "存在长期劳作与重复使用病史",
+        "急性期出现第一掌指关节疼痛加重",
+        "伴随屈伸活动受限",
+        "符合慢性劳损基础上急性发作特征"
+      ],
+      "clinical_tip": "问诊中应重点追溯长期手部负荷史，以辅助判断急慢性叠加的病理过程。"
+    }
+  },
+  {
+    "id": "KB-IR-CL-0536",
+    "title": "热成像表现-患侧第一掌指关节及掌背部充血性高温",
+    "content": "在正常情况下，第一掌指关节位于肢体末梢、缺乏较大动脉血管，局部温度通常相对偏低。本例中右手第一掌指关节周围及掌背部较左侧出现充血性高温改变，提示局部炎性反应与微循环异常。",
+    "category": "clinical_presentation",
+    "tags": [
+      "红外热成像",
+      "高温改变",
+      "充血",
+      "第一掌指关节",
+      "掌背部"
+    ],
+    "source": "病例分析整理",
+    "source_type": "case_report",
+    "priority": "high",
+    "structured_advice": {
+      "action": "recognize_hyperthermic_pattern_around_first_mcp",
+      "key_points": [
+        "末梢关节常态温度相对偏低",
+        "患侧较健侧出现局部高温区",
+        "高温区分布于第一掌指关节周围及掌背部",
+        "支持炎性与充血性改变判断"
+      ],
+      "clinical_tip": "解读热成像时应以患健侧对照为核心，避免仅凭单侧绝对温度下结论。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0537",
+    "title": "诊断要点-红外热成像结合病史的辅助诊断价值",
+    "content": "结合长期劳作病史与局部热成像异常分布，红外热成像可对屈指肌腱鞘炎提供辅助诊断信息，并较好显示疼痛相关区域范围，有助于提升病灶定位与临床判断一致性。",
+    "category": "diagnosis",
+    "tags": [
+      "辅助诊断",
+      "红外热成像",
+      "病史结合",
+      "病灶定位",
+      "疼痛范围"
+    ],
+    "source": "病例分析整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "use_thermal_imaging_with_history_for_diagnostic_support",
+      "key_points": [
+        "将长期劳作史纳入诊断链条",
+        "利用热成像识别异常热分布区域",
+        "将热区与疼痛主诉范围进行匹配",
+        "作为体征与影像间的桥接信息"
+      ],
+      "clinical_tip": "红外热成像适合作为临床决策的补充证据，应与体格检查及病史共同解释。"
+    }
+  },
+  {
+    "id": "KB-IR-BM-0538",
+    "title": "影像互补价值-弥补X线与CT对软组织功能变化显示不足",
+    "content": "在本类病例中，红外热成像对局部炎性热改变与疼痛范围的可视化能力，可在一定程度上弥补X线、CT等结构性影像对软组织功能状态显示不足的问题，从而形成更完整的评估框架。",
+    "category": "basic_concept",
+    "tags": [
+      "影像互补",
+      "红外热成像",
+      "X线",
+      "CT",
+      "软组织评估"
+    ],
+    "source": "病例分析整理",
+    "source_type": "expert_consensus",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "integrate_thermal_imaging_with_structural_imaging",
+      "key_points": [
+        "X线与CT偏重骨性与结构信息",
+        "红外热成像补充炎性与功能性信息",
+        "多模态联合可提升评估完整性",
+        "避免单一影像结果导致判断偏差"
+      ],
+      "clinical_tip": "建议将红外热成像与常规影像检查协同使用，以提高临床解释力。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0539",
+    "title": "疗效评估-区域测温对比针刀治疗前后变化",
+    "content": "运用热像仪区域测温功能对充血性高温区域进行温度检测，并对针刀治疗前后进行对比，可实现对局部热异常变化的量化观察，从而更精准地评估疗效。",
+    "category": "follow_up",
+    "tags": [
+      "热像仪",
+      "区域测温",
+      "针刀治疗",
+      "前后对比",
+      "疗效评估"
+    ],
+    "source": "临床热成像评估方法整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "quantitatively_compare_regional_temperature_before_and_after_needle_knife_treatment",
+      "key_points": [
+        "锁定充血性高温区域进行定点测温",
+        "记录治疗前基线温度与分布范围",
+        "在治疗后同条件下重复区域测温",
+        "通过前后温度差与热区变化评估疗效"
+      ],
+      "clinical_tip": "为保证可比性，应尽量统一采集环境、体位与测温区域边界定义。"
+    }
+  },
+  {
+    "id": "KB-IR-BM-0540",
+    "title": "病理机制-屈指肌腱狭窄性腱鞘炎的慢性无菌性炎症基础",
+    "content": "屈指肌腱狭窄性腱鞘炎的主要病理机制为慢性无菌性炎症，进而导致腱鞘滑车局部变性、粘连与狭窄，最终影响手指屈伸活动。",
+    "category": "basic_concept",
+    "tags": [
+      "扳机指",
+      "病理机制",
+      "慢性无菌性炎症",
+      "滑车狭窄",
+      "粘连"
+    ],
+    "source": "临床机制与文献经验整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "understand_pathogenesis_of_stenosing_flexor_tenosynovitis",
+      "key_points": [
+        "慢性无菌性炎症是核心病理基础",
+        "滑车局部可出现变性与纤维化",
+        "粘连与狭窄导致肌腱滑动受阻",
+        "临床表现为手指屈伸受限与疼痛"
+      ],
+      "clinical_tip": "治疗策略应围绕解除局部机械性狭窄与粘连展开。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0541",
+    "title": "治疗原则-以安全有效方式解除滑车局部狭窄",
+    "content": "屈指肌腱狭窄性腱鞘炎治疗关键在于采用尽可能简单、有效且安全的方法，解除腱鞘滑车局部狭窄病变，从而恢复肌腱滑动与手指功能。",
+    "category": "treatment",
+    "tags": [
+      "治疗原则",
+      "安全性",
+      "有效性",
+      "滑车狭窄",
+      "功能恢复"
+    ],
+    "source": "临床机制与文献经验整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "prioritize_safe_and_effective_release_of_pulley_stenosis",
+      "key_points": [
+        "明确局部狭窄病变是治疗靶点",
+        "优先选择创伤较小且可控的方式",
+        "以恢复肌腱滑动与功能为目标",
+        "兼顾疗效与并发症风险控制"
+      ],
+      "clinical_tip": "治疗前应充分评估病变程度与患者功能需求，制定个体化方案。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0542",
+    "title": "治疗进展-中医小针刀微创松解在扳机指中的应用价值",
+    "content": "中医小针刀微创松解疗法为屈指肌腱狭窄性腱鞘炎提供了有效路径。近年来随着中医微创技术发展，国内临床对该病治疗进行了较多有意义探索，并积累了可借鉴的经验。",
+    "category": "treatment",
+    "tags": [
+      "小针刀",
+      "微创松解",
+      "中医微创",
+      "治疗进展",
+      "经验总结"
+    ],
+    "source": "临床机制与文献经验整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "apply_minimally_invasive_needle_knife_release_when_indicated",
+      "key_points": [
+        "小针刀可用于局部狭窄松解",
+        "临床已积累一定实践经验",
+        "技术发展提升了治疗可及性",
+        "需在规范操作与适应证前提下应用"
+      ],
+      "clinical_tip": "小针刀治疗应重视术前评估、术中精准定位与术后功能管理。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0543",
+    "title": "并发症争议-闭合微创切开存在肌腱与神经血管损伤风险",
+    "content": "部分学者认为微创闭合切开手术可能增加屈指肌腱切割损伤及肌腱旁血管神经损伤等并发症风险，提示该类技术在推广应用中需严格控制操作质量与适应证。",
+    "category": "treatment",
+    "tags": [
+      "并发症",
+      "闭合切开",
+      "肌腱损伤",
+      "神经血管损伤",
+      "风险控制"
+    ],
+    "source": "临床机制与文献经验整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "recognize_complication_risks_in_closed_minimally_invasive_release",
+      "key_points": [
+        "关注肌腱切割损伤风险",
+        "关注邻近血管神经损伤风险",
+        "术式选择需权衡风险与收益",
+        "加强围术期风险告知与监测"
+      ],
+      "clinical_tip": "当解剖层次不清或风险较高时，应谨慎选择术式并考虑替代方案。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0544",
+    "title": "并发症原因总结-解剖不熟、技术不熟与适应证选择不当",
+    "content": "综合多数经验，引发上述不良并发症的主要原因包括：术者对屈指肌腱腱鞘滑车局部解剖结构不熟悉、微创松解技术掌握不熟练，以及适应证选择不当。",
+    "category": "treatment",
+    "tags": [
+      "并发症原因",
+      "解剖熟悉度",
+      "技术熟练度",
+      "适应证",
+      "质量控制"
+    ],
+    "source": "临床机制与文献经验整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "prevent_complications_by_training_and_indication_selection",
+      "key_points": [
+        "强化局部解剖认知与术前定位",
+        "提升微创松解技术规范化训练",
+        "严格把握适应证与禁忌证",
+        "通过标准流程降低并发症发生"
+      ],
+      "clinical_tip": "并发症预防的核心在于术者能力建设与病例筛选双重把关。"
+    }
+  },
+  {
+    "id": "KB-IR-BM-0545",
+    "title": "操作基础-全面掌握屈指肌腱及周围组织解剖层次",
+    "content": "实施屈指肌腱狭窄性腱鞘炎微创松解前，应全面细致掌握屈指肌腱及周围组织的解剖层次与结构关系，为安全入路设计与风险规避提供基础。",
+    "category": "basic_concept",
+    "tags": [
+      "扳机指",
+      "解剖层次",
+      "结构关系",
+      "术前准备",
+      "风险规避"
+    ],
+    "source": "微创松解技术要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "master_flexor_tendon_and_peritendinous_anatomy_before_release",
+      "key_points": [
+        "熟悉屈指肌腱及腱鞘滑车解剖",
+        "识别邻近血管神经走行",
+        "明确安全操作层面与入路",
+        "将解剖认知转化为术中风险控制"
+      ],
+      "clinical_tip": "解剖认知不足是并发症高风险因素，应作为术者准入前提。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0546",
+    "title": "治疗规范-严格把握微创松解疗法适应证",
+    "content": "屈指肌腱狭窄性腱鞘炎微创松解疗法应严格掌握适应证，避免在不恰当病程阶段或不匹配病例中盲目实施，以确保疗效和安全性。",
+    "category": "treatment",
+    "tags": [
+      "适应证",
+      "微创松解",
+      "病例筛选",
+      "规范治疗",
+      "安全性"
+    ],
+    "source": "微创松解技术要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "select_indications_strictly_for_minimally_invasive_release",
+      "key_points": [
+        "术前完成症状与功能分级评估",
+        "结合影像与体征确认靶病变",
+        "排除不适宜微创松解的情况",
+        "以病例筛选降低不良事件风险"
+      ],
+      "clinical_tip": "适应证把握不当会直接降低疗效并增加并发症发生概率。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0547",
+    "title": "技术要求-熟练掌握专用针刀器械与规范化操作",
+    "content": "术者需熟练掌握专用微创松解针、刀具性能及规范化操作方法，包括进针角度、切开深度与力学控制，以提升操作稳定性与可重复性。",
+    "category": "treatment",
+    "tags": [
+      "针刀器械",
+      "规范化操作",
+      "技术熟练度",
+      "操作稳定性",
+      "微创治疗"
+    ],
+    "source": "微创松解技术要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "standardize_tool_handling_and_operational_technique",
+      "key_points": [
+        "掌握专用器械适用场景与边界",
+        "规范进针方向与层次控制",
+        "统一切开力度与节奏",
+        "通过训练提升操作一致性"
+      ],
+      "clinical_tip": "器械熟练度是疗效一致性与并发症控制的重要保障。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0548",
+    "title": "术式要点-术前定位与沿肌腱正中平行连续松解",
+    "content": "术前应准确定位病变滑车组织；术中按平行于屈指肌腱走行方向、沿肌腱正中连续切开松解，对狭窄病变滑车组织进行充分释放，以实现有效减压与功能恢复。",
+    "category": "treatment",
+    "tags": [
+      "术前定位",
+      "平行切开",
+      "肌腱正中",
+      "连续松解",
+      "滑车释放"
+    ],
+    "source": "微创松解技术要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "perform_parallel_midline_continuous_release_after_precise_localization",
+      "key_points": [
+        "术前定位病变滑车具体范围",
+        "沿肌腱走行方向平行操作",
+        "沿肌腱正中连续切开松解",
+        "确保狭窄段释放充分且不过度损伤"
+      ],
+      "clinical_tip": "精准定位与方向控制是获得彻底松解效果的核心技术环节。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0549",
+    "title": "疗效与安全-规范微创松解可达高手术效益并减少并发症",
+    "content": "在严格规范操作前提下，微创松解疗法可达到与传统切开手术相当甚至更高的松解疗效，同时降低常见不良并发症发生风险，实现安全有效治疗目标。",
+    "category": "treatment",
+    "tags": [
+      "疗效比较",
+      "并发症预防",
+      "安全有效",
+      "微创松解",
+      "传统手术"
+    ],
+    "source": "微创松解技术要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "achieve_high_release_effectiveness_with_complication_prevention",
+      "key_points": [
+        "规范流程可提升松解完整性",
+        "疗效可与传统切开术相当或更优",
+        "并发症风险可通过标准化显著降低",
+        "以功能恢复与安全性作为双重终点"
+      ],
+      "clinical_tip": "疗效与安全并重应作为微创松解质量控制的核心评价标准。"
+    }
+  },
+  {
+    "id": "KB-IR-BM-0550",
+    "title": "病名解析-腰椎间盘突出症",
+    "content": "腰椎间盘突出症是由于腰椎间盘退变及外力损伤等因素，导致纤维环部分破裂，髓核从破裂处向外膨出，压迫脊神经根或马尾神经，从而引发以腰腿痛及神经根症状为主要特征的病症。",
+    "category": "basic_concept",
+    "tags": [
+      "腰椎间盘突出症",
+      "病名解析",
+      "纤维环破裂",
+      "髓核突出",
+      "神经根压迫"
+    ],
+    "source": "临床基础知识整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "explain_lumbar_disc_herniation_pathoanatomy_and_symptom_basis",
+      "key_points": [
+        "退变与外力损伤可共同诱发病变",
+        "纤维环破裂后髓核可向外突出",
+        "突出组织可压迫神经根或马尾神经",
+        "常见表现为腰腿痛与神经根相关症状"
+      ],
+      "clinical_tip": "诊断时应结合症状分布、神经体征与影像学结果综合判断受压节段与严重程度。"
+    }
+  },
+  {
+    "id": "KB-IR-CL-0551",
+    "title": "临床表现-腰椎间盘突出症的腰部疼痛特征",
+    "content": "腰椎间盘突出症患者绝大多数可出现腰背痛，发生率约为91%。常在外伤、受凉或过度疲劳后出现腰部钝痛或酸痛，影响日常生活与工作。经休息后症状可减轻，劳动后又可复发，呈时轻时重、反复迁延。病程经数周、数月或更久后，部分患者逐渐出现一侧下肢放射性神经痛。",
+    "category": "clinical_presentation",
+    "tags": [
+      "腰椎间盘突出症",
+      "临床表现",
+      "腰背痛",
+      "放射痛",
+      "反复发作"
+    ],
+    "source": "临床表现要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "identify_low_back_pain_pattern_in_lumbar_disc_herniation",
+      "key_points": [
+        "腰背痛在本病中发生率高",
+        "常由外伤受凉或劳累诱发",
+        "休息可缓解、劳动后易复发",
+        "病程进展可出现单侧下肢放射痛"
+      ],
+      "clinical_tip": "当腰痛反复并逐渐伴随下肢放射痛时，应尽早评估神经根受压可能并完善影像检查。"
+    }
   }
 ]
