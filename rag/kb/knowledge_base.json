@@ -26054,5 +26054,151 @@
       ],
       "clinical_tip": "对于强直性脊柱炎患者，介入治疗主要用于症状控制和功能改善，需与基础抗炎及免疫调节治疗协同，避免替代系统性规范治疗。"
     }
+  },
+  {
+    "id": "KB-IR-CS-0663",
+    "title": "典型病例-负重弯腰后急性腰骶痛伴左下肢酸麻5天",
+    "content": "患者耿某，女性，47岁。负重弯腰时诱发腰骶部疼痛并出现活动受限及左下肢酸麻感，病程5天。该起病方式提示机械性负荷相关损伤背景，临床表现以急性腰骶痛合并左下肢感觉异常为主。",
+    "category": "case_study",
+    "tags": [
+      "典型病例",
+      "耿某",
+      "急性起病",
+      "负重弯腰诱发",
+      "左下肢酸麻"
+    ],
+    "source": "临床典型病例（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_case_of_acute_lumbosacral_pain_and_left_leg_paresthesia_after_load_bending",
+      "patient_profile": {
+        "age": 47,
+        "gender": "female",
+        "chief_complaint": "腰骶部疼痛活动受限及左下肢酸麻5天"
+      },
+      "history_points": [
+        "负重弯腰诱发",
+        "急性起病",
+        "活动受限明显"
+      ],
+      "key_points": [
+        "机械性诱因明确",
+        "左下肢感觉症状并存",
+        "需结合查体判断责任节段"
+      ],
+      "clinical_tip": "急性负重诱发的腰骶痛伴单侧下肢麻感，应尽早完善神经系统和影像学评估，以区分单纯软组织损伤与神经根受累。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0664",
+    "title": "专科查体-腰椎局部压痛及骶髂关节受累体征",
+    "content": "专科检查示腰椎生理曲度变浅，腰椎肌肉紧张；L4/5棘间至L5/S1左侧旁开1.5cm处压痛并向臀部放射。双侧骶髂关节均有压痛，右侧更明显；双侧梨状肌无压痛。上述表现提示下腰椎局部机械性应力反应明显，并可能合并骶髂关节相关疼痛成分。",
+    "category": "diagnosis",
+    "tags": [
+      "腰椎生理曲度变浅",
+      "L4/5-L5/S1压痛",
+      "旁开压痛放射臀部",
+      "骶髂关节压痛",
+      "梨状肌阴性"
+    ],
+    "source": "专科查体（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_local_lumbar_and_sacroiliac_tenderness_pattern_in_specialist_exam",
+      "exam_findings": [
+        "腰椎曲度变浅",
+        "腰椎肌肉紧张",
+        "L4/5至L5/S1左侧旁开压痛",
+        "双侧骶髂关节压痛右侧较重",
+        "双侧梨状肌无压痛"
+      ],
+      "clinical_meaning": [
+        "提示腰椎局部应力性疼痛",
+        "提示可能伴骶髂关节受累",
+        "排除明显梨状肌源性疼痛倾向"
+      ],
+      "key_points": [
+        "压痛定位明确",
+        "骶髂关节体征阳性",
+        "疼痛来源可能为复合机制"
+      ],
+      "clinical_tip": "腰骶痛患者若同时存在腰椎旁开压痛和骶髂关节压痛，应综合评估主要疼痛来源，避免单一病因解释。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0665",
+    "title": "神经功能查体-轻度神经根刺激征伴锥体束体征不对称",
+    "content": "患者鞍区及双下肢皮肤感觉未见明显减弱。直腿抬高试验左60°并加强试验阳性，右侧直腿抬高70°且加强试验阴性，提示左侧神经根刺激征存在。双侧四字试验均阳性。左、右足拇背伸肌力均为V级；左、右膝腱反射及跟腱反射对称引出，双侧巴宾斯基征阴性。左霍夫曼征阳性、右侧阴性，提示需进一步结合中枢神经体征进行动态评估。双侧足背动脉搏动可触及，末梢血运尚可。",
+    "category": "diagnosis",
+    "tags": [
+      "直腿抬高试验",
+      "加强试验左阳性",
+      "四字试验阳性",
+      "霍夫曼征不对称",
+      "反射对称"
+    ],
+    "source": "神经系统查体（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_neurological_exam_with_left_root_irritation_and_asymmetric_hoffmann_sign",
+      "neurological_findings": [
+        "左侧神经根刺激征阳性",
+        "感觉未见明显减弱",
+        "肌力基本保留",
+        "腱反射对称",
+        "巴宾斯基征阴性",
+        "左霍夫曼征阳性"
+      ],
+      "assessment_focus": [
+        "评估左侧神经根受刺激程度",
+        "关注锥体束相关体征是否持续",
+        "结合影像排查上位中枢因素"
+      ],
+      "key_points": [
+        "神经刺激征存在但功能损害轻",
+        "霍夫曼征不对称需警惕",
+        "外周循环状态尚可"
+      ],
+      "clinical_tip": "若出现霍夫曼征不对称等上位运动神经元提示，应结合颈胸段神经系统评估，避免仅以腰椎病变解释全部体征。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0666",
+    "title": "综合评估-机械性腰骶痛伴左侧神经根刺激与骶髂关节疼痛共存",
+    "content": "综合病史与查体，患者表现为负重诱发的机械性腰骶痛，伴左侧神经根刺激征和双侧骶髂关节压痛（右侧较重）。当前感觉与肌力总体保留、反射基本对称，提示神经功能损害程度相对轻，但症状已影响活动。该类复合体征提示疼痛来源可能同时涉及下腰椎节段和骶髂关节区域，需结合影像进一步明确责任结构并制定分层治疗方案。",
+    "category": "diagnosis",
+    "tags": [
+      "机械性腰骶痛",
+      "左侧神经根刺激",
+      "骶髂关节疼痛",
+      "复合疼痛来源",
+      "综合评估"
+    ],
+    "source": "综合评估意见（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "integrate_history_and_exam_for_mixed_lumbosacral_and_sacroiliac_pain_pattern",
+      "integrated_points": [
+        "负重诱发机制明确",
+        "左侧神经根刺激征存在",
+        "骶髂关节体征阳性",
+        "神经功能损害总体较轻"
+      ],
+      "clinical_implications": [
+        "疼痛来源可能为多结构参与",
+        "需影像学细化责任结构",
+        "治疗应兼顾减压与稳定/消炎策略"
+      ],
+      "key_points": [
+        "症状与体征呈复合型",
+        "短病程但功能受限明显",
+        "适合分层评估后个体化治疗"
+      ],
+      "clinical_tip": "对复合型腰骶痛病例应避免单一节段导向，建议结合腰椎与骶髂关节评估结果制定多维干预方案。"
+    }
   }
 ]
