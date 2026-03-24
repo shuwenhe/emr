@@ -23649,5 +23649,31 @@
       ],
       "clinical_tip": "外伤史可提示病变诱因，但诊断需与客观体征和影像证据相互印证。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0592",
+    "title": "鉴别诊断-腰椎间盘突出症与腰椎骨关节病",
+    "content": "腰椎骨关节病多表现为慢性腰痛、僵硬及活动后加重，影像学常见椎体边缘骨赘、关节突关节退变及椎间隙变窄。腰椎间盘突出症则更常伴节段性神经根受压体征与放射痛。结合症状特点、神经查体与影像学表现可进行有效鉴别。",
+    "category": "diagnosis",
+    "tags": [
+      "鉴别诊断",
+      "腰椎骨关节病",
+      "腰椎间盘突出症",
+      "骨赘",
+      "关节突退变"
+    ],
+    "source": "临床鉴别要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "differentiate_lumbar_disc_herniation_from_lumbar_osteoarthropathy",
+      "key_points": [
+        "骨关节病以慢性机械性腰痛为主",
+        "影像多见骨赘与小关节退变",
+        "腰突更常见神经根放射痛和神经体征",
+        "应综合病史、查体与影像分层判断"
+      ],
+      "clinical_tip": "若神经根体征不典型而退变影像明显，应优先考虑腰椎骨关节病相关疼痛来源。"
+    }
   }
 ]
