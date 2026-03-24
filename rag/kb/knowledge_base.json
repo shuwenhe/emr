@@ -29766,5 +29766,182 @@
       ],
       "clinical_tip": "影像提示多节段狭窄时，临床决策应优先锁定症状最匹配责任节段，避免过度泛化干预。"
     }
+  },
+  {
+    "id": "KB-IR-CS-0756",
+    "title": "既往史-10年前腰椎间盘突出急性发作伴左下肢根性症状经保守治疗缓解",
+    "content": "患者10年前因腰椎间盘突出症急性发作于本院治疗，当时以左下肢疼痛麻木等根性症状为主，严重影响生活。经系统保守治疗后症状逐渐缓解并消失，提示既往保守治疗曾获得较好短中期效果。",
+    "category": "case_study",
+    "tags": [
+      "既往史",
+      "10年前急性发作",
+      "腰椎间盘突出症",
+      "左下肢疼痛麻木",
+      "根性症状",
+      "保守治疗有效"
+    ],
+    "source": "病史记录（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_past_acute_lumbar_disc_herniation_with_left_radicular_symptoms_and_good_response_to_conservative_treatment",
+      "history_points": [
+        "10年前急性发作",
+        "左下肢疼痛麻木为主",
+        "系统保守治疗后症状消失"
+      ],
+      "clinical_significance": [
+        "提示曾存在明确神经根受累表型",
+        "保守治疗有效支持分层治疗思路",
+        "可作为本次复发评估与疗效对照基线"
+      ],
+      "key_points": [
+        "既往发作重在左侧根性症状",
+        "曾严重影响日常生活功能",
+        "既往缓解史对当前治疗策略有参考价值"
+      ],
+      "clinical_tip": "复发患者应对比既往发作的侧别、症状谱和疗效路径，以识别病程演变及治疗反应变化。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0757",
+    "title": "既往腰椎MRI回顾-L4/5与L5/S1椎间盘突出伴黄韧带增厚和椎管狭窄",
+    "content": "据回忆，患者既往腰椎MRI提示L4/5、L5/S1椎间盘突出，伴黄韧带增厚及椎管狭窄。该历史影像信息与当时明显左下肢根性症状相吻合，提示下腰椎节段曾为主要责任区域。",
+    "category": "diagnosis",
+    "tags": [
+      "既往MRI",
+      "L4/5椎间盘突出",
+      "L5/S1椎间盘突出",
+      "黄韧带增厚",
+      "椎管狭窄",
+      "责任节段"
+    ],
+    "source": "既往影像回顾（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_historical_mri_showing_l4_5_l5_s1_herniation_ligamentum_flavum_hypertrophy_and_spinal_canal_stenosis",
+      "imaging_findings": [
+        "L4/5椎间盘突出",
+        "L5/S1椎间盘突出",
+        "黄韧带增厚",
+        "椎管狭窄"
+      ],
+      "clinical_significance": [
+        "提示下腰椎多因素狭窄基础长期存在",
+        "与既往根性症状有影像学对应关系",
+        "为本次复诊判断病变延续或进展提供参照"
+      ],
+      "key_points": [
+        "既往影像已显示结构性狭窄因素",
+        "L4/5与L5/S1为重点节段",
+        "需与本次复查影像纵向比较"
+      ],
+      "clinical_tip": "回顾性影像信息即便来自病史记忆，也应在病历中单独标注并在复查时重点核对节段变化。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0758",
+    "title": "复诊经过-7天前劳累后腰痛再发",
+    "content": "患者7天前劳累后再次出现腰痛并复诊。该诱因与时间窗提示机械负荷相关复发特征，需结合神经体征和影像结果评估是否由软组织损伤主导或结构性病变再激惹。",
+    "category": "follow_up",
+    "tags": [
+      "复诊",
+      "7天前",
+      "劳累后",
+      "腰痛复发",
+      "机械负荷诱发"
+    ],
+    "source": "复诊病程记录（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_recurrence_of_low_back_pain_after_exertion_within_seven_days_before_revisit",
+      "timeline": [
+        "7天前劳累后腰痛再发",
+        "因症状复现来院复诊"
+      ],
+      "clinical_significance": [
+        "符合劳损相关再激惹模式",
+        "提示需评估近期负荷暴露与功能耐受",
+        "有助于区分急性神经受压与软组织主导疼痛"
+      ],
+      "key_points": [
+        "存在明确诱因和发病时间",
+        "复发背景下需动态比较神经体征",
+        "后续干预应包含负荷管理"
+      ],
+      "clinical_tip": "记录复发诱因和时间窗可显著提升病因分层准确性，并帮助制定更可执行的二级预防方案。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0759",
+    "title": "红外热成像-下肢无明显温差而腰部局部高温差提示软组织损伤为主",
+    "content": "复诊时红外热成像未提示明显下肢温差改变，可见腰部局部高温差，提示以局部软组织损伤为主。该结果降低了明显单侧神经根急性受压导致远端温差异常的可能性。",
+    "category": "diagnosis",
+    "tags": [
+      "红外热成像",
+      "下肢无明显温差",
+      "腰部局部高温差",
+      "软组织损伤",
+      "复诊检查"
+    ],
+    "source": "红外热成像检查（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_thermography_showing_no_significant_lower_limb_temperature_difference_but_localized_lumbar_hyperthermic_difference",
+      "exam_findings": [
+        "下肢未见明显温差改变",
+        "腰部局部高温差"
+      ],
+      "clinical_significance": [
+        "支持局部软组织损伤成分占主导",
+        "不支持明显下肢侧别温度异常模式",
+        "可与神经查体联合用于病因分层"
+      ],
+      "key_points": [
+        "热成像结果偏向局部病变",
+        "需结合疼痛分布与功能受限综合判断",
+        "可作为后续治疗前后对照指标"
+      ],
+      "clinical_tip": "热成像应与症状和神经体征联合解读，避免将单一温差变化直接等同于神经受压程度。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0760",
+    "title": "复查腰椎MRI-骨质增生骨质疏松倾向及L4轻度前滑移（原始记录后续条目截断）",
+    "content": "复查腰椎MRI提示：①腰椎骨质增生，考虑存在骨质疏松，L4椎体略前滑移；②部分椎……（用户原始文本在此处截断，后续影像描述未完整提供）。当前仅据已提供信息记录，待补充完整影像原文后再细化分条。",
+    "category": "diagnosis",
+    "tags": [
+      "复查MRI",
+      "腰椎骨质增生",
+      "骨质疏松倾向",
+      "L4椎体前滑移",
+      "原始记录截断",
+      "待补充"
+    ],
+    "source": "复查腰椎MRI记录（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_partial_followup_mri_information_with_explicit_truncation_marker_for_data_integrity",
+      "imaging_findings": [
+        "腰椎骨质增生",
+        "考虑骨质疏松",
+        "L4椎体略前滑移",
+        "②部分椎（文本截断）"
+      ],
+      "data_quality_notes": [
+        "原始输入在②条处未完整结束",
+        "未补全文本前不对缺失内容作推断"
+      ],
+      "key_points": [
+        "已知影像结果提示退变与稳定性下降并存",
+        "该条目为阶段性占位记录以防信息丢失",
+        "待补充原文后建议拆分为更细分影像条目"
+      ],
+      "clinical_tip": "当原始病历文本不完整时，应显式标注截断位置并暂停推断，确保知识库可追溯性与准确性。"
+    }
   }
 ]
