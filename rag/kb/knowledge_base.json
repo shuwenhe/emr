@@ -37071,5 +37071,134 @@
       ],
       "clinical_tip": "症状分布不典型或体征不一致时，应主动扩展鉴别诊断范围。"
     }
+  },
+  {
+    "id": "KB-IR-CS-1026",
+    "title": "典型病例-女性患者双腕肿胀伴双手拇示指麻木1周，右侧更重",
+    "content": "患者魏某，女。主诉双腕关节肿胀伴双手拇指、示指麻木加重1周，其中右侧症状尤为明显。",
+    "category": "case_study",
+    "tags": [
+      "典型病例",
+      "女性",
+      "双腕关节肿胀",
+      "双手拇示指麻木",
+      "病程1周",
+      "右侧更重"
+    ],
+    "source": "腕管综合征病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_cts_case_of_female_patient_with_bilateral_wrist_swelling_and_thumb_index_numbness_worse_on_right",
+      "history_points": [
+        "双侧受累",
+        "右侧更重",
+        "病程1周"
+      ],
+      "clinical_tip": "病例记录建议明确双侧对比和主症侧别，便于后续疗效跟踪。"
+    }
+  },
+  {
+    "id": "KB-IR-CS-1027",
+    "title": "诱发背景-长期劳作后症状反复或加重",
+    "content": "患者自诉长期劳作后症状出现或加重，提示重复性手部负荷可能是腕管综合征的重要诱发或加重因素。",
+    "category": "case_study",
+    "tags": [
+      "诱发背景",
+      "长期劳作",
+      "重复负荷",
+      "症状加重",
+      "职业相关"
+    ],
+    "source": "腕管综合征病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_repetitive_long_term_manual_work_as_likely_trigger_or_aggravating_factor_in_cts_case",
+      "risk_factors": [
+        "长期重复劳作"
+      ],
+      "clinical_tip": "建议补充职业动作模式和负荷频率，用于评估复发风险。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-1028",
+    "title": "查体表现-双侧Tinel征阳性、Phalen试验阳性，腕部略肿但屈伸活动尚可",
+    "content": "查体示双侧Tinel征阳性、Phalen试验阳性；双腕关节局部略肿，双手拇指桡背伸功能尚可，双腕关节屈伸活动功能尚可。",
+    "category": "clinical_presentation",
+    "tags": [
+      "Tinel征阳性",
+      "Phalen试验阳性",
+      "双腕略肿",
+      "拇指桡背伸功能可",
+      "腕关节屈伸功能可"
+    ],
+    "source": "腕管综合征病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_case_exam_with_bilateral_positive_tinel_and_phalen_mild_wrist_swelling_and_preserved_motion",
+      "exam_findings": [
+        "双侧诱发试验阳性",
+        "轻度肿胀",
+        "活动度保留"
+      ],
+      "clinical_tip": "诱发试验阳性而活动度尚可，符合早中期腕管综合征常见表现。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1029",
+    "title": "热像与电诊断-双腕热像呈低温纹理差异右侧更显著，肌电图结合病史支持腕管综合征",
+    "content": "红外热成像检查可见双手腕部呈现低温纹理差异，以右手更显著。结合双手正中神经肌电图检查结果及患者临床检查和病史，支持腕管综合征诊断。",
+    "category": "diagnosis",
+    "tags": [
+      "红外热成像",
+      "双腕低温纹理差异",
+      "右侧更显著",
+      "正中神经肌电图",
+      "综合诊断支持"
+    ],
+    "source": "腕管综合征病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_case_thermography_and_emg_supporting_cts_with_more_prominent_right_sided_low_temperature_texture_difference",
+      "imaging_findings": [
+        "双腕低温纹理差异",
+        "右侧更显著"
+      ],
+      "criteria_summary": [
+        "肌电图支持",
+        "病史和查体支持"
+      ],
+      "clinical_tip": "建议将热像侧别差异与肌电图受损程度进行位点对应分析。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1030",
+    "title": "综合判断-结合病史、查体、热像及肌电图考虑腕管综合征",
+    "content": "综合患者病史、临床检查、红外热成像及双手正中神经肌电图结果，临床考虑为腕管综合征。",
+    "category": "diagnosis",
+    "tags": [
+      "综合判断",
+      "病史",
+      "查体",
+      "热像",
+      "肌电图",
+      "腕管综合征"
+    ],
+    "source": "腕管综合征病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_integrated_cts_diagnosis_based_on_history_exam_thermography_and_emg",
+      "criteria_summary": [
+        "病史支持",
+        "查体支持",
+        "热像支持",
+        "肌电图支持"
+      ],
+      "clinical_tip": "多模态证据一致时，可显著提高病例诊断可信度。"
+    }
   }
 ]
