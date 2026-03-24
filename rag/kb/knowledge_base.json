@@ -17794,5 +17794,71 @@
       "sessions_per_week": "3-5",
       "efficacy_timeline_days": "3-5"
     }
+  },
+  {
+    "id": "KB-IR-FUP-0401",
+    "title": "治疗后复查红外热成像图",
+    "content": "治疗后复查红外热成像图是评估治疗效果和调整后续方案的重要手段。通过对比治疗前后的热成像图像，可以客观评估局部温度变化、异常区域缩小情况和血液循环改善程度。建议在规范治疗3-7天后进行首次复查，以评估近期效果；14-21天时进行第二次复查，确认长期效果。复查时应在相同时间段、相近环境温度和相似活动状态下进行，以确保数据可比性。比较内容包括异常区域范围、左右ROI温差、整体温度分布和与初诊的变化趋势。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment_plan_text",
+      "health_advice"
+    ],
+    "tags": [
+      "复查",
+      "热成像",
+      "疗效评估",
+      "趋势跟踪",
+      "温度比较"
+    ],
+    "source": "红外热成像评估与随访规范",
+    "source_type": "guideline",
+    "priority": 10,
+    "status": "active",
+    "applicable_conditions": [
+      "完成规范治疗",
+      "需要评估治疗效果",
+      "需要调整治疗方案"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "腰背",
+      "膝关节",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "治疗后复查",
+      "热成像复测",
+      "3到7天复查",
+      "疗效评估",
+      "温度趋势"
+    ],
+    "structured_advice": {
+      "action": "post_treatment_thermal_imaging_recheck",
+      "first_recheck_days": "3-7",
+      "second_recheck_days": "14-21",
+      "comparison_items": [
+        "异常区域范围",
+        "左右ROI温差",
+        "整体温度分布",
+        "与初诊变化趋势"
+      ],
+      "consistency_requirements": [
+        "相同时间段",
+        "相近环境温度",
+        "相似活动状态"
+      ]
+    }
   }
 ]
