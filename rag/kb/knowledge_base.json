@@ -25809,5 +25809,40 @@
       ],
       "clinical_tip": "当症状、神经查体、影像学及热成像均指向同一侧责任节段时，诊断可信度和治疗针对性通常显著提高。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0656",
+    "title": "术前影像检查-腰椎MR平扫",
+    "content": "术前完成腰椎MR平扫检查。该检查可用于评估椎间盘形态、突出方向与程度、神经根受压情况及椎管或椎间孔狭窄程度，为责任节段判断和后续治疗方案选择提供关键影像学依据。",
+    "category": "diagnosis",
+    "tags": [
+      "术前检查",
+      "腰椎MR平扫",
+      "责任节段评估",
+      "神经根受压",
+      "影像学依据"
+    ],
+    "source": "术前影像检查（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_preoperative_lumbar_mri_plain_scan_as_core_imaging_assessment",
+      "assessment_focus": [
+        "椎间盘突出部位和程度",
+        "神经根受压表现",
+        "椎管和椎间孔狭窄情况"
+      ],
+      "clinical_value": [
+        "明确责任节段",
+        "支持治疗决策",
+        "作为术前基线影像"
+      ],
+      "key_points": [
+        "MR平扫是术前核心影像检查",
+        "有助于制定精准干预策略",
+        "需与症状和体征联合解读"
+      ],
+      "clinical_tip": "术前腰椎MR平扫在判断责任节段和选择微创或手术路径时具有关键价值，应与神经系统查体结果进行一体化分析。"
+    }
   }
 ]
