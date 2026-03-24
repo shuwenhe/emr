@@ -35127,5 +35127,227 @@
       ],
       "clinical_tip": "建议将图像时间点与同日疼痛功能评分配套记录。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0944",
+    "title": "图像引用-跟腱炎临床图关联跟痛症及跟腱炎章节内容",
+    "content": "文本提示“跟腱炎临床图（跟痛症及跟腱炎）”，可作为足跟后方疼痛与附着点病变的图像化补充证据，用于与跟痛症进行临床关联判读。",
+    "category": "diagnosis",
+    "tags": [
+      "跟腱炎临床图",
+      "跟痛症",
+      "跟腱炎",
+      "章节关联",
+      "图像补充证据"
+    ],
+    "source": "第二十章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_achilles_tendinitis_clinical_image_reference_related_to_heel_pain_chapter",
+      "figure_reference": [
+        "跟腱炎临床图"
+      ],
+      "clinical_tip": "足跟后方疼痛应注意区分跖侧跟痛与跟腱附着点病变。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0945",
+    "title": "观察指标-VAS评分0~10分并按轻中重分层（0-3/4-6/7-10）",
+    "content": "疗效观察指标之一为VAS评分。患者于治疗前后按主观疼痛程度进行0~10分评分，其中0~3分为轻度、4~6分为中度、7~10分为重度。",
+    "category": "follow_up",
+    "tags": [
+      "观察指标",
+      "VAS评分",
+      "0~10分",
+      "轻度0-3",
+      "中度4-6",
+      "重度7-10"
+    ],
+    "source": "第二十章疗效评价文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_vas_observation_metric_and_severity_stratification_for_pre_post_treatment_assessment",
+      "evaluation_points": [
+        "治疗前后VAS对比",
+        "疼痛等级分层记录"
+      ],
+      "clinical_tip": "建议固定同一时间段采集VAS，减少日内波动影响。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0946",
+    "title": "观察指标-治疗前后足跟红外热像差异用于评估患侧温度变化（图20.6/20.7）",
+    "content": "疗效观察指标之二为治疗前后足跟红外热成像差异。通过对比图20.6与图20.7，观察治疗后患侧足跟部温度变化情况，用于客观评估炎症热征改善。",
+    "category": "follow_up",
+    "tags": [
+      "观察指标",
+      "红外热像差异",
+      "图20.6",
+      "图20.7",
+      "患侧足跟温度变化",
+      "客观疗效评估"
+    ],
+    "source": "第二十章疗效评价文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_thermography_difference_metric_using_pre_post_heel_images_to_assess_temperature_change",
+      "evaluation_points": [
+        "治疗前后热像对照",
+        "患侧温度变化追踪"
+      ],
+      "figure_reference": [
+        "图20.6",
+        "图20.7"
+      ],
+      "clinical_tip": "建议统一体位与环境温度后再采集热像，保证可比性。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0947",
+    "title": "疗效标准-治愈定义为站立行走无痛、功能正常且随访3个月无复发",
+    "content": "疗效标准中“治愈”定义为：站立行走时疼痛消失，功能恢复正常，且随访3个月无复发。",
+    "category": "follow_up",
+    "tags": [
+      "疗效标准",
+      "治愈",
+      "站立行走无痛",
+      "功能恢复正常",
+      "3个月无复发"
+    ],
+    "source": "第二十章疗效评价文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_cure_criterion_for_heel_pain_with_pain_free_walking_normal_function_and_three_month_no_recurrence",
+      "efficacy_criteria": [
+        "无痛行走",
+        "功能正常",
+        "3个月无复发"
+      ],
+      "clinical_tip": "治愈判定应至少完成固定随访周期后再确认。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0948",
+    "title": "疗效标准-好转定义为站立行走疼痛明显改善但劳累后仍有轻痛",
+    "content": "“好转”定义为：站立行走时疼痛明显改善，但长时间行走或劳累后仍存在轻微疼痛。",
+    "category": "follow_up",
+    "tags": [
+      "疗效标准",
+      "好转",
+      "疼痛明显改善",
+      "劳累后轻痛"
+    ],
+    "source": "第二十章疗效评价文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_improved_criterion_with_significant_pain_reduction_but_mild_post_exertional_pain",
+      "efficacy_criteria": [
+        "日常行走明显改善",
+        "高负荷后仍可有轻痛"
+      ],
+      "clinical_tip": "建议补充活动量阈值，提升“好转”分层一致性。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0949",
+    "title": "疗效标准-有效定义为疼痛稍减轻，行走时仍可感疼痛",
+    "content": "“有效”定义为：疼痛较前稍减轻，但行走时仍可感到疼痛，功能改善有限。",
+    "category": "follow_up",
+    "tags": [
+      "疗效标准",
+      "有效",
+      "疼痛稍减轻",
+      "行走仍痛",
+      "功能改善有限"
+    ],
+    "source": "第二十章疗效评价文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_effective_criterion_with_slight_pain_reduction_and_persistent_pain_on_walking",
+      "efficacy_criteria": [
+        "疼痛轻度下降",
+        "仍影响行走体验"
+      ],
+      "clinical_tip": "“有效”阶段可考虑优化靶点与疗程参数。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0950",
+    "title": "疗效标准-无效定义为疼痛及压痛均无改善",
+    "content": "“无效”定义为：疼痛与压痛均无明显改善，提示当前方案未达到预期。",
+    "category": "follow_up",
+    "tags": [
+      "疗效标准",
+      "无效",
+      "疼痛无改善",
+      "压痛无改善"
+    ],
+    "source": "第二十章疗效评价文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_ineffective_criterion_with_no_improvement_in_pain_and_tenderness",
+      "efficacy_criteria": [
+        "疼痛无变化",
+        "压痛无变化"
+      ],
+      "clinical_tip": "无效时应复核诊断、靶点定位与治疗参数设置。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0951",
+    "title": "病因机制-久站久行外伤及体重骤增可致跟周附着点劳损退变并引发局部炎症痛",
+    "content": "跟痛症多由久站、久行、久立、外伤、体重骤增等因素引起，导致足跟周围肌腱韧带附着点劳损与退行性改变，进而产生局部炎性疼痛。",
+    "category": "diagnosis",
+    "tags": [
+      "病因机制",
+      "久站久行久立",
+      "外伤",
+      "体重骤增",
+      "附着点劳损",
+      "退行性改变",
+      "局部炎症痛"
+    ],
+    "source": "第二十章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_etiology_of_heel_pain_related_to_overuse_trauma_weight_gain_and_enthesis_degeneration",
+      "key_points": [
+        "附着点负荷过高",
+        "劳损与退变叠加"
+      ],
+      "clinical_tip": "管理策略应同时覆盖减负重、步态调整与局部炎症控制。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0952",
+    "title": "图像引用-图20.6为治疗前足跟红外成像，图20.7为治疗后足跟红外成像",
+    "content": "图20.6显示治疗前足跟红外成像，图20.7显示治疗后足跟红外成像，用于直观比较患侧热分布与温度变化。",
+    "category": "diagnosis",
+    "tags": [
+      "图20.6",
+      "图20.7",
+      "治疗前足跟热像",
+      "治疗后足跟热像",
+      "热分布对照"
+    ],
+    "source": "第二十章图注文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_figure_20_6_and_20_7_as_pre_post_heel_thermography_references_for_visual_comparison",
+      "figure_reference": [
+        "图20.6",
+        "图20.7"
+      ],
+      "clinical_tip": "图像对照建议固定同侧ROI并结合定量测温结果解释。"
+    }
   }
 ]
