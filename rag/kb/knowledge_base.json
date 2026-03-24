@@ -26522,5 +26522,109 @@
       ],
       "clinical_tip": "VAS和感觉症状同步改善提示近期疗效可靠，但仍需中期随访观察复发风险与功能稳定性。"
     }
+  },
+  {
+    "id": "KB-IR-CL-0676",
+    "title": "疾病定义与表现-腰椎间盘突出症的病理基础及典型症状",
+    "content": "腰椎间盘突出症是指腰椎纤维环破裂后髓核突出，刺激或压迫相应水平神经根而引起的一系列症状和体征。其典型临床表现为腰部疼痛伴下肢疼痛或麻木，常呈根性分布并可影响活动与生活质量。",
+    "category": "clinical_presentation",
+    "tags": [
+      "腰椎间盘突出症定义",
+      "纤维环破裂",
+      "髓核突出",
+      "神经根受压",
+      "腰痛伴下肢痛麻"
+    ],
+    "source": "疾病定义描述（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "summarize_pathophysiology_and_typical_symptom_pattern_of_lumbar_disc_herniation",
+      "pathophysiology": [
+        "纤维环破裂",
+        "髓核突出",
+        "神经根刺激或压迫"
+      ],
+      "symptom_pattern": [
+        "腰部疼痛",
+        "下肢疼痛",
+        "下肢麻木"
+      ],
+      "key_points": [
+        "根性症状是识别重点",
+        "症状体征与受累节段相关",
+        "影响功能和生活质量"
+      ],
+      "clinical_tip": "当腰痛伴单侧或双侧下肢放射痛麻时，应优先评估神经根受累并进行责任节段定位。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0677",
+    "title": "诊断原则-腰椎间盘突出症需重视影像学检查",
+    "content": "在腰椎间盘突出症诊断过程中，影像学检查是关键环节。影像结果可用于确认突出节段、突出方向与程度，并与症状体征进行对应分析，从而提高诊断准确性并为治疗方案选择提供依据。",
+    "category": "diagnosis",
+    "tags": [
+      "诊断原则",
+      "影像学检查",
+      "责任节段定位",
+      "症状体征对应",
+      "治疗决策"
+    ],
+    "source": "诊断思路总结（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "emphasize_essential_role_of_imaging_in_lumbar_disc_herniation_diagnosis",
+      "diagnostic_value": [
+        "明确突出节段",
+        "评估突出方向与程度",
+        "验证临床-影像一致性"
+      ],
+      "clinical_use": [
+        "提高诊断准确性",
+        "辅助分层治疗决策",
+        "减少误诊漏诊"
+      ],
+      "key_points": [
+        "影像检查为诊断必需环节",
+        "需结合查体而非孤立解读",
+        "责任节段判断依赖多证据整合"
+      ],
+      "clinical_tip": "腰椎间盘突出症评估应坚持症状、神经查体与影像三者匹配原则，避免仅凭单一维度下结论。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0678",
+    "title": "X线排除要点-未见腰椎峡部不连及腰椎失稳征象",
+    "content": "本病例腰椎正侧位、过伸过屈位及左右斜位X线片未见腰椎峡部不连及腰椎失稳征象。该结果提示当前骨性结构不稳相关病因证据不足，有助于将诊断重点聚焦于椎间盘及神经根相关病变评估。",
+    "category": "diagnosis",
+    "tags": [
+      "腰椎X线",
+      "过伸过屈位",
+      "左右斜位",
+      "腰椎峡部不连阴性",
+      "腰椎失稳阴性"
+    ],
+    "source": "X线检查结论（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_negative_xray_findings_for_lumbar_spondylolysis_and_instability_in_differential_diagnosis",
+      "xray_findings": [
+        "未见腰椎峡部不连",
+        "未见腰椎失稳征象"
+      ],
+      "differential_implication": [
+        "暂不支持明显骨性不稳病因",
+        "支持进一步聚焦椎间盘与神经根病变",
+        "为后续影像分层提供背景"
+      ],
+      "key_points": [
+        "动态位X线具备失稳筛查价值",
+        "阴性结果有助于缩小鉴别范围",
+        "需继续结合MRI等检查综合判断"
+      ],
+      "clinical_tip": "动态位X线未见失稳并不能排除神经根受压性病变，仍应结合MRI和神经系统体征进行责任节段确认。"
+    }
   }
 ]
