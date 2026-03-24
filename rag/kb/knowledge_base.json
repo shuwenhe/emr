@@ -27007,5 +27007,112 @@
       ],
       "clinical_tip": "当AS线索存在但证据不完整时，建议采用阶段性复评策略，结合症状演变与影像变化逐步确认诊断。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0690",
+    "title": "AS诊断-1984年修订纽约标准的四项内容",
+    "content": "依据1984年修订的纽约标准，强直性脊柱炎的诊断条目包括：①下腰痛持续至少3个月，休息不能缓解，活动后可缓解；②腰椎在前后及侧屈方向活动受限；③胸廓活动度低于同年龄、性别正常人；④单侧≥3级或双侧≥2级骶髂关节炎。",
+    "category": "diagnosis",
+    "tags": [
+      "AS诊断标准",
+      "1984年纽约标准",
+      "下腰痛",
+      "腰椎活动受限",
+      "骶髂关节炎分级"
+    ],
+    "source": "1984年修订纽约标准（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "list_four_diagnostic_criteria_items_of_1984_modified_new_york_criteria_for_as",
+      "criteria_items": [
+        "①下腰痛持续≥3月且休息不缓解、活动后缓解",
+        "②腰椎前后及侧屈方向活动受限",
+        "③胸廓活动度低于同龄同性别正常值",
+        "④单侧≥3级或双侧≥2级骶髂关节炎"
+      ],
+      "clinical_relevance": [
+        "各条目代表不同器官系统受累",
+        "骶髂关节炎为核心影像依据",
+        "胸廓活动度减低反映晚期累及"
+      ],
+      "key_points": [
+        "四项标准覆盖症状体征与影像",
+        "需依据所有证据分项核对",
+        "结合确认规则才能得出诊断"
+      ],
+      "clinical_tip": "评估疑似AS患者时，应逐项核查1984年修订纽约标准，记录每项是否满足，以确保诊断规范。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0691",
+    "title": "AS确认规则-第④条加①至③中至少一条可确认诊断",
+    "content": "根据1984年修订纽约标准的确认逻辑，具备第④条（骶髂关节炎）且同时符合第①至③条中至少一条，即可确认强直性脊柱炎诊断。该规则强调骶髂关节炎为核心必要条件，同时至少一项临床表现作为辅助支撑。",
+    "category": "diagnosis",
+    "tags": [
+      "AS确认标准",
+      "骶髂关节炎必要条件",
+      "纽约标准确认规则",
+      "诊断逻辑"
+    ],
+    "source": "1984年纽约标准确认规则（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "apply_1984_modified_new_york_criteria_confirmation_rule_for_as_diagnosis",
+      "confirmation_logic": {
+        "mandatory": "第④条：单侧≥3级或双侧≥2级骶髂关节炎",
+        "plus_at_least_one_of": [
+          "①下腰痛≥3月休息不缓解活动后缓解",
+          "②腰椎前后及侧屈活动受限",
+          "③胸廓活动度低于正常"
+        ]
+      },
+      "practical_implication": [
+        "骶髂关节炎为必须满足的核心条件",
+        "临床条目任满一项即可结合影像确诊",
+        "缺少第④条时不能确认AS"
+      ],
+      "key_points": [
+        "骶髂关节炎影像评估至关重要",
+        "结合临床条目更有助于排除假阳性",
+        "规则明确简洁便于临床执行"
+      ],
+      "clinical_tip": "在AS评估中，应优先完成骶髂关节影像学分级，再结合临床症状核对确认规则，避免仅凭症状主观判断。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0692",
+    "title": "AS实验室特征-类风湿因子阴性且HLA-B27阳性率高",
+    "content": "强直性脊柱炎患者类风湿因子一般为阴性，与类风湿关节炎不同。90%至95%以上AS患者HLA-B27阳性，是重要的遗传免疫标志物。该实验室特征组合有助于辅助鉴别诊断及早期识别。",
+    "category": "diagnosis",
+    "tags": [
+      "AS实验室特征",
+      "类风湿因子阴性",
+      "HLA-B27阳性",
+      "鉴别诊断",
+      "遗传标志物"
+    ],
+    "source": "AS实验室检查特点（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "summarize_laboratory_profile_of_as_with_rf_negative_and_high_hla_b27_positivity",
+      "lab_profile": [
+        "类风湿因子一般阴性",
+        "HLA-B27阳性率90%至95%以上"
+      ],
+      "clinical_value": [
+        "RF阴性有助于与RA鉴别",
+        "HLA-B27阳性增加AS诊断可信度",
+        "结合症状和影像可提高早期识别率"
+      ],
+      "key_points": [
+        "RF阴性是AS有别于RA的关键点",
+        "HLA-B27阳性率高但非100%确诊",
+        "需结合临床标准综合判断"
+      ],
+      "clinical_tip": "HLA-B27高阳性率和RF阴性组合是AS与类风湿关节炎鉴别的实验室核心依据，但单独任何一项均不能代替完整诊断流程。"
+    }
   }
 ]
