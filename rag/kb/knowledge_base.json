@@ -23389,5 +23389,31 @@
       ],
       "clinical_tip": "临床决策应以症状体征为基础，结合CT/MR精确定位后制定治疗方案。"
     }
+  },
+  {
+    "id": "KB-IR-BM-0582",
+    "title": "检查方法-医用红外热成像检查",
+    "content": "医用远红外热成像作为新型检查手段，可动态、客观监测人体热场分布变化并进行温差比较。该技术可用于评估软组织颈肩腰腿痛的疼痛部位、性质与程度，也可辅助判断急、慢性炎症的部位、范围及活动程度。",
+    "category": "basic_concept",
+    "tags": [
+      "医用红外热成像",
+      "热场分布",
+      "温差比较",
+      "疼痛评估",
+      "炎症评估"
+    ],
+    "source": "医用热成像应用要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "use_medical_infrared_thermography_for_pain_and_inflammation_assessment",
+      "key_points": [
+        "动态监测体表热场分布变化",
+        "通过患健侧温差进行客观比较",
+        "可定位疼痛相关软组织区域",
+        "可评估急慢性炎症范围与程度"
+      ],
+      "clinical_tip": "热成像结果应结合症状体征与其他影像检查综合解读，以提高临床判断准确性。"
+    }
   }
 ]
