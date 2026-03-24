@@ -22635,5 +22635,109 @@
       ],
       "clinical_tip": "当腰痛反复并逐渐伴随下肢放射痛时，应尽早评估神经根受压可能并完善影像检查。"
     }
+  },
+  {
+    "id": "KB-IR-CL-0552",
+    "title": "临床表现-腰椎间盘突出下肢放射痛的节段差异",
+    "content": "下肢放射性疼痛可因突出节段不同而表现差异。高位腰椎间盘突出（L2/3、L3/4）可引起股神经痛，但发病率相对较低；临床更常见的是L4/5、L5/S1椎间盘突出相关的坐骨神经痛。",
+    "category": "clinical_presentation",
+    "tags": [
+      "腰椎间盘突出症",
+      "下肢放射痛",
+      "节段差异",
+      "股神经痛",
+      "坐骨神经痛"
+    ],
+    "source": "临床表现要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "distinguish_radicular_pain_by_herniation_level",
+      "key_points": [
+        "不同突出节段对应不同神经受累模式",
+        "L2/3与L3/4可见股神经痛但较少见",
+        "L4/5与L5/S1更常见且多表现为坐骨神经痛",
+        "节段判断有助于定位责任神经根"
+      ],
+      "clinical_tip": "症状分布与神经系统查体应结合影像层面共同判断受累节段。"
+    }
+  },
+  {
+    "id": "KB-IR-CL-0553",
+    "title": "临床表现-典型坐骨神经痛放射路径",
+    "content": "典型坐骨神经痛常由下腰部起始，向臀部、大腿后方、小腿外侧并可放射至足部，呈连续或间断放射痛分布。该路径特征对临床识别神经根受累具有较高提示价值。",
+    "category": "clinical_presentation",
+    "tags": [
+      "坐骨神经痛",
+      "放射路径",
+      "下腰部",
+      "下肢放射痛",
+      "神经根症状"
+    ],
+    "source": "临床表现要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "recognize_typical_sciatic_radiation_pattern",
+      "key_points": [
+        "疼痛起于下腰部",
+        "沿臀部至大腿后侧放射",
+        "继续至小腿外侧并可达足部",
+        "路径连续性有助于识别坐骨神经受累"
+      ],
+      "clinical_tip": "若放射路径与经典分布不符，应考虑非典型神经根受累或其他病因。"
+    }
+  },
+  {
+    "id": "KB-IR-CL-0554",
+    "title": "临床表现-腹压增高可诱发或加重腿痛",
+    "content": "当患者咳嗽、打喷嚏、排便等导致腹压增高时，下肢放射痛可明显加重。这类诱发加重现象提示神经根受压或刺激状态对压力变化较为敏感。",
+    "category": "clinical_presentation",
+    "tags": [
+      "诱发因素",
+      "腹压增高",
+      "咳嗽加重",
+      "打喷嚏加重",
+      "神经根受压"
+    ],
+    "source": "临床表现要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "identify_pain_aggravation_with_increased_intraabdominal_pressure",
+      "key_points": [
+        "咳嗽可使腿痛加重",
+        "打喷嚏可诱发放射痛增强",
+        "排便用力时症状可加重",
+        "提示神经根机械性受压敏感"
+      ],
+      "clinical_tip": "问诊应主动追问腹压相关诱发因素，以提高神经根症状识别率。"
+    }
+  },
+  {
+    "id": "KB-IR-CL-0555",
+    "title": "临床表现-下肢放射痛性质与感觉异常演变",
+    "content": "下肢放射痛性质可表现为麻痛、刺痛、胀痛、烧灼痛，其中以麻痛较多见。病程早期可出现痛觉过敏，病情加重后可出现感觉迟钝或麻木等感觉减退表现。",
+    "category": "clinical_presentation",
+    "tags": [
+      "疼痛性质",
+      "麻痛",
+      "刺痛",
+      "烧灼痛",
+      "感觉异常"
+    ],
+    "source": "临床表现要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "assess_pain_quality_and_sensory_change_progression",
+      "key_points": [
+        "疼痛可为麻痛刺痛胀痛或烧灼痛",
+        "麻痛在临床上较常见",
+        "早期可见痛觉过敏",
+        "重症可转为感觉迟钝或麻木"
+      ],
+      "clinical_tip": "疼痛性质与感觉变化的动态记录有助于评估病情进展及治疗反应。"
+    }
   }
 ]
