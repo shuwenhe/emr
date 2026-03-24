@@ -24996,5 +24996,116 @@
       ],
       "clinical_tip": "双节段双极射频介入前应明确每个责任节段与症状对应关系，避免仅依据影像异常进行治疗，需结合神经体征和疼痛分布综合判断。"
     }
+  },
+  {
+    "id": "KB-IR-CS-0634",
+    "title": "典型病例-张某因腰痛伴左下肢酸痛麻木入院",
+    "content": "患者张某，女性，45岁。主因腰痛伴左下肢酸痛麻木3个月余入院。患者于3个月余前劳累后出现腰部疼痛，并伴左下肢酸痛、麻木，经休息后症状未见缓解。曾于当地医院接受针刺、按摩等保守治疗，效果不明显；后于北京某医院就诊，被建议手术治疗，但患者拒绝。此次来我院为求进一步系统诊治，经门诊以腰椎间盘突出症收入院。",
+    "category": "case_study",
+    "tags": [
+      "典型病例",
+      "张某",
+      "腰椎间盘突出症",
+      "左下肢麻木",
+      "保守治疗无效",
+      "拒绝手术"
+    ],
+    "source": "临床典型病例（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "analyze_case_of_female_patient_with_lumbar_disc_herniation_after_failed_conservative_management",
+      "patient_profile": {
+        "age": 45,
+        "gender": "female",
+        "chief_complaint": "腰痛伴左下肢酸痛麻木3个月余"
+      },
+      "history_points": [
+        "劳累后发病",
+        "休息不能缓解",
+        "针刺按摩疗效不佳",
+        "曾被建议手术但拒绝"
+      ],
+      "admission_reason": "为求进一步系统诊治收入院",
+      "key_points": [
+        "病程持续3个月余",
+        "左侧神经根症状为主",
+        "保守治疗失败后住院评估"
+      ],
+      "clinical_tip": "对于病程较长且保守治疗效果不佳的腰椎间盘突出患者，住院进一步明确责任节段和治疗策略具有重要价值。"
+    }
+  },
+  {
+    "id": "KB-IR-CL-0635",
+    "title": "临床表现-腰痛伴左下肢酸痛麻木及体位相关变化",
+    "content": "患者表现为持续性腰部疼痛，伴左下肢酸痛和麻木，站立、行走时症状加重，平卧时症状减轻，提示存在较典型的机械性腰腿痛特点及神经根受刺激表现。患者同时存在腰部活动受限，说明疼痛已对日常活动和脊柱功能产生明显影响。此类体位相关症状变化是腰椎间盘突出症临床判断责任节段和压迫程度的重要依据。",
+    "category": "clinical_presentation",
+    "tags": [
+      "腰痛",
+      "左下肢酸痛",
+      "左下肢麻木",
+      "站立加重",
+      "平卧减轻",
+      "活动受限"
+    ],
+    "source": "临床症状描述（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "summarize_postural_and_radicular_symptoms_in_lumbar_disc_herniation",
+      "symptom_pattern": [
+        "腰痛持续存在",
+        "左下肢酸痛麻木",
+        "站立行走时加重",
+        "平躺时减轻",
+        "腰部活动受限"
+      ],
+      "clinical_meaning": [
+        "符合机械性腰腿痛特点",
+        "提示神经根刺激或压迫",
+        "反映功能受限已较明显"
+      ],
+      "key_points": [
+        "体位改变影响症状强度",
+        "左侧下肢症状提示责任侧别",
+        "活动受限提示病情影响生活质量"
+      ],
+      "clinical_tip": "站立加重、平卧减轻的腰腿痛模式常提示椎间盘突出相关机械压迫，应结合影像学评估受累节段和神经根。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0636",
+    "title": "入院评估-伴轻度排尿控制异常的腰椎间盘突出症线索",
+    "content": "患者入院时除腰痛及左下肢症状外，还描述咳嗽时可出现少量遗尿，但二便总体可控制。该表现提示在评估腰椎间盘突出症时，除常规神经根症状外，还需关注盆底功能和排尿控制情况。虽然当前未表现为明确的严重马尾综合征，但轻度排尿异常仍提示需要密切结合神经系统查体和影像学结果，警惕潜在神经功能受累。",
+    "category": "diagnosis",
+    "tags": [
+      "排尿异常",
+      "少量遗尿",
+      "马尾神经警示",
+      "入院评估",
+      "腰椎间盘突出症"
+    ],
+    "source": "入院评估信息（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "identify_urinary_control_warning_signs_during_admission_assessment_for_lumbar_disc_herniation",
+      "warning_signs": [
+        "咳嗽时少量遗尿",
+        "二便总体可控制",
+        "需排查神经功能进一步受累"
+      ],
+      "assessment_focus": [
+        "完善神经系统查体",
+        "结合影像学评估压迫范围",
+        "警惕马尾神经受累风险"
+      ],
+      "key_points": [
+        "轻度排尿异常不可忽视",
+        "当前尚非典型完全失禁表现",
+        "需动态观察病情变化"
+      ],
+      "clinical_tip": "腰椎间盘突出患者若出现排尿控制异常，即使症状轻微，也应提高警惕，及时评估是否存在更深层次的神经受压。"
+    }
   }
 ]
