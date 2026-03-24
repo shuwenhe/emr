@@ -18695,5 +18695,104 @@
       ],
       "red_flags_for_imaging": "神经根型颈椎病表现明显、下肢反射异常、病理征阳性等脊髓症候群表现"
     }
+  },
+  {
+    "id": "KB-IR-DX-0505",
+    "title": "肩周炎鉴别诊断-肩关节脱位",
+    "content": "肩关节脱位是与肩周炎容易混淆的另一种肩关节疾病，两者虽然都可表现为肩关节疼痛和活动受限，但发病机制、临床表现和诊断方法有本质的区别。肩关节脱位是关节盂与肱骨头之间的关节面完全错位，导致关节结构的破坏。肩关节脱位多有明确的外伤史，通常是由直接暴力、间接暴力或跌扑伤引起的急性损伤。临床上脱位患者的肩关节会出现典型的方肩畸形，即肩部失去正常的圆形轮廓，变成方块状，这是肩关节脱位的病理征象。体格检查时可发现关节盂部位空虚，肱骨头触不到其又常的位置，这与肩周炎的关节结构完整明显不同。脱位后由于关节囊、韧带等软组织的撕裂伤，患者的疼痛往往非常剧烈，活动极度受限，病人多呈不敢动的保护性姿态。影像学检查（X线或CT）可以明确显示关节脱位的诊断，是确诊肩关节脱位的金标准。肩关节脱位需要及时复位治疗，这与肩周炎的保守治疗截然不同。",
+    "category": "diagnosis",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "肩关节脱位",
+      "肩周炎鉴别诊断",
+      "外伤",
+      "方肩畸形"
+    ],
+    "source": "肩关节脱位与肩周炎鉴别诊断指南",
+    "source_type": "guideline",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "患者有肩关节疼痛和活动受限",
+      "需要排除外伤相关疾病"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩关节"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "肩关节脱位",
+      "鉴别诊断",
+      "方肩畸形",
+      "外伤史",
+      "脱位"
+    ],
+    "structured_advice": {
+      "action": "differential_diagnosis_shoulder_dislocation",
+      "comparison_factors": [
+        {
+          "factor": "发病机制",
+          "dislocation": "关节盂与肱骨头关节面完全错位",
+          "frozen_shoulder": "关节囊炎症增厚，粘连收缩"
+        },
+        {
+          "factor": "发病原因",
+          "dislocation": "多有明确外伤史（直接暴力、跌扑伤）",
+          "frozen_shoulder": "无明确外伤史，常见于静息不动"
+        },
+        {
+          "factor": "发病方式",
+          "dislocation": "急性发病，伤后立即出现",
+          "frozen_shoulder": "隐匿缓慢发病，数周至数月逐渐起病"
+        }
+      ],
+      "clinical_signs": [
+        {
+          "sign": "肩部外形",
+          "dislocation": "方肩畸形，失去正常圆形轮廓",
+          "frozen_shoulder": "外形基本正常，可见肌肉萎缩"
+        },
+        {
+          "sign": "关节盂触诊",
+          "dislocation": "关节盂部位空虚，肱骨头触不到正常位置",
+          "frozen_shoulder": "关节盂无空虚感，肱骨头位置正常"
+        },
+        {
+          "sign": "疼痛程度",
+          "dislocation": "极度剧烈，患者保护性不动",
+          "frozen_shoulder": "中等程度，逐渐加重或缓解"
+        }
+      ],
+      "soft_tissue_injury": [
+        {
+          "structure": "关节囊",
+          "dislocation": "撕裂伤",
+          "frozen_shoulder": "炎症增厚"
+        },
+        {
+          "structure": "韧带",
+          "dislocation": "撕裂伤",
+          "frozen_shoulder": "完整但收缩"
+        },
+        {
+          "structure": "软组织",
+          "dislocation": "急性损伤",
+          "frozen_shoulder": "慢性炎症变化"
+        }
+      ],
+      "imaging_modality": "X线或CT可明确显示关节脱位，是确诊的金标准",
+      "treatment_approach": "脱位需要及时复位治疗，肩周炎采用保守治疗"
+    }
   }
 ]
