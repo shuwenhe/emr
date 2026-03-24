@@ -23675,5 +23675,31 @@
       ],
       "clinical_tip": "若神经根体征不典型而退变影像明显，应优先考虑腰椎骨关节病相关疼痛来源。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0593",
+    "title": "鉴别诊断-腰椎骨关节病与腰椎间盘突出症的临床差异",
+    "content": "腰椎骨关节病多发于50岁以后，起病慢、慢性反复并逐渐加重，疼痛多为较广泛钝痛，压痛点相对分散，常无明显感觉、运动及反射障碍。腰椎间盘突出症则常见钝痛、刺痛及放射痛，且多伴感觉异常、肌力改变及反射异常。上述差异可用于两者临床鉴别。",
+    "category": "diagnosis",
+    "tags": [
+      "鉴别诊断",
+      "腰椎骨关节病",
+      "腰椎间盘突出症",
+      "慢性腰痛",
+      "神经体征"
+    ],
+    "source": "临床鉴别要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "differentiate_lumbar_osteoarthropathy_from_ldh_by_age_pain_pattern_and_neurological_signs",
+      "key_points": [
+        "腰椎骨关节病常见于50岁后并慢性进展",
+        "骨关节病疼痛多为广泛钝痛且压痛分散",
+        "腰突更常见刺痛/放射痛及神经根相关症状",
+        "感觉运动反射障碍在腰突中更常见"
+      ],
+      "clinical_tip": "鉴别时应优先评估神经系统体征是否存在，以提高腰突与退变性骨关节病分层准确性。"
+    }
   }
 ]
