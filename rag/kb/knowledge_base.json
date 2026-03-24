@@ -28460,5 +28460,44 @@
       ],
       "clinical_tip": "对于神经源性低温差病例，复查时应重点比较异常区域范围、侧别温差及与症状变化的一致性，以提高疗效判断的可靠性。"
     }
+  },
+  {
+    "id": "KB-FBSS-FU-0723",
+    "title": "FBSS病例-出院时情况（腰痛减轻、左下肢乏力及足下垂改善、步行距离增加）",
+    "content": "出院时，患者腰部疼痛减轻，活动受限好转，左下肢酸沉乏力改善，左足下垂减轻，间歇性跛行较前好转，最多可步行约500米。患者纳食好，睡眠正常，二便调。上述变化提示本次住院综合治疗后疼痛、神经功能及步行耐量均有改善，整体一般情况稳定。",
+    "category": "follow_up",
+    "tags": [
+      "FBSS",
+      "出院时情况",
+      "腰痛减轻",
+      "左下肢酸沉乏力改善",
+      "左足下垂减轻",
+      "间歇性跛行好转",
+      "步行500米",
+      "疗效评估"
+    ],
+    "source": "住院病历出院记录（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_discharge_status_with_improved_pain_motor_function_and_walking_distance_in_fbss",
+      "discharge_status": {
+        "pain": "腰部疼痛减轻",
+        "mobility_limitation": "活动受限好转",
+        "left_lower_limb_function": "左下肢酸沉乏力改善",
+        "foot_drop": "左足下垂减轻",
+        "intermittent_claudication": "较前好转",
+        "max_walking_distance": "约500米",
+        "appetite": "纳食好",
+        "sleep": "睡眠正常",
+        "bowel_bladder": "二便调"
+      },
+      "key_points": [
+        "与入院时最多步行250米相比，出院时步行耐量增至约500米，提示功能改善",
+        "腰痛、左下肢乏力及足下垂均减轻，说明综合治疗取得阶段性疗效",
+        "一般情况稳定，可支持出院后继续康复与门诊随访"
+      ],
+      "clinical_tip": "FBSS患者出院评估应同时记录疼痛、神经功能、步行距离及一般情况，其中间歇性跛行距离是判断短期疗效和后续康复目标的重要量化指标。"
+    }
   }
 ]
