@@ -36715,5 +36715,193 @@
       ],
       "clinical_tip": "症状分布与鱼际肌受累情况可为正中神经卡压定位提供重要线索。"
     }
+  },
+  {
+    "id": "KB-IR-DX-1011",
+    "title": "流行病学-腕管综合征女性发病率高于男性但原因尚未明确",
+    "content": "腕管综合征在女性中的发病率较男性更高，但其具体原因目前尚未完全明确。",
+    "category": "diagnosis",
+    "tags": [
+      "流行病学",
+      "女性发病率更高",
+      "性别差异",
+      "原因未明"
+    ],
+    "source": "腕管综合征文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_higher_prevalence_of_carpal_tunnel_syndrome_in_women_with_unclear_cause",
+      "key_points": [
+        "女性患病率较高",
+        "病因解释尚不明确"
+      ],
+      "clinical_tip": "流行病学差异可作为风险识别线索，但不能替代个体诊断依据。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-1012",
+    "title": "常见症状-正中神经支配区感觉异常或麻木",
+    "content": "腕管综合征常见症状包括正中神经支配区的感觉异常或麻木，反映正中神经感觉纤维受压。",
+    "category": "clinical_presentation",
+    "tags": [
+      "常见症状",
+      "感觉异常",
+      "麻木",
+      "正中神经支配区"
+    ],
+    "source": "腕管综合征文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_common_cts_symptom_of_paresthesia_or_numbness_in_median_nerve_distribution",
+      "clinical_points": [
+        "感觉症状通常早于运动症状"
+      ],
+      "clinical_tip": "症状记录应明确麻木部位与持续时间，便于与其他神经病变鉴别。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-1013",
+    "title": "首发特征-夜间手指麻木或麻醒常为腕管综合征早期表现",
+    "content": "夜间手指麻木很多时候是腕管综合征的首发症状，不少患者有夜间因手指麻木而醒来的经历。",
+    "category": "clinical_presentation",
+    "tags": [
+      "首发症状",
+      "夜间手指麻木",
+      "麻醒",
+      "早期表现"
+    ],
+    "source": "腕管综合征文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_nocturnal_finger_numbness_and_waking_as_common_early_cts_manifestation",
+      "clinical_points": [
+        "夜间症状具有提示价值"
+      ],
+      "clinical_tip": "夜间麻醒史是病史采集中应重点追问的高价值信息。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-1014",
+    "title": "缓解与诱发-改变上肢姿势或甩手可暂时缓解，白天某些活动会使麻木加重",
+    "content": "许多患者的手指麻木不适可通过改变上肢姿势或甩手而获得一定程度缓解；而在白天从事某些活动时，手指麻木又会加重。",
+    "category": "clinical_presentation",
+    "tags": [
+      "姿势改变缓解",
+      "甩手缓解",
+      "白天活动加重",
+      "症状波动"
+    ],
+    "source": "腕管综合征文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_posture_change_or_hand_shaking_relief_with_daytime_activity_exacerbation_in_cts",
+      "trigger_factors": [
+        "特定手部活动加重",
+        "姿势调整可短暂缓解"
+      ],
+      "clinical_tip": "建议记录具体诱发动作，有助于判断重复劳损背景。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-1015",
+    "title": "感觉分布进展-早期可仅指尖麻木，后期累及拇示中及环指桡侧半",
+    "content": "部分患者早期仅感拇指、示指、中指或环指指尖麻木不适；随着病情进展，可出现拇指、示指、中指及环指桡侧半更广泛的麻木。",
+    "category": "clinical_presentation",
+    "tags": [
+      "感觉分布进展",
+      "指尖麻木",
+      "拇指",
+      "示指",
+      "中指",
+      "环指桡侧半",
+      "范围扩大"
+    ],
+    "source": "腕管综合征文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_progression_of_sensory_distribution_from_fingertip_numbness_to_broader_median_territory_in_cts",
+      "clinical_points": [
+        "早期局灶",
+        "后期范围扩大"
+      ],
+      "clinical_tip": "建议用手部示意图标注麻木范围，便于前后比较。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-1016",
+    "title": "症状扩展-部分患者可有前臂甚至整个上肢麻木或感觉异常",
+    "content": "某些患者除典型手指麻木外，也会出现前臂甚至整个上肢的麻木或感觉异常，且可成为主要不适。",
+    "category": "clinical_presentation",
+    "tags": [
+      "症状扩展",
+      "前臂麻木",
+      "上肢麻木",
+      "感觉异常",
+      "主要不适"
+    ],
+    "source": "腕管综合征文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_possible_extension_of_cts_symptoms_to_forearm_or_entire_upper_limb_in_some_patients",
+      "clinical_points": [
+        "症状可超出典型手指分布"
+      ],
+      "clinical_tip": "出现广泛上肢麻木时应同步排查颈源性或近端神经病变。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-1017",
+    "title": "重度感觉损害-病情加重时可出现手指感觉明显减退或消失",
+    "content": "随着病情加重，患者可出现明确的手指感觉减退，严重时甚至感觉消失，提示正中神经受压程度增加。",
+    "category": "clinical_presentation",
+    "tags": [
+      "重度感觉损害",
+      "感觉减退",
+      "感觉消失",
+      "病情加重",
+      "正中神经重压"
+    ],
+    "source": "腕管综合征文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_advanced_cts_with_clear_sensory_loss_or_absence_in_fingers",
+      "clinical_points": [
+        "感觉功能下降提示病情进展"
+      ],
+      "clinical_tip": "应及时评估感觉阈值变化，避免长期神经损伤。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-1018",
+    "title": "运动受累-鱼际肌萎缩、拇指不灵活及对捏力量下降提示晚期正中神经损害",
+    "content": "病情进一步发展时，患者可出现拇短展肌和拇对掌肌萎缩或力弱，大鱼际桡侧肌肉萎缩，拇指活动不灵活，与其他手指对捏力量下降，严重时甚至不能完成对捏动作。",
+    "category": "clinical_presentation",
+    "tags": [
+      "运动受累",
+      "鱼际肌萎缩",
+      "拇短展肌无力",
+      "拇对掌肌无力",
+      "拇指不灵活",
+      "对捏力量下降",
+      "不能对捏"
+    ],
+    "source": "腕管综合征文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_late_motor_involvement_in_cts_with_thenar_atrophy_thumb_clumsiness_and_reduced_pinch_strength",
+      "exam_findings": [
+        "鱼际肌萎缩",
+        "拇指对捏无力"
+      ],
+      "clinical_tip": "一旦出现鱼际肌萎缩，应提高干预优先级，避免不可逆运动功能损失。"
+    }
   }
 ]
