@@ -29461,5 +29461,129 @@
       ],
       "clinical_tip": "合并长期风湿关节炎病史的腰痛患者，建议同步评估炎症活动指标和关节受累情况，以提高病因分层和治疗个体化水平。"
     }
+  },
+  {
+    "id": "KB-IR-CP-0748",
+    "title": "专科检查-腰椎曲度变浅伴椎旁肌紧张及双侧压痛（X线见图12.50）",
+    "content": "专科检查示腰椎生理曲度变浅（X线片见图12.50），腰椎肌肉紧张，L3/4棘间至L5/S1棘间压痛，双侧旁开1.5cm处压痛，双侧梨状肌压痛，均无明显放射痛。该体征组合提示腰骶部存在明显机械性痛源与软组织紧张状态。",
+    "category": "clinical_presentation",
+    "tags": [
+      "腰椎生理曲度变浅",
+      "图12.50",
+      "腰椎肌肉紧张",
+      "L3/4至L5/S1压痛",
+      "双侧旁开1.5cm压痛",
+      "双侧梨状肌压痛",
+      "无放射痛"
+    ],
+    "source": "专科查体记录（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_specialist_exam_with_shallow_lumbar_lordosis_paraspinal_tension_and_bilateral_tenderness_without_radiating_pain",
+      "exam_findings": [
+        "腰椎生理曲度变浅（X线见图12.50）",
+        "腰椎肌肉紧张",
+        "L3/4至L5/S1棘间压痛",
+        "双侧旁开1.5cm处压痛",
+        "双侧梨状肌压痛",
+        "无明显放射痛"
+      ],
+      "clinical_significance": [
+        "提示腰骶部机械性疼痛成分突出",
+        "软组织紧张与局部压痛并存，符合慢性劳损或退变背景",
+        "当前未见典型神经根放射痛体征"
+      ],
+      "key_points": [
+        "双侧对称压痛提示病变并非单侧神经根主导",
+        "无放射痛有助于与急性神经根刺激期区分",
+        "X线曲度变浅可作为长期随访对照指标"
+      ],
+      "clinical_tip": "当压痛广泛而无明显放射痛时，评估上应重点关注机械性与软组织痛源，并结合影像和神经查体排除隐匿性神经根受压。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0749",
+    "title": "神经查体与功能评估-直腿抬高70°双侧阴性、肌力V级、VAS7分",
+    "content": "神经系统与功能查体示：鞍区及双下肢皮肤感觉无明显减弱；直腿抬高试验双侧均70°，加强试验双侧阴性，双“4”字试验阴性；双足背伸肌力V级。腰椎活动度：前屈30°、后伸5°、左屈10°、右屈10°、左旋10°、右旋10°。双侧膝腱反射和跟腱反射对称引出，双侧巴宾斯基征阴性，双侧髌阵挛与踝阵挛未引出。双侧足背动脉搏动可触及，末梢血运好。VAS评分7分。",
+    "category": "clinical_presentation",
+    "tags": [
+      "直腿抬高70°",
+      "加强试验阴性",
+      "双4字试验阴性",
+      "足背伸肌力V级",
+      "腰椎活动度受限",
+      "反射对称",
+      "巴宾斯基阴性",
+      "VAS7分"
+    ],
+    "source": "专科查体记录（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_neurological_and_functional_exam_with_negative_nerve_tension_signs_full_dorsiflexion_strength_and_high_pain_score",
+      "neurologic_findings": [
+        "鞍区及双下肢感觉无明显减弱",
+        "直腿抬高双侧70°",
+        "加强试验双侧阴性",
+        "双4字试验阴性",
+        "双足背伸肌力V级",
+        "双侧膝腱及跟腱反射对称",
+        "双侧巴宾斯基征阴性",
+        "双侧髌阵挛与踝阵挛未引出"
+      ],
+      "functional_and_vascular": [
+        "腰椎前屈30°、后伸5°、左右屈各10°、左右旋各10°",
+        "双侧足背动脉搏动可触及，末梢血运好",
+        "VAS评分7分"
+      ],
+      "key_points": [
+        "神经根牵拉征和病理反射阴性，提示急性进行性神经受压证据不足",
+        "肌力保留但疼痛评分高，说明疼痛负担与神经缺损程度不完全一致",
+        "活动度下降提示功能受限明显"
+      ],
+      "clinical_tip": "当神经体征阴性但VAS较高时，应重视机械性疼痛与软组织因素，并通过功能康复和负荷管理同步干预。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0750",
+    "title": "辅助检查-腰椎MRI及红外热成像（腰、双下肢、足底）见图12.49和图12.51",
+    "content": "辅助检查包括腰椎MRI及红外热成像（腰部、双下肢、足底），图像资料见图12.49和图12.51。该组合检查可同时提供结构影像信息与功能温度分布信息，用于综合评估腰椎退变相关病变及其对下肢功能状态的影响。",
+    "category": "diagnosis",
+    "tags": [
+      "辅助检查",
+      "腰椎MRI",
+      "红外热成像",
+      "腰部",
+      "双下肢",
+      "足底",
+      "图12.49",
+      "图12.51"
+    ],
+    "source": "辅助检查记录（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_auxiliary_exams_with_lumbar_mri_and_thermography_of_waist_bilateral_lower_limbs_and_plantar_regions",
+      "exam_components": [
+        "腰椎MRI",
+        "红外热成像（腰、双下肢、足底）"
+      ],
+      "figure_reference": [
+        "图12.49",
+        "图12.51"
+      ],
+      "clinical_value": [
+        "MRI用于识别结构性病变节段和压迫特点",
+        "热成像用于观察功能性温度分布和侧别差异",
+        "两者联合有助于结构-功能一体化评估"
+      ],
+      "key_points": [
+        "结构影像与功能影像互补",
+        "适用于基线评估与后续疗效比较",
+        "图像资料应与查体和症状变化同步解读"
+      ],
+      "clinical_tip": "联合判读MRI与热成像时，应优先关注症状最匹配节段和区域，避免仅凭单一影像结果作出过度推断。"
+    }
   }
 ]
