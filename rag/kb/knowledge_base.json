@@ -18914,5 +18914,114 @@
       "diagnostic_gold_standard": "病理活检可明确诊断结核或肿瘤的具体病理类型",
       "clinical_alert": "肩关节疼痛伴发热、盗汗、消瘦等B症状患者必须进行全身评估和专科检查，不可作为单纯的肩周炎治疗"
     }
+  },
+  {
+    "id": "KB-IR-DX-0507",
+    "title": "肩周炎鉴别诊断-冈上肌腱断裂",
+    "content": "冈上肌腱断裂是导致肩关节疼痛和肩外展功能受限的常见肩部疾患，与肩周炎都可表现为肩关节疼痛和活动受限，但发病机制、临床表现和治疗方法截然不同。冈上肌腱断裂通常有明确的外伤史，常见于跌扑伤、挤压伤或肩关节脱位等急性损伤，也可见于退行性变导致的慢性腱损伤。患者主诉肩部疼痛，但最显著的症状是肩外展功能明显受限，特别是无法主动抬起上肢进行外展运动。体格检查中冈上肌肌力测试（Jobe推进试验）呈阳性，患者无法进行抵抗的肩外展运动。疼痛弧试验（painfulArc test）也是诊断冈上肌腱损伤的重要体征，当肩关节从下垂位开始被动外展运动时，在60-120度的活动范围内患者感到疼痛加重，这个疼痛范围称为疼痛弧，是冈上肌腱病变的特征性表现。患者的活动受限是由肌力减弱而不是关节囊收缩所致，这与肩周炎因关节囊粘连导致的各方向活动受限有本质区别。影像学检查（超声或MRI）可以明确显示冈上肌腱的部分撕裂或完全断裂。肩外展肌力的显著减弱甚至瘫痪是冈上肌腱断裂的标志性表现。",
+    "category": "diagnosis",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "冈上肌腱断裂",
+      "鉴别诊断",
+      "肌腱损伤",
+      "外伤",
+      "肩外展"
+    ],
+    "source": "冈上肌腱断裂与肩周炎鉴别诊断指南",
+    "source_type": "guideline",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "肩关节疼痛伴外展功能受限",
+      "需要排除肌腱损伤"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩关节",
+      "冈上肌腱"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "冈上肌腱",
+      "肌腱断裂",
+      "外展",
+      "疼痛弧",
+      "肌力"
+    ],
+    "structured_advice": {
+      "action": "differential_diagnosis_supraspinatus_tear",
+      "trauma_history": [
+        {
+          "aspect": "外伤史",
+          "rotator_cuff_tear": "常有明确外伤史（跌扑伤、挤压伤、脱位）",
+          "frozen_shoulder": "无明确外伤史"
+        },
+        {
+          "aspect": "发病方式",
+          "rotator_cuff_tear": "急性发病或急性加重",
+          "frozen_shoulder": "隐匿缓慢发病"
+        }
+      ],
+      "function_limitation": [
+        {
+          "function": "肩外展运动",
+          "rotator_cuff_tear": "明显受限，主要由肌力减弱引起",
+          "frozen_shoulder": "受限，由关节囊粘连引起"
+        },
+        {
+          "function": "肩外展肌力",
+          "rotator_cuff_tear": "明显减弱甚至瘫痪",
+          "frozen_shoulder": "肌力基本正常"
+        },
+        {
+          "function": "其他肩关节运动",
+          "rotator_cuff_tear": "基本保留，仅外展受限",
+          "frozen_shoulder": "各方向活动均受限"
+        }
+      ],
+      "physical_examination": [
+        {
+          "test": "Jobe推进试验",
+          "rotator_cuff_tear": "阳性，患者无法进行抵抗的肩外展",
+          "frozen_shoulder": "阴性，肩外展肌力可"
+        },
+        {
+          "test": "疼痛弧试验",
+          "rotator_cuff_tear": "阳性，60-120度范围内疼痛加重",
+          "frozen_shoulder": "可能阳性但疼痛弧界限不清"
+        },
+        {
+          "test": "肌力测试",
+          "rotator_cuff_tear": "肩外展肌力减弱或为0/5",
+          "frozen_shoulder": "肩外展肌力正常"
+        }
+      ],
+      "pain_characteristics": [
+        {
+          "aspect": "疼痛性质",
+          "rotator_cuff_tear": "尖锐刺痛，特别是在外展时",
+          "frozen_shoulder": "酸胀痛，全身活动受限时加重"
+        },
+        {
+          "aspect": "疼痛范围",
+          "rotator_cuff_tear": "局限于冈上肌区域和肩外侧",
+          "frozen_shoulder": "肩周广泛分布"
+        }
+      ],
+      "imaging_diagnosis": "超声或MRI可明确显示冈上肌腱的部分撕裂或完全断裂",
+      "characteristic_finding": "肩外展肌力的显著减弱甚至瘫痪是冈上肌腱断裂的标志性表现"
+    }
   }
 ]
