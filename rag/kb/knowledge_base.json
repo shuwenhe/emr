@@ -20328,5 +20328,104 @@
         "同时间段复查优先"
       ]
     }
+  },
+  {
+    "id": "KB-IR-TX-0407",
+    "title": "肩周炎治疗方案-针灸联合微针针刺与穴位拔罐（3次）",
+    "content": "治疗采用针灸+微针针刺+穴位拔罐联合方案，共实施3次。治则、治法同前，以活血祛瘀、舒筋通络、活络止痛为原则，重点缓解肩周疼痛、改善局部循环、松解软组织紧张并促进功能恢复。针灸以肩髃、肩髎、肩前、阿是穴、曲池、外关等为主；微针针刺重点处理局部痛点和筋膜紧张带；穴位拔罐用于针刺后局部促循环与松解。每次治疗后评估VAS、活动度和压痛反应，3次后进行阶段性复评并决定后续康复计划。",
+    "category": "treatment",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment",
+      "follow_up",
+      "health_advice"
+    ],
+    "tags": [
+      "肩周炎",
+      "针灸",
+      "微针针刺",
+      "穴位拔罐",
+      "联合治疗",
+      "3次"
+    ],
+    "source": "门诊治疗方案记录",
+    "source_type": "clinical_record",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "肩周炎疼痛期",
+      "肩关节活动受限",
+      "局部压痛明显"
+    ],
+    "contraindications": [
+      "皮肤破损或感染区域",
+      "出血倾向",
+      "严重心肺功能不全患者需谨慎"
+    ],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩关节",
+      "肩胛区"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "clinical_experience",
+    "retrieval_hints": [
+      "针灸+微针+拔罐",
+      "3次治疗",
+      "治则治法同前"
+    ],
+    "structured_advice": {
+      "action": "combined_acupuncture_microneedling_cupping",
+      "treatment_principles": [
+        "活血祛瘀",
+        "舒筋通络",
+        "活络止痛"
+      ],
+      "treatment_components": [
+        {
+          "name": "针灸",
+          "focus": "经穴调节与镇痛"
+        },
+        {
+          "name": "微针针刺",
+          "focus": "局部痛点与筋膜紧张带处理"
+        },
+        {
+          "name": "穴位拔罐",
+          "focus": "改善局部循环与软组织松解"
+        }
+      ],
+      "session_plan": {
+        "total_sessions": 3,
+        "frequency": "按临床安排连续治疗",
+        "reassessment": "每次治疗后评估VAS、活动度和压痛变化"
+      },
+      "suggested_points_or_regions": [
+        "肩髃",
+        "肩髎",
+        "肩前",
+        "阿是穴",
+        "曲池",
+        "外关",
+        "肩胛周高张区"
+      ],
+      "follow_up_metrics": [
+        "VAS疼痛评分",
+        "肩关节活动度",
+        "日常功能（梳头、穿衣、反手）",
+        "压痛点数量与强度"
+      ],
+      "post_treatment_advice": [
+        "治疗后24小时避免受寒和过度负重",
+        "配合轻柔主动活动训练",
+        "若出现持续加重疼痛或皮肤异常及时复诊"
+      ]
+    }
   }
 ]
