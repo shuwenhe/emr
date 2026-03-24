@@ -17730,5 +17730,69 @@
       "sessions_per_week": "3-5",
       "duration_minutes_per_session": "15-30"
     }
+  },
+  {
+    "id": "KB-IR-TX-0401",
+    "title": "颈肩肌筋膜炎-针灸刺络拔罐治疗",
+    "content": "颈肩肌筋膜炎的针灸刺络拔罐治疗是一种中医物理疗法，通过针灸、刺络和拔罐协同作用改善局部血供和缓解肌肉紧张。治疗工具包括刃针和针灸针两种，针刺角度为斜15°斜刺或平刺。该方法可有效缓解颈肩部肌筋膜疼痛、筋膜粘连和肌肉紧张，通常在3-5天内见效，疗程为10-14天。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "针灸",
+      "刺络拔罐",
+      "刃针",
+      "颈肩",
+      "肌筋膜炎",
+      "筋膜松解"
+    ],
+    "source": "针灸推拿疗法规范与临床应用",
+    "source_type": "guideline",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "颈肩部肌筋膜炎诊断明确",
+      "无皮肤感染或破溃",
+      "患者能耐受针刺"
+    ],
+    "contraindications": [
+      "急性感染期、严重出血倾向或妊娠禁用",
+      "过度疲劳或饥饿状态慎用"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "颈肩肌筋膜炎",
+      "刃针治疗",
+      "斜刺平刺",
+      "刺络拔罐",
+      "针灸推拿"
+    ],
+    "structured_advice": {
+      "action": "acupuncture_and_cupping_therapy",
+      "needle_type": [
+        "刃针",
+        "针灸针"
+      ],
+      "angle": [
+        "斜15°",
+        "平刺"
+      ],
+      "typical_course_days": "10-14",
+      "sessions_per_week": "3-5",
+      "efficacy_timeline_days": "3-5"
+    }
   }
 ]
