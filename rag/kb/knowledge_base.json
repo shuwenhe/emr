@@ -29220,5 +29220,77 @@
       ],
       "clinical_tip": "长期追访病例中，应尽量保留对应时期的MR图像资料，便于比较不同时点的结构变化与症状演变。"
     }
+  },
+  {
+    "id": "KB-IR-FUP-0741",
+    "title": "图12.45-患者治疗前红外热成像图",
+    "content": "图12.45为患者治疗前红外热成像图。该图像用于展示治疗前腰骶部及相关下肢区域的体表温度分布，为后续与治疗后热成像结果进行纵向比较提供基线功能影像资料。",
+    "category": "follow_up",
+    "tags": [
+      "图12.45",
+      "治疗前红外热成像图",
+      "基线热成像",
+      "功能影像",
+      "疗效比较"
+    ],
+    "source": "脊柱关节肌骨病红外热成像彩色图谱（第90页，用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_pre_treatment_thermography_figure_12_45_as_baseline_image",
+      "figure_reference": [
+        "图12.45"
+      ],
+      "image_value": [
+        "提供治疗前热成像基线",
+        "展示腰骶部及相关区域温度分布",
+        "为治疗后热图比较提供参照"
+      ],
+      "key_points": [
+        "治疗前热图是疗效判断的基础对照",
+        "应与治疗后同体位图像进行纵向比较",
+        "可辅助解释症状与功能影像的一致性或差异性"
+      ],
+      "clinical_tip": "保存治疗前热成像图时，应尽量记录采集体位和条件，以确保后续与治疗后图像比较时具有可比性。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0742",
+    "title": "图12.46-治疗过程：双针入路L4/5椎间盘射频靶点联合臭氧介入治疗",
+    "content": "图12.46展示治疗过程：采用双针入路对L4/5椎间盘实施射频靶点联合臭氧介入治疗。该技术路径强调在影像引导下对责任节段进行双通道精准进入，以兼顾靶点覆盖、盘内减压及局部炎性调节。",
+    "category": "treatment",
+    "tags": [
+      "图12.46",
+      "双针入路",
+      "L4/5",
+      "椎间盘射频靶点",
+      "臭氧介入治疗",
+      "治疗过程图"
+    ],
+    "source": "脊柱关节肌骨病红外热成像彩色图谱（第90页，用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_figure_12_46_showing_dual_needle_l45_disc_radiofrequency_targeting_combined_with_ozone_intervention",
+      "figure_reference": [
+        "图12.46"
+      ],
+      "procedure_components": [
+        "双针入路",
+        "L4/5椎间盘射频靶点治疗",
+        "臭氧介入"
+      ],
+      "clinical_value": [
+        "有助于展示责任节段精准干预路径",
+        "说明治疗兼顾减压与炎症调节目标",
+        "可作为病例教学和术式说明资料"
+      ],
+      "key_points": [
+        "双针入路有利于提升L4/5责任节段覆盖度",
+        "射频联合臭氧体现微创综合干预思路",
+        "治疗过程图可与术前影像及术后结局联合解读"
+      ],
+      "clinical_tip": "记录介入治疗过程图时，应尽量标明责任节段、入路方式及联合技术要点，以提高病例资料的教学和复盘价值。"
+    }
   }
 ]
