@@ -30978,5 +30978,42 @@
       ],
       "clinical_tip": "建立治疗前后同部位热成像对照时，建议统一拍摄条件与体位，减少环境干扰。"
     }
+  },
+  {
+    "id": "KB-IR-TX-0792",
+    "title": "操作参数-肱骨外上髁腕伸肌附着点射频镇痛后联合臭氧注入（图13.3）",
+    "content": "绝缘针灸针自肱骨外上髁腕伸肌附着点处进针并连接电极，选用10W能量、5秒持续时间进行射频镇痛治疗；随后给予浓度30ug/mL臭氧3mL（图13.3）。该记录用于固定关键操作参数与剂量信息。",
+    "category": "treatment",
+    "tags": [
+      "肱骨外上髁",
+      "腕伸肌附着点",
+      "绝缘针灸针",
+      "射频镇痛",
+      "10W",
+      "5秒",
+      "臭氧30ug/mL",
+      "3mL",
+      "图13.3"
+    ],
+    "source": "操作参数文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_rf_analgesia_parameters_and_following_ozone_injection_at_lateral_epicondyle_extensor_origin",
+      "procedure_steps": [
+        "绝缘针灸针于肱骨外上髁腕伸肌附着点进针",
+        "连接电极",
+        "射频参数：10W，持续5秒",
+        "随后注入臭氧30ug/mL，3mL"
+      ],
+      "figure_reference": [
+        "图13.3"
+      ],
+      "key_points": [
+        "明确记录能量与持续时间便于复现操作",
+        "臭氧浓度与体积需完整保留用于疗效和安全性追踪"
+      ],
+      "clinical_tip": "介入参数记录建议固定包含部位、能量、时间、药物浓度与剂量五要素，便于标准化随访。"
+    }
   }
 ]
