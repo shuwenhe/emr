@@ -32491,5 +32491,272 @@
       ],
       "clinical_tip": "封闭试验建议记录给药前后即时疼痛评分变化，以提高证据客观性。"
     }
+  },
+  {
+    "id": "KB-IR-CS-0843",
+    "title": "典型病例-2015-07-24主诉腰臀部疼痛4天，无明显外伤及下肢麻木放射痛",
+    "content": "患者陈某某于2015年7月24日因“腰臀部疼痛4天”就诊。未诉明显下肢放射痛及麻木，无明确外伤及明显诱因。该起病特征符合局部软组织-周围神经相关疼痛初诊场景。",
+    "category": "case_study",
+    "tags": [
+      "典型病例",
+      "2015-07-24",
+      "腰臀部疼痛4天",
+      "无明显外伤",
+      "无明显下肢麻木"
+    ],
+    "source": "典型病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_case_onset_with_low_back_buttock_pain_for_four_days_without_clear_trauma_or_distal_neurologic_symptoms",
+      "history_points": [
+        "主诉腰臀痛4天",
+        "无明显外伤诱因",
+        "无明显下肢放射痛麻木"
+      ],
+      "clinical_tip": "首诊应同步记录负重/受寒等暴露史，便于后续病因分层。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0844",
+    "title": "首诊查体-右髂嵴中点下3cm压痛伴轻度臀部放射感，L3/4棘突旁压痛无放射",
+    "content": "查体见右侧髂嵴中点下方约3cm处压痛，并略伴臀部放射感；腰3、4棘突及右侧旁开1.5cm处亦有压痛但无放射痛。该体征提示责任点更偏向髂嵴下神经通道。",
+    "category": "clinical_presentation",
+    "tags": [
+      "右髂嵴中点下3cm压痛",
+      "臀部放射感",
+      "L3/4棘突压痛",
+      "右侧旁开1.5cm",
+      "无放射痛"
+    ],
+    "source": "典型病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_initial_exam_localizing_primary_tenderness_three_cm_below_right_iliac_crest_midpoint_with_mild_gluteal_radiation",
+      "exam_findings": [
+        "右髂嵴中点下3cm压痛并放射",
+        "L3/4棘突及旁开1.5cm压痛但不放射"
+      ],
+      "clinical_tip": "定位性放射痛比单纯压痛更能提示主责靶点。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0845",
+    "title": "神经与专项试验-直腿抬高/加强/梨状肌紧张试验阴性，下肢感觉肌力正常，VAS 5分",
+    "content": "首诊时直腿抬高试验阴性、加强试验阴性、梨状肌紧张试验阴性；下肢皮肤感觉与肌力均正常。VAS评分5分。该组合降低了典型神经根受压与梨状肌综合征的可能性。",
+    "category": "clinical_presentation",
+    "tags": [
+      "直腿抬高阴性",
+      "加强试验阴性",
+      "梨状肌紧张试验阴性",
+      "感觉正常",
+      "肌力正常",
+      "VAS5分"
+    ],
+    "source": "典型病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_negative_neurodynamic_and_piriformis_tests_with_preserved_neurologic_function_and_moderate_pain_score",
+      "exam_findings": [
+        "SLR阴性",
+        "加强试验阴性",
+        "梨状肌紧张试验阴性",
+        "感觉肌力正常",
+        "VAS 5分"
+      ],
+      "clinical_tip": "当神经牵拉与梨状肌试验均阴性时，应优先考虑局部神经卡压或软组织痛源。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0846",
+    "title": "初步诊断-考虑臀上皮神经卡压综合征",
+    "content": "根据病史、压痛定位及试验结果，首诊初步考虑“臀上皮神经卡压综合征”。该判断为后续影像与热成像验证提供方向。",
+    "category": "diagnosis",
+    "tags": [
+      "初步诊断",
+      "臀上皮神经卡压综合征",
+      "首诊判断"
+    ],
+    "source": "典型病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_initial_clinical_impression_of_superior_cluneal_nerve_entrapment",
+      "diagnostic_points": [
+        "病史与体征支持神经卡压假设",
+        "后续检查用于确认"
+      ],
+      "clinical_tip": "初步诊断建议与后续客观检查形成闭环验证。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0847",
+    "title": "骨盆正位片-腰椎骨质增生而骨盆骨质未见明显异常（图15.1）",
+    "content": "骨盆正位片报告示腰椎骨质增生，骨盆骨质未见明显异常（图15.1）。该结果提示骨盆侧未见明显器质性异常支持。",
+    "category": "diagnosis",
+    "tags": [
+      "骨盆正位片",
+      "腰椎骨质增生",
+      "骨盆骨质无明显异常",
+      "图15.1"
+    ],
+    "source": "影像检查文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_pelvic_ap_xray_showing_lumbar_osteophyte_changes_without_obvious_pelvic_bony_abnormality",
+      "imaging_findings": [
+        "腰椎骨质增生",
+        "骨盆骨质未见明显异常"
+      ],
+      "figure_reference": [
+        "图15.1"
+      ],
+      "clinical_tip": "影像阴性区域信息同样重要，可用于缩小责任病灶范围。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0848",
+    "title": "治疗前热成像-右髂嵴片状高温差较左侧升高并结合查体确诊（图15.2）",
+    "content": "腰臀部红外热成像示右侧髂嵴处片状高温差，较左侧温差升高。结合查体表现可确诊臀上皮神经卡压综合征。治疗图示见图15.2（原文表述为治疗图）。",
+    "category": "diagnosis",
+    "tags": [
+      "治疗前热成像",
+      "右髂嵴片状高温差",
+      "侧别升高",
+      "确诊依据",
+      "图15.2"
+    ],
+    "source": "热成像与诊断文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_pre_treatment_thermography_with_right_iliac_crest_patchy_hyperthermic_difference_supporting_diagnosis",
+      "exam_findings": [
+        "右髂嵴片状高温差",
+        "较左侧温差升高"
+      ],
+      "figure_reference": [
+        "图15.2"
+      ],
+      "key_points": [
+        "热成像与压痛定位一致支持确诊",
+        "侧别差异可用于疗后对照"
+      ],
+      "clinical_tip": "热成像用于确诊时应与体征同位点匹配，避免仅凭颜色分布下结论。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0849",
+    "title": "治疗方案-铍针刺络+穴位拔罐+微波射频+中药敷贴治疗1次",
+    "content": "本次治疗采用铍针刺络、穴位拔罐、微波射频及中药敷贴联合方案，实施1次。该组合体现局部松解、热疗与中医外治协同干预思路。",
+    "category": "treatment",
+    "tags": [
+      "铍针刺络",
+      "穴位拔罐",
+      "微波射频",
+      "中药敷贴",
+      "联合治疗",
+      "治疗1次"
+    ],
+    "source": "治疗记录文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_combined_treatment_of_acupotomy_like_needling_cupping_microwave_rf_and_herbal_poultice_single_session",
+      "treatment_plan": [
+        "铍针刺络",
+        "穴位拔罐",
+        "微波射频",
+        "中药敷贴"
+      ],
+      "session_info": [
+        "实施1次"
+      ],
+      "clinical_tip": "联合治疗后建议分时点评估疼痛和温差变化，明确主要获益环节。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0850",
+    "title": "短时复查-治疗后休息1小时热成像示右髂嵴高温差范围缩小（图15.3）",
+    "content": "治疗后休息1小时复查红外热成像显示：右侧髂嵴片状高温差范围较治疗前减少（图15.3）。该结果提示短时内局部功能状态已有改善趋势。",
+    "category": "follow_up",
+    "tags": [
+      "治疗后1小时",
+      "复查热成像",
+      "右髂嵴高温差缩小",
+      "图15.3",
+      "短时疗效"
+    ],
+    "source": "随访复查文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_one_hour_post_treatment_thermography_showing_reduced_right_iliac_crest_hyperthermic_area",
+      "figure_reference": [
+        "图15.3"
+      ],
+      "outcome_points": [
+        "高温差范围缩小"
+      ],
+      "clinical_tip": "早期复查可反映即时反应，但仍需结合后续复诊确认稳定疗效。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0851",
+    "title": "三日复诊-压痛与放射感减轻，VAS由5分降至2分（2015-07-27）",
+    "content": "2015年7月27日复诊：右侧髂嵴中点下3cm压痛较前减轻，臀部放射感消失；腰3、4棘突及右侧旁开1.5cm压痛亦较前减弱。VAS评分由5分降至2分。",
+    "category": "follow_up",
+    "tags": [
+      "2015-07-27复诊",
+      "压痛减轻",
+      "臀部放射感消失",
+      "VAS2分",
+      "较前改善"
+    ],
+    "source": "复诊记录文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_three_day_followup_with_tenderness_reduction_disappearance_of_gluteal_radiation_and_vas_drop_from_five_to_two",
+      "timeline": [
+        "首诊VAS 5分",
+        "三日复诊VAS 2分"
+      ],
+      "outcome_points": [
+        "压痛减轻",
+        "放射感消失"
+      ],
+      "clinical_tip": "复诊应同步记录同位点触痛和VAS变化，以增强疗效可追踪性。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0852",
+    "title": "复诊热成像-右髂嵴高温差区域基本消失（图15.4）",
+    "content": "复诊复查红外热成像显示右侧髂嵴高温差区域基本消失（图15.4）。该客观变化与症状改善一致，进一步支持本次治疗有效。",
+    "category": "follow_up",
+    "tags": [
+      "复诊热成像",
+      "右髂嵴高温差基本消失",
+      "图15.4",
+      "主客观一致",
+      "疗效确认"
+    ],
+    "source": "复诊热成像文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_followup_thermography_showing_near_resolution_of_right_iliac_crest_hyperthermic_area_with_consistent_symptom_relief",
+      "figure_reference": [
+        "图15.4"
+      ],
+      "outcome_points": [
+        "高温差区域基本消失",
+        "与临床症状同步改善"
+      ],
+      "clinical_tip": "建议保留治疗前后同位点热成像对照图，作为病例教学和疗效证据。"
+    }
   }
 ]
