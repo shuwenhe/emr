@@ -22869,5 +22869,109 @@
       ],
       "clinical_tip": "出现会阴麻木或大小便功能障碍时，应立即按马尾综合征流程处理。"
     }
+  },
+  {
+    "id": "KB-IR-CL-0561",
+    "title": "临床表现-腰突患者常见功能性脊柱侧凸",
+    "content": "约90%以上腰椎间盘突出病例可出现不同程度功能性脊柱侧凸。该体位变化多为减轻神经根刺激的代偿反应，具有较高临床提示意义。",
+    "category": "clinical_presentation",
+    "tags": [
+      "腰椎间盘突出症",
+      "功能性脊柱侧凸",
+      "代偿体位",
+      "体征",
+      "临床表现"
+    ],
+    "source": "临床表现要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "identify_functional_scoliosis_as_compensatory_sign_in_ldh",
+      "key_points": [
+        "功能性侧凸在腰突中较常见",
+        "多数与神经根受压刺激有关",
+        "属于姿势性代偿而非固定畸形",
+        "可作为受压方向判断的辅助体征"
+      ],
+      "clinical_tip": "查体时应结合疼痛侧与影像受压侧综合判断，避免将功能性侧凸误判为结构性侧弯。"
+    }
+  },
+  {
+    "id": "KB-IR-CL-0562",
+    "title": "临床表现-髓核与神经根相对位置决定躯干侧弯方向",
+    "content": "当髓核突出位于神经根外侧时，患者上身多向健侧弯曲，腰椎凸向患侧以松弛受压神经根；当突出位于神经根内侧时，患者可向患侧弯曲以缓解疼痛。姿势方向可反映受压力学关系。",
+    "category": "clinical_presentation",
+    "tags": [
+      "髓核位置",
+      "神经根外侧",
+      "神经根内侧",
+      "躯干侧弯",
+      "力学代偿"
+    ],
+    "source": "临床表现要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "infer_root_compression_pattern_from_trunk_lean_direction",
+      "key_points": [
+        "外侧型突出常见向健侧侧弯",
+        "内侧型突出可见向患侧侧弯",
+        "侧弯方向与神经根减压策略相关",
+        "体位信息可辅助节段与受压关系判断"
+      ],
+      "clinical_tip": "姿势判断应与放射痛分布、神经体征和MRI层面共同解释。"
+    }
+  },
+  {
+    "id": "KB-IR-CL-0563",
+    "title": "临床表现-神经根与髓核粘连时体位代偿失效",
+    "content": "若神经根与突出的髓核已形成粘连，无论腰椎凸向何侧，体位调整均难以有效缓解疼痛，提示病变可能进展并伴更明显机械性受限。",
+    "category": "clinical_presentation",
+    "tags": [
+      "神经根粘连",
+      "体位无效",
+      "疼痛持续",
+      "病情进展",
+      "腰突"
+    ],
+    "source": "临床表现要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "recognize_postural_nonresponse_when_root_adhesion_exists",
+      "key_points": [
+        "粘连会限制神经根相对滑移",
+        "单纯改变姿势难以减压止痛",
+        "提示病变复杂度增加",
+        "需进一步评估干预策略"
+      ],
+      "clinical_tip": "当体位调整完全无效时，应提高对神经根粘连或重度受压的警惕。"
+    }
+  },
+  {
+    "id": "KB-IR-CL-0564",
+    "title": "临床表现-腰椎生理前凸减小消失甚至后凸",
+    "content": "腰突患者常伴腰椎生理前凸减小或消失，部分可出现腰椎后凸。该变化多与疼痛性肌痉挛及保护性姿势相关，反映脊柱力线代偿状态。",
+    "category": "clinical_presentation",
+    "tags": [
+      "腰椎前凸减小",
+      "腰椎后凸",
+      "保护性姿势",
+      "肌痉挛",
+      "脊柱力线"
+    ],
+    "source": "临床表现要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "assess_lumbar_lordosis_loss_and_kyphotic_compensation",
+      "key_points": [
+        "可见生理前凸减小或消失",
+        "部分患者可出现腰椎后凸",
+        "多与疼痛和肌痉挛有关",
+        "提示脊柱保护性代偿持续存在"
+      ],
+      "clinical_tip": "动态随访腰椎曲度变化有助于评估疼痛缓解与功能恢复进程。"
+    }
   }
 ]
