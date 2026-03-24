@@ -21957,5 +21957,31 @@
       ],
       "clinical_tip": "尺侧面可补全多体位热成像信息，便于更全面评估局部温度异常范围。"
     }
+  },
+  {
+    "id": "KB-IR-BM-0526",
+    "title": "影像资料-患者治疗前红外热成像图",
+    "content": "患者治疗前红外热成像图用于记录干预前局部热分布状态，可作为疗效评估的基线影像。通过与治疗后同体位图像对照，可辅助判断局部炎性反应和微循环改变趋势。",
+    "category": "basic_concept",
+    "tags": [
+      "治疗前",
+      "红外热成像图",
+      "基线影像",
+      "疗效评估",
+      "扳机指"
+    ],
+    "source": "临床热成像评估要点整理",
+    "source_type": "expert_consensus",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_pre_treatment_infrared_thermography_baseline",
+      "key_points": [
+        "治疗前采集标准化红外热成像图像",
+        "明确记录拍摄体位与环境条件",
+        "将图像作为治疗后复查对照基线",
+        "结合症状体征综合解读温度变化"
+      ],
+      "clinical_tip": "复查时保持相同采集条件可减少技术偏差，提高前后对比可信度。"
+    }
   }
 ]
