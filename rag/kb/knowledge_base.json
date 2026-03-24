@@ -25879,5 +25879,144 @@
       ],
       "clinical_tip": "当保守药物治疗无效且责任节段明确时，及时手术减压可降低持续神经压迫导致的不可逆功能损害风险。"
     }
+  },
+  {
+    "id": "KB-IR-TX-0658",
+    "title": "手术技术特点-椎间孔镜经安全三角入路局麻精准减压",
+    "content": "椎间孔镜技术被认为是脊柱内镜技术的重要进展。其核心是在局部麻醉下，经椎间孔安全三角入路，在内镜直视下完成突出髓核组织摘除及神经通道松解。该术式可在保持组织结构完整性的前提下实现责任节段精准减压，兼具靶向性与微创性。",
+    "category": "treatment",
+    "tags": [
+      "椎间孔镜技术",
+      "局麻",
+      "安全三角入路",
+      "髓核摘除",
+      "神经通道松解"
+    ],
+    "source": "手术技术描述（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "summarize_transforaminal_endoscopic_local_anesthesia_technique_and_precise_decompression_path",
+      "technique_features": [
+        "局麻下完成操作",
+        "经椎间孔安全三角入路",
+        "内镜直视下摘核与松解"
+      ],
+      "clinical_value": [
+        "责任节段精准减压",
+        "减少组织损伤",
+        "提升围手术期安全性"
+      ],
+      "key_points": [
+        "入路清晰且创伤小",
+        "直视操作提高精准度",
+        "符合微创脊柱外科趋势"
+      ],
+      "clinical_tip": "椎间孔镜技术的关键在于责任节段精准定位与安全入路建立，术前影像评估对提高手术成功率至关重要。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0659",
+    "title": "术中优势-出血少且对脊柱骨性结构干扰小",
+    "content": "椎间孔镜术中出血通常较少，一般约2-10mL。由于不需要大范围剥离软组织，对脊柱骨性结构及椎管内结构干扰较小，可降低术中和术后并发症发生风险。该特征使其在合适适应证患者中具有较好的安全性和恢复优势。",
+    "category": "treatment",
+    "tags": [
+      "术中出血少",
+      "软组织保护",
+      "骨性结构干扰小",
+      "并发症风险降低",
+      "微创优势"
+    ],
+    "source": "术中特点总结（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_intraoperative_benefits_of_transforaminal_endoscopic_approach_with_low_blood_loss_and_low_structural_disruption",
+      "intraoperative_benefits": [
+        "术中出血量低",
+        "减少软组织剥离",
+        "对骨性结构影响小",
+        "对椎管内结构干扰小"
+      ],
+      "risk_reduction": [
+        "降低术中并发症风险",
+        "降低术后并发症风险"
+      ],
+      "key_points": [
+        "微创优势明确",
+        "组织保护程度高",
+        "有助于术后快速恢复"
+      ],
+      "clinical_tip": "椎间孔镜术中的组织保护优势可降低并发症风险，但前提是术者对入路解剖和镜下操作有充分掌握。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0660",
+    "title": "术后早期康复-6小时下床与倒蹬训练联合中西医支持",
+    "content": "患者术后恢复时间短，术后约6小时即可下床活动，并开始倒蹬训练以防止神经粘连。围术后配合活血化瘀止痛类中药及营养神经药物综合治疗，有助于控制疼痛、改善局部循环并促进神经功能恢复。该方案体现了手术减压与早期康复、药物支持并行的快速康复路径。",
+    "category": "follow_up",
+    "tags": [
+      "术后6小时下床",
+      "倒蹬训练",
+      "防神经粘连",
+      "中药治疗",
+      "营养神经药物"
+    ],
+    "source": "术后康复记录（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_early_rehabilitation_with_combined_medication_support_after_transforaminal_endoscopic_surgery",
+      "rehabilitation_steps": [
+        "术后6小时下床活动",
+        "尽早开始倒蹬训练",
+        "预防术后神经粘连"
+      ],
+      "adjuvant_therapy": [
+        "活血化瘀止痛中药",
+        "营养神经药物"
+      ],
+      "key_points": [
+        "早期活动促进功能恢复",
+        "康复与药物支持协同",
+        "有助于缩短恢复周期"
+      ],
+      "clinical_tip": "术后早期下床和针对性训练应在支具保护和专业指导下进行，以兼顾恢复效率与安全性。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0661",
+    "title": "术后影像随访-红外热成像示双下肢温差趋于一致",
+    "content": "术后红外热成像复查显示腰部中正，双下肢温差几乎相同。该结果提示术前存在的侧别性温度异常已明显改善，局部微循环和神经功能逐步恢复。热成像变化与临床症状改善趋势一致，可作为术后疗效客观评估的补充证据。",
+    "category": "follow_up",
+    "tags": [
+      "术后红外复查",
+      "双下肢温差一致",
+      "神经功能恢复",
+      "微循环改善",
+      "客观疗效评估"
+    ],
+    "source": "术后热成像随访（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_postoperative_infrared_thermography_symmetry_as_objective_recovery_marker",
+      "follow_up_findings": [
+        "腰部中正",
+        "双下肢温差接近一致",
+        "侧别低温异常明显改善"
+      ],
+      "clinical_implications": [
+        "提示神经功能逐步恢复",
+        "提示微循环状态改善",
+        "支持术后恢复趋势良好"
+      ],
+      "key_points": [
+        "热成像结果与症状改善一致",
+        "可作为客观随访指标",
+        "有助于判断恢复稳定性"
+      ],
+      "clinical_tip": "术后热成像温差趋于一致通常提示恢复良好，但仍应结合疼痛、感觉及肌力变化进行综合评估。"
+    }
   }
 ]
