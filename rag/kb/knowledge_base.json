@@ -37744,5 +37744,79 @@
       ],
       "clinical_tip": "可结合症状时相与诱因特点，进行中西医病因病机并行归纳。"
     }
+  },
+  {
+    "id": "KB-IR-TX-1053",
+    "title": "疗法定位-小针刀融合中医针灸理论与现代解剖学、生物力学",
+    "content": "小针刀疗法是中医针灸理论与现代医学解剖学、生物力学相结合的治疗方法，体现了传统理论与现代结构功能认识的整合应用。",
+    "category": "treatment",
+    "tags": [
+      "小针刀疗法",
+      "中西结合",
+      "针灸理论",
+      "解剖学",
+      "生物力学",
+      "治疗定位"
+    ],
+    "source": "小针刀疗法文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_needle_knife_therapy_as_integration_of_tcm_acupuncture_theory_with_modern_anatomy_and_biomechanics",
+      "criteria_summary": [
+        "中医针灸理论结合现代解剖与生物力学"
+      ],
+      "clinical_tip": "治疗设计应兼顾经络理论与局部解剖层次，提升操作针对性。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-1054",
+    "title": "临床特点-小针刀对骨退行性变及慢性软组织损伤疼痛疗效较明显",
+    "content": "小针刀疗法对骨退行性变及慢性软组织损伤相关疼痛具有较明显疗效，常用于疼痛与功能受限并存的慢性肌骨问题干预。",
+    "category": "treatment",
+    "tags": [
+      "骨退行性变",
+      "慢性软组织损伤",
+      "疼痛疗效",
+      "肌骨疾病",
+      "小针刀"
+    ],
+    "source": "小针刀疗法文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_observed_pain_relief_effect_of_needle_knife_for_degenerative_bone_and_chronic_soft_tissue_conditions",
+      "treatment_plan": [
+        "用于慢性疼痛相关肌骨病变干预"
+      ],
+      "clinical_tip": "建议联合功能量表与疼痛评分进行疗效量化随访。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-1055",
+    "title": "方法优势与机制条目-见效快、操作相对简便且经济，腕管综合征机制待后续细化",
+    "content": "小针刀疗法具有见效较快、方法相对简便、经济适用等特点。原文提出“小针刀治疗腕管综合征的机制为：”，但该段未提供后续具体机制细节，需结合后续文本补充完善。",
+    "category": "treatment",
+    "tags": [
+      "见效快",
+      "方法简便",
+      "经济适用",
+      "腕管综合征",
+      "机制待补充",
+      "小针刀"
+    ],
+    "source": "小针刀疗法文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_needle_knife_practical_advantages_and_mark_cts_mechanism_as_pending_due_to_incomplete_source_sentence",
+      "criteria_summary": [
+        "见效较快",
+        "方法相对简便",
+        "经济适用",
+        "机制描述未展开"
+      ],
+      "clinical_tip": "待补充机制原文后，可进一步拆分为减压、松解、循环改善等更细条目。"
+    }
   }
 ]
