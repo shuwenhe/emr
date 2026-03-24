@@ -18432,5 +18432,90 @@
       ],
       "examination_technique": "触诊时应系统地检查各个解剖部位，避免造成过度的疼痛刺激"
     }
+  },
+  {
+    "id": "KB-IR-CL-0504",
+    "title": "肩周炎临床表现-肌肉萎缩",
+    "content": "肌肉萎缩是肩周炎晚期的重要临床体征，反映了长期疼痛和活动受限对肌肉组织的影响。肌肉参与的变化与疾病进展密切相关，分为早期和晚期两个阶段。早期阶段，由于疼痛的持续刺激，肩周围肌肉处于保护性痉挛状态，主要表现为三角肌、冈上肌等肌肉的紧张与痉挛，这是一种神经反射性的防御反应。随着疾病进展进入晚期，因为肩关节活动严重受限，患者长期不能进行正常的肩关节运动，导致肌肉长期缺乏使用，逐渐发生废用性萎缩。废用性萎缩主要涉及肌群包括三角肌（特别是三角肌的前、中、后三束）、冈上肌、冈下肌、小圆肌等旋转袖肌群以及胸大肌等肩周肌肉。肌肉萎缩会进一步加重肩关节的稳定性不足，形成恶性循环，使患者的肩关节功能受损更加严重。通常在病程持续3-6个月以上且活动严重受限的患者才会出现明显的肌肉萎缩表现。",
+    "category": "clinical_presentation",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "肩周炎",
+      "肌肉萎缩",
+      "三角肌",
+      "旋转袖肌群",
+      "临床体征",
+      "晚期表现"
+    ],
+    "source": "肩周炎诊疗规范与病理生理学",
+    "source_type": "guideline",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "肩周炎患者就诊",
+      "需要评估肌肉状态"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩关节",
+      "肌肉"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "肌肉萎缩",
+      "三角肌",
+      "冈上肌",
+      "萎缩",
+      "废用性"
+    ],
+    "structured_advice": {
+      "action": "assess_muscle_atrophy",
+      "progression_stages": {
+        "early_stage": "疼痛刺激引起的保护性痉挛",
+        "late_stage": "活动受限引起的废用性萎缩"
+      },
+      "affected_muscles": [
+        {
+          "name": "三角肌（前、中、后束）",
+          "stage": "早期痉挛→晚期萎缩",
+          "clinical_significance": "肩外展主要肌肉，萎缩影响肩外展功能"
+        },
+        {
+          "name": "冈上肌",
+          "stage": "早期痉挛→晚期萎缩",
+          "clinical_significance": "肩关节上举主要肌肉，萎缩导致活动进一步受限"
+        },
+        {
+          "name": "冈下肌",
+          "stage": "早期痉挛→晚期萎缩",
+          "clinical_significance": "肩关节外旋肌肉，萎缩加重外旋受限"
+        },
+        {
+          "name": "小圆肌",
+          "stage": "晚期萎缩为主",
+          "clinical_significance": "旋转袖肌群一部分，与肩关节稳定性相关"
+        },
+        {
+          "name": "胸大肌",
+          "stage": "晚期萎缩为主",
+          "clinical_significance": "肩内收肌肉，萎缩影响肩内收功能"
+        }
+      ],
+      "temporal_correlation": "通常在病程持续3-6个月以上且活动严重受限的患者才会出现明显萎缩",
+      "clinical_implications": "肌肉萎缩加重肩关节稳定性不足，形成恶性循环，进一步损害肩关节功能",
+      "assessment_points": "检查时注意对比两侧肩膀肌肉体积和线条，特别是三角肌和冈上肌区域的对称性"
+    }
   }
 ]
