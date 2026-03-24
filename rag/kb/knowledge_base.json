@@ -20068,5 +20068,67 @@
         "追踪治疗反应"
       ]
     }
+  },
+  {
+    "id": "KB-IR-IR-0604",
+    "title": "红外热成像复查体位-双肩正侧位",
+    "content": "双肩正侧位可作为肩部红外热成像复查的标准体位组合，用于治疗前后纵向对比。正位用于观察双侧三角肌区、肩峰区和前胸肩带温差；侧位用于观察肩前区、肩后区及肩峰下区温差变化。复查时建议与初次检查保持同环境、同体位角度、同采集参数，以提高疗效评估一致性。",
+    "category": "follow_up",
+    "report_sections": [
+      "follow_up",
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "红外热成像",
+      "双肩正侧位",
+      "复查",
+      "疗效评估",
+      "温差对比"
+    ],
+    "source": "红外热成像复查规范",
+    "source_type": "guideline",
+    "priority": 7,
+    "status": "active",
+    "applicable_conditions": [
+      "肩周炎治疗后复评",
+      "双侧温差疗效对比",
+      "随访监测"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "双肩"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "双肩正侧位复查",
+      "温差复评",
+      "热成像随访"
+    ],
+    "structured_advice": {
+      "action": "infrared_followup_positioning",
+      "positions": [
+        "双肩正位",
+        "双肩侧位"
+      ],
+      "comparison_focus": [
+        "双侧温差是否缩小",
+        "局部高温差区域是否减弱",
+        "热分布是否趋于均衡"
+      ],
+      "quality_control": [
+        "同环境温度",
+        "同体位角度",
+        "同采集参数",
+        "同时间段复查优先"
+      ]
+    }
   }
 ]
