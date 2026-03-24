@@ -14224,6 +14224,161 @@
     ]
   },
   {
+    "id": "KB-IR-BG-0221",
+    "title": "胸肋软骨类病变常累及第7至10肋前缘并伴局部压痛",
+    "content": "胸肋软骨类病变多指第7、8、9、10肋胸廓前缘组成的肋软骨区域出现慢性损伤性炎症和疼痛，局部常有较明显压痛。临床判断时应结合疼痛部位及压痛点综合分析。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "胸肋软骨",
+      "第7到10肋",
+      "慢性损伤性炎症",
+      "局部压痛",
+      "胸廓前缘"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "胸腹部"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "第7 8 9 10肋胸廓前缘组成肋软骨",
+      "慢性损伤性炎症疼痛",
+      "局部明显压痛"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0222",
+    "title": "胸肋软骨类病变需与劳损性胸椎侧凸症鉴别",
+    "content": "诊断胸肋软骨类病变时，应注意与劳损性胸椎侧凸症进行鉴别，以避免将不同来源的胸背部疼痛混淆。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "胸肋软骨",
+      "鉴别诊断",
+      "劳损性胸椎侧凸症",
+      "胸背部疼痛"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 9,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "胸腹部",
+      "脊柱背部"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "与劳损性胸椎侧凸症相鉴别",
+      "胸肋软骨类病变鉴别诊断"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0223",
+    "title": "胸前部疼痛诊断时应排除呼吸心胆胃肠及乳腺疾病",
+    "content": "对于胸前部或胸肋部疼痛患者，诊断时应注意排除呼吸道疾病、冠心病、胆囊及胃肠疾病，以及女性乳腺病变等其他常见原因。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "鉴别诊断",
+      "呼吸道疾病",
+      "冠心病",
+      "胆囊疾病",
+      "胃肠疾病",
+      "乳腺病变"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 10,
+    "status": "active",
+    "patient_scope": [
+      "adult",
+      "female"
+    ],
+    "body_parts": [
+      "胸腹部"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "排除呼吸道疾患",
+      "排除冠心病",
+      "排除胆囊和胃肠疾病",
+      "排除妇女乳腺病变"
+    ]
+  },
+  {
+    "id": "KB-IR-BG-0224",
+    "title": "胸背部相关病变可表现为胸背不适并牵涉胸胁疼痛",
+    "content": "患者早期可感到胸背部不适、麻痹感或胀感，随后逐渐出现疼痛，有时可牵涉至胸部或胁肋部。一侧上肢活动时，背部疼痛可加重。",
+    "category": "interpretation_rule",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "report_note"
+    ],
+    "tags": [
+      "胸背不适",
+      "麻痹感",
+      "胀感",
+      "牵涉胸痛",
+      "胁痛",
+      "上肢活动加重背痛"
+    ],
+    "source": "设备操作说明（用户补充）",
+    "source_type": "internal_sop",
+    "priority": 8,
+    "status": "active",
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "胸腹部",
+      "脊柱背部",
+      "上肢"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "internal_sop",
+    "retrieval_hints": [
+      "胸背不适麻痹胀感",
+      "逐渐出现疼痛",
+      "牵涉胸痛胁痛",
+      "上肢运动时背痛加重"
+    ]
+  },
+  {
     "id": "KB-IR-BG-0199",
     "title": "神经根型颈椎病诊断要点：神经根性症状与节段分布一致",
     "content": "诊断神经根型颈椎病时，患者多具有较典型的神经根性症状，如麻木、疼痛等，且症状或感觉异常范围应与相应颈神经根支配区域基本一致。",
@@ -17518,5 +17673,62 @@
       "低风险"
     ],
     "evidence_level": "clinical_experience"
+  },
+  {
+    "id": "KB-IR-TX-0400",
+    "title": "湿敷直流电药物透入疗法",
+    "content": "湿敷直流电药物透入疗法是一种物理医学和康复治疗技术，结合直流电、医用敷料和治疗药物，将药物离子通过直流电的作用透入患者体内。该疗法可用于减轻局部炎症、缓解疼痛、改善微循环和促进组织修复。适用于颈肩、腰背、膝关节等部位的慢性疼痛和炎症性病变，疗效显著且无明显全身性不良反应。",
+    "category": "treatment_guideline",
+    "report_sections": [
+      "treatment_plan_text",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "物理治疗",
+      "直流电疗",
+      "药物透入",
+      "离子导入",
+      "消炎止痛"
+    ],
+    "source": "物理医学与康复治疗规范",
+    "source_type": "guideline",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "存在局部炎症或疼痛",
+      "无皮肤破溃或开放性伤口",
+      "无心脏起搏器等植入设备"
+    ],
+    "contraindications": [
+      "皮肤破溃、急性化脓性感染或心脏起搏器植入者禁用",
+      "妊娠期或心脏疾病患者慎用"
+    ],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "腰背",
+      "膝关节",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "直流电药物透入",
+      "离子导入疗法",
+      "消炎镇痛治疗",
+      "物理治疗"
+    ],
+    "structured_advice": {
+      "action": "ion_iontophoresis_therapy",
+      "typical_course_days": "10-14",
+      "sessions_per_week": "3-5",
+      "duration_minutes_per_session": "15-30"
+    }
   }
 ]
