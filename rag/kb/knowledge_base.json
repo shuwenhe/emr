@@ -19329,5 +19329,82 @@
       ],
       "clinical_implication": "若出现红旗影像表现，应优先转入相应专科路径，避免按单纯肩周炎处理"
     }
+  },
+  {
+    "id": "KB-IR-DX-0509",
+    "title": "肩部红外热成像表现-双侧异常高温差分布",
+    "content": "红外热成像显示患者肩部及肩胛周围存在多处异常高温差区域，提示局部软组织炎症反应、肌筋膜张力异常及疼痛相关代谢活跃。具体表现为：左肩前侧肱二头肌长头腱区域出现片状高温差；左肩后侧冈上肌及其周围区域较右侧明显高温差；左肩侧位肩峰下区域较右侧出现局部片状高温差。与此同时，右侧肩胛提肌、右侧肩胛骨内侧缘及菱形肌区域亦见高温差分布，提示存在对侧代偿性肌筋膜紧张与劳损。该热像分布符合颈肩复合疼痛模式，支持“患侧肩关节局部炎症+对侧肩胛稳定肌代偿过载”的临床判断，可用于定位痛源区域、指导针灸取穴和手法干预路径。",
+    "category": "diagnosis",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "红外热成像",
+      "高温差",
+      "肱二头肌长头腱",
+      "冈上肌",
+      "肩峰下",
+      "肩胛提肌",
+      "菱形肌"
+    ],
+    "source": "肩部红外热成像临床判读记录",
+    "source_type": "clinical_record",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "肩痛伴活动受限",
+      "颈肩复合疼痛评估",
+      "治疗前定位评估"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "左肩",
+      "右肩胛区"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "clinical_experience",
+    "retrieval_hints": [
+      "红外热像",
+      "左肩高温差",
+      "右侧肩胛提肌",
+      "菱形肌高温差"
+    ],
+    "structured_advice": {
+      "action": "interpret_infrared_thermography",
+      "thermal_findings": {
+        "left_anterior": [
+          "肱二头肌长头腱处片状高温差"
+        ],
+        "left_posterior": [
+          "冈上肌及周围较右侧明显高温差"
+        ],
+        "left_lateral": [
+          "肩峰下较右侧局部片状高温差"
+        ],
+        "right_scapular_region": [
+          "肩胛提肌高温差",
+          "肩胛骨内侧缘高温差",
+          "菱形肌高温差"
+        ]
+      },
+      "clinical_interpretation": [
+        "左侧以肩关节局部炎症活跃为主",
+        "右侧肩胛稳定肌群存在代偿性紧张",
+        "整体符合颈肩复合疼痛热像特征"
+      ],
+      "treatment_guidance": [
+        "针灸优先覆盖左肩前侧、左肩后侧及肩峰下高温区",
+        "手法治疗重点处理右侧肩胛提肌与菱形肌紧张",
+        "随访复查热像对比双侧温差变化以评估疗效"
+      ]
+    }
   }
 ]
