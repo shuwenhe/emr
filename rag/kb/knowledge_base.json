@@ -24484,5 +24484,76 @@
       ],
       "clinical_tip": "红外热成像提供了客观的术前术后对比，是评估脊椎微创手术疗效的重要补充工具。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0620",
+    "title": "影像学诊断-L4/5、L5/S1间盘突出致神经根压迫详述",
+    "content": "患者L4/5、L5/S1两个节段存在间盘突出继发椎管狭窄症。椎间盘组织偏左侧突出，对左侧神经根形成明显压迫。同时，腰MR轴位图像显示L4/5、L5/S1两个节段的右侧神经通道也受到影响。左侧症状以神经根受压明显，表现为左侧臀区及左下肢疼痛、麻木、乏力。右侧神经通道受影响虽然症状相对较轻，但影像学证据清楚，两侧神经根均不同程度地受到椎间盘突出组织和椎管狭窄的压迫。",
+    "category": "diagnosis",
+    "tags": [
+      "间盘突出",
+      "多节段",
+      "双侧神经根压迫",
+      "L4/5",
+      "L5/S1",
+      "MR诊断"
+    ],
+    "source": "影像学征象分析（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "analyze_multi_level_disc_herniation_with_bilateral_neural_compression",
+      "imaging_findings": {
+        "levels": "L4/5、L5/S1",
+        "herniation_direction": "偏左侧突出",
+        "left_side": "神经根受压明显",
+        "right_side": "神经通道受影响"
+      },
+      "clinical_correlation": [
+        "左侧症状显著",
+        "右侧症状相对轻微",
+        "影像异常双侧"
+      ],
+      "key_points": [
+        "多节段间盘突出",
+        "双侧神经通道受累",
+        "影像学证据完整"
+      ],
+      "clinical_tip": "多节段双侧神经根受压的患者，存在非对称症状表现，术前影像评估应全面覆盖左右两侧及多个节段。"
+    }
+  },
+  {
+    "id": "KB-IR-CL-0621",
+    "title": "神经病理机制-交感神经通路刺激与皮肤温度改变",
+    "content": "椎间盘突出组织压迫或刺激神经根及相应的交感神经通路，可引起一系列病理生理改变。当交感神经受到刺激时，所支配区域的体表血管发生收缩，导致局部血流量减少，皮肤温度下降，在热成像中表现为低温区。相反，当局部组织充血水肿加重，炎性物质增多，血管通透性增加时，局部微循环血流增加，皮肤温度升高，在热成像中表现为高温区。这种温度异常分布直接反映了神经受压及局部血管反应的程度和范围。",
+    "category": "clinical_presentation",
+    "tags": [
+      "交感神经",
+      "血管反应",
+      "皮温异常",
+      "炎症反应",
+      "微循环改变"
+    ],
+    "source": "神经病理机制原理（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "understand_sympathetic_neural_pathway_stimulation_and_skin_temperature_changes",
+      "mechanism": {
+        "sympathetic_stimulation": "血管收缩→皮温下降（低温区）",
+        "local_inflammation": "充血水肿+血管扩张→皮温升高（高温区）"
+      },
+      "pathophysiology": [
+        "神经根压迫刺激交感通路",
+        "血管反应导致皮肤温度改变",
+        "炎症物质增加血管通透性"
+      ],
+      "key_points": [
+        "两种相反的温度改变机制",
+        "反映神经压迫的严重程度",
+        "体现局部微循环状态"
+      ],
+      "clinical_tip": "患者皮肤温度的异常分布是神经压迫和局部炎症程度的客观反映，可用于评估疾病程度和治疗效果。"
+    }
   }
 ]
