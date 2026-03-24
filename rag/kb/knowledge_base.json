@@ -30942,5 +30942,41 @@
       ],
       "clinical_tip": "建议在知识库中为重复出现的图号建立统一索引字段，提升检索效率。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0791",
+    "title": "图像引用-图13.2为患者治疗前双肘及双股外侧红外热成像图",
+    "content": "文本注明“图13.2 患者治疗前双肘及双股外侧红外热成像图”。该图像用于记录治疗前基线热成像状态，可与治疗后热成像结果进行对比评估。",
+    "category": "diagnosis",
+    "tags": [
+      "图13.2",
+      "治疗前",
+      "双肘红外热成像",
+      "双股外侧红外热成像",
+      "基线影像",
+      "疗效对比"
+    ],
+    "source": "图注文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_figure_13_2_as_pre_treatment_thermography_of_bilateral_elbows_and_bilateral_lateral_thighs",
+      "figure_reference": [
+        "图13.2"
+      ],
+      "baseline_regions": [
+        "双肘",
+        "双股外侧"
+      ],
+      "clinical_significance": [
+        "可作为治疗前功能影像基线",
+        "便于与治疗后同部位热成像进行纵向比较"
+      ],
+      "key_points": [
+        "图像覆盖肘部与股外侧两个症状相关区域",
+        "建议在随访中保持同条件复测提高可比性"
+      ],
+      "clinical_tip": "建立治疗前后同部位热成像对照时，建议统一拍摄条件与体位，减少环境干扰。"
+    }
   }
 ]
