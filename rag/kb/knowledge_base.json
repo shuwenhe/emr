@@ -35800,5 +35800,95 @@
       ],
       "clinical_tip": "晚期患者建议增加影像评估与功能康复计划。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0972",
+    "title": "临床诊断要点-趾囊炎主要症状为活动时跖趾关节疼痛",
+    "content": "趾囊炎临床诊断中，活动时跖趾关节疼痛是主要主诉与核心判断线索。",
+    "category": "diagnosis",
+    "tags": [
+      "临床诊断",
+      "主要症状",
+      "活动痛",
+      "跖趾关节疼痛"
+    ],
+    "source": "临床诊断文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_core_diagnostic_symptom_of_toe_bursitis_as_activity_related_mtp_joint_pain",
+      "criteria_summary": [
+        "活动相关跖趾关节疼痛"
+      ],
+      "clinical_tip": "建议同步记录静息痛与活动痛差异，提升诊断分辨率。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0973",
+    "title": "典型体征-拇趾外翻畸形并伴局部皮肤红肿热痛及压痛",
+    "content": "体征可见拇趾外翻畸形，局部皮肤出现红、肿、热、痛表现，并伴明显压痛，提示局部炎症与力线异常并存。",
+    "category": "clinical_presentation",
+    "tags": [
+      "拇趾外翻",
+      "红肿热痛",
+      "局部压痛",
+      "炎症体征",
+      "力线异常"
+    ],
+    "source": "临床诊断文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_typical_physical_signs_of_hallux_valgus_with_local_inflammatory_tenderness_in_toe_bursitis",
+      "exam_findings": [
+        "拇趾外翻畸形",
+        "局部红肿热痛及压痛"
+      ],
+      "clinical_tip": "查体应同时评估畸形角度与压痛范围，指导后续干预定位。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0974",
+    "title": "影像诊断要点-X线可见跖趾关节半脱位",
+    "content": "X线检查可显示跖趾关节半脱位，为趾囊炎相关结构改变的重要影像提示。",
+    "category": "diagnosis",
+    "tags": [
+      "X线",
+      "跖趾关节半脱位",
+      "结构改变",
+      "影像诊断"
+    ],
+    "source": "临床诊断文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_xray_finding_of_mtp_subluxation_as_key_structural_evidence_in_toe_bursitis",
+      "imaging_findings": [
+        "跖趾关节半脱位"
+      ],
+      "clinical_tip": "建议结合负重位X线评估半脱位程度与功能影响。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0975",
+    "title": "影像排除点-骨质通常无明显异常改变",
+    "content": "本病X线评估中可见跖趾关节半脱位，但骨质一般无明显异常改变，可作为鉴别骨性破坏性病变的参考。",
+    "category": "diagnosis",
+    "tags": [
+      "骨质无明显异常",
+      "影像排除点",
+      "鉴别诊断",
+      "非骨质破坏"
+    ],
+    "source": "临床诊断文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_imaging_exclusion_point_of_no_obvious_bony_abnormality_despite_mtp_subluxation",
+      "differential_points": [
+        "需与骨质破坏性病变区分"
+      ],
+      "clinical_tip": "若症状重而骨质阴性，建议结合软组织与功能评估补充判断。"
+    }
   }
 ]
