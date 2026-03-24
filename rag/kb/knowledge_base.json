@@ -27731,5 +27731,88 @@
       ],
       "clinical_tip": "老年FBSS患者合并高血压时，介入镇痛操作前应确认当日降压药已按时服用，避免术中血压失控。"
     }
+  },
+  {
+    "id": "KB-FBSS-DX-0708",
+    "title": "FBSS病例-脊柱基本检查与热成像所见（腰椎曲度变浅、L3/4-L5/S1等温差）",
+    "content": "专科查体示腰椎生理曲度变浅，腰椎椎旁肌肉紧张。红外热成像显示L3/4至L5/S1节段关节区域双侧温差基本相等（等温差），提示该节段炎性活动处于相对对称状态，无明显单侧高温异常热区。腰椎曲度变浅结合肌肉紧张，提示腰椎节段保护性痉挛或术后结构改变所致生理弓度丧失。",
+    "category": "diagnosis",
+    "tags": [
+      "腰椎曲度变浅",
+      "腰椎肌肉紧张",
+      "热成像等温差",
+      "L3/4",
+      "L5/S1",
+      "FBSS",
+      "红外热成像",
+      "脊柱体征"
+    ],
+    "source": "住院病历（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_spinal_basic_exam_and_thermography_in_fbss",
+      "findings": {
+        "spine_curvature": "腰椎生理曲度变浅",
+        "paraspinal_muscles": "腰椎椎旁肌肉紧张",
+        "thermography": "L3/4-L5/S1关节区域双侧等温差，无明显单侧高温异常"
+      },
+      "clinical_interpretation": [
+        "曲度变浅+肌肉紧张提示保护性痉挛或术后结构性改变",
+        "等温差提示当前炎性活动对称，缺乏局灶性热区可指向靶点"
+      ],
+      "key_points": [
+        "热成像等温差需结合临床症状及影像综合判断",
+        "腰椎术后生理曲度改变属常见体征，需与新发病变鉴别"
+      ],
+      "clinical_tip": "热成像等温差不等于无病变，应结合动态比较（治疗前后对比）及MRI评估节段稳定性。"
+    }
+  },
+  {
+    "id": "KB-FBSS-CP-0709",
+    "title": "FBSS病例-压痛定位与感觉障碍（棘间旁压痛、左梨状肌压痛、左足及鞍区感觉减退）",
+    "content": "查体见棘间左侧旁开1.5cm处明显压痛，无明显放射痛，提示局部软组织或小关节源性疼痛为主。左梨状肌处压痛阳性，梨状肌紧张试验阴性，提示梨状肌刺激存在但无明显痉挛卡压。左足及鞍区皮肤感觉减退，提示骶神经（S2-S4）及足背神经（L4-S1）受累，为神经损伤或长期压迫的重要体征。鞍区感觉减退需警惕马尾神经受损风险。",
+    "category": "clinical_presentation",
+    "tags": [
+      "棘间旁压痛",
+      "左梨状肌压痛",
+      "鞍区感觉减退",
+      "左足感觉减退",
+      "马尾神经",
+      "神经损害",
+      "FBSS",
+      "感觉检查",
+      "S2-S4"
+    ],
+    "source": "住院病历（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_tenderness_localization_and_sensory_deficits_in_fbss",
+      "tenderness": {
+        "location": "棘间左侧旁开1.5cm",
+        "radiation": "无明显放射痛",
+        "left_piriformis": "压痛阳性",
+        "piriformis_tension_test": "阴性"
+      },
+      "sensory_deficits": [
+        "左足皮肤感觉减退",
+        "鞍区皮肤感觉减退"
+      ],
+      "innervation_mapping": {
+        "saddle_area": "S2-S4（马尾神经支配）",
+        "left_foot": "L4-S1"
+      },
+      "clinical_significance": [
+        "鞍区感觉减退是马尾神经受损的重要警示体征",
+        "左足感觉减退与L4-S1神经根受压一致",
+        "梨状肌压痛需排除梨状肌综合征参与疼痛"
+      ],
+      "key_points": [
+        "鞍区感觉减退需排查大小便功能，必要时紧急影像学复查",
+        "旁开1.5cm压痛提示多裂肌/小关节可为介入靶点"
+      ],
+      "clinical_tip": "鞍区及足部感觉减退同时存在时，需评估是否存在马尾神经受压，这是影响手术再干预决策的关键指标。"
+    }
   }
 ]
