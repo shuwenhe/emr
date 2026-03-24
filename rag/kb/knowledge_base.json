@@ -23571,5 +23571,31 @@
       ],
       "clinical_tip": "影像退变征象需与症状体征匹配后再确定治疗策略，避免过度影像化诊断。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0589",
+    "title": "鉴别诊断-腰椎管狭窄症的神经原性间歇性跛行特征",
+    "content": "腰椎管狭窄症腿痛常累及双侧，咳嗽时多不明显加重，但步行后症状加重，可伴下肢感觉异常与运动乏力，形成神经原性间歇性跛行。该模式有助于与腰椎间盘突出症进行鉴别。",
+    "category": "diagnosis",
+    "tags": [
+      "鉴别诊断",
+      "腰椎管狭窄症",
+      "双侧腿痛",
+      "神经原性间歇性跛行",
+      "步行加重"
+    ],
+    "source": "临床鉴别要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "identify_neurogenic_claudication_pattern_in_lumbar_spinal_stenosis",
+      "key_points": [
+        "腿痛常呈双侧受累",
+        "咳嗽诱发加重不典型",
+        "步行后症状加重较突出",
+        "可伴感觉异常与下肢无力"
+      ],
+      "clinical_tip": "问诊应重点记录步行耐量和休息后缓解情况，并结合影像狭窄节段综合判断。"
+    }
   }
 ]
