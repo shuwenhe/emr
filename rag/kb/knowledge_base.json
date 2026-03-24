@@ -19023,5 +19023,124 @@
       "imaging_diagnosis": "超声或MRI可明确显示冈上肌腱的部分撕裂或完全断裂",
       "characteristic_finding": "肩外展肌力的显著减弱甚至瘫痪是冈上肌腱断裂的标志性表现"
     }
+  },
+  {
+    "id": "KB-IR-CS-0601",
+    "title": "肩周炎典型病例1-针灸联合手法治疗",
+    "content": "患者，女，52岁，右利手，主诉右肩疼痛伴活动受限4个月。起病隐匿，无明确外伤史，夜间疼痛明显，侧卧受限，梳头、穿衣、背手等动作困难。查体示右肩关节前外侧压痛，外展、外旋及后伸活动明显受限，疼痛弧试验阳性，Neer征阳性，肌力基本可。结合病史、年龄及体征，诊断为肩周炎（冻结肩，粘连期）。治疗方案采用针灸联合手法：针灸取穴以肩髃、肩髎、肩前、阿是穴、曲池、外关等为主，配合温针或电针，每周3次；手法治疗采用肩关节松动术、牵伸松解及关节被动活动训练，每周2-3次。治疗2周后夜间痛明显减轻，VAS由7分降至4分；治疗4周后外展和外旋活动度显著改善，功能评分提升；治疗6周后患者日常生活基本恢复，VAS降至2分，肩关节活动接近正常。该病例提示针灸可有效镇痛、改善局部循环，联合手法松解可恢复关节活动度，两者协同可提高冻结肩康复效率。",
+    "category": "case_study",
+    "report_sections": [
+      "diagnosis",
+      "treatment",
+      "follow_up",
+      "health_advice"
+    ],
+    "tags": [
+      "肩周炎",
+      "典型病例",
+      "针灸",
+      "手法治疗",
+      "联合治疗",
+      "冻结肩"
+    ],
+    "source": "临床病例整理与康复实践",
+    "source_type": "case_report",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "肩周炎粘连期",
+      "夜间痛明显",
+      "活动受限患者"
+    ],
+    "contraindications": [
+      "急性创伤未排除",
+      "严重骨折或脱位",
+      "治疗部位皮肤感染"
+    ],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "clinical_experience",
+    "retrieval_hints": [
+      "典型病例",
+      "针灸+手法",
+      "冻结肩康复",
+      "VAS",
+      "活动度改善"
+    ],
+    "structured_advice": {
+      "action": "apply_combined_acupuncture_manipulation",
+      "patient_profile": {
+        "sex": "female",
+        "age": 52,
+        "dominant_side": "right",
+        "course": "4个月"
+      },
+      "baseline_assessment": {
+        "main_symptoms": [
+          "肩痛",
+          "夜间痛",
+          "外展外旋受限",
+          "梳头穿衣困难"
+        ],
+        "physical_signs": [
+          "肩前外侧压痛",
+          "疼痛弧试验阳性",
+          "Neer征阳性"
+        ],
+        "pain_score_vas": 7
+      },
+      "treatment_protocol": {
+        "acupuncture": {
+          "points": [
+            "肩髃",
+            "肩髎",
+            "肩前",
+            "阿是穴",
+            "曲池",
+            "外关"
+          ],
+          "frequency": "每周3次",
+          "technique": "温针或电针"
+        },
+        "manual_therapy": {
+          "methods": [
+            "肩关节松动术",
+            "牵伸松解",
+            "被动活动训练"
+          ],
+          "frequency": "每周2-3次"
+        },
+        "duration": "6周"
+      },
+      "follow_up_outcomes": [
+        {
+          "timepoint": "2周",
+          "result": "夜间痛减轻，VAS 7→4"
+        },
+        {
+          "timepoint": "4周",
+          "result": "外展外旋活动度明显改善，功能评分提升"
+        },
+        {
+          "timepoint": "6周",
+          "result": "日常生活基本恢复，VAS降至2，活动接近正常"
+        }
+      ],
+      "clinical_takeaway": "针灸镇痛与手法松解协同，可在粘连期有效改善疼痛与活动受限，提升康复效率",
+      "rehab_advice": [
+        "治疗期间每日进行轻柔肩关节主动活动",
+        "避免暴力牵拉与过度负重",
+        "夜间注意肩部保暖并调整睡姿"
+      ]
+    }
   }
 ]
