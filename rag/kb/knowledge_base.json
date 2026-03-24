@@ -30118,5 +30118,35 @@
       ],
       "clinical_tip": "遇到历史影像缺失病例，建议从当前开始建立固定周期复查档案，逐步弥补纵向证据链。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0766",
+    "title": "诊断词条-肋骨外上髁炎（网球肘）/肱骨外上髁炎",
+    "content": "新增诊断词条：肋骨外上髁炎（网球肘）。临床标准命名常用“肱骨外上髁炎（网球肘）”，本条保留原始输入并补充标准同义写法，便于检索与归一化管理。",
+    "category": "diagnosis",
+    "tags": [
+      "网球肘",
+      "肋骨外上髁炎",
+      "肱骨外上髁炎",
+      "同义词归一",
+      "诊断词条"
+    ],
+    "source": "用户直接输入（add）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "add_tennis_elbow_diagnosis_term_with_raw_and_normalized_names",
+      "diagnosis_terms": [
+        "肋骨外上髁炎（原始输入）",
+        "肱骨外上髁炎（标准写法）",
+        "网球肘（俗称）"
+      ],
+      "key_points": [
+        "保留原始词汇用于可追溯检索",
+        "补充标准命名用于术语统一",
+        "便于后续结构化映射与统计"
+      ],
+      "clinical_tip": "术语入库时建议同时存储原始文本与标准术语，兼顾可追溯性和数据一致性。"
+    }
   }
 ]
