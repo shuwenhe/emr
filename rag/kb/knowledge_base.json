@@ -24092,5 +24092,45 @@
       ],
       "clinical_tip": "红外热成像作为无创诊断手段，可客观反映神经受压导致的微循环改变，为手术定位和术后疗效评估提供量化参考。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0609",
+    "title": "检查表现-综合神经体格检查：脊柱活动、反射、肌力、末梢血运",
+    "content": "脊柱活动：脊柱旋转可至20°。神经反射：双侧膝腱反射、跟腱反射对称引出，提示脊髓反射弧完整。末梢血运：双足背动脉搏动可触及，足趾活动良好，末梢血运良好。肌力评估：双下肢肌力V级(正常)。疼痛评分：视觉模拟评分(VAS)为2分，提示疼痛明显缓解。上述检查结果提示脊髓神经功能恢复良好，无明显神经根受压或血管受累表现。",
+    "category": "diagnosis",
+    "tags": [
+      "脊柱活动",
+      "腱反射",
+      "肌力",
+      "末梢血运",
+      "VAS评分",
+      "神经体检",
+      "脊髓功能"
+    ],
+    "source": "临床神经体格检查（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_comprehensive_neurological_examination_showing_recovery",
+      "exam_findings": {
+        "spinal_rotation": "20°",
+        "patellar_reflex": "symmetric",
+        "achilles_reflex": "symmetric",
+        "dorsalis_pedis_pulse": "palpable bilaterally",
+        "toe_movement": "good",
+        "peripheral_perfusion": "good",
+        "bilateral_lower_limb_strength": "V (normal)",
+        "vas_pain_score": 2,
+        "assessment": "favorable neurological recovery"
+      },
+      "key_points": [
+        "脊柱活动范围逐渐恢复",
+        "双侧腱反射对称表示脊髓反射功能完整",
+        "双足背动脉搏动可触及提示血管供应良好",
+        "双下肢肌力恢复至V级（正常）",
+        "VAS评分降至2分表示疼痛明显缓解"
+      ],
+      "clinical_tip": "综合神经体格检查评分的改善反映了神经根减压和脊髓功能的恢复，为评估治疗效果和判断预后提供客观依据。"
+    }
   }
 ]
