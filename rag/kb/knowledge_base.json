@@ -27114,5 +27114,153 @@
       ],
       "clinical_tip": "HLA-B27高阳性率和RF阴性组合是AS与类风湿关节炎鉴别的实验室核心依据，但单独任何一项均不能代替完整诊断流程。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0693",
+    "title": "AS疑诊依据-骶髂关节压痛加HLA-B27阳性加右骶髂高温差三联提示",
+    "content": "本病例中，患者双侧骶髂关节压痛、HLA-B27阳性，术前红外热成像显示右骶髂关节处较对侧温差偏高。上述三项证据并存提示骶髂关节局部存在炎性活动，结合遗传免疫背景，支持疑诊强直性脊柱炎，需进一步依据诊断标准综合评估。",
+    "category": "diagnosis",
+    "tags": [
+      "AS疑诊",
+      "骶髂关节压痛",
+      "HLA-B27阳性",
+      "骶髂关节高温差",
+      "炎性活动证据"
+    ],
+    "source": "AS疑诊综合依据（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "identify_suspected_as_based_on_sacroiliac_tenderness_hla_b27_positivity_and_right_sacroiliac_hyperthermia",
+      "evidence_combination": [
+        "双侧骶髂关节压痛",
+        "HLA-B27阳性",
+        "术前热成像右骶髂高温差"
+      ],
+      "clinical_meaning": [
+        "三项证据共同指向骶髂关节炎性活动",
+        "支持AS疑诊",
+        "需动态随访进一步确认"
+      ],
+      "key_points": [
+        "热成像为炎性活动提供功能层面佐证",
+        "HLA-B27为遗传背景证据",
+        "临床与实验室与功能影像联合更可靠"
+      ],
+      "clinical_tip": "当骶髂关节体征、HLA-B27阳性与热成像高温差同时出现时，应高度重视AS可能，并尽快完善骶髂关节影像学分级评估。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0694",
+    "title": "功能影像机制-红外热成像可反映组织代谢、神经功能与血液循环变化",
+    "content": "红外热成像属于功能性影像学范畴，可根据人体体表温度变化清晰反映机体组织代谢、神经功能及血液循环所发生的改变。通过测量人体温度分布变化，将其转化为可靠的人体温度梯度红外图，据此可辅助判断病灶部位和大小，对疾病定位诊断具有重要意义。",
+    "category": "diagnosis",
+    "tags": [
+      "红外热成像机制",
+      "组织代谢",
+      "神经功能",
+      "血液循环",
+      "温度梯度图"
+    ],
+    "source": "功能影像学机制说明（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "explain_functional_imaging_mechanism_of_infrared_thermography_reflecting_metabolism_neurology_and_circulation",
+      "mechanism_basis": [
+        "体表温度变化反映组织代谢活动",
+        "体表温度变化反映神经功能状态",
+        "体表温度变化反映局部血液循环"
+      ],
+      "output_format": [
+        "温度分布测量转化为温度梯度红外图",
+        "可直观呈现异常温区"
+      ],
+      "diagnostic_value": [
+        "辅助判断病灶部位",
+        "辅助估计病灶大小",
+        "支持疾病定位诊断"
+      ],
+      "key_points": [
+        "功能影像优势在于反映生理状态",
+        "梯度图提供空间分布信息",
+        "与结构影像互补而非替代"
+      ],
+      "clinical_tip": "阅读热成像温度梯度图时，应结合解剖位置和神经支配分布综合判读，提高定位诊断的准确性。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0695",
+    "title": "无菌炎症与热成像-炎症及水肿致痛物质增多可表达为局部异常热区",
+    "content": "无菌性炎症刺激及水肿组织局部致痛物质增多，可引起局部疼痛，亦可在热成像上表达为异常热区。该机制揭示了热成像在炎性病变中的信号来源，即炎性代谢活跃和局部血流增加均可导致体表温度升高，从而被热成像捕捉并可视化。",
+    "category": "diagnosis",
+    "tags": [
+      "无菌性炎症",
+      "水肿",
+      "致痛物质",
+      "异常热区",
+      "炎症信号"
+    ],
+    "source": "炎症热成像机制（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "explain_how_aseptic_inflammation_and_edema_manifest_as_abnormal_hot_zones_in_thermography",
+      "pathophysiology": [
+        "无菌性炎症刺激局部",
+        "水肿组织致痛物质增多",
+        "炎性代谢活跃和局部血流增加"
+      ],
+      "thermography_manifestation": [
+        "病变部位体表温度升高",
+        "热成像可见异常热区"
+      ],
+      "clinical_relevance": [
+        "热区位置与病灶对应",
+        "有助于炎性病变定位",
+        "可辅助评估炎症活跃程度"
+      ],
+      "key_points": [
+        "热成像可可视化炎症活动",
+        "异常热区具有定位诊断意义",
+        "需排除其他原因导致的温度升高"
+      ],
+      "clinical_tip": "发现局部异常热区时，应结合临床病史与体征判断其是否对应炎性病变，避免仅凭热区范围过度推断。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0696",
+    "title": "热成像临床价值-通过炎性热区识别有助于提高疾病治疗有效性",
+    "content": "由于无菌性炎症及异常热区可通过热成像客观显现，该技术在辅助识别病变部位的同时，也有助于提高治疗靶向性和有效性。结合影像定位施加干预，可减少盲目性，为精准治疗提供依据。",
+    "category": "diagnosis",
+    "tags": [
+      "热成像临床价值",
+      "炎性热区识别",
+      "治疗靶向性",
+      "精准治疗",
+      "辅助决策"
+    ],
+    "source": "热成像临床应用价值（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "emphasize_infrared_thermography_role_in_improving_treatment_targeting_through_inflammatory_hot_zone_identification",
+      "clinical_utility": [
+        "客观显示炎性异常热区",
+        "支持治疗靶区定位",
+        "减少干预盲目性"
+      ],
+      "application_scenarios": [
+        "骶髂关节炎局部介入前评估",
+        "神经根受累区域识别",
+        "疗效随访中炎症消退监测"
+      ],
+      "key_points": [
+        "精准定位是提高疗效的基础",
+        "热成像为定位提供功能依据",
+        "随访时可评估热区变化判断疗效"
+      ],
+      "clinical_tip": "将热成像定位信息纳入干预方案设计，可提高治疗针对性，但仍需结合结构影像进行靶点验证。"
+    }
   }
 ]
