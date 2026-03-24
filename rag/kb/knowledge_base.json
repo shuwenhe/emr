@@ -37873,5 +37873,33 @@
       ],
       "clinical_tip": "建议结合触诊张力、活动范围与症状变化评估松解效果，并注意分层操作安全。"
     }
+  },
+  {
+    "id": "KB-IR-TX-1058",
+    "title": "作用机制-松解高应力纤维与周围增生组织以恢复关节正常相对位置",
+    "content": "软组织损伤后可造成关节周围力平衡失衡，长期异常应力会引起关节相对位置改变，并促使周围组织尤其结缔组织按异常应力方向增生与固定。治疗时除松解原发高应力纤维外，还需松解关节周围增生固定组织，以促进关节关系恢复正常，减少骨间异常应力并缓解对神经血管的压迫。",
+    "category": "treatment",
+    "tags": [
+      "小针刀机制",
+      "关节相对位置改变",
+      "力平衡失衡",
+      "高应力纤维",
+      "结缔组织增生",
+      "神经血管压迫",
+      "腕管综合征"
+    ],
+    "source": "小针刀治疗机制文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_joint_realignment_mechanism_via_releasing_primary_high_stress_fibers_and_periarticular_hyperplastic_fixation_tissues",
+      "criteria_summary": [
+        "软组织损伤后力平衡失衡",
+        "长期异常力致关节相对位置改变",
+        "需联合松解原发应力纤维与周围增生固定组织",
+        "恢复位置后可减少神经血管压迫"
+      ],
+      "clinical_tip": "治疗后建议结合功能活动度、压痛点与神经血管症状变化评估复位与减压效果。"
+    }
   }
 ]
