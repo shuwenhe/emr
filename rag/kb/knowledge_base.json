@@ -18348,5 +18348,89 @@
       },
       "assessment_method": "Neer评分、Constant评分等标准化评估"
     }
+  },
+  {
+    "id": "KB-IR-CL-0503",
+    "title": "肩周炎临床表现-压痛与触诊阳性",
+    "content": "压痛是肩周炎物理检查的重要体征，反映肩关节周围软组织的炎症和敏感性增加。肩周炎患者肩关节周围多处可见明确的压痛点，这些压痛点的位置和范围与疼痛部位密切相关，是诊断的重要参考。主要压痛位置包括：肱二头肌长头腱（肩关节前方），这是最常见和最显著的压痛点，患者常在此处指向疼痛部位；肩峰下滑囊（肩峰与肱骨头之间的间隙），这是肩周炎中炎症最集中的部位；冈上肌（肩胛骨冈上窝的肌肉），其上方压痛明显；冈下肌、小圆肌等旋转袖肌群也常有压痛。压痛的程度与病情严重程度相关，轻度患者压痛可能局限，而重度患者压痛范围广泛。压痛检查可配合Neer征、Hawkins征等特殊检查方法进行，以增强诊断的准确性。",
+    "category": "clinical_presentation",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "肩周炎",
+      "压痛",
+      "触诊",
+      "压痛点",
+      "临床体征"
+    ],
+    "source": "肩周炎诊疗规范与体格检查标准",
+    "source_type": "guideline",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "肩周炎患者就诊",
+      "需要进行体格检查"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "压痛",
+      "触诊",
+      "压痛点",
+      "肱二头肌腱",
+      "肩峰下滑囊"
+    ],
+    "structured_advice": {
+      "action": "assess_palpation_tenderness",
+      "tenderness_points": [
+        {
+          "location": "肱二头肌长头腱（肩关节前方）",
+          "significance": "最常见和最显著的压痛点",
+          "clinical_feature": "患者常在此处指向疼痛部位"
+        },
+        {
+          "location": "肩峰下滑囊（肩峰与肱骨头之间）",
+          "significance": "炎症最集中的部位",
+          "clinical_feature": "压痛最明显，与肩关节活动受限相关"
+        },
+        {
+          "location": "冈上肌（肩胛骨冈上窝）",
+          "significance": "上方压痛明显",
+          "clinical_feature": "与肩关节前屈活动受限相关"
+        },
+        {
+          "location": "冈下肌",
+          "significance": "旋转袖肌群一部分",
+          "clinical_feature": "与肩关节外旋活动受限相关"
+        },
+        {
+          "location": "小圆肌",
+          "significance": "旋转袖肌群一部分",
+          "clinical_feature": "与肩关节外旋活动受限相关"
+        }
+      ],
+      "clinical_correlation": "压痛程度与病情严重程度相关，轻度患者压痛可能局限，重度患者压痛范围广泛",
+      "associated_tests": [
+        "Neer征",
+        "Hawkins征",
+        "Jobe推进试验"
+      ],
+      "examination_technique": "触诊时应系统地检查各个解剖部位，避免造成过度的疼痛刺激"
+    }
   }
 ]
