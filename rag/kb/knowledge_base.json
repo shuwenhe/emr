@@ -23129,5 +23129,31 @@
       ],
       "clinical_tip": "将解剖示意与患者症状分布对照，可提升诊断解释力和治疗方案沟通效率。"
     }
+  },
+  {
+    "id": "KB-IR-CL-0572",
+    "title": "临床表现-神经根受压感觉分布与双节段受压征象",
+    "content": "L5神经根受压时可见小腿前外侧及足内侧疼痛、触觉减退；S1神经根受压时可见外踝附近及足外侧疼痛、触觉减退。若髓核突出体积较大，还可压迫下一节段神经根，出现双节段神经根受压征象。",
+    "category": "clinical_presentation",
+    "tags": [
+      "L5神经根",
+      "S1神经根",
+      "感觉减退",
+      "节段定位",
+      "双节段受压"
+    ],
+    "source": "临床表现要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "differentiate_l5_s1_sensory_patterns_and_identify_multilevel_root_compression",
+      "key_points": [
+        "L5受压常见小腿前外侧与足内侧感觉异常",
+        "S1受压常见外踝周围与足外侧感觉异常",
+        "触觉减退是重要神经体征",
+        "巨大突出可导致双节段神经根受压表现"
+      ],
+      "clinical_tip": "当体征跨越两个神经节段时，应警惕大体积突出并评估是否存在多节段神经根受压。"
+    }
   }
 ]
