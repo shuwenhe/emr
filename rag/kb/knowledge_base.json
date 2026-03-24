@@ -33477,5 +33477,184 @@
       ],
       "clinical_tip": "优势结论建议结合长期随访与安全性监测持续验证。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0881",
+    "title": "诊断词条-骶髂关节紊乱症",
+    "content": "新增病名词条：骶髂关节紊乱症（原文OCR为“素乱症”，按语义规范化）。该病多表现为骶髂关节相关疼痛与功能受限。",
+    "category": "diagnosis",
+    "tags": [
+      "骶髂关节紊乱症",
+      "病名词条",
+      "腰骶痛",
+      "功能受限"
+    ],
+    "source": "第十七章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "add_diagnosis_term_for_sacroiliac_joint_dysfunction_with_ocr_normalization_note",
+      "diagnosis_terms": [
+        "骶髂关节紊乱症"
+      ],
+      "data_quality_notes": [
+        "原文“素乱症”按上下文规范为“紊乱症”"
+      ],
+      "clinical_tip": "OCR来源病名建议保留规范化说明，便于后续追溯。"
+    }
+  },
+  {
+    "id": "KB-IR-CS-0882",
+    "title": "典型病例-弯腰搬物诱发腰骶痛3天并活动受限",
+    "content": "患者孙某在弯腰搬物后诱发腰骶部疼痛3天，伴活动受限。该急性负荷诱发模式符合骶髂关节力学失衡相关发作背景。",
+    "category": "case_study",
+    "tags": [
+      "典型病例",
+      "弯腰搬物诱发",
+      "腰骶痛3天",
+      "活动受限",
+      "急性发作"
+    ],
+    "source": "第十七章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_case_onset_of_lumbosacral_pain_for_three_days_triggered_by_bending_and_lifting_with_activity_limitation",
+      "history_points": [
+        "搬物后发作",
+        "疼痛持续3天",
+        "活动受限"
+      ],
+      "clinical_tip": "急性诱发病例建议记录具体负荷动作与起病时间。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0883",
+    "title": "查体结果-右侧骶髂关节压痛阳性，左侧轻压痛",
+    "content": "查体示右侧骶髂关节压痛阳性，左侧骶髂关节轻压痛，提示病变以右侧为主并伴对侧轻度受累。",
+    "category": "clinical_presentation",
+    "tags": [
+      "右侧骶髂压痛阳性",
+      "左侧轻压痛",
+      "侧别差异",
+      "查体定位"
+    ],
+    "source": "第十七章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_exam_findings_of_right_dominant_sacroiliac_tenderness_with_mild_left_sided_tenderness",
+      "exam_findings": [
+        "右侧压痛阳性",
+        "左侧轻压痛"
+      ],
+      "clinical_tip": "建议双侧压痛分级记录，便于治疗前后对照。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0884",
+    "title": "图像引用-图17.1为骨盆正位与腰椎侧位X线，图17.2为治疗前红外热成像",
+    "content": "患者影像资料包括图17.1（骨盆正位及腰椎侧位X线片）和图17.2（治疗前红外热成像图），用于结构与功能信息的联合评估。",
+    "category": "diagnosis",
+    "tags": [
+      "图17.1",
+      "骨盆正位X线",
+      "腰椎侧位X线",
+      "图17.2",
+      "治疗前热成像",
+      "联合评估"
+    ],
+    "source": "图注文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_figure_references_17_1_xray_views_and_17_2_pre_treatment_thermography_for_combined_assessment",
+      "figure_reference": [
+        "图17.1",
+        "图17.2"
+      ],
+      "clinical_tip": "结构影像与热成像同屏对照可提高责任病灶识别效率。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0885",
+    "title": "整脊后反应-左骶髂关节疼痛消失，右侧疼痛仅略缓解",
+    "content": "行美式整脊关节矫正术后，左侧骶髂关节疼痛消失，右侧骶髂关节疼痛仅略缓解。该结果提示双侧疗效不对称，右侧仍需进一步干预。",
+    "category": "follow_up",
+    "tags": [
+      "整脊后反应",
+      "左侧疼痛消失",
+      "右侧略缓解",
+      "疗效不对称",
+      "后续干预"
+    ],
+    "source": "治疗经过文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_post_chiropractic_asymmetric_response_with_left_resolution_and_persistent_right_sacroiliac_pain",
+      "outcome_points": [
+        "左侧疼痛消失",
+        "右侧仅略缓解"
+      ],
+      "clinical_tip": "出现侧别疗效差异时应尽快转入针对残余主责侧的精准治疗。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0886",
+    "title": "后续计划与结果-拟行并实施右侧骶髂关节射频针刀/针灸治疗后次日疼痛基本消失",
+    "content": "针对右侧残余疼痛，考虑并实施右侧骶髂关节射频针刀（原文并述射频针灸）治疗，术后第2天患者疼痛症状基本消失。相关过程与结果见图17.3与图17.4。",
+    "category": "treatment",
+    "tags": [
+      "右侧骶髂关节",
+      "射频针刀",
+      "射频针灸",
+      "术后第2天",
+      "疼痛基本消失",
+      "图17.3",
+      "图17.4"
+    ],
+    "source": "治疗经过文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_right_sacroiliac_rf_needleknife_or_acupuncture_intervention_with_near_resolution_by_postop_day_two",
+      "treatment_plan": [
+        "右侧骶髂关节射频针刀/针灸治疗"
+      ],
+      "outcome_points": [
+        "术后第2天疼痛基本消失"
+      ],
+      "figure_reference": [
+        "图17.3",
+        "图17.4"
+      ],
+      "clinical_tip": "术后短期显效仍需中期复诊以确认疗效稳定性。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0887",
+    "title": "分步治疗策略-先整脊再针对残余主责侧行射频干预可提升总体缓解",
+    "content": "本例显示分步策略可行：先行关节矫正，随后对残余主责侧（右侧骶髂关节）实施射频介入，以实现更充分症状控制。",
+    "category": "diagnosis",
+    "tags": [
+      "分步治疗",
+      "整脊矫正",
+      "残余主责侧",
+      "右侧骶髂关节",
+      "射频介入",
+      "总体缓解"
+    ],
+    "source": "病例流程总结（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_stepwise_strategy_of_initial_manipulative_correction_followed_by_targeted_rf_for_residual_side_dominant_pain",
+      "strategy_points": [
+        "先矫正后精准介入",
+        "针对残余侧别疼痛加治"
+      ],
+      "clinical_tip": "对双侧不对称疼痛病例可采用阶段化、侧别化干预路径。"
+    }
   }
 ]
