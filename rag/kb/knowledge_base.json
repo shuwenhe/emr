@@ -31208,5 +31208,32 @@
       ],
       "clinical_tip": "建议将热成像结果纳入标准化疗效评价模板，与疼痛评分和功能量表联合解读。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0799",
+    "title": "诊断词条-第三腰椎横突综合征",
+    "content": "新增诊断词条：第三腰椎横突综合征。该病名用于描述与第三腰椎横突区域相关的局部软组织劳损或附着点疼痛综合征，建议与腰椎间盘源性及小关节源性疼痛进行鉴别。",
+    "category": "diagnosis",
+    "tags": [
+      "第三腰椎横突综合征",
+      "L3横突",
+      "腰痛",
+      "附着点疼痛",
+      "诊断词条"
+    ],
+    "source": "用户直接输入（add）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "add_diagnosis_term_for_third_lumbar_transverse_process_syndrome_with_basic_differential_hint",
+      "diagnosis_terms": [
+        "第三腰椎横突综合征"
+      ],
+      "key_points": [
+        "保留病名词条用于结构化检索",
+        "建议结合体征与影像进行病因鉴别"
+      ],
+      "clinical_tip": "录入诊断词条时可同步关联常见鉴别诊断，提升后续检索和临床决策支持能力。"
+    }
   }
 ]
