@@ -20601,5 +20601,89 @@
         "2-4周复评活动度与热像变化"
       ]
     }
+  },
+  {
+    "id": "KB-IR-CS-0603",
+    "title": "肩周炎典型病例2-三维动态回旋正骨手法联合医用臭氧治疗",
+    "content": "典型病例2采用三维动态回旋正骨手法联合医用臭氧治疗。患者以肩关节疼痛、活动受限及颈肩部不适为主要表现，常规治疗后仍有残余功能障碍。治疗策略以恢复关节力学平衡和改善局部炎性环境为核心：通过三维动态回旋正骨手法进行关节与软组织协同调整，配合医用臭氧治疗以减轻炎症反应、改善微循环和促进组织修复。治疗过程中按阶段评估疼痛（VAS）、活动度及功能动作恢复情况，并结合红外热成像变化进行疗效追踪。临床观察提示，联合方案在改善疼痛、提升肩关节活动度和降低复发风险方面具有协同价值。",
+    "category": "case_study",
+    "report_sections": [
+      "diagnosis",
+      "treatment",
+      "follow_up",
+      "health_advice"
+    ],
+    "tags": [
+      "肩周炎",
+      "典型病例",
+      "三维动态回旋正骨",
+      "医用臭氧",
+      "联合治疗",
+      "康复"
+    ],
+    "source": "临床病例整理与综合治疗实践",
+    "source_type": "case_report",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "肩周炎功能恢复期",
+      "常规治疗后残余症状",
+      "颈肩联合疼痛患者"
+    ],
+    "contraindications": [
+      "急性骨折脱位未处理",
+      "严重感染或出血风险",
+      "臭氧治疗禁忌人群需评估"
+    ],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩关节",
+      "颈肩部"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "clinical_experience",
+    "retrieval_hints": [
+      "三维动态回旋正骨",
+      "医用臭氧",
+      "典型病例2",
+      "联合方案"
+    ],
+    "structured_advice": {
+      "action": "combined_manual_orthopedic_and_medical_ozone",
+      "core_strategy": [
+        "重建肩关节力学平衡",
+        "缓解炎性反应",
+        "改善局部微循环",
+        "促进软组织修复"
+      ],
+      "treatment_components": [
+        {
+          "name": "三维动态回旋正骨手法",
+          "purpose": "改善关节对位与软组织张力，恢复运动链协调"
+        },
+        {
+          "name": "医用臭氧治疗",
+          "purpose": "抑制炎症反应，促进代谢与组织修复"
+        }
+      ],
+      "assessment_metrics": [
+        "VAS疼痛评分",
+        "肩关节活动度（前屈/外展/外旋）",
+        "功能动作（梳头、穿衣、反手）",
+        "红外热成像温差变化"
+      ],
+      "clinical_takeaway": "手法力学重建与臭氧生物调节联合，可提升中后期肩周炎的疼痛控制与功能恢复效率",
+      "follow_up_advice": [
+        "坚持分阶段功能训练",
+        "避免受寒及突发过度负重",
+        "定期复查活动度与热成像变化"
+      ]
+    }
   }
 ]
