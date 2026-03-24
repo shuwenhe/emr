@@ -23103,5 +23103,31 @@
       ],
       "clinical_tip": "神经系统查体应与影像学结果对照解释，并动态追踪功能变化以评估进展。"
     }
+  },
+  {
+    "id": "KB-IR-BM-0571",
+    "title": "解剖示意-腰椎神经走行与椎间盘神经支配",
+    "content": "腰椎间盘神经走行及间盘神经支配示意用于展示神经根与椎间盘、后纵韧带及周围组织的解剖关系，可帮助理解腰椎间盘病变导致腰腿痛与神经根症状的机制。",
+    "category": "basic_concept",
+    "tags": [
+      "腰椎间盘",
+      "神经走行",
+      "神经支配",
+      "解剖示意",
+      "定位理解"
+    ],
+    "source": "临床解剖要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "illustrate_lumbar_nerve_course_and_disc_innervation_relationship",
+      "key_points": [
+        "明确神经根与椎间盘相对位置关系",
+        "理解椎间盘相关神经支配特点",
+        "解释神经受压与放射痛的关联机制",
+        "辅助病变节段定位与临床沟通"
+      ],
+      "clinical_tip": "将解剖示意与患者症状分布对照，可提升诊断解释力和治疗方案沟通效率。"
+    }
   }
 ]
