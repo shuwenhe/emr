@@ -25625,5 +25625,78 @@
       ],
       "clinical_tip": "在症状、查体、影像学和热成像结果高度一致时，责任靶点判断更为可靠，可为后续微创或手术治疗提供坚实依据。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0651",
+    "title": "X线正侧位诊断意见-腰椎骨质增生及L4/5、L5/S1椎间盘退变",
+    "content": "腰椎正侧位片诊断意见提示：腰椎骨质增生，L4/5及L5/S1椎间盘退变。该结果表明患者存在腰椎退行性改变，既包括骨性增生，也包括下腰椎两个常见受力节段的椎间盘退变。这类影像学表现常提示慢性劳损或年龄相关退变背景，可与腰椎间盘突出、椎间孔狭窄等病变共同构成患者症状的结构基础。",
+    "category": "diagnosis",
+    "tags": [
+      "腰椎正侧位片",
+      "骨质增生",
+      "L4/5",
+      "L5/S1",
+      "椎间盘退变",
+      "退行性改变"
+    ],
+    "source": "X线诊断意见（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_lateral_and_ap_radiographic_impression_of_lumbar_osteophytes_and_disc_degeneration",
+      "radiographic_findings": [
+        "腰椎骨质增生",
+        "L4/5椎间盘退变",
+        "L5/S1椎间盘退变"
+      ],
+      "clinical_significance": [
+        "提示腰椎退行性改变背景",
+        "支持下腰椎长期受力和慢性劳损可能",
+        "为综合判断结构性病变提供基础信息"
+      ],
+      "key_points": [
+        "X线有助于评估骨性退变",
+        "下腰椎双节段退变较常见",
+        "需结合MR判断神经受压情况"
+      ],
+      "clinical_tip": "腰椎正侧位片可较好显示骨质增生和椎间隙退变，但对软组织和神经压迫的判断有限，应与MRI等影像学检查联合分析。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0652",
+    "title": "影像学诊断-L4-S1间盘变性伴L5/S1左后脱出及左侧椎间孔侧隐窝狭窄",
+    "content": "影像学提示L4-S1节段椎间盘变性，其中L5/S1椎间盘左后脱出，并伴L5/S1左侧椎间孔狭窄及侧隐窝狭窄。同时可见L5、S1椎体缘终板软骨炎改变。该结果说明患者存在下腰椎多节段退变基础，其中以L5/S1节段结构性病变最为突出，既有椎间盘脱出，又有神经通道狭窄及终板炎性退变，提示神经根受压和慢性退变因素并存。",
+    "category": "diagnosis",
+    "tags": [
+      "L4-S1间盘变性",
+      "L5/S1左后脱出",
+      "左侧椎间孔狭窄",
+      "侧隐窝狭窄",
+      "终板软骨炎"
+    ],
+    "source": "影像学诊断意见（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_multilevel_disc_degeneration_with_l5_s1_left_posterior_extrusion_foraminal_and_lateral_recess_stenosis_and_endplate_chondritis",
+      "imaging_findings": [
+        "L4-S1间盘变性",
+        "L5/S1椎间盘左后脱出",
+        "L5/S1左侧椎间孔狭窄",
+        "L5/S1侧隐窝狭窄",
+        "L5和S1椎体缘终板软骨炎"
+      ],
+      "clinical_significance": [
+        "提示下腰椎多节段退变背景",
+        "L5/S1为主要责任节段候选",
+        "神经通道狭窄可加重神经根压迫"
+      ],
+      "key_points": [
+        "存在退变、脱出和狭窄的复合病变",
+        "终板软骨炎提示慢性退变和炎症参与",
+        "需结合症状侧别和神经查体判断责任节段"
+      ],
+      "clinical_tip": "当L5/S1同时存在椎间盘脱出、椎间孔狭窄及侧隐窝狭窄时，神经根受压往往更为复杂，治疗决策应结合影像分型和临床表现综合制定。"
+    }
   }
 ]
