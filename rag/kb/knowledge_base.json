@@ -23729,5 +23729,32 @@
       ],
       "clinical_tip": "录入方药信息时应保留剂量、特殊服法与日服次数，便于后续处方比对与随访。"
     }
+  },
+  {
+    "id": "KB-IR-FUP-0595",
+    "title": "随访结局-腰痛伴左下肢疼痛麻木症状缓解",
+    "content": "患者腰痛伴左下肢疼痛、麻木症状较前缓解，疼痛视觉模拟评分（VAS）为5分。该变化提示症状负担有所下降，后续仍需结合功能恢复情况与神经系统体征持续评估疗效。",
+    "category": "follow_up",
+    "tags": [
+      "腰痛",
+      "左下肢疼痛",
+      "麻木",
+      "症状缓解",
+      "VAS评分",
+      "随访"
+    ],
+    "source": "疗效随访记录（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_partial_symptom_relief_and_vas_score_for_lumbar_follow_up",
+      "key_points": [
+        "记录腰痛及左下肢疼痛麻木症状较前缓解",
+        "当前VAS评分为5分",
+        "疗效评估需结合功能改善程度",
+        "随访中应继续观察神经症状变化"
+      ],
+      "clinical_tip": "VAS下降可作为疗效参考，但仍需结合麻木范围、活动能力及神经查体结果综合判断恢复程度。"
+    }
   }
 ]
