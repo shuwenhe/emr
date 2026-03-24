@@ -20982,5 +20982,876 @@
         "结合病程判断活动度"
       ]
     }
+  },
+  {
+    "id": "KB-IR-BM-0702",
+    "title": "肩关节周围炎的无菌性炎症病理机制",
+    "content": "肩关节周围炎属于无菌性炎症的一类，具有炎症的基本病理过程。在局部炎症刺激下，肩关节周围肌腱、韧带及相关软组织发生病理性改变；在肩关节活动过程中，肩周肌群与附属关节之间的耦合运动出现应力性改变，进一步刺激局部炎症因子释放，导致附着于关节囊周围的肌组织粘连并加重组织损伤。",
+    "category": "basic_concept",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "肩周炎",
+      "无菌性炎症",
+      "病理机制",
+      "炎症因子",
+      "软组织粘连"
+    ],
+    "source": "肩关节周围炎病理机制临床总结",
+    "source_type": "textbook",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "肩周炎病因病机解释",
+      "病理机制教学"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩关节",
+      "关节囊",
+      "肩周软组织"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "textbook",
+    "retrieval_hints": [
+      "无菌性炎症",
+      "肩周炎病理过程",
+      "炎症因子",
+      "粘连"
+    ],
+    "structured_advice": {
+      "action": "explain_aseptic_inflammation_in_frozen_shoulder",
+      "pathological_process": [
+        "局部炎症刺激",
+        "肌腱韧带病理改变",
+        "应力性改变",
+        "炎症因子进一步释放",
+        "关节囊附着组织粘连"
+      ],
+      "clinical_meaning": "炎症与力学异常相互促进，可导致病情反复和进展"
+    }
+  },
+  {
+    "id": "KB-IR-BM-0703",
+    "title": "肩周炎修复-损伤交替与瘢痕挛缩机制",
+    "content": "机体本身具有修复能力，但在炎症反复过程中，修复与损伤交替进行，容易导致肌肉、韧带等组织瘢痕化。为维持肩关节活动功能，相关瘢痕组织会出现代偿性挛缩，最终造成肩关节活动功能受限，这是冻结肩患者临床常见的功能障碍基础。",
+    "category": "basic_concept",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "肩周炎",
+      "冻结肩",
+      "瘢痕化",
+      "代偿性挛缩",
+      "活动受限"
+    ],
+    "source": "肩周炎病程演变与组织修复机制",
+    "source_type": "textbook",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "冻结肩功能受限解释",
+      "康复机制教学"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩关节",
+      "肌肉",
+      "韧带"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "textbook",
+    "retrieval_hints": [
+      "修复损伤交替",
+      "瘢痕挛缩",
+      "冻结肩活动受限"
+    ],
+    "structured_advice": {
+      "action": "explain_scar_contracture_mechanism",
+      "key_steps": [
+        "炎症反复",
+        "修复与损伤交替",
+        "组织瘢痕化",
+        "代偿性挛缩",
+        "活动功能受限"
+      ],
+      "clinical_implication": "康复应兼顾镇痛、抗炎与抗挛缩训练，防止功能进一步下降"
+    }
+  },
+  {
+    "id": "KB-IR-BM-0704",
+    "title": "肩周炎炎症微循环改变与高温痛表现",
+    "content": "在致炎因子作用下，局部软组织先出现动脉性充血与血管通透性增加，继而可发生静脉淤血与血流停滞。局部代谢活跃与能量供应变化可表现为高温区，同时炎症介质进入组织后具有致痛作用，临床上可见疼痛逐渐加重甚至剧烈疼痛。",
+    "category": "basic_concept",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "肩周炎",
+      "微循环",
+      "动脉充血",
+      "静脉淤血",
+      "高温区",
+      "疼痛"
+    ],
+    "source": "炎症微循环与临床热像表现机制",
+    "source_type": "textbook",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "肩周炎热像结果解释",
+      "疼痛机制说明"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩周软组织"
+    ],
+    "risk_levels": [
+      "medium",
+      "high"
+    ],
+    "evidence_level": "textbook",
+    "retrieval_hints": [
+      "动脉性充血",
+      "静脉淤血",
+      "高温区",
+      "炎症介质致痛"
+    ],
+    "structured_advice": {
+      "action": "explain_microcirculation_and_pain",
+      "microcirculation_changes": [
+        "动脉性充血",
+        "血管通透性增加",
+        "静脉淤血",
+        "血流停滞"
+      ],
+      "clinical_signals": [
+        "局部高温差",
+        "疼痛加重"
+      ],
+      "interpretation_note": "高温区与疼痛增强常提示炎症活跃，需结合体征综合判断"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0510",
+    "title": "红外热成像在肩周炎炎症追踪中的价值",
+    "content": "红外热成像可直观呈现炎症“红、肿、热、痛”相关特征，尤其在肩周炎诊疗中，可动态追踪每次治疗前后局部温差变化。通过连续复查，医生可观察炎症活跃区是否缩小、温差是否趋于均衡，从而辅助评估疗效并优化后续治疗路径。",
+    "category": "diagnosis",
+    "report_sections": [
+      "diagnosis",
+      "follow_up",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "红外热成像",
+      "肩周炎",
+      "动态追踪",
+      "温差变化",
+      "疗效评估"
+    ],
+    "source": "红外热成像临床应用经验",
+    "source_type": "clinical_record",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "肩周炎治疗动态评估",
+      "疗效追踪",
+      "复查对比"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩关节",
+      "肩胛区"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "clinical_experience",
+    "retrieval_hints": [
+      "红外热成像追踪",
+      "治疗前后温差",
+      "炎症动态评估"
+    ],
+    "structured_advice": {
+      "action": "use_thermography_for_dynamic_followup",
+      "tracking_targets": [
+        "高温差区域范围",
+        "双侧温差对称性",
+        "治疗前后温差变化"
+      ],
+      "clinical_value": [
+        "直观呈现炎症变化",
+        "辅助疗效判断",
+        "指导治疗调整"
+      ],
+      "follow_up_tip": "建议固定体位、同参数复查以提高纵向可比性"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0511",
+    "title": "屈指肌腱狭窄性腱鞘炎（扳机指）",
+    "content": "屈指肌腱狭窄性腱鞘炎是手部常见慢性劳损性疾病，又称扳机指。其本质为屈指肌腱与A1滑车区域反复摩擦后出现腱鞘增厚和管腔相对狭窄，导致肌腱滑动受阻。典型表现为手指屈伸卡顿、晨起僵硬、掌指关节掌侧压痛，严重时出现弹响或屈曲后难以主动伸直。好发于拇指、中指、无名指，常见于反复抓握劳动者及中老年人。治疗遵循分期原则：早期以制动、热敷、NSAIDs和局部理疗为主；持续症状可行腱鞘封闭注射；保守治疗无效或反复发作可考虑A1滑车松解术。",
+    "category": "diagnosis",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "treatment",
+      "health_advice"
+    ],
+    "tags": [
+      "屈指肌腱狭窄性腱鞘炎",
+      "扳机指",
+      "腱鞘炎",
+      "手指卡顿",
+      "A1滑车"
+    ],
+    "source": "手外科与骨科临床诊疗规范",
+    "source_type": "guideline",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "手指屈伸卡顿",
+      "掌指关节掌侧疼痛",
+      "疑似扳机指"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "手指",
+      "掌指关节",
+      "屈肌腱鞘"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "扳机指",
+      "屈指肌腱",
+      "腱鞘狭窄",
+      "A1滑车"
+    ],
+    "structured_advice": {
+      "action": "diagnose_and_manage_trigger_finger",
+      "pathogenesis": [
+        "反复摩擦劳损",
+        "腱鞘增厚",
+        "管腔狭窄",
+        "肌腱滑动受阻"
+      ],
+      "clinical_features": [
+        "屈伸卡顿",
+        "弹响",
+        "晨僵",
+        "掌侧压痛",
+        "重者屈曲固定"
+      ],
+      "common_sites": [
+        "拇指",
+        "中指",
+        "无名指"
+      ],
+      "treatment_strategy": {
+        "early_stage": [
+          "减少抓握负荷",
+          "局部制动",
+          "热敷理疗",
+          "NSAIDs"
+        ],
+        "persistent_stage": [
+          "腱鞘内注射治疗"
+        ],
+        "refractory_stage": [
+          "A1滑车松解术"
+        ]
+      },
+      "follow_up_points": [
+        "疼痛评分",
+        "卡顿频率",
+        "主动伸直能力",
+        "复发情况"
+      ]
+    }
+  },
+  {
+    "id": "KB-IR-DX-0512",
+    "title": "屈指肌腱狭窄性腱鞘炎病名解析",
+    "content": "屈指肌腱狭窄性腱鞘炎又称“弹响指”“扳机指”。本病好发于拇指、食指和中指。其发生多与长期屈指劳动、反复用力握持硬物有关，导致屈指肌腱与腱鞘滑车反复摩擦和挤压，局部出现充血、水肿，继而发生变性与粘连，使滑车区域狭窄，形成类似“纽扣眼”样改变。部分患者在受寒后可出现手指筋脉拘急、屈伸不利而诱发或加重症状。患病人群已由传统手工业者扩展至现代电脑使用者和手机高频使用者，并呈现发病年轻化、多指化趋势。",
+    "category": "diagnosis",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "屈指肌腱狭窄性腱鞘炎",
+      "弹响指",
+      "扳机指",
+      "病名解析",
+      "A1滑车"
+    ],
+    "source": "手外科与骨科临床病名解析",
+    "source_type": "guideline",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "扳机指病名解释",
+      "手指屈伸卡顿病因说明",
+      "患者宣教"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "拇指",
+      "食指",
+      "中指",
+      "屈肌腱鞘"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "弹响指",
+      "扳机指",
+      "病名解析",
+      "长期握持劳损",
+      "年轻化"
+    ],
+    "structured_advice": {
+      "action": "explain_trigger_finger_naming_and_pathogenesis",
+      "aliases": [
+        "弹响指",
+        "扳机指"
+      ],
+      "common_digits": [
+        "拇指",
+        "食指",
+        "中指"
+      ],
+      "mechanism_summary": [
+        "反复摩擦挤压",
+        "局部充血水肿",
+        "组织变性粘连",
+        "滑车狭窄"
+      ],
+      "possible_trigger_factors": [
+        "长期屈指劳动",
+        "持续握持硬物",
+        "受寒后症状诱发或加重"
+      ],
+      "population_trend": [
+        "从传统手工业向电脑族、手机族扩展",
+        "发病年轻化",
+        "多指化趋势"
+      ]
+    }
+  },
+  {
+    "id": "KB-IR-CL-0511",
+    "title": "屈指肌腱狭窄性腱鞘炎临床表现",
+    "content": "屈指肌腱狭窄性腱鞘炎（扳机指）的主要临床症状为患指在屈伸活动时出现弹响和卡顿，呈“扣扳机样”动作，并可引发指根部疼痛，伴有患指屈伸受限。病情加重时可出现屈指肌腱嵌顿，患指被动固定于屈曲位或伸直位，主动活动明显困难。严重病例会显著影响日常生活与工作能力，如拿筷子、端碗、洗脸及持笔写字等精细手部功能。",
+    "category": "clinical_presentation",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "屈指肌腱狭窄性腱鞘炎",
+      "扳机指",
+      "临床表现",
+      "弹响",
+      "嵌顿",
+      "功能受限"
+    ],
+    "source": "手外科临床表现总结",
+    "source_type": "guideline",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "疑似扳机指患者",
+      "手指屈伸卡顿评估",
+      "门诊初筛"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "手指",
+      "掌指关节",
+      "屈肌腱鞘"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "弹响指",
+      "扣扳机样",
+      "屈伸受限",
+      "肌腱嵌顿",
+      "日常功能受损"
+    ],
+    "structured_advice": {
+      "action": "assess_trigger_finger_clinical_presentation",
+      "core_symptoms": [
+        "屈伸弹响",
+        "扣扳机样卡顿",
+        "指根部疼痛",
+        "屈伸受限"
+      ],
+      "severe_signs": [
+        "屈指肌腱嵌顿",
+        "患指被动固定于屈或伸位",
+        "手指主动活动困难"
+      ],
+      "functional_impact": [
+        "拿筷子困难",
+        "端碗困难",
+        "洗脸动作受限",
+        "持笔写字受限"
+      ],
+      "clinical_note": "若出现固定畸位或明显功能障碍，应尽早进行专科评估与干预"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0513",
+    "title": "屈指肌腱狭窄性腱鞘炎临床诊断与分度标准",
+    "content": "屈指肌腱狭窄性腱鞘炎可按病情程度分为I~III度。分度核心依据包括：掌指关节掌侧疼痛与压痛程度、屈伸过程中是否出现弹响或绞锁、以及主动屈伸活动受限程度。临床应结合病程、体格检查和功能受限情况综合判断分度，以指导保守治疗或手术决策。",
+    "category": "diagnosis",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "扳机指",
+      "屈指肌腱狭窄性腱鞘炎",
+      "诊断标准",
+      "分度"
+    ],
+    "source": "手外科临床分度规范",
+    "source_type": "guideline",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "扳机指门诊初诊",
+      "病情分级评估",
+      "治疗方案制定"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "手指",
+      "掌指关节",
+      "屈肌腱鞘"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "I到III度",
+      "扳机指分度",
+      "临床诊断标准"
+    ],
+    "structured_advice": {
+      "action": "grade_trigger_finger_severity",
+      "grading_basis": [
+        "掌指关节掌侧疼痛与压痛",
+        "弹响/绞锁是否存在",
+        "主动屈伸活动受限程度"
+      ],
+      "grading_levels": [
+        "I度",
+        "II度",
+        "III度"
+      ],
+      "clinical_use": "用于判断病情进展并指导保守或手术治疗路径"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0514",
+    "title": "屈指肌腱狭窄性腱鞘炎I度诊断要点",
+    "content": "I度表现为掌指关节掌侧局限性疼痛并有压痛，但不出现弹响，主动屈伸活动基本正常。该阶段以早期炎症刺激和局部滑动不适为主，尚未形成明显机械性卡顿。",
+    "category": "diagnosis",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "扳机指",
+      "I度",
+      "早期",
+      "压痛",
+      "无弹响"
+    ],
+    "source": "手外科分度诊断标准",
+    "source_type": "guideline",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "疑似扳机指早期患者",
+      "手指疼痛但无弹响"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "掌指关节",
+      "屈肌腱鞘"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "I度扳机指",
+      "无弹响",
+      "活动正常"
+    ],
+    "structured_advice": {
+      "action": "identify_grade_1_trigger_finger",
+      "key_features": [
+        "掌侧局限性疼痛",
+        "局部压痛",
+        "无弹响",
+        "主动屈伸正常"
+      ],
+      "clinical_note": "建议早期负荷管理与保守治疗，防止向II度进展"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0515",
+    "title": "屈指肌腱狭窄性腱鞘炎II度诊断要点",
+    "content": "II度表现为患指屈伸时出现弹响，但在活动后可减轻或消失，通常仍可完成主动屈伸活动。该阶段提示腱鞘狭窄已引起明显机械性摩擦与瞬时卡顿，但尚未形成持续性嵌顿。",
+    "category": "diagnosis",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "扳机指",
+      "II度",
+      "弹响",
+      "活动后减轻",
+      "主动活动可完成"
+    ],
+    "source": "手外科分度诊断标准",
+    "source_type": "guideline",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "屈伸弹响明显患者",
+      "疑似中期扳机指"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "手指",
+      "屈肌腱鞘"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "II度扳机指",
+      "屈伸弹响",
+      "活动后减轻"
+    ],
+    "structured_advice": {
+      "action": "identify_grade_2_trigger_finger",
+      "key_features": [
+        "屈伸出现弹响",
+        "活动后弹响可减轻或消失",
+        "可完成主动屈伸"
+      ],
+      "clinical_note": "可考虑局部注射与功能干预，减少进展为III度风险"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0516",
+    "title": "屈指肌腱狭窄性腱鞘炎III度诊断要点",
+    "content": "III度表现为患指屈伸时频繁出现弹响或绞锁现象，主动屈伸活动明显受限。该阶段提示机械性梗阻加重，肌腱嵌顿风险高，功能障碍明显，常影响日常生活和工作动作。",
+    "category": "diagnosis",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "扳机指",
+      "III度",
+      "绞锁",
+      "活动受限",
+      "重度"
+    ],
+    "source": "手外科分度诊断标准",
+    "source_type": "guideline",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "频繁弹响或绞锁",
+      "主动活动受限明显",
+      "重度扳机指"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "手指",
+      "屈肌腱鞘"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "III度扳机指",
+      "绞锁现象",
+      "主动屈伸受限"
+    ],
+    "structured_advice": {
+      "action": "identify_grade_3_trigger_finger",
+      "key_features": [
+        "频繁弹响",
+        "绞锁",
+        "主动屈伸受限"
+      ],
+      "clinical_note": "应尽早专科评估，必要时考虑手术松解以恢复功能"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0517",
+    "title": "扳机指鉴别诊断-桡骨茎突狭窄性腱鞘炎",
+    "content": "桡骨茎突狭窄性腱鞘炎（De Quervain病）是屈指肌腱狭窄性腱鞘炎的重要鉴别诊断。其疼痛和压痛点主要位于桡骨茎突处，而非掌指关节掌侧。临床上握拳尺偏试验（Finkelstein试验）阳性具有较高提示价值。与扳机指不同，本病以拇侧腕部疼痛、拇指活动痛和腕关节尺偏诱发痛为主，通常不以手指屈伸弹响和绞锁为主要表现。",
+    "category": "diagnosis",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "鉴别诊断",
+      "桡骨茎突狭窄性腱鞘炎",
+      "De Quervain",
+      "握拳尺偏试验",
+      "Finkelstein"
+    ],
+    "source": "手外科鉴别诊断规范",
+    "source_type": "guideline",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "手指或腕部疼痛待鉴别",
+      "疑似扳机指但体征不典型"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "桡骨茎突",
+      "腕关节",
+      "拇指"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "桡骨茎突压痛",
+      "握拳尺偏试验阳性",
+      "扳机指鉴别"
+    ],
+    "structured_advice": {
+      "action": "differentiate_trigger_finger_from_dequervain",
+      "key_differential_points": [
+        {
+          "item": "压痛部位",
+          "dequervain": "桡骨茎突处",
+          "trigger_finger": "掌指关节掌侧/A1滑车区"
+        },
+        {
+          "item": "诱发试验",
+          "dequervain": "握拳尺偏试验阳性",
+          "trigger_finger": "屈伸弹响与卡顿更典型"
+        },
+        {
+          "item": "主要症状",
+          "dequervain": "拇侧腕痛与拇指活动痛",
+          "trigger_finger": "手指屈伸弹响、绞锁"
+        }
+      ],
+      "clinical_tip": "若桡骨茎突压痛明显且Finkelstein试验阳性，应优先考虑De Quervain病"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0518",
+    "title": "扳机指鉴别诊断-类风湿性关节炎",
+    "content": "类风湿性关节炎常见于女性，通常表现为多关节受累、晨僵明显，可伴关节畸形，实验室检查常见类风湿因子升高。扳机指多为单指屈伸卡压与弹响，晨僵通常不突出，且一般无系统性炎症关节表现，可据此进行鉴别。",
+    "category": "diagnosis",
+    "tags": [
+      "扳机指",
+      "鉴别诊断",
+      "类风湿性关节炎",
+      "晨僵",
+      "类风湿因子"
+    ],
+    "source": "临床鉴别要点整理",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "differentiate_trigger_finger_from_rheumatoid_arthritis",
+      "key_points": [
+        "类风湿性关节炎女性多发",
+        "晨僵明显且持续时间较长",
+        "可出现多关节受累与关节畸形",
+        "实验室可见类风湿因子升高",
+        "扳机指以局部腱鞘卡压弹响为主"
+      ],
+      "clinical_tip": "若患者存在多关节晨僵和关节畸形体征，应优先考虑类风湿性关节炎并完善风湿免疫评估。"
+    }
+  },
+  {
+    "id": "KB-IR-CS-0519",
+    "title": "典型病例-老年女性右拇指狭窄性腱鞘炎",
+    "content": "患者张某某，女性，70岁。2015年8月因劳累后出现右手拇指指间关节疼痛伴弹响，初期自行外用活血化瘀类膏药，症状逐渐加重，影响拿筷子、拧毛巾等日常生活，后就诊我科。右手正斜位X线片未见明显异常（图11.1）。进一步行双手红外热成像检查（图11.2），结合临床表现，考虑诊断为屈指肌腱狭窄性腱鞘炎。",
+    "category": "case_study",
+    "tags": [
+      "扳机指",
+      "典型病例",
+      "老年女性",
+      "红外热成像",
+      "X线"
+    ],
+    "source": "临床病例整理",
+    "source_type": "case_report",
+    "priority": "high",
+    "structured_advice": {
+      "action": "identify_trigger_thumb_case_with_normal_xray_and_ir_support",
+      "patient_profile": {
+        "gender": "female",
+        "age": 70,
+        "onset_time": "2015-08",
+        "affected_site": "right_thumb_interphalangeal_region"
+      },
+      "clinical_features": [
+        "右拇指疼痛伴弹响",
+        "劳累后发病",
+        "影响拿筷子与拧毛巾"
+      ],
+      "exam_findings": {
+        "xray": "右手正斜位X线未见明显异常",
+        "infrared_thermography": "双手红外热成像结合症状支持诊断"
+      },
+      "diagnosis": "屈指肌腱狭窄性腱鞘炎",
+      "clinical_tip": "当X线未见明显异常但存在典型弹响与功能受限时，应结合红外热成像和体征综合判断。"
+    }
+  },
+  {
+    "id": "KB-IR-BM-0520",
+    "title": "影像体位-右手正位片",
+    "content": "右手正位片是手部影像学常用基础体位，可用于观察掌指关节、指间关节及骨性排列情况。结合临床症状与体征，可用于狭窄性腱鞘炎等手部疾病的辅助评估与鉴别。",
+    "category": "basic_concept",
+    "tags": [
+      "右手正位片",
+      "手部影像",
+      "体位",
+      "扳机指"
+    ],
+    "source": "临床影像体位要点整理",
+    "source_type": "expert_consensus",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "standardize_right_hand_ap_view_usage",
+      "key_points": [
+        "右手自然伸展并保持正位",
+        "关注掌指关节与指间关节对位",
+        "记录有无骨质异常或关节间隙改变",
+        "与症状体征联合解读影像结果"
+      ],
+      "clinical_tip": "若正位片未见明显骨性异常但存在典型弹响与卡压体征，仍应考虑软组织病变并结合其他检查。"
+    }
+  },
+  {
+    "id": "KB-IR-BM-0521",
+    "title": "影像体位-右手斜位片",
+    "content": "右手斜位片用于补充正位片观察盲区，可更清晰显示掌骨、指骨及关节面的空间关系，有助于评估骨性结构与关节对位。对扳机指等以软组织病变为主的疾病，斜位片常用于排除明显骨关节异常并辅助临床鉴别。",
+    "category": "basic_concept",
+    "tags": [
+      "右手斜位",
+      "手部影像",
+      "体位",
+      "扳机指"
+    ],
+    "source": "临床影像体位要点整理",
+    "source_type": "expert_consensus",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "standardize_right_hand_oblique_view_usage",
+      "key_points": [
+        "右手保持标准斜位角度拍摄",
+        "观察掌骨与指骨皮质连续性",
+        "评估关节面及关节间隙变化",
+        "与正位片及临床表现联合判读"
+      ],
+      "clinical_tip": "当正位片信息有限时，补充斜位片可提高对骨关节细节的可视化程度。"
+    }
   }
 ]
