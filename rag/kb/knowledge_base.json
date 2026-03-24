@@ -19406,5 +19406,195 @@
         "随访复查热像对比双侧温差变化以评估疗效"
       ]
     }
+  },
+  {
+    "id": "KB-IR-TX-0403",
+    "title": "肩周炎治疗方案-针灸联合微针针刺与穴位拔罐（4次）",
+    "content": "治疗采用针灸+微针针刺+穴位拔罐联合方案，共实施4次。该组合方案用于肩周炎疼痛期或粘连期患者，以镇痛、改善局部循环、松解软组织粘连和促进功能恢复为目标。针灸以肩髃、肩髎、肩前、阿是穴、曲池、外关等为主，微针针刺重点处理局部痛点与紧张带，穴位拔罐用于肩周高张区域与经筋走行区域。每次治疗后评估疼痛变化、活动度变化及不良反应，连续4次后综合评估疗效并决定是否进入下一阶段康复训练。",
+    "category": "treatment",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment",
+      "follow_up",
+      "health_advice"
+    ],
+    "tags": [
+      "肩周炎",
+      "针灸",
+      "微针针刺",
+      "穴位拔罐",
+      "联合治疗",
+      "4次"
+    ],
+    "source": "门诊治疗方案记录",
+    "source_type": "clinical_record",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "肩周炎疼痛期",
+      "肩关节活动受限",
+      "局部压痛明显"
+    ],
+    "contraindications": [
+      "皮肤破损或感染区域",
+      "出血倾向",
+      "严重心肺功能不全患者需谨慎"
+    ],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩关节",
+      "肩胛区"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "clinical_experience",
+    "retrieval_hints": [
+      "针灸+微针+拔罐",
+      "4次治疗",
+      "肩周炎联合疗法"
+    ],
+    "structured_advice": {
+      "action": "combined_acupuncture_microneedling_cupping",
+      "treatment_components": [
+        {
+          "name": "针灸",
+          "focus": "经穴调节与镇痛"
+        },
+        {
+          "name": "微针针刺",
+          "focus": "局部痛点与筋膜紧张带处理"
+        },
+        {
+          "name": "穴位拔罐",
+          "focus": "改善局部循环与软组织松解"
+        }
+      ],
+      "session_plan": {
+        "total_sessions": 4,
+        "frequency": "按临床安排连续治疗",
+        "reassessment": "每次治疗后评估VAS、活动度和压痛变化"
+      },
+      "suggested_points_or_regions": [
+        "肩髃",
+        "肩髎",
+        "肩前",
+        "阿是穴",
+        "曲池",
+        "外关",
+        "肩胛周高张区"
+      ],
+      "follow_up_metrics": [
+        "VAS疼痛评分",
+        "肩关节活动度",
+        "日常功能（梳头、穿衣、反手）",
+        "压痛点数量与强度"
+      ],
+      "post_treatment_advice": [
+        "治疗后24小时避免受寒和过度负重",
+        "配合轻柔主动活动训练",
+        "若出现持续加重疼痛或皮肤异常及时复诊"
+      ]
+    }
+  },
+  {
+    "id": "KB-IR-TX-0404",
+    "title": "肩周炎治疗技术-活血祛瘀舒筋通络针刺联合拔罐",
+    "content": "治则为活血祛瘀、舒筋通络。取穴以阿是穴为主，重点覆盖肱二头肌长头腱、肩峰下滑囊处及冈上肌压痛点，并配合肩井、天宗及颈部夹脊穴。针刺手法采用直刺或平刺，留针15分钟；起针后于针刺部位实施穴位拔罐10分钟。该方案适用于肩周炎伴局部压痛明显、颈肩筋膜紧张及活动受限患者，可用于缓解疼痛、改善局部循环与软组织张力。",
+    "category": "treatment",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment",
+      "health_advice"
+    ],
+    "tags": [
+      "肩周炎",
+      "活血祛瘀",
+      "舒筋通络",
+      "阿是穴",
+      "夹脊穴",
+      "针刺",
+      "拔罐"
+    ],
+    "source": "临床治疗要点整理",
+    "source_type": "clinical_record",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "肩周炎压痛明显",
+      "颈肩联合症状",
+      "肩关节活动受限"
+    ],
+    "contraindications": [
+      "局部皮肤破损或感染",
+      "明显出血倾向",
+      "高热或急性全身感染期"
+    ],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩关节",
+      "颈肩部"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "clinical_experience",
+    "retrieval_hints": [
+      "活血祛瘀",
+      "舒筋通络",
+      "阿是穴",
+      "留针15分钟",
+      "拔罐10分钟"
+    ],
+    "structured_advice": {
+      "action": "acupuncture_plus_cupping_protocol",
+      "treatment_principle": [
+        "活血祛瘀",
+        "舒筋通络"
+      ],
+      "acupoint_selection": {
+        "ashi_points": [
+          "肱二头肌长头腱压痛处",
+          "肩峰下滑囊压痛处",
+          "冈上肌压痛处"
+        ],
+        "regular_points": [
+          "肩井",
+          "天宗",
+          "颈部夹脊穴"
+        ]
+      },
+      "needling_method": {
+        "technique": [
+          "直刺",
+          "平刺"
+        ],
+        "needle_retention_minutes": 15
+      },
+      "post_needling_cupping": {
+        "target": "针刺穴位处",
+        "duration_minutes": 10
+      },
+      "clinical_goal": [
+        "减轻疼痛",
+        "改善局部血供",
+        "缓解肌筋膜紧张",
+        "促进肩关节功能恢复"
+      ],
+      "monitoring_items": [
+        "VAS评分变化",
+        "压痛点反应",
+        "肩关节活动度",
+        "针刺/拔罐后皮肤反应"
+      ]
+    }
   }
 ]
