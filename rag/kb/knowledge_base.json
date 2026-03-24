@@ -20768,5 +20768,87 @@
         "定期复评VAS与活动度变化"
       ]
     }
+  },
+  {
+    "id": "KB-IR-TX-0409",
+    "title": "肩周炎治疗技术-医用臭氧注射联合三维动态回旋手法",
+    "content": "患者行医用臭氧注射治疗，剂量10mL、浓度30ug/mL。注射入路选择肱二头肌长头腱区、肩峰下区及小圆肌区域。术后约30分钟，在患者状态稳定基础上实施三维动态回旋手法治疗，以进一步改善关节运动链、松解软组织紧张并促进功能恢复。该联合流程体现“先生物调节后力学重建”的治疗思路，可用于肩周炎疼痛与活动受限并存阶段的综合干预。",
+    "category": "treatment",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment",
+      "follow_up",
+      "health_advice"
+    ],
+    "tags": [
+      "肩周炎",
+      "医用臭氧",
+      "臭氧注射",
+      "三维动态回旋手法",
+      "联合治疗"
+    ],
+    "source": "临床操作记录",
+    "source_type": "clinical_record",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "肩周炎疼痛伴活动受限",
+      "局部软组织炎性反应明显",
+      "需要联合干预"
+    ],
+    "contraindications": [
+      "注射部位感染",
+      "凝血功能异常",
+      "臭氧治疗禁忌人群",
+      "急性骨折脱位未处理"
+    ],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩关节",
+      "肱二头肌长头腱",
+      "肩峰下区",
+      "小圆肌"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "clinical_experience",
+    "retrieval_hints": [
+      "10mL 30ug/mL",
+      "肱二头肌长头腱入路",
+      "术后半小时",
+      "三维动态回旋手法"
+    ],
+    "structured_advice": {
+      "action": "ozone_injection_plus_dynamic_rotational_manual_therapy",
+      "ozone_injection": {
+        "dose_ml": 10,
+        "concentration_ug_per_ml": 30,
+        "routes": [
+          "肱二头肌长头腱区",
+          "肩峰下区",
+          "小圆肌区域"
+        ]
+      },
+      "post_injection_interval_minutes": 30,
+      "manual_therapy": {
+        "name": "三维动态回旋手法",
+        "purpose": [
+          "改善关节力学平衡",
+          "松解软组织紧张",
+          "提升活动度"
+        ]
+      },
+      "treatment_logic": "先行臭氧生物调节，后行手法力学重建",
+      "monitoring_items": [
+        "注射后局部反应",
+        "VAS评分变化",
+        "肩关节活动度",
+        "治疗后不适反应"
+      ]
+    }
   }
 ]
