@@ -25698,5 +25698,45 @@
       ],
       "clinical_tip": "当L5/S1同时存在椎间盘脱出、椎间孔狭窄及侧隐窝狭窄时，神经根受压往往更为复杂，治疗决策应结合影像分型和临床表现综合制定。"
     }
+  },
+  {
+    "id": "KB-IR-TX-0653",
+    "title": "围手术期方案-局麻经皮椎间孔镜下L4/5椎间盘摘除与神经通道松解",
+    "content": "患者手术指征明确且无明显手术禁忌，建议在局部麻醉下行经皮椎间孔镜L4/5椎间盘摘除及神经通道松解术。术后给予补液、营养神经药物及中药汤剂（复元活血汤加减）综合治疗。术后当天患者疼痛明显减轻，并即开始倒蹬训练；术后第2天佩戴腰部支具下床活动。该围手术期路径体现了微创减压联合早期康复和药物支持的综合管理策略。",
+    "category": "treatment",
+    "tags": [
+      "手术指征明确",
+      "局麻",
+      "经皮椎间孔镜",
+      "L4/5椎间盘摘除",
+      "神经通道松解",
+      "早期康复"
+    ],
+    "source": "围手术期治疗记录（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_perioperative_plan_for_local_anesthesia_percutaneous_transforaminal_endoscopic_discectomy_and_neural_decompression_at_l4_5",
+      "surgical_plan": [
+        "局麻下经皮椎间孔镜手术",
+        "L4/5椎间盘摘除",
+        "神经通道松解"
+      ],
+      "postoperative_management": [
+        "补液治疗",
+        "营养神经药物",
+        "复元活血汤加减"
+      ],
+      "early_rehabilitation": [
+        "术后当天疼痛明显减轻并开始倒蹬训练",
+        "术后第2天佩戴腰部支具下床活动"
+      ],
+      "key_points": [
+        "术前指征和禁忌证评估明确",
+        "微创减压与药物支持并行",
+        "早期康复有助于功能恢复"
+      ],
+      "clinical_tip": "经皮椎间孔镜减压术后尽早启动规范化康复训练，可在保护腰椎稳定的前提下促进神经功能和活动能力恢复。"
+    }
   }
 ]
