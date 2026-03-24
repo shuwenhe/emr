@@ -37636,5 +37636,32 @@
       ],
       "clinical_tip": "建议继续随访夜间症状、握力和感觉功能，评估疗效维持情况。"
     }
+  },
+  {
+    "id": "KB-IR-DX-1049",
+    "title": "诊断现状-无单一检查可独立诊断腕管综合征，红外热成像可弥补电生理与MRI不足",
+    "content": "腕管综合征诊断方法日趋多样化，但目前尚无单一检查可独立确诊。红外热成像凭借无创、可视化与动态监测优势，可在一定程度上弥补电生理及MRI等检查的局限，用于辅助诊断并监测治疗效果。",
+    "category": "diagnosis",
+    "tags": [
+      "诊断现状",
+      "无单一金标准",
+      "红外热成像",
+      "电生理局限",
+      "MRI局限",
+      "辅助诊断",
+      "疗效监测"
+    ],
+    "source": "诊断方法综述文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_that_no_single_test_independently_diagnoses_cts_and_thermography_complements_electrophysiology_and_mri_for_assistive_diagnosis_and_response_monitoring",
+      "criteria_summary": [
+        "诊断手段多样",
+        "尚无单一独立诊断方式",
+        "热成像用于辅助诊断与疗效监测"
+      ],
+      "clinical_tip": "建议将热像结果与症状体征、电生理及影像学联合判读，以提高诊断与随访可靠性。"
+    }
   }
 ]
