@@ -35979,5 +35979,123 @@
       ],
       "clinical_tip": "出现破溃时需同时进行感染评估与代谢控制。"
     }
+  },
+  {
+    "id": "KB-IR-CS-0980",
+    "title": "典型病例-28岁女性左足第一跖趾关节内侧疼痛2周，行走痛明显",
+    "content": "患者张某，女，28岁。因左足第一跖趾关节内侧疼痛2周就诊，行走时疼痛较为明显。",
+    "category": "case_study",
+    "tags": [
+      "典型病例",
+      "28岁女性",
+      "左足第一跖趾关节",
+      "内侧疼痛",
+      "病程2周",
+      "行走痛明显"
+    ],
+    "source": "典型病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_case_overview_of_young_female_with_two_week_medial_left_first_mtp_pain_worse_on_walking",
+      "history_points": [
+        "病程2周",
+        "活动负重痛明显"
+      ],
+      "clinical_tip": "病例记录建议同步标注疼痛起始时间与活动受限程度。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0981",
+    "title": "诱发因素-发病前有穿尖头紧鞋史",
+    "content": "患者自述发病前期长期或频繁穿尖头紧鞋，提示鞋履压迫与局部摩擦可能为重要诱发因素。",
+    "category": "clinical_presentation",
+    "tags": [
+      "诱发因素",
+      "尖头紧鞋",
+      "鞋履压迫",
+      "局部摩擦"
+    ],
+    "source": "典型病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_narrow_tight_shoe_exposure_as_likely_trigger_for_first_mtp_bursal_inflammation",
+      "risk_factors": [
+        "鞋履前足挤压",
+        "反复摩擦刺激"
+      ],
+      "clinical_tip": "建议将鞋履习惯纳入复发预防教育核心项。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0982",
+    "title": "查体表现-左第一跖趾关节局部红肿及压痛明显",
+    "content": "查体见左足第一跖趾关节局部红肿明显，压痛明显，符合局部炎性体征。",
+    "category": "clinical_presentation",
+    "tags": [
+      "查体表现",
+      "左第一跖趾关节",
+      "局部红肿",
+      "明显压痛",
+      "炎性体征"
+    ],
+    "source": "典型病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_physical_exam_with_marked_local_swelling_redness_and_tenderness_at_left_first_mtp",
+      "exam_findings": [
+        "红肿明显",
+        "压痛明显"
+      ],
+      "clinical_tip": "建议记录压痛范围和分级，便于疗程中动态比较。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0983",
+    "title": "影像与初步诊断-左足X线未见明显异常，结合临床考虑滑囊炎",
+    "content": "左足X线片未见明显异常。在活动痛、局部红肿压痛及鞋履诱因基础上，临床初步考虑滑囊炎诊断。",
+    "category": "diagnosis",
+    "tags": [
+      "X线未见异常",
+      "初步诊断",
+      "滑囊炎",
+      "临床综合判断"
+    ],
+    "source": "典型病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_preliminary_bursitis_diagnosis_when_xray_is_negative_but_clinical_signs_and_trigger_history_are_positive",
+      "criteria_summary": [
+        "影像阴性",
+        "体征阳性",
+        "诱因明确"
+      ],
+      "clinical_tip": "影像阴性阶段应强化临床体征与病史证据链记录。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0984",
+    "title": "图像引用-治疗前红外热成像用于记录患侧温度基线",
+    "content": "本例保留治疗前红外热成像图，用于记录患侧温度分布基线并作为后续疗效对照依据。",
+    "category": "diagnosis",
+    "tags": [
+      "治疗前红外热成像",
+      "温度基线",
+      "疗效对照",
+      "患侧温度分布"
+    ],
+    "source": "典型病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_pre_treatment_thermography_baseline_for_followup_effect_comparison_in_first_mtp_bursitis_case",
+      "figure_reference": [
+        "治疗前红外热成像图"
+      ],
+      "clinical_tip": "建议同体位、同环境重复采集以提高前后对比可靠性。"
+    }
   }
 ]
