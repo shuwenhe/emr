@@ -20685,5 +20685,88 @@
         "定期复查活动度与热成像变化"
       ]
     }
+  },
+  {
+    "id": "KB-IR-CS-0604",
+    "title": "肩周炎典型病例-孙某初诊（左肩疼痛伴活动受限）",
+    "content": "患者孙某，女，55岁。主诉左肩关节疼痛、活动受限半个月余。半个月前无明显诱因出现左肩关节活动功能受限，夜间疼痛明显。查体可见：左肱二头肌长头腱压痛、左喙突压痛、左肩峰下滑囊压痛、左肩冈上肌与冈下肌压痛。功能检查示反手于背达左侧臀外侧，上梳于脑达左耳后，外展功能受限约40°，内旋与外旋功能均受限。综合病史与体征，符合肩周炎临床表现特征，提示处于疼痛并功能受限阶段。",
+    "category": "case_study",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "treatment",
+      "follow_up"
+    ],
+    "tags": [
+      "肩周炎",
+      "典型病例",
+      "左肩疼痛",
+      "夜间痛",
+      "活动受限",
+      "压痛点"
+    ],
+    "source": "门诊初诊病例记录",
+    "source_type": "case_report",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "肩关节疼痛伴活动受限患者",
+      "中老年肩周炎初诊评估"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "左肩",
+      "肩关节"
+    ],
+    "risk_levels": [
+      "medium"
+    ],
+    "evidence_level": "clinical_experience",
+    "retrieval_hints": [
+      "孙某",
+      "55岁",
+      "夜间疼痛",
+      "左肩外展受限",
+      "反手于背受限"
+    ],
+    "structured_advice": {
+      "action": "initial_case_assessment",
+      "patient_profile": {
+        "name_masked": "孙某",
+        "sex": "female",
+        "age": 55
+      },
+      "chief_complaint": "左肩关节疼痛、活动受限半个月余",
+      "history_keypoints": [
+        "无明显诱因起病",
+        "病程约半个月",
+        "夜间疼痛明显"
+      ],
+      "tenderness_points": [
+        "左肱二头肌长头腱",
+        "左喙突",
+        "左肩峰下滑囊",
+        "左肩冈上肌",
+        "左肩冈下肌"
+      ],
+      "functional_findings": {
+        "behind_back_reach": "反手于背达左侧臀外侧",
+        "overhead_reach": "上梳于脑达左耳后",
+        "abduction_limitation_deg": 40,
+        "internal_rotation_limitation": "受限",
+        "external_rotation_limitation": "受限"
+      },
+      "clinical_impression": "肩周炎疼痛期/功能受限期表现",
+      "management_suggestion": [
+        "进行镇痛与软组织松解治疗",
+        "联合肩关节活动度训练",
+        "重点改善外展及内外旋功能",
+        "定期复评VAS与活动度变化"
+      ]
+    }
   }
 ]
