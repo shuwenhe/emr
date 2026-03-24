@@ -18196,5 +18196,83 @@
       "prevalence": "中老年人常见肩关节疾患",
       "pathophysiology": "肩关节周围软组织退变、炎症和粘连导致肩关节功能障碍"
     }
+  },
+  {
+    "id": "KB-IR-CL-0501",
+    "title": "肩周炎临床表现-疼痛特征",
+    "content": "肩周炎的疼痛是最主要的临床表现，其特征和演变过程具有典型性。初期肩部疼痛多不明显，患者常不以为意。1-2周后疼痛逐渐加重，呈刀割样痛或钝痛，持续存在且因物理活动刺激不易缓解。疼痛与环境和活动状态密切相关：劳累及受寒凉刺激后疼痛加重；疼痛常向颈肩部及上肢放射，有时伴随针刺感或酸胀感。时间节律特征明显：晨起疼痛通常较重，活动后可逐渐减轻；但夜间疼痛明显加重，常影响睡眠质量，患者常因疼痛导致睡眠困难。这种日间可部分缓解、夜间加重的特点是肩周炎的典型特征。疼痛程度可随病程进展而变化，但通常持续存在。",
+    "category": "clinical_presentation",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "肩周炎",
+      "肩痛",
+      "疼痛特征",
+      "临床表现",
+      "疼痛规律"
+    ],
+    "source": "肩周炎诊疗规范与临床特征描述",
+    "source_type": "guideline",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "肩周炎患者就诊",
+      "需要问诊疼痛特征"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩关节",
+      "颈肩部",
+      "上肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "肩痛",
+      "疼痛特征",
+      "夜间痛",
+      "放射痛",
+      "刀割样痛",
+      "晨起疼痛"
+    ],
+    "structured_advice": {
+      "action": "assess_shoulder_pain_characteristics",
+      "pain_characteristics": {
+        "initial_phase": "初期疼痛不明显，多不为人注意",
+        "progression_timeline": "1-2周逐渐加重",
+        "pain_quality": [
+          "刀割样痛",
+          "钝痛"
+        ],
+        "pain_persistence": "持续存在，因物理活动不易缓解",
+        "aggravating_factors": [
+          "劳累",
+          "受寒凉刺激"
+        ],
+        "radiation_pattern": "向颈肩部及上肢放射",
+        "associated_sensations": [
+          "针刺感",
+          "酸胀感"
+        ]
+      },
+      "temporal_pattern": {
+        "morning": "晨起疼痛较重，活动后可减轻",
+        "daytime": "活动中可部分缓解",
+        "night": "夜间疼痛明显加重，影响睡眠"
+      },
+      "clinical_significance": "日间可部分缓解、夜间加重是肩周炎的典型特征",
+      "pain_assessment": "需使用VAS评分量化疼痛程度"
+    }
   }
 ]
