@@ -19241,5 +19241,93 @@
         "居家热敷与循序渐进功能锻炼，监测VAS与活动度变化"
       ]
     }
+  },
+  {
+    "id": "KB-IR-DX-0508",
+    "title": "肩周炎影像学表现",
+    "content": "肩周炎的诊断以临床为主，但影像学检查在排除其他疾病、分期评估和治疗决策中具有重要价值。X线平片早期多无特异性改变，部分患者可见肩峰下间隙轻度变窄、肱骨大结节骨质疏松或退行性改变；在排除骨折、脱位、肿瘤及明显骨破坏方面价值较高。超声检查可动态观察肩袖、肱二头肌长头腱及肩峰下滑囊，常见肩袖肌腱增厚、回声不均、滑囊积液或滑膜增厚，对合并肌腱损伤的筛查较敏感。MRI可更清晰显示关节囊增厚、喙肱韧带增厚、腋隐窝容积减小及肩袖周围软组织炎性改变，是评估粘连程度和鉴别诊断的重要手段。对于肩周炎患者，影像学通常用于“排他性诊断”而非单独确诊：若发现明显骨质破坏、占位性病变、大范围肌腱断裂或急性外伤改变，应优先考虑其他诊断并调整治疗路径。",
+    "category": "diagnosis",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "肩周炎",
+      "影像学",
+      "X线",
+      "超声",
+      "MRI",
+      "鉴别诊断"
+    ],
+    "source": "肩周炎影像评估与鉴别诊断实践",
+    "source_type": "guideline",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "肩关节疼痛活动受限需鉴别诊断",
+      "治疗前评估",
+      "疗效随访评估"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩关节"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "影像学表现",
+      "X线",
+      "超声",
+      "MRI",
+      "肩周炎分期"
+    ],
+    "structured_advice": {
+      "action": "imaging_evaluation_for_frozen_shoulder",
+      "imaging_modalities": [
+        {
+          "modality": "X线平片",
+          "typical_findings": [
+            "早期多无特异性改变",
+            "肩峰下间隙轻度变窄",
+            "肱骨大结节骨质疏松或退变"
+          ],
+          "main_value": "排除骨折、脱位、肿瘤及明显骨破坏"
+        },
+        {
+          "modality": "肩关节超声",
+          "typical_findings": [
+            "肩袖肌腱增厚",
+            "回声不均",
+            "肩峰下滑囊积液或滑膜增厚"
+          ],
+          "main_value": "动态评估软组织，筛查合并肌腱病变"
+        },
+        {
+          "modality": "MRI",
+          "typical_findings": [
+            "关节囊增厚",
+            "喙肱韧带增厚",
+            "腋隐窝容积减小",
+            "周围软组织炎性改变"
+          ],
+          "main_value": "评估粘连程度与软组织病变，辅助鉴别诊断"
+        }
+      ],
+      "diagnostic_principle": "影像学以排除其他器质性病变为主，不作为肩周炎单独确诊依据",
+      "red_flags": [
+        "明显骨质破坏",
+        "占位性病变",
+        "大范围肌腱断裂",
+        "急性外伤性改变"
+      ],
+      "clinical_implication": "若出现红旗影像表现，应优先转入相应专科路径，避免按单纯肩周炎处理"
+    }
   }
 ]
