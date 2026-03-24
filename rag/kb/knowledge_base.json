@@ -31015,5 +31015,198 @@
       ],
       "clinical_tip": "介入参数记录建议固定包含部位、能量、时间、药物浓度与剂量五要素，便于标准化随访。"
     }
+  },
+  {
+    "id": "KB-IR-FUP-0793",
+    "title": "疗后变化-双侧肘关节与双侧股外侧疼痛整体缓解，活动痛减轻",
+    "content": "经过治疗后，患者双侧肘关节及双侧股外侧疼痛症状较前缓解，主要表现为活动相关疼痛减轻。该变化提示治疗对负荷诱发痛具有正向效果。",
+    "category": "follow_up",
+    "tags": [
+      "治疗后",
+      "双肘疼痛缓解",
+      "双股外侧疼痛缓解",
+      "活动痛减轻",
+      "疗效观察"
+    ],
+    "source": "疗后随访文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_post_treatment_global_pain_relief_in_bilateral_elbows_and_lateral_thighs_with_reduced_activity_pain",
+      "outcome_points": [
+        "双肘疼痛缓解",
+        "双股外侧疼痛缓解",
+        "活动痛明显减轻"
+      ],
+      "clinical_significance": [
+        "提示治疗对功能相关痛有效",
+        "为后续巩固治疗提供依据"
+      ],
+      "key_points": [
+        "应继续跟踪症状持续时间",
+        "建议结合功能量化指标复评"
+      ],
+      "clinical_tip": "疗后评估建议聚焦活动痛变化，因为其更能反映日常功能获益。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0794",
+    "title": "功能改善-行走迈步时双股外侧阔筋膜张肌张力下降且牵拉痛减轻",
+    "content": "患者自觉行走迈步时，双股外侧（阔筋膜张肌）肌肉张力较前减轻，牵拉痛明显缓解。该表现提示下肢动态活动中的软组织应激状态改善。",
+    "category": "follow_up",
+    "tags": [
+      "行走迈步改善",
+      "双股外侧",
+      "阔筋膜张肌",
+      "肌肉张力下降",
+      "牵拉痛缓解"
+    ],
+    "source": "疗后随访文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_improved_gait_related_tfl_tension_and_reduced_lateral_thigh_traction_pain_after_treatment",
+      "functional_changes": [
+        "迈步时双股外侧肌张力下降",
+        "牵拉痛较前缓解"
+      ],
+      "clinical_significance": [
+        "提示动态功能状态改善",
+        "支持治疗对软组织负荷链有积极影响"
+      ],
+      "key_points": [
+        "可作为复诊功能终点之一",
+        "建议配合步态和活动耐受度追踪"
+      ],
+      "clinical_tip": "对股外侧疼痛病例可在随访中固定记录迈步痛和牵拉痛等级，提升疗效评估一致性。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0795",
+    "title": "红外热成像疗后评估-图13.4示靶点温差改善且颜色由冷向暖转变",
+    "content": "治疗后红外热成像（图13.4）显示靶点区域温差较治疗前改善，原低温差状态发生变化，颜色由冷色向暖色转变。该结果提示靶点区域功能状态出现积极改变。",
+    "category": "diagnosis",
+    "tags": [
+      "图13.4",
+      "疗后红外热成像",
+      "温差改善",
+      "冷色转暖色",
+      "靶点区域变化"
+    ],
+    "source": "疗后热成像分析（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_post_treatment_thermography_improvement_with_cold_to_warm_color_shift_at_target_regions",
+      "figure_reference": [
+        "图13.4"
+      ],
+      "imaging_changes": [
+        "靶点温差改善",
+        "低温差较前发生变化",
+        "颜色由冷色向暖色转变"
+      ],
+      "clinical_significance": [
+        "支持治疗后局部功能活动增强",
+        "可与症状改善形成客观-主观一致证据"
+      ],
+      "key_points": [
+        "建议与治疗前图13.2成对对比",
+        "应尽量保持同条件采集以提高可比性"
+      ],
+      "clinical_tip": "热成像对比分析宜结合时间点和同部位ROI，避免因采集条件差异造成误判。"
+    }
+  },
+  {
+    "id": "KB-IR-CS-0796",
+    "title": "机制解释-疗后靶点能量转化增强并伴局部循环代谢及肌肉活动活跃",
+    "content": "病例分析认为，治疗后靶点区域能量转化发生变化，局部热能活动更活跃，反映局部血液循环、组织代谢及肌肉活动状态改善。该解释用于连接热成像变化与临床症状缓解。",
+    "category": "case_study",
+    "tags": [
+      "机制解释",
+      "能量转化变化",
+      "局部热能活跃",
+      "血液循环改善",
+      "组织代谢活跃",
+      "肌肉活动改善"
+    ],
+    "source": "病例机制讨论（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_case_level_mechanistic_interpretation_linking_thermographic_change_to_local_circulation_metabolism_and_muscle_activity_improvement",
+      "mechanism_hypothesis": [
+        "靶点能量转化增强",
+        "局部热能活动活跃",
+        "循环代谢和肌肉活动改善"
+      ],
+      "key_points": [
+        "该条目为病例层面解释性结论",
+        "应结合客观随访指标进一步验证"
+      ],
+      "clinical_tip": "机制性描述建议与定量指标并行记录，以增强结论可验证性。"
+    }
+  },
+  {
+    "id": "KB-IR-CS-0797",
+    "title": "病例局限-多院检查治疗多为阴性，双肘及双股外侧疼痛病因未明确",
+    "content": "本案例不足在于患者经多家医院检查和治疗，各项检查多为阴性，双侧肘关节及双侧股外侧疼痛原因未获明确确诊，诊断提示不充分。该局限降低了病因归因的确定性。",
+    "category": "case_study",
+    "tags": [
+      "病例局限",
+      "多院检查阴性",
+      "病因未明确",
+      "双肘疼痛",
+      "双股外侧疼痛",
+      "诊断不明确"
+    ],
+    "source": "病例总结文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_case_limitation_of_uncertain_etiology_despite_multiple_hospital_negative_workups",
+      "limitations": [
+        "多家医院检查治疗结果多为阴性",
+        "双肘及双股外侧疼痛病因未明确"
+      ],
+      "clinical_impact": [
+        "影响病因层面的确定性判断",
+        "限制机制归因与推广性解释"
+      ],
+      "key_points": [
+        "应在病历中保留不确定性声明",
+        "后续需持续完善病因评估证据"
+      ],
+      "clinical_tip": "对于病因未明的慢性疼痛病例，应分阶段建立症状-功能-影像联合随访框架，逐步补强证据链。"
+    }
+  },
+  {
+    "id": "KB-IR-CS-0798",
+    "title": "临床价值-热成像在靶点识别与疗效说服力方面提供重要支持",
+    "content": "尽管病因未完全明确，热成像在治疗指导过程中发挥了重要作用：通过靶点区域遥感识别为对症治疗提供依据，并在治疗后形成较有说服力的疗效可视化证据。",
+    "category": "case_study",
+    "tags": [
+      "热成像价值",
+      "靶点识别",
+      "对症治疗指导",
+      "疗效可视化",
+      "证据支持"
+    ],
+    "source": "病例总结文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_clinical_value_of_thermography_for_target_guidance_and_persuasive_post_treatment_effect_evidence",
+      "value_points": [
+        "支持靶点区域识别",
+        "辅助制定对症治疗策略",
+        "增强疗效评估说服力"
+      ],
+      "key_points": [
+        "在病因不完全明确时仍具临床辅助价值",
+        "可与症状和功能指标形成互补证据"
+      ],
+      "clinical_tip": "建议将热成像结果纳入标准化疗效评价模板，与疼痛评分和功能量表联合解读。"
+    }
   }
 ]
