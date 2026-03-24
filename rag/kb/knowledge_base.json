@@ -35549,5 +35549,96 @@
       ],
       "clinical_tip": "机制型证据建议与热像及疼痛评分变化进行同周期关联分析。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0961",
+    "title": "病名词条-趾囊炎",
+    "content": "新增病名词条：趾囊炎。该病可表现为足趾局部囊性软组织炎性改变，属于成人足部常见疾病类型之一。",
+    "category": "diagnosis",
+    "tags": [
+      "趾囊炎",
+      "病名词条",
+      "足趾软组织",
+      "成人足部疾病"
+    ],
+    "source": "病名解析文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "add_disease_term_toe_bursitis_with_basic_definition_context",
+      "diagnosis_terms": [
+        "趾囊炎"
+      ],
+      "clinical_tip": "病名录入时建议同步绑定常见别名与解剖部位关键词。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0962",
+    "title": "病因机制-非自然撞击或骨骼弯曲可诱发趾囊炎",
+    "content": "趾囊炎可由非自然撞击或骨骼弯曲等机械性因素诱发，导致局部组织反复刺激后出现炎性病变。",
+    "category": "diagnosis",
+    "tags": [
+      "病因机制",
+      "机械性刺激",
+      "非自然撞击",
+      "骨骼弯曲",
+      "局部炎性病变"
+    ],
+    "source": "病名解析文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_mechanical_triggered_pathogenesis_of_toe_bursitis_due_to_impact_or_bony_deviation",
+      "key_points": [
+        "机械负荷异常与反复摩擦刺激"
+      ],
+      "clinical_tip": "需结合足部力线与鞋履受压点评估病因来源。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0963",
+    "title": "形态特征-大拇趾起始部可形成局部隆起",
+    "content": "本病在大拇趾起始部位可形成隆起性表现，提示趾部附着区或滑液囊区域存在慢性刺激与组织增生反应。",
+    "category": "clinical_presentation",
+    "tags": [
+      "大拇趾起始部",
+      "局部隆起",
+      "形态特征",
+      "慢性刺激"
+    ],
+    "source": "病名解析文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_morphologic_feature_of_prominence_at_hallux_base_in_toe_bursitis",
+      "exam_findings": [
+        "拇趾起始部隆起"
+      ],
+      "clinical_tip": "查体时建议记录隆起部位、大小及压痛强度用于随访对比。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0964",
+    "title": "同义名与流行特征-趾囊炎又称趾滑液囊肿，为成人常见足部疾病之一",
+    "content": "趾囊炎又称趾滑液囊肿，在成人足部疾病中较常见。规范记录同义名有助于跨来源病历与知识库检索一致性。",
+    "category": "diagnosis",
+    "tags": [
+      "趾滑液囊肿",
+      "同义名",
+      "成人常见病",
+      "足部疾病",
+      "检索一致性"
+    ],
+    "source": "病名解析文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_synonym_toe_synovial_bursal_cyst_and_adult_prevalence_feature",
+      "diagnosis_terms": [
+        "趾囊炎",
+        "趾滑液囊肿"
+      ],
+      "clinical_tip": "建议在术语标准化中设置同义词映射以减少漏检。"
+    }
   }
 ]
