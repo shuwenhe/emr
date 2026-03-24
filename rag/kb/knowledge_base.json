@@ -17860,5 +17860,70 @@
         "相似活动状态"
       ]
     }
+  },
+  {
+    "id": "KB-IR-FUP-0402",
+    "title": "治疗后第三次复查红外热成像图",
+    "content": "治疗后第三次复查红外热成像图是进行远期疗效评估和长期管理规划的重要节点。通常在完成系统治疗后的4-8周进行，用于评估治疗的长期效果、复发风险和是否需要巩固治疗。第三次复查可以判断患者是否达到临床治愈、是否需要继续干预或转入预防性管理阶段。复查重点应关注异常温度区域是否完全恢复、与初诊相比的改善幅度、患者的主观症状与客观指标的一致性。如温度异常基本消退且症状明显改善，可考虑停止特殊治疗并进入预防性保健阶段；如仍存在中等程度异常，建议继续巩固治疗或调整方案。",
+    "category": "follow_up_rule",
+    "report_sections": [
+      "doctor_opinion",
+      "treatment_plan_text",
+      "health_advice"
+    ],
+    "tags": [
+      "远期复查",
+      "热成像",
+      "长期评估",
+      "治愈判断",
+      "预防保健"
+    ],
+    "source": "红外热成像评估与随访规范",
+    "source_type": "guideline",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "完成系统治疗4-8周",
+      "需要评估长期效果",
+      "需要制定长期管理计划"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult"
+    ],
+    "body_parts": [
+      "颈肩",
+      "腰背",
+      "膝关节",
+      "四肢"
+    ],
+    "risk_levels": [
+      "low",
+      "medium",
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "第三次复查",
+      "4到8周",
+      "远期疗效",
+      "热成像长期评估",
+      "治愈判断"
+    ],
+    "structured_advice": {
+      "action": "third_thermal_imaging_recheck",
+      "recheck_weeks": "4-8",
+      "timing_context": "完成系统治疗后",
+      "evaluation_focus": [
+        "异常温度恢复程度",
+        "与初诊的改善幅度",
+        "症状与指标一致性"
+      ],
+      "decision_tree": {
+        "fully_recovered": "停止特殊治疗，进入预防性保健",
+        "partial_improvement": "继续巩固治疗或调整方案",
+        "minimal_change": "评估治疗方案有效性，考虑专科转诊"
+      }
+    }
   }
 ]
