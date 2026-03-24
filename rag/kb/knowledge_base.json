@@ -36377,5 +36377,100 @@
       ],
       "clinical_tip": "对OCR截断文本应保留已知信息并显式标记缺口，避免过度推断。"
     }
+  },
+  {
+    "id": "KB-IR-CP-0997",
+    "title": "病例表现-左第一跖趾关节急性疼痛并伴站立行走受限",
+    "content": "本例表现为左足第一跖趾关节急性疼痛，并出现站立及行走受限，提示局部炎症已对负重功能造成影响。",
+    "category": "clinical_presentation",
+    "tags": [
+      "左第一跖趾关节",
+      "急性疼痛",
+      "站立受限",
+      "行走受限",
+      "负重功能受影响"
+    ],
+    "source": "病例分析文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_acute_left_first_mtp_pain_with_standing_and_walking_limitation_in_case_analysis",
+      "clinical_points": [
+        "急性疼痛",
+        "负重功能受限"
+      ],
+      "clinical_tip": "建议同时记录静息痛、站立痛与步行痛，便于功能分层评估。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0998",
+    "title": "热像判读基础-第一跖趾关节属肢体末梢且无较大动脉血管，正常温度应偏低",
+    "content": "足跖趾关节处于肢体末梢部位，通常没有较大的动脉血管，因此其正常温度应较四肢其他区域偏低。该生理特征为红外热成像异常判读提供基线参考。",
+    "category": "diagnosis",
+    "tags": [
+      "热像判读基础",
+      "末梢部位",
+      "无较大动脉血管",
+      "正常温度偏低",
+      "基线参考"
+    ],
+    "source": "病例分析文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_normal_low_temperature_expectation_of_first_mtp_region_as_thermography_baseline",
+      "imaging_findings": [
+        "末梢区域正常应偏低温"
+      ],
+      "clinical_tip": "热像解读前应先建立该部位的正常生理温度预期。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0999",
+    "title": "热像诊断价值-左第一跖趾关节周围及足背较右侧出现充血性高温改变，可辅助定位疼痛范围",
+    "content": "本例左足第一跖趾关节周围及足背部与右侧对比出现充血性高温改变。结合患者生活习惯及X线片，该热像表现可作为辅助诊断依据，并能较好显示疼痛存在范围。",
+    "category": "diagnosis",
+    "tags": [
+      "左足高温改变",
+      "足背高温",
+      "双侧对比",
+      "辅助诊断",
+      "疼痛范围定位",
+      "充血性高温"
+    ],
+    "source": "病例分析文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_left_first_mtp_and_dorsal_foot_hyperthermia_against_right_side_as_auxiliary_diagnostic_and_pain_mapping_evidence",
+      "imaging_findings": [
+        "患侧较健侧充血性高温"
+      ],
+      "clinical_tip": "建议将热像高温区与压痛区、X线部位逐一对应，提高证据一致性。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-1000",
+    "title": "疗效评估-区域测温比较臭氧治疗前后高温区变化可精确评估疗效",
+    "content": "运用热像仪区域测温功能对充血性高温区域进行温度检测，并对臭氧治疗前后进行对比，可用于更精确地评估治疗效果。",
+    "category": "follow_up",
+    "tags": [
+      "区域测温",
+      "臭氧治疗前后对比",
+      "高温区检测",
+      "精确疗效评估",
+      "温度量化"
+    ],
+    "source": "病例分析文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_quantitative_roi_temperature_comparison_before_and_after_ozone_for_precise_effect_assessment",
+      "evaluation_points": [
+        "高温区定量温度变化",
+        "治疗前后热像对照"
+      ],
+      "clinical_tip": "建议固定ROI、环境温度与拍摄体位，保证前后测温可比。"
+    }
   }
 ]
