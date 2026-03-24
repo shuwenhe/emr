@@ -26799,5 +26799,213 @@
       ],
       "clinical_tip": "在疑难或复合型腰骶痛病例中，建议建立结构影像与功能影像并行评估流程，以提升诊疗一致性与可解释性。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0684",
+    "title": "责任节段判定-左足底低温差提示S1分布受累并指向L5/S1椎间盘",
+    "content": "本例红外热成像显示左足底较对侧温差降低，位于S1神经支配区域。结合患者症状和体征，提示左下肢酸麻感的责任椎间盘主要位于L5/S1节段。该结果体现了功能影像与神经解剖分布结合后对责任节段定位的辅助价值。",
+    "category": "diagnosis",
+    "tags": [
+      "左足底低温差",
+      "S1神经支配区",
+      "L5/S1责任节段",
+      "红外热成像",
+      "症状体征结合"
+    ],
+    "source": "责任节段分析（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "identify_l5_s1_responsible_disc_by_combining_left_plantar_hypothermia_with_s1_dermatomal_distribution",
+      "evidence_points": [
+        "左足底较对侧低温差",
+        "温差区域对应S1支配",
+        "左下肢酸麻症状与分布一致"
+      ],
+      "clinical_implication": [
+        "支持L5/S1为主要责任节段",
+        "提高靶向治疗定位可信度"
+      ],
+      "key_points": [
+        "功能影像可反映神经功能受扰",
+        "需与症状体征联合判断",
+        "责任节段定位应强调解剖一致性"
+      ],
+      "clinical_tip": "当热成像低温区与皮节分布一致时，可显著增强责任节段判断，但仍需结合MRI进行结构确认。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0685",
+    "title": "靶向治疗依据-MRI三维分区与术中定位支持L5/S1射频联合臭氧",
+    "content": "结合腰椎MRI可见突出间盘位于椎间盘III层、2区至3区及a域的三维空间，解剖上S1神经出口根经过该区域。术中影像显示定位准确，据此实施L5/S1椎间盘靶点射频消融联合臭氧注射治疗，强调了影像分区与解剖通道匹配对精准干预的重要性。",
+    "category": "treatment",
+    "tags": [
+      "L5/S1",
+      "射频消融",
+      "臭氧注射",
+      "MRI三维分区",
+      "术中定位准确"
+    ],
+    "source": "靶向介入依据（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "perform_targeted_l5_s1_radiofrequency_and_ozone_intervention_based_on_mri_3d_zone_and_intraoperative_imaging_alignment",
+      "targeting_basis": [
+        "MRI示突出位于III层2至3区a域",
+        "S1出口根解剖路径穿行该区",
+        "术中影像证实靶点定位准确"
+      ],
+      "procedure_goal": [
+        "精准覆盖责任病变区域",
+        "减轻神经根刺激",
+        "改善下肢感觉异常"
+      ],
+      "key_points": [
+        "术前影像分区提升定位精度",
+        "术中影像验证可降低偏靶风险",
+        "解剖学一致性是疗效基础"
+      ],
+      "clinical_tip": "实施椎间盘靶向介入时，建议以术前MRI分区与术中影像双重确认靶点，确保责任神经通道覆盖充分。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0686",
+    "title": "术后结局-左下肢酸麻消失且双足底温差趋于对称",
+    "content": "靶点射频联合臭氧治疗后，患者左下肢酸麻感消失。术后红外热成像显示双足底基本等温差，提示术前侧别温度异常获得纠正。症状改善与功能影像变化方向一致，支持短期疗效可靠。",
+    "category": "follow_up",
+    "tags": [
+      "左下肢酸麻消失",
+      "术后红外热成像",
+      "双足底等温差",
+      "短期疗效",
+      "症状影像一致"
+    ],
+    "source": "术后疗效观察（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_post_intervention_resolution_of_left_leg_paresthesia_with_bilateral_plantar_thermal_symmetry",
+      "outcome_findings": [
+        "左下肢酸麻感消失",
+        "双足底温差基本对称"
+      ],
+      "clinical_interpretation": [
+        "神经刺激相关症状明显缓解",
+        "体表温度分布趋于正常化",
+        "症状与功能影像呈一致改善"
+      ],
+      "key_points": [
+        "主观与客观指标共同改善",
+        "可作为疗效评估证据链的一部分",
+        "仍需中期复评稳定性"
+      ],
+      "clinical_tip": "术后若症状与热成像同步改善，通常提示治疗命中责任结构，但建议继续随访以监测复发。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0687",
+    "title": "检查价值-红外热成像可客观显示病变区域并辅助腰椎间盘突出诊断",
+    "content": "红外热成像可客观显示病变部位及区域温差特征，在腰椎间盘突出症辅助诊断中具有重要价值。该技术可作为一项客观检查指标，为责任区域识别、病情分层及疗效随访提供功能层面依据。",
+    "category": "diagnosis",
+    "tags": [
+      "红外热成像价值",
+      "客观检查指标",
+      "病变区域显示",
+      "辅助诊断",
+      "腰椎间盘突出症"
+    ],
+    "source": "检查价值观点（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "emphasize_infrared_thermography_as_objective_auxiliary_indicator_for_lumbar_disc_herniation_diagnosis",
+      "diagnostic_role": [
+        "客观呈现侧别温差异常",
+        "辅助识别病变区域",
+        "补充结构影像信息"
+      ],
+      "clinical_application": [
+        "责任区域评估",
+        "病情分层判断",
+        "术前术后疗效追踪"
+      ],
+      "key_points": [
+        "功能影像适合作为辅助证据",
+        "不替代MRI等结构影像",
+        "联合分析可提升诊断完整性"
+      ],
+      "clinical_tip": "红外热成像用于腰椎间盘突出评估时，应作为客观补充指标纳入多模态诊断框架。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0688",
+    "title": "疾病概述-强直性脊柱炎为以中轴关节慢性炎症为主的全身性疾病",
+    "content": "强直性脊柱炎（ankylosing spondylitis，AS）是一类以中轴关节慢性炎症为主的全身性疾病。其病因尚未完全明确，通常认为与感染、免疫及遗传因素相关。病变常主要累及骶髂关节。",
+    "category": "diagnosis",
+    "tags": [
+      "强直性脊柱炎",
+      "AS",
+      "中轴关节慢性炎症",
+      "病因不明",
+      "骶髂关节受累"
+    ],
+    "source": "AS基础知识（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "summarize_basic_disease_profile_and_etiologic_factors_of_ankylosing_spondylitis",
+      "core_features": [
+        "中轴关节慢性炎症为主",
+        "属全身性疾病谱系",
+        "病变常累及骶髂关节"
+      ],
+      "etiology_clues": [
+        "与感染因素相关",
+        "与免疫机制相关",
+        "与遗传背景相关"
+      ],
+      "key_points": [
+        "AS具有慢性进展特点",
+        "骶髂关节受累具有提示意义",
+        "诊断需结合临床与影像证据"
+      ],
+      "clinical_tip": "对反复腰骶痛伴骶髂关节体征患者，应尽早纳入AS筛查路径并进行系统评估。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0689",
+    "title": "诊断提示-AS评估应依据现行标准并结合骶髂关节证据综合判断",
+    "content": "对于强直性脊柱炎的诊断，应依据现行诊断标准进行综合评估，并重点关注骶髂关节受累证据。临床症状、体征、实验室指标与影像学资料需联合判读，以提高早期识别准确性。",
+    "category": "diagnosis",
+    "tags": [
+      "AS诊断标准",
+      "综合评估",
+      "骶髂关节证据",
+      "早期识别",
+      "多维判读"
+    ],
+    "source": "AS诊断原则（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "recommend_comprehensive_as_assessment_using_current_diagnostic_criteria_and_sacroiliac_evidence",
+      "assessment_elements": [
+        "依据现行诊断标准",
+        "关注骶髂关节受累表现",
+        "联合临床实验室和影像资料"
+      ],
+      "clinical_goal": [
+        "提高AS早期识别率",
+        "减少漏诊与误诊",
+        "支持分层治疗策略"
+      ],
+      "key_points": [
+        "诊断需多证据整合",
+        "骶髂关节评估是关键环节",
+        "动态随访有助于提高确定性"
+      ],
+      "clinical_tip": "当AS线索存在但证据不完整时，建议采用阶段性复评策略，结合症状演变与影像变化逐步确认诊断。"
+    }
   }
 ]
