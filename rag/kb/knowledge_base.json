@@ -31411,5 +31411,185 @@
       ],
       "clinical_tip": "出现按压诱发下传放射痛时，建议记录放射终点并结合节段体征进行鉴别。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0806",
+    "title": "鉴别诊断要点-与腰椎间盘突出症比较时本病在咳嗽/大笑/喷嚏时疼痛可加重",
+    "content": "与腰椎间盘突出症鉴别时，可见本病在咳嗽、大笑或喷嚏等腹压变化动作时疼痛加重。该要点可作为症状诱发模式的比较线索之一。",
+    "category": "diagnosis",
+    "tags": [
+      "鉴别诊断",
+      "腰椎间盘突出症",
+      "咳嗽痛加重",
+      "喷嚏痛加重",
+      "诱发模式"
+    ],
+    "source": "鉴别诊断文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_differential_point_of_pain_exacerbation_with_cough_laugh_sneeze_against_lumbar_disc_herniation",
+      "differential_points": [
+        "咳嗽、大笑、喷嚏时疼痛可加重"
+      ],
+      "key_points": [
+        "诱发模式可作为鉴别辅助",
+        "需结合体征与影像综合判断"
+      ],
+      "clinical_tip": "鉴别腰腿痛时建议记录诱发动作清单，避免仅凭单一症状定性。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0807",
+    "title": "鉴别诊断要点-压痛点定位差异：本病偏向L3横突尖端，腰突症多位于病椎椎板间隙相关区",
+    "content": "与腰椎间盘突出症相比，本病压痛点位置存在差异：本病更偏向第三腰椎横突尖端区域，而后者常见于病椎椎板间隙相关区域。定位差异对体格检查分层有重要价值。",
+    "category": "diagnosis",
+    "tags": [
+      "鉴别诊断",
+      "压痛点定位",
+      "L3横突尖端",
+      "椎板间隙",
+      "体格检查"
+    ],
+    "source": "鉴别诊断文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_differential_tender_point_location_between_l3_transverse_process_syndrome_and_lumbar_disc_herniation",
+      "differential_points": [
+        "本病压痛偏L3横突尖端",
+        "腰椎间盘突出相关压痛多见病椎椎板间隙区域"
+      ],
+      "key_points": [
+        "定位性触诊可提高鉴别效率",
+        "建议双侧与邻近节段对照触诊"
+      ],
+      "clinical_tip": "体格检查应把压痛点“节段+距离+深度”结构化记录，增强随访可比性。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0808",
+    "title": "鉴别诊断要点-本病重症可直腿抬高阳性，但加强试验通常阴性",
+    "content": "本病少数重症患者可出现直腿抬高试验阳性，但加强试验通常为阴性。该组合可作为与典型腰椎间盘突出症神经牵拉征表现差异的参考。",
+    "category": "diagnosis",
+    "tags": [
+      "鉴别诊断",
+      "直腿抬高试验",
+      "加强试验阴性",
+      "神经牵拉征",
+      "重症提示"
+    ],
+    "source": "鉴别诊断文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_differential_pattern_of_possible_positive_slr_with_negative_bragard_in_severe_cases",
+      "differential_points": [
+        "少数重症可直腿抬高阳性",
+        "加强试验多为阴性"
+      ],
+      "key_points": [
+        "试验组合较单项结果更有鉴别意义",
+        "需联合神经体征和影像排除根性受压"
+      ],
+      "clinical_tip": "当SLR与加强试验结果不一致时，建议结合压痛定位与影像再分层，避免误判为典型椎间盘根性痛。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0809",
+    "title": "神经与功能查体-四字试验阴性、双足背伸肌力V级、病理反射未引出，VAS 5分",
+    "content": "查体记录提示：加强试验右侧阴性；“4”字试验左侧阴性、右侧阴性；左足及右足背伸肌力均V级；双侧足背动脉搏动可触及；左、右膝腱反射未引出；左、右跟腱反射可引出（原文存在OCR噪声）；双侧髌阵挛与踝阵挛均未引出；双侧巴宾斯基征未引出。VAS评分5分。",
+    "category": "clinical_presentation",
+    "tags": [
+      "四字试验阴性",
+      "双足背伸肌力V级",
+      "足背动脉可触及",
+      "膝腱反射未引出",
+      "跟腱反射可引出",
+      "巴宾斯基未引出",
+      "VAS5分"
+    ],
+    "source": "神经查体文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_neurologic_exam_with_negative_pathologic_reflexes_preserved_dorsiflexion_strength_and_vas_five",
+      "exam_findings": [
+        "双侧四字试验阴性",
+        "双足背伸肌力V级",
+        "双侧足背动脉搏动可触及",
+        "双侧膝腱反射未引出",
+        "双侧病理反射与阵挛未引出",
+        "VAS 5分"
+      ],
+      "key_points": [
+        "肌力保留与病理反射阴性提示重大神经功能缺损证据不足",
+        "疼痛程度中等，需结合功能受限评估"
+      ],
+      "clinical_tip": "神经查体出现个别反射异常时，建议复查并结合影像与症状侧别综合判读。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0810",
+    "title": "本院腰椎X线-退行性骨关节病伴侧弯、序列失稳及多节段退变（图14.1）",
+    "content": "本院腰椎X线检查提示：腰椎退行性骨关节病，腰椎侧弯，序列失稳，多发腰椎间盘退变，L4/5与L5/S1椎小关节退变（图14.1）。该结果提示退变性结构改变较为广泛。",
+    "category": "diagnosis",
+    "tags": [
+      "腰椎X线",
+      "退行性骨关节病",
+      "腰椎侧弯",
+      "序列失稳",
+      "多发椎间盘退变",
+      "L4/5椎小关节退变",
+      "L5/S1椎小关节退变",
+      "图14.1"
+    ],
+    "source": "本院影像检查文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_lumbar_xray_showing_degenerative_osteoarthropathy_scoliosis_instability_and_multilevel_disc_facet_degeneration",
+      "imaging_findings": [
+        "腰椎退行性骨关节病",
+        "腰椎侧弯",
+        "序列失稳",
+        "多发椎间盘退变",
+        "L4/5与L5/S1椎小关节退变"
+      ],
+      "figure_reference": [
+        "图14.1"
+      ],
+      "key_points": [
+        "提示多因素退变背景",
+        "应结合症状责任节段进行临床分层"
+      ],
+      "clinical_tip": "多节段退变影像应与症状主责节段匹配，避免“影像即病因”的过度推断。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0811",
+    "title": "图像引用-图14.1为患者腰椎X线片",
+    "content": "文本注明“图14.1 患者腰椎X线片”，用于本案影像证据索引和随访对照。该图号可与腰椎退变及失稳相关条目交叉关联。",
+    "category": "diagnosis",
+    "tags": [
+      "图14.1",
+      "腰椎X线片",
+      "影像引用",
+      "退变对照"
+    ],
+    "source": "图注文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_figure_14_1_as_lumbar_xray_reference_for_cross_entry_linking",
+      "figure_reference": [
+        "图14.1"
+      ],
+      "key_points": [
+        "用于病例影像追溯",
+        "便于前后影像和症状对照分析"
+      ],
+      "clinical_tip": "建议为连续图号建立统一索引，提升教学和检索效率。"
+    }
   }
 ]
