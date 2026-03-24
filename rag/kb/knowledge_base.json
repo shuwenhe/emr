@@ -31235,5 +31235,37 @@
       ],
       "clinical_tip": "录入诊断词条时可同步关联常见鉴别诊断，提升后续检索和临床决策支持能力。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0800",
+    "title": "病名解析-第三腰椎横突综合征与L3横突易损伤机制",
+    "content": "病名解析：第三腰椎常被视为腰椎活动中心，横突相对较长且尖部较高，易受外力或反复劳损影响而出现损伤。因急慢性损伤引发腰痛、下肢疼痛及腰部活动障碍等症状时，可归入第三腰椎横突综合征范畴。",
+    "category": "diagnosis",
+    "tags": [
+      "病名解析",
+      "第三腰椎",
+      "横突易损伤",
+      "急慢性损伤",
+      "腰痛",
+      "下肢疼痛",
+      "活动障碍"
+    ],
+    "source": "病名解析文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_disease_name_interpretation_for_l3_transverse_process_syndrome_with_mechanistic_context",
+      "definition_points": [
+        "第三腰椎为腰椎活动中心之一",
+        "横突较长且尖部较高，易受外力影响",
+        "急慢性损伤后可出现腰痛、下肢痛和活动障碍"
+      ],
+      "key_points": [
+        "病名强调L3横突相关损伤背景",
+        "症状群包含腰部与下肢疼痛及功能受限",
+        "诊断时需结合体征与影像排除其他腰腿痛病因"
+      ],
+      "clinical_tip": "对疑似第三腰椎横突综合征患者，建议在压痛定位基础上结合负荷诱发特征进行分层评估。"
+    }
   }
 ]
