@@ -24591,5 +24591,153 @@
       ],
       "clinical_tip": "红外热成像在评估神经根压迫时具有全面性优势，可发现临床症状不明显但影像学显示异常的神经通道受累情况。"
     }
+  },
+  {
+    "id": "KB-IR-TX-0623",
+    "title": "手术方法-MED术式的优点和技术要点",
+    "content": "微创内镜辅助下椎间盘切除术（MED）具有多项优势，包括：切口小、软组织损伤少、对脊柱稳定性影响小、术后下地早、恢复快等特点。术中通过剥离责任椎间节段的黄韧带，摘除突出的髓核组织，能够彻底解除神经通道前后方的压迫，为神经功能的恢复提供宽敞的减压空间。该术式在腰椎间盘突出症的微创治疗中应用广泛，具有较高的安全性和有效性。",
+    "category": "treatment",
+    "tags": [
+      "MED术式",
+      "微创手术",
+      "椎间盘切除",
+      "黄韧带",
+      "髓核摘除",
+      "神经减压"
+    ],
+    "source": "手术优点总结（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "understand_med_minimally_invasive_advantages_and_surgical_technique",
+      "technique_features": [
+        "切口小",
+        "软组织损伤少",
+        "脊柱稳定性影响小"
+      ],
+      "surgical_steps": [
+        "剥离黄韧带",
+        "摘除突出髓核",
+        "解除神经通道前后方压迫"
+      ],
+      "postoperative_benefits": [
+        "术后下地早",
+        "恢复快",
+        "创伤小"
+      ],
+      "key_points": [
+        "微创手术理念",
+        "神经减压充分",
+        "脊柱稳定性保留"
+      ],
+      "clinical_tip": "MED术式通过有限的入路实现有效的神经减压，符合现代脊椎微创和快速康复的治疗理念。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0624",
+    "title": "术后康复管理-早期活动和药物治疗",
+    "content": "术后第2天患者即开始倒蹬训练，通过早期运动刺激防止术后神经根粘连，促进神经功能恢复。术后第3天患者佩戴腰部支具下地活动，循序渐进地增加活动量。同时配合活血化瘀止痛类中药及营养神经药物进行综合治疗，促进微循环改善，加快组织修复和神经功能恢复。这种多模式的早期康复管理显著改善了患者的预后。",
+    "category": "follow_up",
+    "tags": [
+      "术后康复",
+      "倒蹬训练",
+      "下地活动",
+      "支具保护",
+      "中药治疗",
+      "神经营养"
+    ],
+    "source": "术后康复管理（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "implement_comprehensive_postoperative_rehabilitation_with_traditional_chinese_medicine",
+      "timeline": {
+        "postop_day_2": "开始倒蹬训练，防止神经根粘连",
+        "postop_day_3": "佩戴支具下地活动"
+      },
+      "rehabilitation_approach": [
+        "早期运动刺激",
+        "循序渐进的活动",
+        "中药综合治疗"
+      ],
+      "medications": [
+        "活血化瘀止痛类中药",
+        "营养神经药物"
+      ],
+      "key_points": [
+        "早期康复对预后至关重要",
+        "多模式综合治疗",
+        "中西医结合加快恢复"
+      ],
+      "clinical_tip": "术后早期的倒蹬训练和支具保护能有效防止神经根粘连，中药配合现代营养神经治疗提高了疗效。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0625",
+    "title": "术后随访-两周临床症状评估",
+    "content": "术后两周复查时，患者症状显著改善。患者行走中原本的臀区和左下肢疼痛、麻木症状已完全消失，仅偶有右下肢酸沉感，提示左侧神经根的压迫已完全解除。右侧症状的轻微存在反映了术前双侧神经根受压的情况，但程度明显减轻。这种临床表现与患者的术前影像学诊断中右侧神经通道受影响的发现相符合，证实了手术减压的有效性和全面性。",
+    "category": "follow_up",
+    "tags": [
+      "术后两周",
+      "症状完全消失",
+      "左侧症状消失",
+      "右侧轻微症状",
+      "疼痛缓解"
+    ],
+    "source": "术后随访评估（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_two_week_postoperative_symptom_resolution_assessment",
+      "symptom_status": {
+        "left_side": "臀区及左下肢疼痛、麻木完全消失",
+        "right_side": "偶有右下肢酸沉感，显著改善"
+      },
+      "clinical_findings": [
+        "行走能力明显改善",
+        "疼痛消失",
+        "麻木症状消失"
+      ],
+      "key_points": [
+        "左侧症状完全消失",
+        "右侧症状显著改善",
+        "双侧减压效果确切"
+      ],
+      "clinical_tip": "术后两周左侧症状的完全消失提示左侧神经根减压充分，右侧的逐步改善表明该侧压迫也得到了有效解除。"
+    }
+  },
+  {
+    "id": "KB-IR-FUP-0626",
+    "title": "术后热成像评估-皮温恢复与疗效确认",
+    "content": "术后两周复查行红外热成像检查。热成像结果显示患者左臀区及左下肢皮温升高，较术前明显改善，提示该部位的血供恢复良好。右臀区及右下肢局部皮温与术前相比无明显变化，呈温和的缓解趋势。这种热成像表现与患者的临床症状改善情况相符合，左侧皮温升高与左侧症状完全消失相应，反映了该侧的神经功能和微循环已基本恢复。热成像客观地证实了MED手术对神经根减压和血供改善的效果。",
+    "category": "follow_up",
+    "tags": [
+      "术后热成像",
+      "皮温升高",
+      "血供恢复",
+      "左侧改善",
+      "乳热评估"
+    ],
+    "source": "术后热成像分析（用户补充）",
+    "source_type": "expert_consensus",
+    "priority": "high",
+    "structured_advice": {
+      "action": "assess_postoperative_recovery_with_infrared_thermography_and_clinical_correlation",
+      "imaging_findings": {
+        "left_side": "皮温升高，较术前明显改善",
+        "right_side": "皮温变化不明显，温和改善"
+      },
+      "clinical_correlation": [
+        "热成像改善与临床症状一致",
+        "左侧皮温升高反映左侧恢复",
+        "右侧缓慢改善反映逐步恢复"
+      ],
+      "key_points": [
+        "热成像客观评估疗效",
+        "皮温变化反映血供恢复",
+        "影像与临床表现相符"
+      ],
+      "clinical_tip": "术后热成像显示的皮温升高既证实了神经减压的效果，也反映了微循环的逐步恢复，是评估手术远期预后的重要指标。"
+    }
   }
 ]
