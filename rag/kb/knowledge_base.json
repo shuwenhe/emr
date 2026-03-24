@@ -34463,5 +34463,213 @@
       ],
       "clinical_tip": "标准应用时建议逐条勾选并记录证据来源，提高诊断可追溯性。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0919",
+    "title": "鉴别诊断-蜂窝织炎常伴发热与白细胞升高而血尿酸多不升高",
+    "content": "痛风需与蜂窝织炎鉴别。蜂窝织炎常伴全身发热等感染表现，血白细胞升高，而血尿酸通常不升高。",
+    "category": "diagnosis",
+    "tags": [
+      "鉴别诊断",
+      "蜂窝织炎",
+      "发热",
+      "白细胞升高",
+      "血尿酸不升高"
+    ],
+    "source": "第十九章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_differential_points_between_gout_and_cellulitis_with_infectious_signs_and_non_elevated_uric_acid_in_cellulitis",
+      "differential_points": [
+        "感染征象明显",
+        "实验室炎症指标升高",
+        "尿酸表现不同"
+      ],
+      "clinical_tip": "急性红肿热痛关节应先排除感染性病变。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0920",
+    "title": "鉴别诊断-晶体性关节炎需与假性痛风/羟磷灰石沉积/类固醇结晶关节炎区分",
+    "content": "晶体性关节炎鉴别范围包括假性痛风、羟磷灰石沉积症、类固醇结晶关节炎等，常需结合病理或晶体学检查进行区分。",
+    "category": "diagnosis",
+    "tags": [
+      "鉴别诊断",
+      "晶体性关节炎",
+      "假性痛风",
+      "羟磷灰石沉积症",
+      "类固醇结晶关节炎",
+      "晶体学检查"
+    ],
+    "source": "第十九章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_crystal_arthritis_differential_scope_and_need_for_pathology_or_crystal_identification",
+      "differential_points": [
+        "多种晶体沉积病可模拟痛风",
+        "需晶体层面证据支持"
+      ],
+      "clinical_tip": "可疑晶体性关节炎建议尽早进行关节液晶体检查。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0921",
+    "title": "鉴别诊断-多关节受累时需与类风湿关节炎区分（女性多见、晨僵及RF升高）",
+    "content": "当痛风累及多个关节时需与类风湿关节炎鉴别。类风湿关节炎常见于女性，可有晨僵、关节畸形及类风湿因子升高等表现。",
+    "category": "diagnosis",
+    "tags": [
+      "鉴别诊断",
+      "类风湿关节炎",
+      "多关节受累",
+      "女性多见",
+      "晨僵",
+      "类风湿因子升高"
+    ],
+    "source": "第十九章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_differential_with_rheumatoid_arthritis_in_polyarticular_presentations_of_gout",
+      "differential_points": [
+        "人群差异",
+        "晨僵特征",
+        "免疫学指标差异"
+      ],
+      "clinical_tip": "多关节炎患者建议同步完成免疫谱和影像分布评估。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0922",
+    "title": "鉴别诊断-继发性痛风多见于青少年/女性/老年，肾受累更重且关节表现可不典型",
+    "content": "继发性痛风常见于青少年、女性及老年患者，通常高尿酸血症程度更重，肾受累更常见，甚至可急性肾功能衰竭；痛风性关节炎症状往往较轻或不典型。",
+    "category": "diagnosis",
+    "tags": [
+      "鉴别诊断",
+      "继发性痛风",
+      "高尿酸更重",
+      "肾受累多见",
+      "急性肾功能衰竭",
+      "关节表现不典型"
+    ],
+    "source": "第十九章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_differential_features_of_secondary_gout_with_heavier_hyperuricemia_and_renal_involvement",
+      "differential_points": [
+        "人群分布差异",
+        "肾损害风险更高",
+        "关节症状可不典型"
+      ],
+      "clinical_tip": "疑似继发性痛风应优先评估继发病因与肾功能状态。"
+    }
+  },
+  {
+    "id": "KB-IR-CS-0923",
+    "title": "典型病例-55岁男性饮酒及高嘌呤饮食后反复右足第一跖趾关节疼痛",
+    "content": "典型病例：袁某某，男，55岁。2015年2月前后饮酒后出现右足第一跖趾关节疼痛，社区就诊血尿酸570μmol/L，按痛风对症中药治疗1周后缓解。2015年6月2日再次因饮酒及高嘌呤饮食后复发。",
+    "category": "case_study",
+    "tags": [
+      "典型病例",
+      "55岁男性",
+      "右第一跖趾关节痛",
+      "饮酒诱发",
+      "高嘌呤饮食诱发",
+      "血尿酸570μmol/L",
+      "复发"
+    ],
+    "source": "第十九章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_typical_recurrent_gout_case_with_alcohol_and_high_purine_triggers_and_prior_hyperuricemia_value",
+      "history_points": [
+        "诱因明确且可重复触发",
+        "首发后短期缓解再复发"
+      ],
+      "clinical_tip": "复发性痛风病例应强化诱因管理与长期降尿酸策略。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0924",
+    "title": "影像学表现-右足正斜位X线示复合性痛风性关节炎改变（图19.1）",
+    "content": "右足关节正斜位X线提示复合性痛风性关节炎影像改变。结合双足红外热成像（图19.2）及既往病史，支持临床痛风判断。",
+    "category": "diagnosis",
+    "tags": [
+      "右足X线正斜位",
+      "复合性痛风性关节炎",
+      "图19.1",
+      "图19.2",
+      "影像支持"
+    ],
+    "source": "影像学文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_right_foot_xray_oblique_ap_findings_consistent_with_complex_gouty_arthritis_with_supporting_thermography",
+      "imaging_findings": [
+        "X线提示痛风性关节炎改变"
+      ],
+      "figure_reference": [
+        "图19.1",
+        "图19.2"
+      ],
+      "clinical_tip": "建议将足部X线骨性改变与热成像温差区域进行位点对应分析。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0925",
+    "title": "干预手段-右第一跖趾关节穿刺后关节腔内30%臭氧注射（15mL）",
+    "content": "干预采用关节腔内臭氧注射：右足常规碘伏消毒三遍，局部以利多卡因3mL+0.9%氯化钠3mL浸润麻醉，穿刺至右足第一跖趾关节痛点及关节腔，20mL注射器抽取15mL、30%浓度臭氧注入。",
+    "category": "treatment",
+    "tags": [
+      "右第一跖趾关节",
+      "关节腔穿刺",
+      "利多卡因3mL",
+      "0.9%氯化钠3mL",
+      "臭氧30%",
+      "臭氧15mL"
+    ],
+    "source": "干预手段文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_intraarticular_ozone_intervention_for_right_first_mtp_joint_with_local_anesthesia_and_volume_concentration_details",
+      "procedure_steps": [
+        "常规消毒",
+        "局麻浸润",
+        "关节腔穿刺",
+        "臭氧注射"
+      ],
+      "procedure_parameters": [
+        "臭氧30%",
+        "注射量15mL"
+      ],
+      "clinical_tip": "关节腔注射建议记录注射阻力和即时反应，完善安全性档案。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0926",
+    "title": "图像引用-图19.1为患者右足关节正斜位X线片",
+    "content": "图19.1为患者右足关节正位与斜位X线片，用于痛风性关节炎结构改变的影像证据记录。",
+    "category": "diagnosis",
+    "tags": [
+      "图19.1",
+      "右足关节正位",
+      "右足关节斜位",
+      "X线影像引用"
+    ],
+    "source": "图注文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_figure_19_1_as_right_foot_ap_and_oblique_xray_reference_for_gouty_arthritis_changes",
+      "figure_reference": [
+        "图19.1"
+      ],
+      "clinical_tip": "建议将图号与对应结构损伤描述绑定，提升复核效率。"
+    }
   }
 ]
