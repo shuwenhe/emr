@@ -37291,5 +37291,153 @@
       ],
       "clinical_tip": "治疗目标应与麻木分布、夜间症状和手功能指标联合追踪。"
     }
+  },
+  {
+    "id": "KB-IR-DX-1035",
+    "title": "图像引用-腕管综合征热像包括右手正面/侧面及左手正面/侧面/背面视图",
+    "content": "患者红外热成像图包括右手正面、右手侧面、左手正面、左手侧面及左手背面等视图，用于多角度观察双手腕及手部热分布差异。",
+    "category": "diagnosis",
+    "tags": [
+      "红外热成像图",
+      "右手正面",
+      "右手侧面",
+      "左手正面",
+      "左手侧面",
+      "左手背面",
+      "多体位视图"
+    ],
+    "source": "腕管综合征图注文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_multiview_thermography_views_for_cts_case_including_right_and_left_hand_surfaces",
+      "figure_reference": [
+        "右手正面",
+        "右手侧面",
+        "左手正面",
+        "左手侧面",
+        "左手背面"
+      ],
+      "clinical_tip": "多体位热像有助于减少单一角度对温度判读的偏差。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1036",
+    "title": "神经传导检查-双侧正中神经腕掌段MCV减慢且潜伏期延长",
+    "content": "神经电生理检查显示双侧正中神经（表面电极）腕-掌段运动传导速度减慢，潜伏期延长，而其余节段基本正常，提示腕部局灶性卡压改变。",
+    "category": "diagnosis",
+    "tags": [
+      "神经传导检查",
+      "正中神经",
+      "腕掌段MCV减慢",
+      "潜伏期延长",
+      "局灶性卡压"
+    ],
+    "source": "神经肌电图文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_bilateral_median_nerve_wrist_palm_conduction_slowing_and_latency_prolongation_in_cts_emg",
+      "criteria_summary": [
+        "腕掌段MCV减慢",
+        "潜伏期延长",
+        "其余段正常"
+      ],
+      "clinical_tip": "节段性异常而其余段相对正常更支持腕部局灶卡压。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1037",
+    "title": "电生理侧别差异-左侧波幅下降提示左侧轴索受累更明显",
+    "content": "在双侧正中神经电生理异常基础上，左侧波幅下降，提示左侧神经受累程度在轴索功能层面更为明显。",
+    "category": "diagnosis",
+    "tags": [
+      "波幅下降",
+      "左侧更重",
+      "轴索受累",
+      "侧别差异",
+      "电生理"
+    ],
+    "source": "神经肌电图文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_left_amplitude_reduction_as_indicator_of_more_pronounced_axonal_involvement_in_cts_case",
+      "criteria_summary": [
+        "左侧波幅下降"
+      ],
+      "clinical_tip": "传导减慢合并波幅下降时应警惕卡压程度加重或损伤时间延长。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1038",
+    "title": "针极肌电图-双侧拇短展肌静息时可见正锐波和纤颤电位，大力收缩呈电纯混合相",
+    "content": "针极肌电图示双侧拇短展肌静息时可见1~2处正锐波和纤颤电位；大力收缩时均呈电纯混合相，提示存在神经源性损害表现。",
+    "category": "diagnosis",
+    "tags": [
+      "针极肌电图",
+      "拇短展肌",
+      "正锐波",
+      "纤颤电位",
+      "电纯混合相",
+      "神经源性损害"
+    ],
+    "source": "神经肌电图文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_abductor_pollicis_brevis_needle_emg_showing_positive_sharp_waves_fibrillations_and_neurogenic_pattern_in_cts",
+      "imaging_findings": [
+        "静息异常自发电位",
+        "收缩期神经源性改变"
+      ],
+      "clinical_tip": "鱼际肌针极肌电异常提示运动支受累，需提高干预重视程度。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1039",
+    "title": "肌电图提示-双侧正中神经不完全性损伤且左侧腕点潜伏期延长更著",
+    "content": "神经肌电图提示双侧正中神经不完全性损伤，其中腕点潜伏期延长以左侧更为显著。",
+    "category": "diagnosis",
+    "tags": [
+      "肌电图提示",
+      "双侧正中神经不完全性损伤",
+      "腕点潜伏期延长",
+      "左侧更著"
+    ],
+    "source": "神经肌电图文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_emg_impression_of_bilateral_incomplete_median_nerve_injury_with_more_marked_left_wrist_latency_prolongation",
+      "criteria_summary": [
+        "双侧不完全性损伤",
+        "左侧更明显"
+      ],
+      "clinical_tip": "应将侧别差异与症状主诉、肌力和热像变化综合解读。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1040",
+    "title": "肌电图提示-双侧拇短展肌示神经源性损害并需结合临床综合判断",
+    "content": "神经肌电图进一步提示双侧拇短展肌存在神经源性损害，报告建议结合临床症状、体征及其他检查结果综合判断。",
+    "category": "diagnosis",
+    "tags": [
+      "拇短展肌",
+      "神经源性损害",
+      "结合临床",
+      "肌电图提示"
+    ],
+    "source": "神经肌电图文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_emg_impression_of_bilateral_abductor_pollicis_brevis_neurogenic_damage_requiring_clinical_correlation",
+      "criteria_summary": [
+        "双侧拇短展肌神经源性损害",
+        "需结合临床"
+      ],
+      "clinical_tip": "电生理提示应回到症状、查体和影像证据中进行综合判读，避免孤立下结论。"
+    }
   }
 ]
