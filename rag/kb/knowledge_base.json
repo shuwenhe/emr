@@ -29622,5 +29622,149 @@
       ],
       "clinical_tip": "记录入院诊断时建议保持中医病名、证型与西医病种三要素完整，以支持多学科协同和标准化随访。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0752",
+    "title": "腰椎MRI-腰椎骨质增生伴骨质疏松倾向及L4椎体轻度前滑移",
+    "content": "腰椎MRI提示：腰椎骨质增生，考虑存在骨质疏松倾向，L4椎体略前滑移。上述改变提示退行性骨性改变与节段稳定性下降并存，可能共同参与慢性腰痛及负重后症状加重。",
+    "category": "diagnosis",
+    "tags": [
+      "腰椎MRI",
+      "骨质增生",
+      "骨质疏松倾向",
+      "L4椎体前滑移",
+      "退行性改变",
+      "节段不稳"
+    ],
+    "source": "腰椎MRI报告（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_mri_findings_of_osteophyte_change_possible_osteopenia_and_mild_l4_anterolisthesis",
+      "imaging_findings": [
+        "腰椎骨质增生",
+        "考虑骨质疏松倾向",
+        "L4椎体略前滑移"
+      ],
+      "clinical_significance": [
+        "提示骨性退变基础明显",
+        "前滑移提示局部稳定性下降",
+        "需结合症状评估是否存在动态不稳相关疼痛"
+      ],
+      "key_points": [
+        "骨质改变与力线异常可叠加影响症状",
+        "L4节段应作为重点随访部位",
+        "治疗中需兼顾抗退变与稳定性管理"
+      ],
+      "clinical_tip": "对于合并前滑移与骨质疏松倾向患者，康复训练宜循序渐进并强调核心稳定，避免早期过度负重。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0753",
+    "title": "腰椎MRI-部分椎体缘许莫结节并终板炎改变",
+    "content": "腰椎MRI显示部分椎体缘许莫结节并终板炎改变。该表现提示椎间盘-终板复合体慢性退变及反复应力损伤，可能与持续性腰痛、晨僵或负荷相关疼痛有关。",
+    "category": "diagnosis",
+    "tags": [
+      "腰椎MRI",
+      "许莫结节",
+      "终板炎",
+      "椎体缘改变",
+      "慢性退变",
+      "应力损伤"
+    ],
+    "source": "腰椎MRI报告（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_schmorl_nodes_with_endplate_inflammation_on_lumbar_mri",
+      "imaging_findings": [
+        "部分椎体缘许莫结节",
+        "终板炎改变"
+      ],
+      "clinical_significance": [
+        "反映椎间盘-终板结构慢性损伤",
+        "常与慢性腰痛和活动后加重相关",
+        "提示需重视生物力学负荷管理"
+      ],
+      "key_points": [
+        "终板炎可作为疼痛来源线索之一",
+        "应结合体征与疼痛节律判断临床相关性",
+        "随访中可用于评估退变进展"
+      ],
+      "clinical_tip": "当影像见终板炎时，建议在镇痛基础上强化姿势与负荷干预，以减少终板反复微损伤。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0754",
+    "title": "腰椎MRI-L1/2至L5/S1多节段椎间盘退变",
+    "content": "腰椎MRI示L1/2-L5/S1椎间盘退变，属于多节段退行性病变。该模式提示腰椎整体缓冲与传导功能下降，常与慢性腰痛、活动耐受下降及复发倾向相关。",
+    "category": "diagnosis",
+    "tags": [
+      "腰椎MRI",
+      "L1/2-L5/S1",
+      "多节段退变",
+      "椎间盘退变",
+      "慢性腰痛",
+      "复发风险"
+    ],
+    "source": "腰椎MRI报告（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_multilevel_disc_degeneration_from_l1_2_to_l5_s1",
+      "imaging_findings": [
+        "L1/2至L5/S1椎间盘退变"
+      ],
+      "clinical_significance": [
+        "提示腰椎退变并非单节段局灶问题",
+        "多节段受累与症状慢性化风险增加相关",
+        "治疗需采取全腰椎功能重建思路"
+      ],
+      "key_points": [
+        "多节段退变需长期管理而非一次性处理",
+        "应结合功能评估制定分期康复目标",
+        "随访重点包括疼痛、活动度与生活能力"
+      ],
+      "clinical_tip": "多节段退变患者建议采用长期、分阶段方案，优先改善功能与负荷耐受，而非仅追求短期止痛。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0755",
+    "title": "腰椎MRI-多节段椎间盘膨出及突出并继发椎管与双侧椎间孔狭窄",
+    "content": "腰椎MRI示L1/2-L5/S1椎间盘膨出，L3/4、L4/5椎间盘左后突出，L5/S1椎间盘后突出，并继发相应水平椎管及双侧椎间孔狭窄。该结果提示存在结构性神经通道受限风险，应结合神经症状和体征评估压迫程度与干预优先级。",
+    "category": "diagnosis",
+    "tags": [
+      "腰椎MRI",
+      "椎间盘膨出",
+      "L3/4左后突出",
+      "L4/5左后突出",
+      "L5/S1后突出",
+      "椎管狭窄",
+      "双侧椎间孔狭窄"
+    ],
+    "source": "腰椎MRI报告（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_multilevel_disc_bulging_and_focal_herniations_with_secondary_canal_and_bilateral_foraminal_stenosis",
+      "imaging_findings": [
+        "L1/2-L5/S1椎间盘膨出",
+        "L3/4与L4/5左后突出",
+        "L5/S1后突出",
+        "相应水平椎管狭窄",
+        "双侧椎间孔狭窄"
+      ],
+      "clinical_significance": [
+        "提示多节段神经通道受限风险",
+        "节段差异可能对应不同症状分布",
+        "需结合神经查体判断是否存在进行性受压"
+      ],
+      "key_points": [
+        "结构性狭窄是症状分层和治疗路径关键依据",
+        "应记录主责节段与症状对应关系",
+        "若出现进行性神经功能受损需及时升级处理"
+      ],
+      "clinical_tip": "影像提示多节段狭窄时，临床决策应优先锁定症状最匹配责任节段，避免过度泛化干预。"
+    }
   }
 ]
