@@ -20263,5 +20263,70 @@
         "同时间段复查优先"
       ]
     }
+  },
+  {
+    "id": "KB-IR-IR-0607",
+    "title": "红外热成像复查体位-右肩侧位",
+    "content": "右肩侧位可作为肩部红外热成像复查的关键体位，用于追踪右肩前后区、肩峰下区及三角肌外侧区温度分布变化。该体位适合比较治疗前后局部高温差范围是否缩小、温差峰值是否下降以及热分布是否趋于均衡。复查采集时建议与前次检查保持同环境温度、同体位角度、同采集参数，以提升纵向疗效评估的稳定性与可比性。",
+    "category": "follow_up",
+    "report_sections": [
+      "follow_up",
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "红外热成像",
+      "右肩侧位",
+      "复查",
+      "温差对比",
+      "疗效评估"
+    ],
+    "source": "红外热成像复查规范",
+    "source_type": "guideline",
+    "priority": 7,
+    "status": "active",
+    "applicable_conditions": [
+      "右肩疼痛治疗后复评",
+      "右肩局部温差动态观察",
+      "肩周炎随访"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "右肩"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "右肩侧位复查",
+      "热像随访",
+      "右肩温差变化"
+    ],
+    "structured_advice": {
+      "action": "right_shoulder_lateral_followup_positioning",
+      "position": "右肩侧位",
+      "comparison_focus": [
+        "局部高温差范围变化",
+        "温差峰值变化",
+        "热分布均衡趋势"
+      ],
+      "observation_targets": [
+        "右肩前区",
+        "右肩后区",
+        "肩峰下区",
+        "三角肌外侧区"
+      ],
+      "quality_control": [
+        "同环境温度",
+        "同体位角度",
+        "同采集参数",
+        "同时间段复查优先"
+      ]
+    }
   }
 ]
