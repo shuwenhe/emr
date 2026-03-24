@@ -37818,5 +37818,33 @@
       ],
       "clinical_tip": "待补充机制原文后，可进一步拆分为减压、松解、循环改善等更细条目。"
     }
+  },
+  {
+    "id": "KB-IR-TX-1056",
+    "title": "作用机制-小针刀通过组织减压降低神经血管受压并改善循环",
+    "content": "在骨骼、滑囊、关节、肌肉等组织因外在因素损伤后，局部内压可升高并刺激或挤压周围血管神经而出现相应症状。小针刀可使组织内外相通，减轻组织内压，减少对神经末梢刺激，并促进局部血液循环改善。",
+    "category": "treatment",
+    "tags": [
+      "小针刀机制",
+      "组织减压",
+      "内压升高",
+      "神经末梢刺激",
+      "血管神经受压",
+      "改善血液循环",
+      "腕管综合征"
+    ],
+    "source": "小针刀治疗机制文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_cts_needle_knife_decompression_mechanism_as_pressure_relief_neural_irritation_reduction_and_microcirculation_improvement",
+      "criteria_summary": [
+        "损伤后内压升高可致症状",
+        "小针刀使组织内外相通",
+        "减轻内压并减少神经刺激",
+        "改善局部循环"
+      ],
+      "clinical_tip": "机制评估可结合疼痛变化、感觉症状与局部温度/灌注指标进行前后对照。"
+    }
   }
 ]
