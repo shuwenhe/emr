@@ -18517,5 +18517,85 @@
       "clinical_implications": "肌肉萎缩加重肩关节稳定性不足，形成恶性循环，进一步损害肩关节功能",
       "assessment_points": "检查时注意对比两侧肩膀肌肉体积和线条，特别是三角肌和冈上肌区域的对称性"
     }
+  },
+  {
+    "id": "KB-IR-DX-0503",
+    "title": "肩周炎临床诊断方法",
+    "content": "肩周炎的诊断主要基于病史、发病年龄和临床表现，是一种临床诊断性疾病，通常不需要特殊的影像学检查来确诊。诊断的关键要素包括：首先详细的病史采集，包括发病情况、疼痛性质、持续时间、加重和缓解因素等；其次发病年龄特征，肩周炎多发生于40岁以上的中老年人，这个年龄段的肩关节疼痛和功能障碍应高度怀疑肩周炎；再次全面的临床体格检查，包括肩关节的视诊、触诊和功能检查，观察肌肉是否萎缩、是否有压痛点、肩关节活动范围是否受限等。在具备典型临床表现的基础上，结合患者年龄、起病方式、疼痛性质、活动受限程度等特点，多可进行肩周炎的诊断。辅助检查（如X线、超声或MRI）在排除其他疾病、评估病情严重程度时有一定价值，但不是诊断肩周炎的必需条件。若有明确的外伤史、胸部病变或神经根压迫症状，应进一步进行影像学检查以排除其他疾病。",
+    "category": "diagnosis",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "肩周炎",
+      "临床诊断",
+      "病史",
+      "年龄",
+      "临床表现"
+    ],
+    "source": "肩周炎诊疗指南与临床实践",
+    "source_type": "guideline",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "患者就诊时需要明确诊断",
+      "怀疑肩周炎"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩关节"
+    ],
+    "risk_levels": [
+      "low"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "临床诊断",
+      "病史",
+      "发病年龄",
+      "临床表现",
+      "肩周炎诊断"
+    ],
+    "structured_advice": {
+      "action": "establish_clinical_diagnosis",
+      "diagnostic_criteria": {
+        "essential_components": [
+          {
+            "component": "详细的病史采集",
+            "details": "发病情况、疼痛性质、持续时间、加重和缓解因素"
+          },
+          {
+            "component": "发病年龄特征",
+            "details": "多发生于40岁以上中老年人，此年龄段肩关节疼痛应高度怀疑肩周炎"
+          },
+          {
+            "component": "全面的临床体格检查",
+            "details": "包括视诊、触诊和功能检查"
+          }
+        ]
+      },
+      "physical_examination_components": [
+        {
+          "item": "视诊",
+          "observation": "肌肉萎缩、肩部外形、肌肉线条对称性"
+        },
+        {
+          "item": "触诊",
+          "observation": "压痛点位置和范围、肌肉紧张度"
+        },
+        {
+          "item": "功能检查",
+          "observation": "肩关节活动范围、疼痛程度、活动质量"
+        }
+      ],
+      "imaging_role": "不是诊断肩周炎的必需条件，主要用于排除其他疾病和评估病情严重程度",
+      "differential_diagnosis_indicators": "有明确外伤史、胸部病变或神经根压迫症状时应进行影像学检查以排除其他疾病",
+      "diagnostic_basis": "具有典型临床表现，结合患者年龄、起病方式、疼痛性质、活动受限程度等特点，多可进行诊断"
+    }
   }
 ]
