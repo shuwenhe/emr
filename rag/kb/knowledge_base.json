@@ -18794,5 +18794,125 @@
       "imaging_modality": "X线或CT可明确显示关节脱位，是确诊的金标准",
       "treatment_approach": "脱位需要及时复位治疗，肩周炎采用保守治疗"
     }
+  },
+  {
+    "id": "KB-IR-DX-0506",
+    "title": "肩周炎鉴别诊断-关节结核与肿瘤",
+    "content": "肩部关节结核和恶性肿瘤是与肩周炎需要鉴别的严重疾病，两者都可导致肩关节疼痛和活动受限，但诊断和治疗方向完全不同。肩部关节结核和肿瘤多数情况下不是原发于肩关节，而是由肺部、胸腔、骨盆或其他远处脏器的感染灶或原发肿瘤转移而来。这类患者通常伴有明显的全身症状，包括低热、盗汗、消瘦、食欲不振等B症状，这是与肩周炎最重要的区别。肩部结核患者可有结核接触史，痰液检查可发现结核分枝杆菌，结核菌素试验（PPD试验）呈阳性，这是诊断肺结核的关键依据。肩部肿瘤患者的实验室检查显示肿瘤标志物升高，如患者有腺癌可见CA19-9、CEA升高，有小细胞肺癌可见NSE升高等。影像学检查对这两类患者诊断至关重要，结核病可见典型的骨质破坏和脓肿形成，肿瘤转移可见溶骨性或成骨性破坏。病理活检是确诊的金标准，可以明确诊断结核或肿瘤的具体病理类型。对于肩关节疼痛伴有全身症状的患者，必须警惕这些严重疾病的存在，及时进行全身评估和专科检查。",
+    "category": "diagnosis",
+    "report_sections": [
+      "diagnosis",
+      "doctor_opinion"
+    ],
+    "tags": [
+      "关节结核",
+      "肿瘤转移",
+      "鉴别诊断",
+      "B症状",
+      "转移瘤"
+    ],
+    "source": "肩关节结核肿瘤与肩周炎鉴别诊断指南",
+    "source_type": "guideline",
+    "priority": 9,
+    "status": "active",
+    "applicable_conditions": [
+      "肩关节疼痛伴全身症状",
+      "需要排除严重全身疾病"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "肩关节",
+      "肺部",
+      "其他脏器"
+    ],
+    "risk_levels": [
+      "high"
+    ],
+    "evidence_level": "guideline",
+    "retrieval_hints": [
+      "结核",
+      "肿瘤",
+      "转移瘤",
+      "低热",
+      "盗汗",
+      "消瘦"
+    ],
+    "structured_advice": {
+      "action": "differential_diagnosis_tuberculosis_tumor",
+      "systemic_symptoms": [
+        {
+          "symptom": "发热",
+          "tuberculosis": "低热，多为午后发热",
+          "tumor": "发热不规则，可为弛张热",
+          "frozen_shoulder": "无发热"
+        },
+        {
+          "symptom": "盗汗",
+          "tuberculosis": "明显，晨起衣衫尽湿",
+          "tumor": "可见，与体质和病情有关",
+          "frozen_shoulder": "无盗汗"
+        },
+        {
+          "symptom": "消瘦",
+          "tuberculosis": "明显，病程进展快",
+          "tumor": "明显，进行性消瘦",
+          "frozen_shoulder": "无消瘦"
+        }
+      ],
+      "disease_source": [
+        {
+          "aspect": "病灶来源",
+          "tuberculosis": "肺部或胸膜结核病灶",
+          "tumor": "肺癌、乳腺癌、肾癌等转移",
+          "frozen_shoulder": "局部关节组织"
+        },
+        {
+          "aspect": "发病途径",
+          "tuberculosis": "血行播散或淋巴播散",
+          "tumor": "血行转移或邻近器官直接蔓延",
+          "frozen_shoulder": "原发局部"
+        }
+      ],
+      "laboratory_findings": [
+        {
+          "test": "结核菌素试验",
+          "tuberculosis": "PPD阳性",
+          "tumor": "阴性",
+          "frozen_shoulder": "阴性"
+        },
+        {
+          "test": "肿瘤标志物",
+          "tuberculosis": "通常阴性",
+          "tumor": "如CEA、CA19-9、NSE等升高",
+          "frozen_shoulder": "阴性或正常"
+        },
+        {
+          "test": "痰液检查",
+          "tuberculosis": "可找到结核分枝杆菌",
+          "tumor": "可发现癌细胞",
+          "frozen_shoulder": "无特殊改变"
+        }
+      ],
+      "imaging_appearance": [
+        {
+          "modality": "骨质破坏",
+          "tuberculosis": "典型的骨质破坏和脓肿形成",
+          "tumor": "溶骨性或成骨性破坏",
+          "frozen_shoulder": "无骨质破坏"
+        },
+        {
+          "modality": "软组织",
+          "tuberculosis": "周围软组织肿胀，可见冷脓肿",
+          "tumor": "肿块，无包裹",
+          "frozen_shoulder": "关节囊增厚"
+        }
+      ],
+      "diagnostic_gold_standard": "病理活检可明确诊断结核或肿瘤的具体病理类型",
+      "clinical_alert": "肩关节疼痛伴发热、盗汗、消瘦等B症状患者必须进行全身评估和专科检查，不可作为单纯的肩周炎治疗"
+    }
   }
 ]
