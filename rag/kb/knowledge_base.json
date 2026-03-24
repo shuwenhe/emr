@@ -20517,5 +20517,89 @@
         "疼痛持续加重及时复诊"
       ]
     }
+  },
+  {
+    "id": "KB-IR-FUP-0404",
+    "title": "肩周炎典型病例2-第二次复诊与红外热成像复查（2015-03-23）",
+    "content": "2015年3月23日患者第二次复诊。患者左肩疼痛较前好转约80%，VAS评分1.6分。左肩关节活动度复测：前屈70°、后伸20°、外展60°、内旋80°、外旋25°；颈肩部疼痛较前明显减轻。综合评估提示症状改善显著，但左肩活动度仍未恢复至理想水平，建议继续对症治疗并强化功能训练。医嘱继续进行爬墙训练，以进一步改善前屈与外展活动。复查红外热成像显示：左前位、后位及侧位较右侧略低温差；右肩胛内上处可见片状高温差。整体提示左侧炎性热活跃度进一步下降，右侧肩胛区仍存在代偿性肌筋膜负荷。",
+    "category": "follow_up",
+    "report_sections": [
+      "follow_up",
+      "doctor_opinion",
+      "health_advice"
+    ],
+    "tags": [
+      "肩周炎",
+      "第二次复诊",
+      "VAS1.6",
+      "活动度改善",
+      "爬墙训练",
+      "红外热成像"
+    ],
+    "source": "门诊复诊记录与热像复查",
+    "source_type": "clinical_record",
+    "priority": 8,
+    "status": "active",
+    "applicable_conditions": [
+      "肩周炎中后期随访",
+      "疗效评估与康复计划调整"
+    ],
+    "contraindications": [],
+    "patient_scope": [
+      "adult",
+      "elderly"
+    ],
+    "body_parts": [
+      "左肩",
+      "右肩胛区",
+      "颈肩部"
+    ],
+    "risk_levels": [
+      "low",
+      "medium"
+    ],
+    "evidence_level": "clinical_experience",
+    "retrieval_hints": [
+      "2015-03-23复诊",
+      "VAS1.6",
+      "爬墙训练",
+      "右肩胛内上高温差"
+    ],
+    "structured_advice": {
+      "action": "second_follow_up_reassessment",
+      "visit_date": "2015-03-23",
+      "symptom_change": {
+        "pain_improvement_percent": 80,
+        "vas_score": 1.6,
+        "neck_shoulder_pain": "较前明显减轻"
+      },
+      "left_shoulder_rom_deg": {
+        "forward_flexion": 70,
+        "extension": 20,
+        "abduction": 60,
+        "internal_rotation": 80,
+        "external_rotation": 25
+      },
+      "current_problem": "左肩活动度仍不理想",
+      "rehab_instruction": [
+        "继续爬墙训练",
+        "每日循序渐进增加前屈与外展幅度",
+        "避免暴力牵拉"
+      ],
+      "infrared_thermography_review": {
+        "left_views_vs_right": "左前位、后位及侧位较右侧略低温差",
+        "right_scapular_inner_upper": "片状高温差"
+      },
+      "clinical_interpretation": [
+        "左侧疼痛与炎性活跃度进一步下降",
+        "右侧肩胛区仍有代偿性紧张",
+        "需继续康复训练以提升活动度"
+      ],
+      "next_plan": [
+        "继续对症治疗",
+        "强化功能训练",
+        "2-4周复评活动度与热像变化"
+      ]
+    }
   }
 ]
