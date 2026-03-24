@@ -32084,5 +32084,412 @@
       ],
       "clinical_tip": "术后康复建议围绕“降低弦系统应力”设计姿势与负荷管理方案，以维持疗效。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0828",
+    "title": "诊断词条-臀上皮神经卡压综合征",
+    "content": "新增病名词条：臀上皮神经卡压综合征。该病以臀上皮神经在髂嵴下通道受刺激或嵌压所致疼痛与感觉异常为主要特征。",
+    "category": "diagnosis",
+    "tags": [
+      "臀上皮神经卡压综合征",
+      "病名词条",
+      "腰臀痛",
+      "神经嵌压"
+    ],
+    "source": "第十五章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "add_diagnosis_term_for_superior_cluneal_nerve_entrapment_syndrome",
+      "diagnosis_terms": [
+        "臀上皮神经卡压综合征"
+      ],
+      "key_points": [
+        "用于结构化索引章节病名",
+        "便于后续鉴别诊断关联"
+      ],
+      "clinical_tip": "病名入库时建议同步挂接常见鉴别病种，提升检索实用性。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0829",
+    "title": "病名解析-臀上皮神经解剖来源与分布区域",
+    "content": "臀上皮神经主要由L1-L3脊神经后支外侧支构成，在股骨大转子与L3连线近髂嵴处穿出深筋膜，分布于臀部后外侧及大转子区域皮肤，承担该区域感觉传入。",
+    "category": "diagnosis",
+    "tags": [
+      "病名解析",
+      "臀上皮神经",
+      "L1-L3后支外侧支",
+      "深筋膜穿出",
+      "臀后外侧感觉"
+    ],
+    "source": "第十五章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_anatomic_origin_course_and_sensory_distribution_of_superior_cluneal_nerve",
+      "anatomy_points": [
+        "来源于L1-L3后支外侧支",
+        "近髂嵴处穿出深筋膜",
+        "分布于臀后外侧及大转子区皮肤"
+      ],
+      "key_points": [
+        "解剖通道是卡压高发环节",
+        "感觉分布区可用于症状定位"
+      ],
+      "clinical_tip": "查体时建议沿髂嵴下神经通道进行分段压痛评估。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0830",
+    "title": "病理机制与别名-劳损寒凉后神经段损伤粘连，可称臀上皮神经炎/损伤/嵌压",
+    "content": "腰骶部劳损或受寒后，臀上皮神经在髂嵴下段可发生损伤，并伴局部软组织及筋膜充血、水肿、炎性反应与粘连，进而出现腰臀部乃至下肢刺痛、酸痛、牵扯痛。临床亦称臀上皮神经损伤、臀上皮神经炎、臀上皮神经嵌压。",
+    "category": "diagnosis",
+    "tags": [
+      "病理机制",
+      "劳损受寒",
+      "充血水肿",
+      "炎性反应",
+      "神经粘连",
+      "臀上皮神经炎",
+      "神经嵌压"
+    ],
+    "source": "第十五章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_pathomechanism_and_synonyms_of_superior_cluneal_nerve_entrapment_after_lumbosacral_strain_or_cold_exposure",
+      "mechanism_points": [
+        "劳损受寒后神经段损伤",
+        "局部筋膜软组织炎性改变与粘连",
+        "出现刺痛酸痛牵扯痛"
+      ],
+      "synonyms": [
+        "臀上皮神经损伤",
+        "臀上皮神经炎",
+        "臀上皮神经嵌压"
+      ],
+      "clinical_tip": "记录病名时可并列同义词，减少文献和病历检索遗漏。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0831",
+    "title": "诊断要点-外伤/劳累史+髂嵴中点下2-4cm压痛放射+封闭试验阳性并排除相关病种",
+    "content": "诊断可依据外伤或劳累病史，结合腰臀部刺痛、撕裂样疼痛等表现；查体于髂嵴中点下方约2-4cm可触及压痛并向下放射。封闭试验阳性且排除腰椎间盘突出症、梨状肌综合征、第三腰椎横突综合征后，可支持本病诊断。",
+    "category": "diagnosis",
+    "tags": [
+      "诊断要点",
+      "髂嵴中点下2-4cm压痛",
+      "放射痛",
+      "封闭试验阳性",
+      "排除诊断"
+    ],
+    "source": "第十五章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_core_diagnostic_criteria_with_history_local_tenderness_block_test_and_exclusion_of_major_differentials",
+      "diagnostic_criteria": [
+        "外伤或劳累病史",
+        "腰臀部刺痛或撕裂样痛",
+        "髂嵴中点下2-4cm压痛并放射",
+        "封闭试验阳性",
+        "排除三类主要鉴别病"
+      ],
+      "key_points": [
+        "局灶压痛定位是核心证据",
+        "排除性诊断步骤不可省略"
+      ],
+      "clinical_tip": "建议将压痛点距离和放射方向量化记录，提升复诊一致性。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0832",
+    "title": "鉴别诊断-腰椎间盘突出症常见根性症状、SLR与加强试验阳性且CT/MRI可见突出",
+    "content": "腰椎间盘突出症多见腰痛伴下肢放射痛麻木，负压增加（咳嗽、喷嚏）时加重，可伴相应神经分布区感觉障碍及肌力减弱。查体常见直腿抬高试验阳性、加强试验阳性，腰椎CT/MRI可见突出间盘组织。",
+    "category": "diagnosis",
+    "tags": [
+      "鉴别诊断",
+      "腰椎间盘突出症",
+      "根性症状",
+      "SLR阳性",
+      "加强试验阳性",
+      "CT/MRI间盘突出"
+    ],
+    "source": "第十五章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_differential_features_of_lumbar_disc_herniation_for_excluding_superior_cluneal_entrapment",
+      "differential_points": [
+        "典型下肢根性痛麻木",
+        "咳嗽喷嚏加重",
+        "SLR与加强试验常阳性",
+        "影像可见间盘突出"
+      ],
+      "clinical_tip": "鉴别时应将神经体征和影像阳性节段与疼痛分布逐项对应。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0833",
+    "title": "鉴别诊断-梨状肌综合征以臀痛伴下肢放射痛麻木及梨状肌紧张试验阳性为特征",
+    "content": "梨状肌综合征多见于青壮年，可见臀部疼痛伴下肢放射痛，小腿及足部麻木，臀部局限压痛并向下放射；查体可触及条索状紧张梨状肌，梨状肌紧张试验阳性。",
+    "category": "diagnosis",
+    "tags": [
+      "鉴别诊断",
+      "梨状肌综合征",
+      "臀痛",
+      "下肢放射痛",
+      "足部麻木",
+      "梨状肌紧张试验阳性"
+    ],
+    "source": "第十五章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_differential_pattern_of_piriformis_syndrome_against_superior_cluneal_entrapment",
+      "differential_points": [
+        "臀痛伴下肢放射痛麻木",
+        "触及条索状梨状肌",
+        "梨状肌紧张试验阳性"
+      ],
+      "clinical_tip": "当臀部深层压痛明显且梨状肌试验阳性时，应优先评估梨状肌相关病变。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0834",
+    "title": "鉴别诊断-第三腰椎横突综合征常见固定L3横突压痛且可见横突过长",
+    "content": "第三腰椎横突综合征好发青壮年，主要表现为腰痛，可有大腿前侧放射痛，通常不因腹压增高加重。查体L3横突处压痛固定明显，X线可见L3横突过长。",
+    "category": "diagnosis",
+    "tags": [
+      "鉴别诊断",
+      "第三腰椎横突综合征",
+      "L3固定压痛",
+      "大腿前侧放射痛",
+      "X线横突过长"
+    ],
+    "source": "第十五章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_differential_features_of_l3_transverse_process_syndrome_including_fixed_tenderness_and_long_transverse_process_on_xray",
+      "differential_points": [
+        "L3横突固定压痛",
+        "可见横突过长",
+        "腹压增高通常不明显加重"
+      ],
+      "clinical_tip": "定位性压痛与影像骨性特征联合可提高两病鉴别准确度。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0835",
+    "title": "鉴别诊断-急性腰扭伤多在突发负重扭转后出现剧痛与棘上/棘间韧带压痛",
+    "content": "急性腰扭伤常发生于弯腰搬重物或突发扭转后，出现腰部剧痛、活动受限、肌肉僵硬痉挛，棘上及棘间韧带压痛明显。病程与诱因特征有助于与神经卡压综合征区分。",
+    "category": "diagnosis",
+    "tags": [
+      "鉴别诊断",
+      "急性腰扭伤",
+      "突发负重扭转",
+      "棘上韧带压痛",
+      "棘间韧带压痛",
+      "急性剧痛"
+    ],
+    "source": "第十五章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_differential_features_of_acute_lumbar_sprain_with_sudden_onset_and_interspinous_supraspinous_tenderness",
+      "differential_points": [
+        "突发负重扭转起病",
+        "急性剧痛和活动受限",
+        "棘上棘间韧带压痛明显"
+      ],
+      "clinical_tip": "对急性起病患者应优先识别外伤诱因与韧带压痛分布。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0836",
+    "title": "临床表现-多有腰骶部外伤、受寒凉及劳累病史",
+    "content": "患者多具有腰骶部外伤史，或受寒凉、劳累等诱发背景。该病史组合常作为本病初筛线索。",
+    "category": "clinical_presentation",
+    "tags": [
+      "外伤史",
+      "受寒凉史",
+      "劳累史",
+      "诱发因素",
+      "初筛线索"
+    ],
+    "source": "第十五章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_common_history_patterns_of_lumbosacral_trauma_cold_exposure_and_overexertion",
+      "history_points": [
+        "腰骶部外伤",
+        "受寒凉",
+        "劳累"
+      ],
+      "clinical_tip": "病史采集中建议追问近期负重和受寒事件时间线。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0837",
+    "title": "临床表现-腰臀部撕裂/刺痛/酸痛并向大腿后外侧放射，通常不过膝",
+    "content": "腰臀部疼痛可呈撕裂痛、刺痛或酸痛，并向大腿后外侧放射，但疼痛通常不超过膝关节。该放射边界对鉴别下行神经根痛具有参考价值。",
+    "category": "clinical_presentation",
+    "tags": [
+      "腰臀部疼痛",
+      "撕裂痛",
+      "刺痛",
+      "酸痛",
+      "大腿后外侧放射",
+      "不过膝"
+    ],
+    "source": "第十五章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_pain_pattern_radiating_to_posterolateral_thigh_usually_not_below_knee",
+      "symptom_features": [
+        "多型态痛感",
+        "向大腿后外侧放射",
+        "通常不过膝"
+      ],
+      "clinical_tip": "建议在病历中明确记录放射终点以支持鉴别。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0838",
+    "title": "查体定位-髂嵴中点下2-4cm压痛及深部条索样隆起并向臀部/大腿后侧放射",
+    "content": "查体可在髂嵴中点下方2-4cm触及局限压痛，深部可触及条索样隆起，疼痛可向臀部及大腿后侧放射。该定位性体征是本病关键查体依据。",
+    "category": "clinical_presentation",
+    "tags": [
+      "髂嵴中点下2-4cm",
+      "局限压痛",
+      "条索样隆起",
+      "臀部放射痛",
+      "大腿后侧放射痛"
+    ],
+    "source": "第十五章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_key_exam_signs_of_tenderness_and_deep_cordlike_prominence_below_iliac_crest_midpoint_with_radiation",
+      "exam_findings": [
+        "2-4cm定位压痛",
+        "深部条索样隆起",
+        "向臀部及大腿后侧放射"
+      ],
+      "clinical_tip": "建议双侧对照触诊并记录压痛强度分级。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0839",
+    "title": "病程相关表现-可伴腰背肌僵硬痉挛，久病者可见臀肌萎缩",
+    "content": "患者可伴腰部疼痛、腰背部肌肉僵硬及痉挛，活动受限；病程较长者可出现臀部肌肉萎缩。该表现提示慢性化阶段功能损害进展。",
+    "category": "clinical_presentation",
+    "tags": [
+      "腰背肌僵硬",
+      "肌痉挛",
+      "活动受限",
+      "慢性病程",
+      "臀肌萎缩"
+    ],
+    "source": "第十五章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_chronic_course_features_of_back_muscle_stiffness_spasm_and_possible_gluteal_atrophy",
+      "clinical_points": [
+        "肌僵硬痉挛",
+        "活动受限",
+        "久病可见臀肌萎缩"
+      ],
+      "clinical_tip": "慢性期建议增加肌力与体态评估，及时调整康复策略。"
+    }
+  },
+  {
+    "id": "KB-IR-CP-0840",
+    "title": "神经牵拉试验-直腿抬高多阴性，部分患者可阳性",
+    "content": "本病直腿抬高试验多数为阴性，但部分患者可呈阳性。需结合局部压痛定位及其他神经体征综合判读。",
+    "category": "clinical_presentation",
+    "tags": [
+      "直腿抬高试验",
+      "多数阴性",
+      "部分阳性",
+      "神经牵拉试验"
+    ],
+    "source": "第十五章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_slr_pattern_mostly_negative_with_occasional_positive_results_in_superior_cluneal_entrapment",
+      "exam_points": [
+        "SLR多数阴性",
+        "少数可阳性"
+      ],
+      "clinical_tip": "SLR单项异常不足以定性，需结合压痛点和封闭试验。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0841",
+    "title": "影像学诊断-多数X线无特异性，CT/MRI可见退变或椎间盘突出等并存表现",
+    "content": "影像学上多数患者X线缺乏特异性；腰椎CT或MRI可见退行性改变、椎间盘突出等并存表现。影像结果更多用于排除和并病识别，而非单独确诊本病。",
+    "category": "diagnosis",
+    "tags": [
+      "影像学诊断",
+      "X线无特异性",
+      "CT",
+      "MRI",
+      "退行性改变",
+      "椎间盘突出",
+      "并存病变"
+    ],
+    "source": "第十五章文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_imaging_role_as_nonspecific_on_xray_with_ct_mri_showing_degenerative_or_disc_findings_for_exclusion_and_comorbidity_assessment",
+      "imaging_points": [
+        "X线多无特异性",
+        "CT/MRI可见退变或间盘突出"
+      ],
+      "key_points": [
+        "影像重在鉴别和并病识别",
+        "不能替代定位性查体"
+      ],
+      "clinical_tip": "建议把影像结果与疼痛责任区对应后再制定治疗策略。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0842",
+    "title": "封闭试验-2%普鲁卡因4mL联合加强松龙12.5mg后疼痛明显改善可辅助诊断",
+    "content": "当患者疼痛明显时，可于局部试行封闭：2%普鲁卡因4mL联合加强松龙12.5mg；若疼痛改善明显，可作为臀上皮神经卡压综合征的辅助诊断依据。",
+    "category": "diagnosis",
+    "tags": [
+      "封闭试验",
+      "2%普鲁卡因4mL",
+      "加强松龙12.5mg",
+      "疼痛改善",
+      "辅助诊断"
+    ],
+    "source": "封闭试验文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_diagnostic_block_test_with_two_percent_procaine_four_ml_plus_methylprednisolone_twelve_point_five_mg_and_positive_pain_relief_response",
+      "test_protocol": [
+        "2%普鲁卡因4mL",
+        "加强松龙12.5mg局部封闭"
+      ],
+      "positive_criteria": [
+        "疼痛明显改善"
+      ],
+      "key_points": [
+        "可用于辅助诊断确认",
+        "需结合鉴别诊断一并判断"
+      ],
+      "clinical_tip": "封闭试验建议记录给药前后即时疼痛评分变化，以提高证据客观性。"
+    }
   }
 ]
