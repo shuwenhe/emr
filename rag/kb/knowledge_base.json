@@ -23623,5 +23623,31 @@
       ],
       "clinical_tip": "当患者仅有局部压痛而缺乏明确神经根体征时，应优先考虑软组织损伤相关诊断。"
     }
+  },
+  {
+    "id": "KB-IR-CL-0591",
+    "title": "病史特征-腰椎相关患者多有不同程度外伤史",
+    "content": "患者多有不同程度的腰部外伤史。该病史线索可作为临床评估的重要参考，需结合症状演变、神经体征及影像学结果综合判断病变性质与严重程度。",
+    "category": "clinical_presentation",
+    "tags": [
+      "外伤史",
+      "腰部病史",
+      "临床线索",
+      "腰椎疾病",
+      "病史评估"
+    ],
+    "source": "临床病史要点整理",
+    "source_type": "expert_consensus",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "consider_history_of_lumbar_trauma_in_clinical_evaluation",
+      "key_points": [
+        "询问外伤发生时间与机制",
+        "评估外伤后症状持续或加重情况",
+        "结合神经查体与影像评估相关性",
+        "避免仅凭单一病史线索下结论"
+      ],
+      "clinical_tip": "外伤史可提示病变诱因，但诊断需与客观体征和影像证据相互印证。"
+    }
   }
 ]
