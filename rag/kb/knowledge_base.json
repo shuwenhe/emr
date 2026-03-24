@@ -33270,5 +33270,212 @@
       ],
       "clinical_tip": "AS与RA鉴别建议采用“病程节律+受累分布+免疫指标+影像分期”四维综合法。"
     }
+  },
+  {
+    "id": "KB-IR-DX-0873",
+    "title": "图16.3说明-患者术中DSA下显示图",
+    "content": "图16.3为患者术中DSA下显示图，用于记录骶髂关节介入治疗过程中的靶点定位与操作验证。",
+    "category": "diagnosis",
+    "tags": [
+      "图16.3",
+      "术中DSA",
+      "靶点定位",
+      "操作验证"
+    ],
+    "source": "图注文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_figure_16_3_as_intraoperative_dsa_reference_for_target_localization_and_procedure_verification",
+      "figure_reference": [
+        "图16.3"
+      ],
+      "clinical_tip": "术中图像建议与术后疗效指标关联存档，增强可追溯性。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-0874",
+    "title": "病例结论-诊断为左侧强直性脊柱炎",
+    "content": "结合症状、体征及检查结果，病例最终诊断为“强直性脊柱炎（左侧）”。",
+    "category": "diagnosis",
+    "tags": [
+      "左侧强直性脊柱炎",
+      "病例结论",
+      "明确诊断"
+    ],
+    "source": "病例记录文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_final_case_diagnosis_of_left_sided_ankylosing_spondylitis",
+      "diagnosis_terms": [
+        "强直性脊柱炎（左侧）"
+      ],
+      "clinical_tip": "诊断结论应与体征、影像及实验室线索逐项对应记录。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0875",
+    "title": "介入治疗流程-左侧骶髂关节射频肌骨介入联合臭氧注射（DSA引导）",
+    "content": "治疗采用左侧骶髂关节射频肌骨介入联合臭氧注射：患者俯卧位，胸髂部垫枕约10cm，常规消毒铺巾；DSA透视定位左侧骶髂关节间隙并标记，局麻后穿刺入关节间隙，正侧位确认针尖位置，连接电极设备并监测阻抗，完成感觉/运动刺激测试后实施射频热凝。",
+    "category": "treatment",
+    "tags": [
+      "左侧骶髂关节",
+      "射频肌骨介入",
+      "臭氧注射",
+      "DSA引导",
+      "俯卧位",
+      "局麻穿刺",
+      "阻抗监测"
+    ],
+    "source": "治疗过程文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_dsa_guided_left_sacroiliac_radiofrequency_intervention_plus_ozone_injection_workflow",
+      "procedure_steps": [
+        "体位摆放与常规消毒",
+        "DSA定位与标记",
+        "局麻后穿刺并正侧位确认",
+        "阻抗监测及感觉运动刺激测试",
+        "实施射频热凝"
+      ],
+      "clinical_tip": "DSA引导下应反复确认针尖位置与安全测试结果，降低非靶组织损伤风险。"
+    }
+  },
+  {
+    "id": "KB-IR-TX-0876",
+    "title": "射频参数与给药-40℃/50℃/55℃/60℃/65℃分阶段热凝后注射40ug/mL臭氧3mL",
+    "content": "射频热凝按分阶段参数执行：40℃ 30秒、50℃（原文未标注时长）、55℃ 60秒、60℃（原文未标注时长）、65℃ 30秒；治疗满意后局部注射40ug/mL臭氧3mL，完成退针与无菌敷料覆盖后返回病房。",
+    "category": "treatment",
+    "tags": [
+      "射频参数",
+      "40℃30秒",
+      "55℃60秒",
+      "65℃30秒",
+      "臭氧40ug/mL",
+      "3mL",
+      "术后处理"
+    ],
+    "source": "治疗过程文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_stepwise_rf_thermocoagulation_parameters_and_post_rf_ozone_injection_dose_with_noted_missing_durations_for_50_and_60_degrees",
+      "procedure_parameters": [
+        "40℃ 30秒",
+        "50℃ 时长未提供",
+        "55℃ 60秒",
+        "60℃ 时长未提供",
+        "65℃ 30秒",
+        "臭氧40ug/mL 3mL"
+      ],
+      "data_quality_notes": [
+        "原文未给出50℃与60℃持续时间"
+      ],
+      "clinical_tip": "参数记录应补全每一温度平台持续时间，以利于疗效复盘与标准化。"
+    }
+  },
+  {
+    "id": "KB-IR-CS-0877",
+    "title": "分析结论-患侧腰骶部温差可辅助诊断并帮助界定疼痛范围与治疗靶点",
+    "content": "病例分析指出：患侧腰骶部较对侧温差异常可辅助诊断。红外热成像能够较好观察疼痛存在范围，为靶点治疗提供依据。",
+    "category": "case_study",
+    "tags": [
+      "分析结论",
+      "患侧温差异常",
+      "辅助诊断",
+      "疼痛范围界定",
+      "靶点治疗依据"
+    ],
+    "source": "分析文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_analysis_that_side_to_side_lumbosacral_temperature_difference_supports_diagnosis_and_target_delimitation",
+      "analysis_points": [
+        "温差异常具辅助诊断价值",
+        "可帮助界定疼痛范围",
+        "用于靶点干预规划"
+      ],
+      "clinical_tip": "热成像解读建议与体征定位联合，避免孤立判读。"
+    }
+  },
+  {
+    "id": "KB-IR-CS-0878",
+    "title": "疗效评估价值-热成像前后对比使介入治疗效果评估更直观明确",
+    "content": "相较仅依赖主观感受，热成像可直观反映病变区域温差变化，通过介入治疗前后对比使疗效评估更明确。",
+    "category": "case_study",
+    "tags": [
+      "疗效评估",
+      "热成像前后对比",
+      "客观证据",
+      "介入治疗"
+    ],
+    "source": "分析文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_added_value_of_pre_post_thermography_comparison_for_objective_effect_assessment_beyond_subjective_reports",
+      "value_points": [
+        "主客观联合评估",
+        "疗效判定更清晰"
+      ],
+      "clinical_tip": "建议固定同位点、同条件、同时间窗完成热成像复查。"
+    }
+  },
+  {
+    "id": "KB-IR-CS-0879",
+    "title": "治疗策略框架-本病可分非药物、药物及手术治疗路径",
+    "content": "当前本病治疗可分为非药物治疗、药物治疗与手术治疗三类路径，临床应依据病情阶段和反应动态分层选择。",
+    "category": "case_study",
+    "tags": [
+      "治疗策略",
+      "非药物治疗",
+      "药物治疗",
+      "手术治疗",
+      "分层管理"
+    ],
+    "source": "分析文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_three_tier_treatment_framework_of_nonpharmacologic_pharmacologic_and_surgical_options_for_as_related_sacroiliac_pain",
+      "strategy_points": [
+        "三路径分层管理",
+        "根据病程和反应调整"
+      ],
+      "clinical_tip": "建议建立分层升级标准，避免过度或延迟治疗。"
+    }
+  },
+  {
+    "id": "KB-IR-CS-0880",
+    "title": "方案优势总结-射频肌骨介入联合臭氧可改善炎性环境且起效快副作用小",
+    "content": "病例总结认为，射频肌骨介入联合臭氧注射可显著改善关节周围炎性环境，同时相较药物或手术路径可减少相关并发风险，具有起效快、副作用小、疗效确切等优势。图16.4用于展示治疗后热成像改变。",
+    "category": "case_study",
+    "tags": [
+      "方案优势",
+      "射频肌骨介入",
+      "臭氧注射",
+      "炎性环境改善",
+      "起效快",
+      "副作用小",
+      "图16.4"
+    ],
+    "source": "分析文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_reported_advantages_of_rf_msk_intervention_plus_ozone_in_improving_periarticular_inflammatory_environment_with_fast_onset_and_low_side_effect_profile",
+      "value_points": [
+        "改善炎性环境",
+        "起效较快",
+        "副作用较小"
+      ],
+      "figure_reference": [
+        "图16.4"
+      ],
+      "clinical_tip": "优势结论建议结合长期随访与安全性监测持续验证。"
+    }
   }
 ]
