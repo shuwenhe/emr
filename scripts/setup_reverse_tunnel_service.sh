@@ -91,6 +91,23 @@ ensure_prereqs() {
   fi
 }
 
+check_public_port_reachability() {
+  set +e
+  timeout 6 bash -lc "</dev/tcp/${PUBLIC_HOST}/${PUBLIC_PORT}" >/dev/null 2>&1
+  local rc=$?
+  set -e
+
+  if [[ $rc -eq 0 ]]; then
+    log "Reachability check OK: ${PUBLIC_HOST}:${PUBLIC_PORT}"
+    return 0
+  fi
+
+  warn "Reachability check failed: ${PUBLIC_HOST}:${PUBLIC_PORT}"
+  warn "This host cannot establish TCP to the public gateway SSH port right now."
+  warn "If journal shows 'Connection timed out', verify egress firewall/routing or try another SSH port (for example --public-port 22)."
+  return 1
+}
+
 ensure_ssh_key() {
   local key_dir
   key_dir="$(dirname "$IDENTITY_FILE")"
@@ -151,6 +168,7 @@ write_service() {
 Description=EMR Reverse SSH Tunnel to Public Gateway
 After=network-online.target
 Wants=network-online.target
+StartLimitIntervalSec=0
 
 [Service]
 Type=simple
@@ -168,7 +186,6 @@ ExecStart=${SSH_BIN} -NT \
   ${PUBLIC_USER}@${PUBLIC_HOST}
 Restart=always
 RestartSec=5
-StartLimitIntervalSec=0
 
 [Install]
 WantedBy=multi-user.target
@@ -209,6 +226,7 @@ main() {
   require_root
   parse_args "$@"
   ensure_prereqs
+  check_public_port_reachability || true
   ensure_ssh_key
   install_public_key_if_requested
   check_non_interactive_ssh
