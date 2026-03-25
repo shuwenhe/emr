@@ -10,7 +10,7 @@ services:
       MYSQL_USER: ${MYSQL_USER:-hospital}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-hospital}
     ports:
-      - "${MYSQL_PORT:-3306}:3306"
+      - "${MYSQL_PORT:-33061}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./database/init_mysql.sql:/docker-entrypoint-initdb.d/init.sql
