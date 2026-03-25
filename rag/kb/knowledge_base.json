@@ -38035,5 +38035,108 @@
       ],
       "clinical_tip": "若同时出现屈曲功能下降和桡侧手部感觉异常，应优先考虑正中神经受累。"
     }
+  },
+  {
+    "id": "KB-IR-DX-1064",
+    "title": "感觉障碍表现-正中神经损伤可见手桡半侧感觉减退或异常",
+    "content": "正中神经损伤后常出现手桡半侧感觉障碍，表现为拇指、示指及中指桡侧区域感觉减退、麻木或感觉异常。该分布特征可用于与尺神经或桡神经受累进行初步鉴别。",
+    "category": "diagnosis",
+    "tags": [
+      "正中神经损伤",
+      "感觉障碍",
+      "手桡半侧",
+      "麻木",
+      "感觉减退",
+      "定位诊断"
+    ],
+    "source": "正中神经损伤描述文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_radial_half_hand_sensory_deficit_pattern_after_median_nerve_injury_for_localization",
+      "criteria_summary": [
+        "手桡半侧感觉异常",
+        "常见麻木或感觉减退",
+        "可用于周围神经受累初步鉴别"
+      ],
+      "clinical_tip": "感觉分布判读应结合皮节与周围神经支配区，避免单一症状误判。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1065",
+    "title": "运动功能受限-可出现拇指对掌对指受限及拇示指屈曲与前臂旋前无力",
+    "content": "正中神经损伤可导致拇指对掌和对指功能受限，并可伴拇指、示指屈曲受限及前臂旋前受限。该组运动体征提示正中神经运动支受累，影响精细抓握与前臂功能。",
+    "category": "diagnosis",
+    "tags": [
+      "正中神经损伤",
+      "对掌受限",
+      "对指受限",
+      "拇示指屈曲受限",
+      "前臂旋前受限",
+      "运动支受累"
+    ],
+    "source": "正中神经损伤描述文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_median_nerve_motor_deficits_in_opposition_finger_flexion_and_pronation",
+      "criteria_summary": [
+        "拇指对掌对指受限",
+        "拇指和示指屈曲受限",
+        "前臂旋前受限"
+      ],
+      "clinical_tip": "建议联合肌力分级和功能量表评估运动受限程度及随访变化。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1066",
+    "title": "肌肉萎缩体征-大鱼际肌与前臂屈侧肌萎缩提示慢性或较重受累",
+    "content": "正中神经损伤后可见大鱼际肌及前臂屈侧肌肉萎缩，通常提示受累时间较长或损伤程度较重。出现肌萎缩时应提高对功能预后的评估强度，并尽早制定干预与康复计划。",
+    "category": "diagnosis",
+    "tags": [
+      "正中神经损伤",
+      "大鱼际肌萎缩",
+      "前臂屈侧肌萎缩",
+      "慢性受累",
+      "预后评估"
+    ],
+    "source": "正中神经损伤描述文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_thenar_and_forearm_flexor_atrophy_as_marker_of_chronic_or_severe_median_nerve_involvement",
+      "criteria_summary": [
+        "大鱼际肌萎缩",
+        "前臂屈侧肌萎缩",
+        "提示慢性或较重损伤"
+      ],
+      "clinical_tip": "肌萎缩出现后应结合电生理定量评估再支配潜力和康复目标。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1067",
+    "title": "诊断路径-神经损伤诊断以病史查体与肌电图为主，红外热像可辅助评估",
+    "content": "神经功能损伤的诊断主要依赖损伤病史、神经系统查体和肌电图检查。红外热成像可作为辅助工具，通过温度分布与左右不对称信息补充评估受累区域和变化趋势，但不替代肌电图等核心检查。",
+    "category": "diagnosis",
+    "tags": [
+      "神经损伤诊断",
+      "病史",
+      "神经查体",
+      "肌电图",
+      "红外热成像",
+      "辅助评估"
+    ],
+    "source": "正中神经损伤诊断描述文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_diagnostic_workflow_for_nerve_injury_with_history_exam_emg_as_core_and_thermography_as_adjunct",
+      "criteria_summary": [
+        "病史+查体+肌电图为主",
+        "热像用于辅助定位与趋势观察",
+        "不宜以热像替代核心检查"
+      ],
+      "clinical_tip": "建议在同一环境和体位下重复热像采集，以提升前后比较的可解释性。"
+    }
   }
 ]
