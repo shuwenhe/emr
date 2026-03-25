@@ -74,11 +74,19 @@ def _connect() -> pymysql.connections.Connection:
     pool = _get_connection_pool()
     conn = pool.connection()
     try:
-        conn.ping(reconnect=False)
+        # Allow transparent reconnect so stale pooled handles (e.g. after DB restart)
+        # do not immediately bubble up as 500 errors.
+        conn.ping(reconnect=True)
+        return conn
     except Exception:
-        conn.close()
-        raise
-    return conn
+        try:
+            conn.close()
+        except Exception:
+            pass
+        # Retry once with a fresh pooled connection before failing.
+        conn = pool.connection()
+        conn.ping(reconnect=True)
+        return conn
 
 
 def _is_retryable_operational_error(exc: OperationalError) -> bool:
