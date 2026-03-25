@@ -411,7 +411,7 @@ auto-deploy-status:
 logs: logs-backend
 
 logs-backend:
-	@bash -c 'tail -f "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log"'
+	@bash -c 'mkdir -p "$(CURDIR)/logs"; touch "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log"; tail -f "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log"'
 
 logs-frontend:
 	@bash -c 'tail -f "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"'
@@ -423,10 +423,10 @@ logs-auto-deploy:
 	@journalctl --user -u emr-auto-deploy -f
 
 logs-all:
-	@bash -c 'tail -f "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log" "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"'
+	@bash -c 'mkdir -p "$(CURDIR)/logs"; touch "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log" "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"; tail -f "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log" "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"'
 
 logs-file-backend:
-	@bash -c 'tail -f "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log"'
+	@bash -c 'mkdir -p "$(CURDIR)/logs"; touch "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log"; tail -f "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log"'
 
 logs-file-frontend:
 	@bash -c 'tail -f "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"'
