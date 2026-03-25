@@ -491,7 +491,7 @@ export default function PatientsPage() {
 
     const connect = () => {
       if (closed) return;
-      source = new EventSource(`${API_BASE}/events/patients`);
+      source = new EventSource(`/api/events/patients`);
 
       const onPatientEvent = () => {
         refreshPatientsIfChanged();
