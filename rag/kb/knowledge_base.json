@@ -38345,5 +38345,103 @@
       ],
       "clinical_tip": "若你继续提供桡神经损伤的具体病史、查体或热像结果，可进一步拆分为多个更细的诊断条目。"
     }
+  },
+  {
+    "id": "KB-IR-DX-1076",
+    "title": "主诉-右手拇指活动不利1个月提示上肢伸拇功能受限",
+    "content": "患者祝某，女，主诉右手拇指活动不利1个月。该主诉提示拇指相关运动功能受限，需结合桡神经支配肌群查体进一步判断是否存在桡神经运动支受累。",
+    "category": "diagnosis",
+    "tags": [
+      "右手拇指活动不利",
+      "主诉",
+      "拇指活动受限",
+      "桡神经损伤",
+      "运动功能评估"
+    ],
+    "source": "桡神经损伤病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_thumb_motion_limitation_complaint_as_possible_radial_nerve_related_motor_deficit",
+      "criteria_summary": [
+        "右手拇指活动不利1个月",
+        "提示需评估伸拇相关功能"
+      ],
+      "clinical_tip": "主诉应进一步细化为伸拇、外展、背伸或捏持障碍，以提高定位诊断精度。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1077",
+    "title": "运动体征-右手拇指桡背伸受限伴右腕下垂支持桡神经损伤",
+    "content": "查体见右手拇指桡背伸受限，并伴有右手腕下垂。该组合体征高度提示桡神经及其支配伸肌群受累，是桡神经损伤定位诊断中的关键运动学线索。",
+    "category": "diagnosis",
+    "tags": [
+      "拇指桡背伸受限",
+      "腕下垂",
+      "桡神经损伤",
+      "伸肌群受累",
+      "运动体征"
+    ],
+    "source": "桡神经损伤病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_thumb_radial_dorsiflexion_limitation_with_wrist_drop_as_key_motor_sign_of_radial_nerve_injury",
+      "criteria_summary": [
+        "拇指桡背伸受限",
+        "右手腕下垂",
+        "支持桡神经运动支受累"
+      ],
+      "clinical_tip": "应结合伸腕、伸指和肘以下不同平面肌力检查，区分高位与低位桡神经损伤。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1078",
+    "title": "局部体征-右腕关节局部略肿提示损伤区周围软组织反应",
+    "content": "查体示右腕关节局部略肿，提示损伤区域可能伴局部软组织反应、术后改变或慢性刺激因素。该体征需结合损伤史、压痛范围及影像学检查综合分析。",
+    "category": "diagnosis",
+    "tags": [
+      "右腕肿胀",
+      "局部略肿",
+      "软组织反应",
+      "局部体征",
+      "损伤区域评估"
+    ],
+    "source": "桡神经损伤病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_mild_local_wrist_swelling_as_supportive_local_sign_around_radial_nerve_injury_region",
+      "criteria_summary": [
+        "右腕关节局部略肿",
+        "提示局部软组织反应或术后改变"
+      ],
+      "clinical_tip": "局部肿胀应与压痛、皮温、瘢痕及活动受限程度一并记录，以便判断病变活动性。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1079",
+    "title": "检查限制-右小腿钢板未去除导致无法行颈部MRI检查",
+    "content": "患者因右小腿内固定术后钢板未去除，无法进行颈部MRI检查。该检查限制提示在排除颈源性病变时需更多依赖病史、查体、电生理及其他可替代影像学手段。",
+    "category": "diagnosis",
+    "tags": [
+      "MRI受限",
+      "钢板未去除",
+      "检查限制",
+      "颈部MRI无法完成",
+      "鉴别诊断"
+    ],
+    "source": "桡神经损伤病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_cervical_mri_limitation_due_to_retained_hardware_and_need_for_alternative_evaluation_path",
+      "criteria_summary": [
+        "右小腿钢板未去除",
+        "无法行颈部MRI",
+        "需依赖其他诊断手段完成鉴别"
+      ],
+      "clinical_tip": "当MRI受限时，可优先考虑详细神经查体、电生理和可行的超声或其他影像替代方案。"
+    }
   }
 ]
