@@ -38443,5 +38443,135 @@
       ],
       "clinical_tip": "当MRI受限时，可优先考虑详细神经查体、电生理和可行的超声或其他影像替代方案。"
     }
+  },
+  {
+    "id": "KB-IR-DX-1080",
+    "title": "神经纤维功能-主要作用为传导兴奋",
+    "content": "神经纤维的主要功能是传导兴奋，将神经冲动沿相应通路传递至效应器或中枢。该功能是维持感觉、运动及反射活动正常进行的基础。",
+    "category": "diagnosis",
+    "tags": [
+      "神经纤维",
+      "传导兴奋",
+      "神经冲动",
+      "感觉传导",
+      "运动传导"
+    ],
+    "source": "神经功能与红外热像理论文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_nerve_fiber_primary_function_as_excitation_conduction",
+      "criteria_summary": [
+        "神经纤维主要负责传导兴奋",
+        "是感觉和运动功能基础"
+      ],
+      "clinical_tip": "在周围神经损伤评估中，传导功能异常常首先反映于感觉减退、肌力下降或反射改变。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1081",
+    "title": "神经营养性作用-神经末梢释放营养因子调节支配区域结构与生理",
+    "content": "除传导兴奋外，神经末梢还能释放营养因子，对其支配区域的结构、生化和生理状态进行调节，这种作用称为神经的营养性作用。该作用有助于维持靶组织正常代谢与功能稳定。",
+    "category": "diagnosis",
+    "tags": [
+      "神经营养性作用",
+      "营养因子",
+      "神经末梢",
+      "结构调节",
+      "生化调节",
+      "生理调节"
+    ],
+    "source": "神经功能与红外热像理论文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_trophic_function_of_nerves_via_neurotrophic_regulation_of_target_tissues",
+      "criteria_summary": [
+        "神经末梢释放营养因子",
+        "调节所支配区域结构生化和生理",
+        "维持靶组织正常状态"
+      ],
+      "clinical_tip": "理解神经营养性作用有助于解释为何神经损伤后会出现温度、营养和组织代谢异常。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1082",
+    "title": "病理变化-神经切断后失去营养性作用可致肌萎缩与组织代谢下降",
+    "content": "神经被切断后，所支配区域失去神经的营养性作用，肌肉内糖原合成减慢、蛋白质分解加速，肌肉逐渐萎缩，同时组织整体代谢减少。该变化说明神经损伤不仅影响传导功能，也会导致靶组织营养和代谢异常。",
+    "category": "diagnosis",
+    "tags": [
+      "神经切断",
+      "肌肉萎缩",
+      "糖原合成减慢",
+      "蛋白质分解加速",
+      "组织代谢减少",
+      "营养障碍"
+    ],
+    "source": "神经功能与红外热像理论文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_denervation_related_muscle_atrophy_and_metabolic_decline_after_loss_of_trophic_support",
+      "criteria_summary": [
+        "失去神经营养性作用",
+        "肌糖原合成减慢",
+        "蛋白分解加速",
+        "肌肉逐渐萎缩",
+        "组织代谢减少"
+      ],
+      "clinical_tip": "若病程较长，应关注肌萎缩和局部温度变化是否提示持续去神经支配状态。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1083",
+    "title": "检查特点-肌电图主要评估神经肌肉兴奋与传导功能",
+    "content": "肌电图通过记录肌肉静止或收缩时的电活动，并结合电刺激检查神经和肌肉的兴奋与传导功能，是针对神经纤维传导兴奋功能的重要检查手段。该方法有助于判断是否存在去神经支配、传导减慢或轴索损伤。",
+    "category": "diagnosis",
+    "tags": [
+      "肌电图",
+      "电活动记录",
+      "神经传导",
+      "肌肉兴奋性",
+      "去神经支配",
+      "电生理检查"
+    ],
+    "source": "神经功能与红外热像理论文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_emg_as_primary_test_for_excitation_and_conduction_function_of_nerves_and_muscles",
+      "criteria_summary": [
+        "记录肌肉静止与收缩时电活动",
+        "可做神经肌肉电刺激检查",
+        "主要反映传导兴奋功能"
+      ],
+      "clinical_tip": "肌电图更侧重功能传导层面，判读时宜与临床症状和热像的营养性改变信息互补结合。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1084",
+    "title": "应用价值-红外热像可反映神经营养性调节并与神经支配区分布更直观重合",
+    "content": "红外热像更能反映神经对其支配区域生理、生化及营养状态的调节作用，所显示的异常区域往往与神经支配区相重合，因此在神经功能状态判断、损伤后检查及治疗随访中可作为较直观可靠的辅助手段。",
+    "category": "diagnosis",
+    "tags": [
+      "红外热像",
+      "神经营养调节",
+      "神经支配区",
+      "直观显示",
+      "辅助检查",
+      "治疗随访"
+    ],
+    "source": "神经功能与红外热像理论文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_infrared_thermography_as_visual_adjunct_for_trophic_regulation_and_nerve_territory_assessment",
+      "criteria_summary": [
+        "反映神经营养性调节作用",
+        "异常区域常与神经支配区重合",
+        "可用于损伤后检查和治疗辅助随访"
+      ],
+      "clinical_tip": "热像结果可视化优势明显，但应与肌电图、电生理和神经查体联合使用以提高判断可靠性。"
+    }
   }
 ]
