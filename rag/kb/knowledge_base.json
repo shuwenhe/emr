@@ -38138,5 +38138,132 @@
       ],
       "clinical_tip": "建议在同一环境和体位下重复热像采集，以提升前后比较的可解释性。"
     }
+  },
+  {
+    "id": "KB-IR-DX-1068",
+    "title": "损伤病史-玻璃划伤右腕致右正中神经断裂并行神经吻合术",
+    "content": "患者王某以右手麻木无力3个月就诊。追问病史示3个月前曾因玻璃划伤右腕部，诊断为右正中神经断裂，并已接受神经吻合术治疗。该病史提示存在明确外伤性正中神经损伤及术后再评估需求。",
+    "category": "diagnosis",
+    "tags": [
+      "正中神经断裂",
+      "玻璃划伤",
+      "右腕外伤",
+      "神经吻合术",
+      "外伤史",
+      "病史要点"
+    ],
+    "source": "正中神经损伤病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_traumatic_right_median_nerve_laceration_history_with_post_repair_status",
+      "criteria_summary": [
+        "右腕玻璃划伤史",
+        "诊断为右正中神经断裂",
+        "已行神经吻合术"
+      ],
+      "clinical_tip": "明确损伤机制、时间轴和修复方式有助于判断当前症状属于恢复期、再损伤还是修复不足。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1069",
+    "title": "术后主诉-神经吻合术后仍持续右手麻木无力3个月",
+    "content": "患者在右正中神经吻合术后仍存在右手麻木和无力，持续约3个月后再次就诊。持续性症状提示神经功能恢复有限，需结合查体、电生理及温度变化进一步评估恢复程度。",
+    "category": "diagnosis",
+    "tags": [
+      "术后症状",
+      "右手麻木",
+      "右手无力",
+      "术后恢复评估",
+      "持续3个月"
+    ],
+    "source": "正中神经损伤病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_persistent_post_repair_numbness_and_weakness_over_three_months_in_median_nerve_injury",
+      "criteria_summary": [
+        "术后仍麻木无力",
+        "症状持续约3个月",
+        "提示恢复有限需进一步评估"
+      ],
+      "clinical_tip": "术后症状持续时间应与神经再生速度、损伤层级和修复方式综合解读。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1070",
+    "title": "局部查体-右腕约3cm术后瘢痕提示既往神经损伤修复部位",
+    "content": "查体可见右手腕部约3cm手术缝合瘢痕，提示既往外伤和神经修复手术部位。局部瘢痕信息有助于结合损伤平面分析远端感觉与运动缺失范围。",
+    "category": "diagnosis",
+    "tags": [
+      "术后瘢痕",
+      "右腕瘢痕",
+      "神经修复部位",
+      "局部查体",
+      "损伤平面"
+    ],
+    "source": "正中神经损伤病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "medium",
+    "structured_advice": {
+      "action": "document_wrist_surgical_scar_as_surface_marker_of_prior_median_nerve_repair_site",
+      "criteria_summary": [
+        "右腕约3cm缝合瘢痕",
+        "提示既往神经修复部位"
+      ],
+      "clinical_tip": "体表瘢痕位置应与神经走行、症状分布和触发痛点一并记录，以提高定位判断准确性。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1071",
+    "title": "温度体征-右手拇指示指中指温度较左侧略低提示感觉与自主神经受累",
+    "content": "触诊见右手示指、中指及拇指温度较左侧略低，提示受累区域可能存在感觉功能异常并伴局部自主神经调节改变。该温度差异可与红外热成像结果相互印证，用于辅助判断受累范围和随访趋势。",
+    "category": "diagnosis",
+    "tags": [
+      "温度降低",
+      "拇指温度低",
+      "示指温度低",
+      "中指温度低",
+      "自主神经受累",
+      "红外热像"
+    ],
+    "source": "正中神经损伤病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_lower_thumb_index_middle_finger_temperature_as_supportive_sign_of_median_nerve_involvement",
+      "criteria_summary": [
+        "拇指示指中指温度较对侧略低",
+        "可提示局部神经受累",
+        "可与热像结果互证"
+      ],
+      "clinical_tip": "建议在标准化环境温度下重复测量或进行热像采集，减少触诊主观差异。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1072",
+    "title": "综合体征-大鱼际萎缩伴拇指对掌对指及屈曲受限支持正中神经运动支受累",
+    "content": "查体示右手大鱼际肌肉萎缩、大鱼际容量减少，同时存在拇指对掌、对指功能受限及拇指屈曲受限。该组合体征提示正中神经运动支受累较为明确，并影响拇功能与精细手部操作。",
+    "category": "diagnosis",
+    "tags": [
+      "大鱼际萎缩",
+      "大鱼际容量减少",
+      "对掌受限",
+      "对指受限",
+      "拇指屈曲受限",
+      "运动支受累"
+    ],
+    "source": "正中神经损伤病例文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_thenar_atrophy_with_opposition_and_thumb_flexion_limitation_as_motor_branch_involvement_pattern",
+      "criteria_summary": [
+        "大鱼际萎缩和容量减少",
+        "拇指对掌对指受限",
+        "拇指屈曲受限"
+      ],
+      "clinical_tip": "建议联合鱼际肌肌力、夹捏功能和肌电图结果评估运动恢复程度与康复目标。"
+    }
   }
 ]
