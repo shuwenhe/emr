@@ -64,8 +64,12 @@ async def patient_events(request: Request):
                 try:
                     message = await asyncio.wait_for(queue.get(), timeout=15)
                     yield message
-                except TimeoutError:
+                except asyncio.TimeoutError:
+                    if await request.is_disconnected():
+                        break
                     yield ": keepalive\n\n"
+                except asyncio.CancelledError:
+                    break
         finally:
             await _patient_broker.unsubscribe(queue)
 
@@ -165,8 +169,12 @@ async def ingest_progress_events(record_id: str, request: Request):
                 try:
                     message = await asyncio.wait_for(queue.get(), timeout=20)
                     yield message
-                except TimeoutError:
+                except asyncio.TimeoutError:
+                    if await request.is_disconnected():
+                        break
                     yield ": keepalive\n\n"
+                except asyncio.CancelledError:
+                    break
         finally:
             await _ingest_broker.unsubscribe(record_id, queue)
 
