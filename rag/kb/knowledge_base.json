@@ -37927,5 +37927,32 @@
       ],
       "clinical_tip": "建议与神经查体、电生理及影像学联合判读，以提升诊断可靠性。"
     }
+  },
+  {
+    "id": "KB-IR-DX-1060",
+    "title": "红外热像辅助神经损伤诊断",
+    "content": "红外热像可通过体表温度分布、局部热区或冷区变化以及左右不对称表现，为神经损伤相关受累区域的识别和范围判断提供辅助线索。该方法适合作为临床补充评估工具，诊断时仍应结合神经查体、电生理检查及影像学结果综合分析。",
+    "category": "diagnosis",
+    "tags": [
+      "红外热像",
+      "神经损伤",
+      "辅助诊断",
+      "左右不对称",
+      "局部温差",
+      "综合评估"
+    ],
+    "source": "红外热像辅助诊断文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_infrared_thermography_as_adjunct_for_nerve_injury_diagnosis_based_on_temperature_asymmetry_and_regional_pattern_changes",
+      "criteria_summary": [
+        "观察体表温度分布与左右差异",
+        "识别局部热区或冷区异常",
+        "辅助判断神经损伤受累范围",
+        "需联合电生理和影像学综合诊断"
+      ],
+      "clinical_tip": "报告表述应限定为辅助诊断，不宜替代神经系统专科检查。"
+    }
   }
 ]
