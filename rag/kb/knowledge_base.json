@@ -38265,5 +38265,59 @@
       ],
       "clinical_tip": "建议联合鱼际肌肌力、夹捏功能和肌电图结果评估运动恢复程度与康复目标。"
     }
+  },
+  {
+    "id": "KB-IR-DX-1073",
+    "title": "热像表现-右手正中神经支配区拇指示指中指掌背侧较左侧低温差",
+    "content": "红外热像检查可见右手正中神经支配区内，拇指、示指及中指的掌侧和背侧较左侧呈低温差表现。该温度不对称支持正中神经受累区域存在局部血流与自主神经调节异常，可作为神经功能损伤的辅助评估依据。",
+    "category": "diagnosis",
+    "tags": [
+      "红外热像",
+      "低温差",
+      "拇指",
+      "示指",
+      "中指",
+      "掌侧",
+      "背侧",
+      "正中神经支配区"
+    ],
+    "source": "正中神经损伤热像文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_lower_temperature_asymmetry_in_thumb_index_middle_finger_palmar_and_dorsal_surfaces_within_median_nerve_territory",
+      "criteria_summary": [
+        "右手拇指示指中指掌背侧较对侧低温",
+        "符合正中神经支配区异常分布",
+        "支持神经功能受累的热像证据"
+      ],
+      "clinical_tip": "热像判读应结合感觉分布、运动体征与电生理结果，避免将局部环境或体位差异误判为病理改变。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1074",
+    "title": "热像表现-右前臂掌侧及背侧较左侧低温差提示近端受累范围延伸",
+    "content": "红外热像进一步显示右前臂掌侧及背侧较左侧存在低温差，提示温度异常不仅局限于手部，也可能反映更近端的神经相关血流调节异常或损伤影响范围延伸。该表现有助于结合损伤平面与术后恢复情况进行综合判断。",
+    "category": "diagnosis",
+    "tags": [
+      "红外热像",
+      "前臂低温差",
+      "掌侧低温差",
+      "背侧低温差",
+      "近端受累",
+      "损伤范围评估"
+    ],
+    "source": "正中神经损伤热像文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_lower_temperature_asymmetry_in_volar_and_dorsal_forearm_as_possible_extension_of_nerve_related_dysregulation",
+      "criteria_summary": [
+        "右前臂掌侧较对侧低温",
+        "右前臂背侧较对侧低温",
+        "提示异常范围可能延伸至前臂"
+      ],
+      "clinical_tip": "当前臂与手部同时存在温度异常时，应结合损伤部位、瘢痕平面及神经走行评估受累层级。"
+    }
   }
 ]
