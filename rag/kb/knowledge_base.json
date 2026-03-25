@@ -37954,5 +37954,86 @@
       ],
       "clinical_tip": "报告表述应限定为辅助诊断，不宜替代神经系统专科检查。"
     }
+  },
+  {
+    "id": "KB-IR-DX-1061",
+    "title": "解剖来源-正中神经由颈5至颈8及胸1神经根纤维组成",
+    "content": "正中神经主要由颈5至颈8及胸1神经根发出的纤维组成，是上肢重要的混合神经之一。该解剖来源有助于理解正中神经相关症状可能与颈源性或臂丛近端病变共同关联。",
+    "category": "diagnosis",
+    "tags": [
+      "正中神经",
+      "颈5",
+      "颈6",
+      "颈7",
+      "颈8",
+      "胸1",
+      "神经根来源",
+      "臂丛神经"
+    ],
+    "source": "腕管综合征文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_median_nerve_root_origin_from_c5_to_c8_and_t1_for_anatomic_localization",
+      "anatomy_points": [
+        "来源于C5-C8及T1纤维",
+        "属于上肢重要混合神经"
+      ],
+      "clinical_tip": "定位诊断时应注意区分腕部卡压与颈源性或臂丛近端病变。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1062",
+    "title": "组成方式-正中神经由臂丛外侧索外侧根与内侧索内侧根汇合形成",
+    "content": "正中神经由臂丛神经外侧索分出的外侧根和内侧索分出的内侧根共同组成，二者汇合后形成完整的正中神经主干。该组成关系是理解其近端走行及相关损伤定位的重要解剖基础。",
+    "category": "diagnosis",
+    "tags": [
+      "正中神经",
+      "臂丛神经",
+      "外侧索",
+      "内侧索",
+      "外侧根",
+      "内侧根",
+      "神经组成"
+    ],
+    "source": "腕管综合征文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_median_nerve_formation_from_lateral_and_medial_roots_of_brachial_plexus",
+      "anatomy_points": [
+        "外侧索发出外侧根",
+        "内侧索发出内侧根",
+        "两根汇合成正中神经主干"
+      ],
+      "clinical_tip": "近端损伤评估时可结合臂丛分支解剖判断受累节段。"
+    }
+  },
+  {
+    "id": "KB-IR-DX-1063",
+    "title": "主要功能-正中神经支配前臂屈侧多数肌群并负责手掌桡侧感觉",
+    "content": "正中神经主要负责前臂屈侧大部分肌肉的收缩与舒张功能，同时支配手内桡侧大部分肌肉，并承担手掌桡侧及相关手指区域的重要感觉传导功能。该功能特征可用于解释正中神经损伤时出现的屈曲无力、鱼际肌受累及桡侧手部感觉异常。",
+    "category": "diagnosis",
+    "tags": [
+      "正中神经功能",
+      "前臂屈肌",
+      "手内肌",
+      "鱼际肌",
+      "手掌桡侧感觉",
+      "感觉传导",
+      "运动支配"
+    ],
+    "source": "腕管综合征文本（用户提供）",
+    "source_type": "clinical_case",
+    "priority": "high",
+    "structured_advice": {
+      "action": "document_motor_and_sensory_functions_of_median_nerve_in_forearm_flexors_thenar_region_and_radial_palm",
+      "anatomy_points": [
+        "支配前臂屈侧多数肌群",
+        "支配手内桡侧大部分肌肉",
+        "负责手掌桡侧感觉"
+      ],
+      "clinical_tip": "若同时出现屈曲功能下降和桡侧手部感觉异常，应优先考虑正中神经受累。"
+    }
   }
 ]
