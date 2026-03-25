@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     # ==================== Database ====================
     # MySQL
     MYSQL_HOST: str = Field(default="localhost", description="MySQL host")
-    MYSQL_PORT: int = Field(default=3306, description="MySQL port")
+    MYSQL_PORT: int = Field(default=33061, description="MySQL port")
     MYSQL_USER: str = Field(default="emr_user", description="MySQL user")
     MYSQL_PASSWORD: str = Field(default="", description="MySQL password")
     MYSQL_DATABASE: str = Field(default="emr_db", description="MySQL database")

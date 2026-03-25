@@ -2,7 +2,7 @@
 # Update values for your environment
 mysql:
   host: "127.0.0.1"
-  port: 3306
+  port: 33061
   database: "hospital"
   user: "hospital"
   password: "hospital"
