@@ -14,7 +14,7 @@ type Patient = {
 };
 
 const API_PROXY_BASE = "/api";
-const API_BACKEND_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BACKEND_BASE = API_PROXY_BASE;
 const UPLOAD_STATE_KEY = "patient_flow_state_upload";
 
 function getCurrentDateTimeLocalValue() {
@@ -393,7 +393,7 @@ function UploadPageContent() {
         formData.append("file", files[0]);
         formData.append("metadata", JSON.stringify(metadata));
 
-        // Use backend direct URL for file uploads to avoid Next proxy body-size limits.
+        // Use same-origin API proxy so browser side does not depend on localhost:8000.
         const response = await uploadFormDataWithProgress(`${API_BACKEND_BASE}/ingest`, formData);
         if (!response.ok) {
           setResult({ error: response.data?.detail || `上传失败（HTTP ${response.status}）` });
@@ -409,7 +409,7 @@ function UploadPageContent() {
         }
         formData.append("metadata", JSON.stringify(metadata));
 
-        // Use backend direct URL for batch uploads to avoid Next proxy body-size limits.
+        // Use same-origin API proxy so browser side does not depend on localhost:8000.
         const response = await uploadFormDataWithProgress(`${API_BACKEND_BASE}/ingest/batch`, formData);
         if (!response.ok) {
           setResult({ error: response.data?.detail || `批量上传失败（HTTP ${response.status}）` });
