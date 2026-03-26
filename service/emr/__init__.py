@@ -75,10 +75,19 @@ class EMRService:
             )
             emr_id = result.get("emr_id") if isinstance(result, dict) else None
             patient = (result.get("patient") or {}).get("name", "") if isinstance(result, dict) else ""
-            report_path = result.get("report_path", "") if isinstance(result, dict) else ""
+            pdf_report_path = result.get("pdf_report_path", "") if isinstance(result, dict) else ""
+            docx_report_path = result.get("docx_report_path", "") if isinstance(result, dict) else ""
+            if not pdf_report_path and isinstance(result, dict):
+                report_obj = result.get("report")
+                if isinstance(report_obj, dict):
+                    pdf_report_path = report_obj.get("pdf_report_path", "")
+            if not docx_report_path and isinstance(result, dict):
+                report_obj = result.get("report")
+                if isinstance(report_obj, dict):
+                    docx_report_path = report_obj.get("docx_report_path", "")
             logger.info(
-                "[步骤3-EMR] 病历生成完成 record_id=%s emr_id=%s patient=%s report_path=%s",
-                record_id, emr_id, patient, report_path,
+                "[步骤3-EMR] 病历生成完成 record_id=%s emr_id=%s patient=%s pdf_report_path=%s docx_report_path=%s",
+                record_id, emr_id, patient, pdf_report_path, docx_report_path,
             )
             return result
         except FileNotFoundError:

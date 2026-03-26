@@ -39,6 +39,25 @@ def _strip_numeric_citations(text: str) -> str:
     return re.sub(r"\s{2,}", " ", cleaned).strip()
 
 
+def _has_report_output(emr_result: dict) -> bool:
+    if not isinstance(emr_result, dict):
+        return False
+
+    for field in ("pdf_report_path", "docx_report_path"):
+        value = str(emr_result.get(field) or "").strip()
+        if value:
+            return True
+
+    report = emr_result.get("report")
+    if isinstance(report, dict):
+        for field in ("pdf_report_path", "docx_report_path"):
+            value = str(report.get(field) or "").strip()
+            if value:
+                return True
+
+    return False
+
+
 def _validate_file(file: UploadFile) -> None:
     suffix = Path(file.filename).suffix.lower()
     if suffix not in ALLOWED_EXTENSIONS:
@@ -170,6 +189,20 @@ async def _generate_report_after_ingest(record_id: str, metadata: dict | None = 
         ai_result = await asyncio.to_thread(ai_service.generate_report_summary, analysis_result, emr_result) or {}
         if ai_result and emr_result:
             emr_result = await asyncio.to_thread(_persist_ai_result, record_id, analysis_result, emr_result, ai_result)
+
+        # Even when AI is disabled or returns empty content, we still need
+        # report files for history list and preview pages.
+        if emr_result and not _has_report_output(emr_result):
+            try:
+                emr_result = await asyncio.to_thread(
+                    emr_service.create_emr,
+                    record_id,
+                    ensure_report_outputs=True,
+                ) or emr_result
+                logger.info("[步骤4] AI后报告文件补齐 完成 record_id=%s", record_id)
+            except Exception as backfill_exc:
+                logger.warning("[步骤4] AI后报告文件补齐失败 record_id=%s error=%s", record_id, backfill_exc)
+
         elapsed = time.time() - t0
         logger.info("[步骤4] AI报告生成 完成 record_id=%s keys=%s 耗时=%.2fs", record_id, list(ai_result.keys()), elapsed)
         await publish_ingest_progress(record_id, 4, "AI诊断报告生成完成", 80, "done")
