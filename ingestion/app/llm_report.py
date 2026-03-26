@@ -31,6 +31,9 @@ OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:1.7b")
 OLLAMA_ENABLED = os.getenv("OLLAMA_ENABLED", "1") != "0"
 OLLAMA_TIMEOUT_SEC = _env_int("OLLAMA_TIMEOUT_SEC", 60, min_value=5)
 OLLAMA_MAX_RETRIES = _env_int("OLLAMA_MAX_RETRIES", 2, min_value=0)
+OLLAMA_HEALTHCHECK_TIMEOUT_SEC = _env_int("OLLAMA_HEALTHCHECK_TIMEOUT_SEC", 2, min_value=1)
+OLLAMA_UNAVAILABLE_COOLDOWN_SEC = _env_int("OLLAMA_UNAVAILABLE_COOLDOWN_SEC", 30, min_value=1)
+OLLAMA_SECTION_WORKERS = _env_int("OLLAMA_SECTION_WORKERS", 2, min_value=1)
 RAG_ENABLED = os.getenv("RAG_ENABLED", "1") != "0"
 RAG_TOP_K = _env_int("RAG_TOP_K", 5, min_value=1)
 RAG_SCORE_THRESHOLD = float(os.getenv("RAG_SCORE_THRESHOLD", "0"))
@@ -58,6 +61,8 @@ _VECTOR_KB_MTIME: Optional[float] = None
 _VECTOR_EMBEDDINGS: Any = None
 _VECTOR_DISABLED_REASON: Optional[str] = None
 _RAG_CONFIG_LOGGED = False
+_OLLAMA_UNAVAILABLE_UNTIL_TS = 0.0
+_OLLAMA_UNAVAILABLE_LOGGED_TS = 0.0
 _REF_PATTERN = re.compile(r"\[(\d+)\]")
 _ABSOLUTE_DATE_PATTERN = re.compile(r"\b\d{4}[-/.年]\d{1,2}[-/.月]\d{1,2}(?:日)?\b")
 _SYSTEM_PROMPT = (
@@ -189,7 +194,7 @@ def _log_rag_runtime_config_once() -> None:
     _RAG_CONFIG_LOGGED = True
     logging.info(
         "[RAG-CONFIG] enabled=%s vector_enabled=%s provider=%s embed_model=%s top_k=%s "
-        "score_threshold=%s context_item_max_chars=%s section_top_k=%s kb_path=%s vector_kb_path=%s",
+        "score_threshold=%s context_item_max_chars=%s section_workers=%s section_top_k=%s kb_path=%s vector_kb_path=%s",
         RAG_ENABLED,
         RAG_VECTOR_ENABLED,
         RAG_EMBED_PROVIDER,
@@ -197,6 +202,7 @@ def _log_rag_runtime_config_once() -> None:
         RAG_TOP_K,
         RAG_SCORE_THRESHOLD,
         RAG_CONTEXT_ITEM_MAX_CHARS,
+        OLLAMA_SECTION_WORKERS,
         _SECTION_TOP_K,
         RAG_KB_PATH,
         RAG_VECTOR_KB_PATH,
@@ -220,8 +226,48 @@ def _extract_json_block(text: str) -> Optional[dict]:
         return None
 
 
+def _ollama_healthcheck() -> bool:
+    url = f"{OLLAMA_BASE_URL.rstrip('/')}/api/tags"
+    req = urllib.request.Request(url, method="GET")
+    with urllib.request.urlopen(req, timeout=OLLAMA_HEALTHCHECK_TIMEOUT_SEC) as response:
+        return int(getattr(response, "status", 200) or 200) < 500
+
+
+def _mark_ollama_unavailable(err: Exception) -> None:
+    global _OLLAMA_UNAVAILABLE_UNTIL_TS, _OLLAMA_UNAVAILABLE_LOGGED_TS
+    now = time.time()
+    _OLLAMA_UNAVAILABLE_UNTIL_TS = now + OLLAMA_UNAVAILABLE_COOLDOWN_SEC
+    # Log once per cooldown window to avoid noisy duplicate errors from parallel sections.
+    if now >= _OLLAMA_UNAVAILABLE_LOGGED_TS:
+        logging.warning(
+            "Ollama unavailable, skip LLM calls for %ss model=%s base_url=%s err=%s",
+            OLLAMA_UNAVAILABLE_COOLDOWN_SEC,
+            OLLAMA_MODEL,
+            OLLAMA_BASE_URL,
+            err,
+        )
+        _OLLAMA_UNAVAILABLE_LOGGED_TS = _OLLAMA_UNAVAILABLE_UNTIL_TS
+
+
+def _ollama_available() -> bool:
+    if not OLLAMA_ENABLED:
+        return False
+
+    now = time.time()
+    if now < _OLLAMA_UNAVAILABLE_UNTIL_TS:
+        return False
+
+    try:
+        return _ollama_healthcheck()
+    except Exception as exc:
+        _mark_ollama_unavailable(exc)
+        return False
+
+
 def _ollama_generate(prompt: str, *, temperature: float = 0.2, max_tokens: int = 512) -> str:
     if not OLLAMA_ENABLED:
+        return ""
+    if not _ollama_available():
         return ""
     payload = {
         "model": OLLAMA_MODEL,
@@ -257,6 +303,9 @@ def _ollama_generate(prompt: str, *, temperature: float = 0.2, max_tokens: int =
                 time.sleep(delay)
                 delay = min(delay * 2.0, 5.0)
                 continue
+
+    if isinstance(last_exc, Exception):
+        _mark_ollama_unavailable(last_exc)
 
     if last_exc is not None:
         logging.error("Ollama generate error: %s: %s", type(last_exc).__name__, last_exc)
@@ -1386,6 +1435,26 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
         retrieval_elapsed,
     )
 
+    if not _ollama_available():
+        logging.warning("[RAG-LLM] skipped record_id=%s: ollama_unavailable", record_id)
+        return {
+            "model": OLLAMA_MODEL,
+            "retrieved_context": retrieved_context,
+            "retrieved_items": [
+                {
+                    "id": item.get("id"),
+                    "title": item.get("title"),
+                    "source": item.get("source"),
+                    "tags": item.get("tags") or [],
+                }
+                for item in (retrieval_result.get("items") or [])
+            ],
+            "section_queries": section_retrieval_result.get("section_queries") or {},
+            "section_retrieval": section_retrieval_result.get("sections") or {},
+            "report_note": "LLM服务暂不可用，已跳过AI生成，请稍后重试。",
+            "evidence_item_ids": [],
+        }
+
     merged_ref_by_id = {
         str(citation.get("id") or "").strip(): index
         for index, citation in enumerate(citations, start=1)
@@ -1452,7 +1521,8 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
     }
     llm_started_at = time.time()
     _results: Dict[str, Any] = {}
-    with ThreadPoolExecutor(max_workers=5) as _executor:
+    section_workers = max(1, min(len(_tasks), OLLAMA_SECTION_WORKERS))
+    with ThreadPoolExecutor(max_workers=section_workers) as _executor:
         _futures = {_executor.submit(fn): name for name, fn in _tasks.items()}
         for _future in as_completed(_futures):
             _results[_futures[_future]] = _future.result()

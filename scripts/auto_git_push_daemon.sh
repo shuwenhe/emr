@@ -4,6 +4,7 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 INTERVAL_SECONDS="${AUTO_GIT_INTERVAL_SECONDS:-12}"
 QUIET_SECONDS="${AUTO_GIT_QUIET_SECONDS:-8}"
+AUTO_GIT_EXCLUDE_PATHS="${AUTO_GIT_EXCLUDE_PATHS:-.run/service.pid}"
 
 cd "$REPO_DIR"
 
@@ -22,7 +23,13 @@ while true; do
     continue
   fi
 
-  snapshot="$(git status --porcelain)"
+  status_args=(--porcelain -- .)
+  read -r -a snapshot_excludes <<< "$AUTO_GIT_EXCLUDE_PATHS"
+  for p in "${snapshot_excludes[@]}"; do
+    [[ -z "$p" ]] && continue
+    status_args+=(":(exclude)$p")
+  done
+  snapshot="$(git status "${status_args[@]}")"
 
   if [[ -z "$snapshot" ]]; then
     last_snapshot=""
@@ -45,7 +52,13 @@ while true; do
     continue
   fi
 
-  git add -A
+  git_add_args=(-A --ignore-errors -- .)
+  read -r -a exclude_paths <<< "$AUTO_GIT_EXCLUDE_PATHS"
+  for p in "${exclude_paths[@]}"; do
+    [[ -z "$p" ]] && continue
+    git_add_args+=(":(exclude)$p")
+  done
+  git add "${git_add_args[@]}" || true
 
   if git diff --cached --quiet; then
     last_snapshot=""

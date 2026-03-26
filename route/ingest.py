@@ -140,7 +140,8 @@ def _persist_ai_result(record_id: str, analysis_result: dict, emr_result: dict, 
 
 async def _generate_report_after_ingest(record_id: str, metadata: dict | None = None) -> None:
     """完整报告生成流水线：步骤2分析 → 步骤3EMR → 步骤4AI → 步骤5治疗方案"""
-    patient = metadata or {}
+    ingest_metadata = metadata if isinstance(metadata, dict) else {}
+    patient = ingest_metadata.get("patient") if isinstance(ingest_metadata.get("patient"), dict) else {}
     analysis_result: dict = {}
     emr_result: dict = {}
 

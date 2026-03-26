@@ -28,6 +28,37 @@ class TreatmentService:
     
     def __init__(self):
         self.rules_file = settings.TREATMENT_RULES_FILE
+
+    @staticmethod
+    def _resolve_patient_context(analysis: Dict[str, Any], patient: Dict[str, Any]) -> Dict[str, Any]:
+        candidates = []
+        if isinstance(patient, dict):
+            candidates.append(patient)
+            nested_patient = patient.get("patient")
+            if isinstance(nested_patient, dict):
+                candidates.append(nested_patient)
+
+        if isinstance(analysis, dict):
+            report = analysis.get("report")
+            if isinstance(report, dict):
+                report_patient = report.get("patient")
+                if isinstance(report_patient, dict):
+                    candidates.append(report_patient)
+
+        resolved_name = ""
+        resolved_body_part = ""
+        for item in candidates:
+            if not resolved_name:
+                resolved_name = str(item.get("name") or item.get("patient_name") or "").strip()
+            if not resolved_body_part:
+                resolved_body_part = str(item.get("body_part") or "").strip()
+            if resolved_name and resolved_body_part:
+                break
+
+        return {
+            "name": resolved_name or "未知",
+            "body_part": resolved_body_part,
+        }
         
     def generate_treatment_plan(
         self,
@@ -44,7 +75,8 @@ class TreatmentService:
         Returns:
             Treatment plan with actionable recommendations
         """
-        patient_name = patient.get("name", "未知") if isinstance(patient, dict) else "未知"
+        patient_ctx = self._resolve_patient_context(analysis, patient)
+        patient_name = patient_ctx["name"]
         risk_in = (
             (analysis.get("report") or {}).get("analysis", {}).get("risk_level", "未知")
             if isinstance(analysis, dict) else "未知"
@@ -65,8 +97,8 @@ class TreatmentService:
             "summary": "规则引擎方案待迁移，当前返回基础治疗建议。",
             "recommendation": "建议结合临床症状进一步评估并复测。",
             "patient": {
-                "name": patient.get("name"),
-                "body_part": patient.get("body_part"),
+                "name": patient_ctx["name"],
+                "body_part": patient_ctx["body_part"],
             },
         }
         logger.info("[步骤5-治疗] 治疗方案生成完成 patient=%s risk_level=%s", patient_name, risk_level)

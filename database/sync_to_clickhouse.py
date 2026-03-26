@@ -23,7 +23,7 @@ except ImportError:
 # ClickHouse 配置
 CLICKHOUSE_CONFIG = {
     "host": "127.0.0.1",
-    "port": 9000,
+    "port": 9001,
     "user": "hospital",
     "password": "hospital",
     "database": "hospital",
@@ -92,7 +92,7 @@ def init_clickhouse():
         print(f"✗ ClickHouse 初始化失败: {e}")
         print("  请确保 ClickHouse 服务器正在运行:")
         print("  - 主机: 127.0.0.1")
-        print("  - 端口: 9000")
+        print("  - 端口: 9001")
         print("  - 用户: hospital")
         print("  - 密码: hospital")
         return False

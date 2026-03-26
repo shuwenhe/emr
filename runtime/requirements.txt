@@ -1,0 +1,7 @@
+torch>=2.1.0
+transformers>=4.41.0
+accelerate>=0.30.0
+sentencepiece>=0.1.99
+# Install torch_npu from Ascend official channel matching your CANN/PyTorch version.
+# Example (version must match your environment):
+# pip install torch_npu==2.1.0.post13

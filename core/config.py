@@ -57,7 +57,7 @@ class Settings(BaseSettings):
     
     # ClickHouse
     CLICKHOUSE_HOST: str = Field(default="localhost", description="ClickHouse host")
-    CLICKHOUSE_PORT: int = Field(default=9000, description="ClickHouse port")
+    CLICKHOUSE_PORT: int = Field(default=9001, description="ClickHouse port")
     CLICKHOUSE_USER: str = Field(default="default", description="ClickHouse user")
     CLICKHOUSE_PASSWORD: str = Field(default="", description="ClickHouse password")
     CLICKHOUSE_DATABASE: str = Field(default="emr", description="ClickHouse database")
