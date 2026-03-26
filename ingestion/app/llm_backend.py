@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import shutil
 import socket
 import subprocess
@@ -35,6 +36,31 @@ def _env_bool(name: str, default: bool) -> bool:
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 
+
+def _guess_runtime_model_path() -> str:
+    env_model_path = os.getenv("MODEL_PATH", "").strip()
+    if env_model_path and Path(env_model_path).exists():
+        return env_model_path
+
+    explicit_candidates = [
+        "/data/models/Qwen3-1.7B-Instruct",
+        "/data/models/Qwen2.5-1.5B-Instruct",
+        "/data/models/Qwen2.5-7B-Instruct",
+        "/data/models/Qwen2.5-14B-Instruct",
+    ]
+    for candidate in explicit_candidates:
+        model_path = Path(candidate)
+        if model_path.exists():
+            return str(model_path)
+
+    model_root = Path("/data/models")
+    if model_root.exists():
+        for child in sorted(model_root.iterdir()):
+            name = child.name.lower()
+            if child.is_dir() and "qwen" in name and (child / "config.json").exists():
+                return str(child)
+    return ""
+
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:1.7b")
 OLLAMA_ENABLED = _env_bool("OLLAMA_ENABLED", True)
@@ -43,8 +69,8 @@ OLLAMA_MAX_RETRIES = _env_int("OLLAMA_MAX_RETRIES", 2, min_value=0)
 OLLAMA_HEALTHCHECK_TIMEOUT_SEC = _env_int("OLLAMA_HEALTHCHECK_TIMEOUT_SEC", 2, min_value=1)
 OLLAMA_UNAVAILABLE_COOLDOWN_SEC = _env_int("OLLAMA_UNAVAILABLE_COOLDOWN_SEC", 30, min_value=1)
 
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "auto").strip().lower()
-LLM_RUNTIME_MODEL_PATH = os.getenv("LLM_RUNTIME_MODEL_PATH", "").strip()
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "runtime").strip().lower()
+LLM_RUNTIME_MODEL_PATH = os.getenv("LLM_RUNTIME_MODEL_PATH", _guess_runtime_model_path()).strip()
 LLM_RUNTIME_SCRIPT = Path(
     os.getenv(
         "LLM_RUNTIME_SCRIPT",
@@ -57,9 +83,45 @@ LLM_RUNTIME_ENABLED = _env_bool("LLM_RUNTIME_ENABLED", bool(LLM_RUNTIME_MODEL_PA
 LLM_RUNTIME_TIMEOUT_SEC = _env_int("LLM_RUNTIME_TIMEOUT_SEC", 900, min_value=30)
 LLM_RUNTIME_DTYPE = os.getenv("LLM_RUNTIME_DTYPE", os.getenv("DTYPE", "float16")).strip() or "float16"
 LLM_RUNTIME_TRUST_REMOTE_CODE = os.getenv("LLM_RUNTIME_TRUST_REMOTE_CODE", os.getenv("TRUST_REMOTE_CODE", "true"))
+LLM_RUNTIME_NPU_LOGGING_ENABLED = _env_bool("LLM_RUNTIME_NPU_LOGGING_ENABLED", True)
+LLM_RUNTIME_NPU_SAMPLING_SEC = _env_int("LLM_RUNTIME_NPU_SAMPLING_SEC", 5, min_value=1)
 
 _OLLAMA_UNAVAILABLE_UNTIL_TS = 0.0
 _OLLAMA_UNAVAILABLE_LOGGED_TS = 0.0
+_AICORE_MEM_PATTERN = re.compile(r"\|\s*(\d{1,3})\s+\d+\s*/\s*\d+")
+
+
+def _log_npu_smi(stage: str) -> None:
+    if not LLM_RUNTIME_NPU_LOGGING_ENABLED:
+        return
+    if shutil.which("npu-smi") is None:
+        logging.info("[NPU-SMI] stage=%s npu-smi=not-found", stage)
+        return
+
+    try:
+        result = subprocess.run(
+            ["npu-smi", "info"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=8,
+            check=False,
+        )
+    except Exception as exc:
+        logging.warning("[NPU-SMI] stage=%s failed=%s", stage, exc)
+        return
+
+    output = (result.stdout or "") + "\n" + (result.stderr or "")
+    process_present = "No running processes found" not in output
+    aicore_values = [int(match.group(1)) for match in _AICORE_MEM_PATTERN.finditer(output)]
+    aicore_nonzero = any(value > 0 for value in aicore_values)
+    logging.info(
+        "[NPU-SMI] stage=%s process_present=%s aicore_nonzero=%s sampled_cores=%s",
+        stage,
+        process_present,
+        aicore_nonzero,
+        aicore_values[:16],
+    )
 
 
 def _mark_ollama_unavailable(err: Exception) -> None:
@@ -257,28 +319,58 @@ def _runtime_generate(prompt: str, *, temperature: float, max_tokens: int) -> st
         env.setdefault("LOCAL_RANK", "0")
 
         try:
-            completed = subprocess.run(
+            process = subprocess.Popen(
                 command,
                 cwd=str(LLM_RUNTIME_SCRIPT.parent),
                 env=env,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                timeout=LLM_RUNTIME_TIMEOUT_SEC,
-                check=False,
             )
-        except subprocess.TimeoutExpired as exc:
+        except Exception as exc:
+            logging.error("Runtime LLM launch failed backend=%s err=%s", LLM_RUNTIME_BACKEND, exc)
+            return ""
+
+        _log_npu_smi("runtime-start")
+
+        started_at = time.time()
+        stdout_data = ""
+        stderr_data = ""
+        timed_out = False
+        sample_idx = 0
+        while True:
+            elapsed = time.time() - started_at
+            remaining = max(0.0, float(LLM_RUNTIME_TIMEOUT_SEC) - elapsed)
+            if remaining <= 0:
+                timed_out = True
+                process.kill()
+                stdout_data, stderr_data = process.communicate()
+                break
+
+            wait_for = min(float(LLM_RUNTIME_NPU_SAMPLING_SEC), remaining)
+            try:
+                stdout_data, stderr_data = process.communicate(timeout=wait_for)
+                break
+            except subprocess.TimeoutExpired:
+                sample_idx += 1
+                _log_npu_smi(f"runtime-during-{sample_idx}")
+
+        _log_npu_smi("runtime-end")
+
+        if timed_out:
             logging.error(
                 "Runtime LLM timeout backend=%s model=%s timeout=%ss",
                 LLM_RUNTIME_BACKEND,
                 llm_model_name(),
                 LLM_RUNTIME_TIMEOUT_SEC,
             )
-            if exc.stdout:
-                logging.error("Runtime LLM stdout before timeout: %s", exc.stdout[-1000:])
-            if exc.stderr:
-                logging.error("Runtime LLM stderr before timeout: %s", exc.stderr[-1000:])
+            if stdout_data:
+                logging.error("Runtime LLM stdout before timeout: %s", stdout_data[-1000:])
+            if stderr_data:
+                logging.error("Runtime LLM stderr before timeout: %s", stderr_data[-1000:])
             return ""
+
+        completed = process
 
         if completed.returncode != 0:
             logging.error(
@@ -287,16 +379,16 @@ def _runtime_generate(prompt: str, *, temperature: float, max_tokens: int) -> st
                 llm_model_name(),
                 completed.returncode,
             )
-            if completed.stdout:
-                logging.error("Runtime LLM stdout: %s", completed.stdout[-1000:])
-            if completed.stderr:
-                logging.error("Runtime LLM stderr: %s", completed.stderr[-1000:])
+            if stdout_data:
+                logging.error("Runtime LLM stdout: %s", stdout_data[-1000:])
+            if stderr_data:
+                logging.error("Runtime LLM stderr: %s", stderr_data[-1000:])
             return ""
 
         if not output_file.exists():
             logging.error("Runtime LLM completed without output file: %s", output_file)
-            if completed.stdout:
-                logging.error("Runtime LLM stdout: %s", completed.stdout[-1000:])
+            if stdout_data:
+                logging.error("Runtime LLM stdout: %s", stdout_data[-1000:])
             return ""
 
         lines = [line.strip() for line in output_file.read_text(encoding="utf-8").splitlines() if line.strip()]
