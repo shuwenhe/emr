@@ -105,7 +105,7 @@ class Settings(BaseSettings):
         return Path("template")
     
     # ==================== AI / LLM ====================
-    LLM_ENABLED: bool = Field(default=False, description="Enable LLM features")
+    LLM_ENABLED: bool = Field(default=True, description="Enable LLM features")
     LLM_PROVIDER: str = Field(default="ollama", description="LLM provider (ollama/openai/azure)")
     LLM_MODEL: str = Field(default="qwen2.5:14b", description="LLM model name")
     LLM_BASE_URL: str = Field(default="", description="LLM API base URL")
