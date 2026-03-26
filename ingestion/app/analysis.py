@@ -21,6 +21,11 @@ from matplotlib import font_manager as fm
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
+from .llm_backend import (
+    is_llm_enabled as _shared_is_llm_enabled,
+    llm_generate as _shared_llm_generate,
+    llm_model_name as _shared_llm_model_name,
+)
 from .config import DATA_DIR
 from .data_platform import get_patient_history, save_plan, save_report
 from .emr import upsert_emr_from_analysis
@@ -126,29 +131,7 @@ def _extract_json_block(text: str) -> Optional[dict]:
 
 
 def _ollama_generate(prompt: str, *, temperature: float = 0.2, max_tokens: int = 512) -> str:
-    if not OLLAMA_ENABLED:
-        return ""
-    payload = {
-        "model": OLLAMA_MODEL,
-        "prompt": prompt,
-        "stream": False,
-        "options": {"temperature": temperature, "num_predict": max_tokens},
-    }
-    data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-    request = urllib.request.Request(
-        f"{OLLAMA_BASE_URL}/api/generate",
-        data=data,
-        headers={"Content-Type": "application/json"},
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=20) as response:
-            body = response.read().decode("utf-8")
-        result = json.loads(body)
-        return str(result.get("response") or "").strip()
-    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
-        logging.error(f"Ollama generate error: {type(e).__name__}: {e}")
-        logging.error(f"Model: {OLLAMA_MODEL}, URL: {OLLAMA_BASE_URL}")
-        return ""
+    return _shared_llm_generate(prompt, temperature=temperature, max_tokens=max_tokens)
 
 
 def _build_llm_context(
@@ -1274,7 +1257,7 @@ def analyze_record(
         abnormal_regions=abnormal_regions,
         roi_analysis=roi_analysis,
     )
-    llm_result = _generate_llm_diagnosis_and_opinion(llm_context) if (enable_llm and OLLAMA_ENABLED) else {}
+    llm_result = _generate_llm_diagnosis_and_opinion(llm_context) if (enable_llm and _shared_is_llm_enabled()) else {}
     ai_diagnosis = str(llm_result.get("diagnosis") or "").strip()
     ai_doctor_opinion = str(llm_result.get("doctor_opinion") or "").strip()
     ai_report_note = str(llm_result.get("report_note") or "").strip()
@@ -1358,16 +1341,16 @@ def analyze_record(
     )
 
     ai_plan_text = ""
-    if enable_llm and OLLAMA_ENABLED:
+    if enable_llm and _shared_is_llm_enabled():
         ai_plan_text = _generate_llm_plan_text(llm_context, plan).strip()
         if ai_plan_text:
             plan["ai_recommendation"] = ai_plan_text
 
     report["treatment_plan"] = plan
 
-    if enable_llm and OLLAMA_ENABLED and (ai_diagnosis or ai_doctor_opinion or ai_plan_text or ai_report_note):
+    if enable_llm and _shared_is_llm_enabled() and (ai_diagnosis or ai_doctor_opinion or ai_plan_text or ai_report_note):
         report["ai"] = {
-            "model": OLLAMA_MODEL,
+            "model": _shared_llm_model_name(),
             "diagnosis": ai_diagnosis,
             "doctor_opinion": ai_doctor_opinion,
             "treatment_plan_text": ai_plan_text,

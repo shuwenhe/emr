@@ -5,7 +5,6 @@ import json
 import logging
 import os
 import re
-import socket
 import sys
 import time
 from datetime import datetime
@@ -14,6 +13,14 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
+
+from .llm_backend import (
+    is_llm_enabled as _shared_is_llm_enabled,
+    llm_available as _shared_llm_available,
+    llm_generate as _shared_llm_generate,
+    llm_model_name as _shared_llm_model_name,
+    llm_provider_name as _shared_llm_provider_name,
+)
 
 
 def _env_int(name: str, default: int, *, min_value: Optional[int] = None) -> int:
@@ -184,7 +191,7 @@ _BODY_PART_ALIASES = {
 
 
 def is_llm_enabled() -> bool:
-    return OLLAMA_ENABLED
+    return _shared_is_llm_enabled()
 
 
 def _log_rag_runtime_config_once() -> None:
@@ -250,73 +257,11 @@ def _mark_ollama_unavailable(err: Exception) -> None:
 
 
 def _ollama_available() -> bool:
-    if not OLLAMA_ENABLED:
-        return False
-
-    now = time.time()
-    if now < _OLLAMA_UNAVAILABLE_UNTIL_TS:
-        return False
-
-    try:
-        return _ollama_healthcheck()
-    except Exception as exc:
-        _mark_ollama_unavailable(exc)
-        return False
+    return _shared_llm_available()
 
 
 def _ollama_generate(prompt: str, *, temperature: float = 0.2, max_tokens: int = 512) -> str:
-    if not OLLAMA_ENABLED:
-        return ""
-    if not _ollama_available():
-        return ""
-    payload = {
-        "model": OLLAMA_MODEL,
-        "prompt": prompt,
-        "stream": False,
-        "options": {"temperature": temperature, "num_predict": max_tokens},
-    }
-    data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-    request = urllib.request.Request(
-        f"{OLLAMA_BASE_URL}/api/generate",
-        data=data,
-        headers={"Content-Type": "application/json"},
-    )
-    delay = 0.8
-    last_exc: Optional[Exception] = None
-    for attempt in range(OLLAMA_MAX_RETRIES + 1):
-        try:
-            with urllib.request.urlopen(request, timeout=OLLAMA_TIMEOUT_SEC) as response:
-                body = response.read().decode("utf-8")
-            result = json.loads(body)
-            return str(result.get("response") or "").strip()
-        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, socket.timeout, json.JSONDecodeError) as exc:
-            last_exc = exc
-            if attempt < OLLAMA_MAX_RETRIES:
-                logging.warning(
-                    "Ollama generate retrying attempt=%d/%d timeout=%ss model=%s err=%s",
-                    attempt + 1,
-                    OLLAMA_MAX_RETRIES,
-                    OLLAMA_TIMEOUT_SEC,
-                    OLLAMA_MODEL,
-                    exc,
-                )
-                time.sleep(delay)
-                delay = min(delay * 2.0, 5.0)
-                continue
-
-    if isinstance(last_exc, Exception):
-        _mark_ollama_unavailable(last_exc)
-
-    if last_exc is not None:
-        logging.error("Ollama generate error: %s: %s", type(last_exc).__name__, last_exc)
-    logging.error(
-        "Model: %s, URL: %s, timeout=%ss, retries=%s",
-        OLLAMA_MODEL,
-        OLLAMA_BASE_URL,
-        OLLAMA_TIMEOUT_SEC,
-        OLLAMA_MAX_RETRIES,
-    )
-    return ""
+    return _shared_llm_generate(prompt, temperature=temperature, max_tokens=max_tokens)
 
 
 def _to_list_of_str(value: Any) -> List[str]:
@@ -1384,9 +1329,11 @@ def _generate_llm_plan_text(context: str, plan: Dict[str, Any]) -> Dict[str, Any
 def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str, Any]:
     _log_rag_runtime_config_once()
     record_id = _extract_record_id(report, emr)
+    model_name = _shared_llm_model_name()
+    provider_name = _shared_llm_provider_name()
 
-    if not OLLAMA_ENABLED:
-        logging.info("[RAG] skipped record_id=%s: llm disabled (OLLAMA_ENABLED=0)", record_id)
+    if not is_llm_enabled():
+        logging.info("[RAG] skipped record_id=%s: llm disabled provider=%s", record_id, provider_name)
         return {}
 
     retrieval_query = _build_retrieval_query(report, emr)
@@ -1402,7 +1349,8 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
     if common_answer:
         logging.info("[RAG] short-circuit record_id=%s: common query matched, skip retrieval", record_id)
         return {
-            "model": OLLAMA_MODEL,
+            "model": model_name,
+            "provider": provider_name,
             "retrieved_context": "",
             "retrieved_items": [],
             "report_note": common_answer,
@@ -1418,7 +1366,8 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
     if not retrieval_result.get("items"):
         logging.info("[RAG] completed record_id=%s with 0 hits", record_id)
         return {
-            "model": OLLAMA_MODEL,
+            "model": model_name,
+            "provider": provider_name,
             "retrieved_context": "",
             "retrieved_items": [],
             "section_queries": section_retrieval_result.get("section_queries") or {},
@@ -1436,9 +1385,10 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
     )
 
     if not _ollama_available():
-        logging.warning("[RAG-LLM] skipped record_id=%s: ollama_unavailable", record_id)
+        logging.warning("[RAG-LLM] skipped record_id=%s: provider_unavailable provider=%s", record_id, provider_name)
         return {
-            "model": OLLAMA_MODEL,
+            "model": model_name,
+            "provider": provider_name,
             "retrieved_context": retrieved_context,
             "retrieved_items": [
                 {
@@ -1560,7 +1510,8 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
     health_evidence_ids = _parse_evidence_ids(health_payload.get("evidence_item_ids"))
 
     payload: Dict[str, Any] = {
-        "model": OLLAMA_MODEL,
+        "model": model_name,
+        "provider": provider_name,
         "retrieved_context": retrieved_context,
         "retrieved_items": [
             {

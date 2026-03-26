@@ -82,3 +82,31 @@ BATCH_SIZE=8 MAX_NEW_TOKENS=256 DTYPE=float16 \
 - This implementation uses throughput parallelism: each rank handles part of prompts and rank0 merges outputs.
 - For CANN mode, distributed backend is HCCL. For CUDA mode, distributed backend is NCCL.
 - If `auto` mode detects both stacks, CANN is preferred.
+
+## EMR Integration
+
+EMR can use this runtime path instead of Ollama for report generation.
+
+Runtime provider:
+
+```bash
+export LLM_PROVIDER=runtime
+export LLM_RUNTIME_MODEL_PATH=/data/models/Qwen3-1.7B-Instruct
+export LLM_RUNTIME_BACKEND=auto
+export LLM_RUNTIME_PYTHON=/usr/bin/python3
+```
+
+Keep Ollama provider:
+
+```bash
+export LLM_PROVIDER=ollama
+export OLLAMA_BASE_URL=http://localhost:11434
+export OLLAMA_MODEL=qwen3:1.7b
+```
+
+Auto-select runtime first, then fall back to Ollama:
+
+```bash
+export LLM_PROVIDER=auto
+export LLM_RUNTIME_MODEL_PATH=/data/models/Qwen3-1.7B-Instruct
+```
