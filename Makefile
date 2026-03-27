@@ -57,7 +57,7 @@ TCM_WORKERS  ?= 4
 TCM_DOCX_DIR  ?= $(CURDIR)/rag/dataset/docx_corpus
 TCM_DOCX_RPF  ?= 500   # records per docx file
 
-.PHONY: help install service-setup service service-fg service-start service-stop service-status service-restart service-precheck service-build-watch service-build-watch-start service-build-watch-stop service-build-watch-status runtime-selfcheck web web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-validate kb-export-json kb-export-jsonl kb-json-watch-start kb-json-watch-stop kb-json-watch-status kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-import-case kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build public-domain-up public-domain-down auto-commit-start auto-commit-stop auto-commit-status auto-deploy-install auto-deploy-start auto-deploy-stop auto-deploy-status logs logs-backend logs-frontend logs-auto-git-push logs-auto-deploy logs-all logs-file-backend logs-file-frontend clean
+.PHONY: help install service-setup service service-fg service-start service-stop service-status service-restart service-precheck service-build-watch service-build-watch-start service-build-watch-stop service-build-watch-status runtime-selfcheck web web-dev-start web-dev-stop web-dev-status web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-validate kb-export-json kb-export-jsonl kb-json-watch-start kb-json-watch-stop kb-json-watch-status kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-import-case kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build public-domain-up public-domain-down auto-commit-start auto-commit-stop auto-commit-status auto-deploy-install auto-deploy-start auto-deploy-stop auto-deploy-status logs logs-backend logs-frontend logs-auto-git-push logs-auto-deploy logs-all logs-file-backend logs-file-frontend clean
 
 help:
 	@echo "Available targets:"
@@ -74,7 +74,10 @@ help:
 	@echo "  make service-build-watch-stop  # stop backend auto-build watcher"
 	@echo "  make service-build-watch-status # show backend auto-build watcher status"
 	@echo "  make runtime-selfcheck # auto-detect runtime python/model and run minimal inference check"
-	@echo "  make web              # run Next.js web app (dev, slow)"
+	@echo "  make web              # run Next.js web app in foreground with hot reload"
+	@echo "  make web-dev-start    # start Next.js dev server in background with hot reload"
+	@echo "  make web-dev-stop     # stop background Next.js dev server"
+	@echo "  make web-dev-status   # show background Next.js dev server status"
 	@echo "  make web-build        # compile Next.js for production (run once)"
 	@echo "  make web-prod         # start production Next.js server (fast, use after web-build)"
 	@echo "  make public-domain-up DOMAIN=example.com   # deploy fixed domain + Caddy HTTPS"
@@ -143,6 +146,10 @@ service-setup: install
 SERVICE_PORT ?= 8000
 SERVICE_PID_FILE ?= $(CURDIR)/.run/service.pid
 SERVICE_LOG_FILE ?= $(CURDIR)/.run/service.log
+WEB_PORT ?= 3000
+WEB_PID_FILE ?= $(CURDIR)/.run/web-dev.pid
+WEB_STDOUT_LOG_FILE ?= $(CURDIR)/logs/emr-frontend.out.log
+WEB_STDERR_LOG_FILE ?= $(CURDIR)/logs/emr-frontend.err.log
 LLM_PROVIDER ?= disabled
 LLM_VL_PROVIDER ?= local
 LLM_VL_MODEL_PATH ?= /app/Qwen
@@ -230,6 +237,15 @@ runtime-selfcheck:
 
 web:
 	@bash -c 'set -e; WEB_DIR="$(CURDIR)/web"; LOCK_FILE="$$WEB_DIR/.next/dev/lock"; if [ -f "$$LOCK_FILE" ]; then echo "Removing stale lock: $$LOCK_FILE"; rm -f "$$LOCK_FILE"; fi; cd "$$WEB_DIR"; if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" && nvm use 20; fi; npm run dev'
+
+web-dev-start:
+	@bash -c 'set -e; PORT="$(WEB_PORT)"; PID_FILE="$(WEB_PID_FILE)"; OUT_LOG="$(WEB_STDOUT_LOG_FILE)"; ERR_LOG="$(WEB_STDERR_LOG_FILE)"; WEB_DIR="$(CURDIR)/web"; mkdir -p "$$(dirname "$$PID_FILE")" "$$(dirname "$$OUT_LOG")" "$$(dirname "$$ERR_LOG")"; if [ -f "$$PID_FILE" ] && kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[web-dev] already running pid=$$(cat "$$PID_FILE") port=$$PORT"; exit 0; fi; if command -v ss >/dev/null 2>&1 && ss -ltn "sport = :$$PORT" | grep -q LISTEN; then echo "[error] Frontend port $$PORT is already in use."; echo "        Run: make web-dev-stop   (or use: make WEB_PORT=3001 web-dev-start)"; exit 1; fi; LOCK_FILE="$$WEB_DIR/.next/dev/lock"; if [ -f "$$LOCK_FILE" ]; then rm -f "$$LOCK_FILE"; fi; nohup bash -lc "set -e; cd \"$$WEB_DIR\"; if [ -s \"$$HOME/.nvm/nvm.sh\" ]; then . \"$$HOME/.nvm/nvm.sh\" && nvm use 20 >/dev/null; fi; exec npm run dev -- --hostname 0.0.0.0 --port $$PORT" > "$$OUT_LOG" 2> "$$ERR_LOG" & echo $$! > "$$PID_FILE"; sleep 2; if kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[web-dev] started pid=$$(cat "$$PID_FILE") port=$$PORT"; echo "[web-dev] logs: $$OUT_LOG $$ERR_LOG"; else echo "[web-dev] failed to start"; tail -n 40 "$$ERR_LOG" || true; tail -n 40 "$$OUT_LOG" || true; rm -f "$$PID_FILE"; exit 1; fi'
+
+web-dev-stop:
+	@bash -c 'set -e; PORT="$(WEB_PORT)"; PID_FILE="$(WEB_PID_FILE)"; if [ -f "$$PID_FILE" ]; then PID="$$(cat "$$PID_FILE")"; if kill -0 "$$PID" 2>/dev/null; then echo "[web-dev] stopping pid=$$PID"; kill "$$PID" || true; sleep 1; if kill -0 "$$PID" 2>/dev/null; then kill -9 "$$PID" || true; fi; else echo "[web-dev] stale pid file removed"; fi; rm -f "$$PID_FILE"; fi; PIDS="$$(fuser -n tcp $$PORT 2>/dev/null || true)"; if [ -n "$$PIDS" ]; then echo "[web-dev] cleanup by port $$PORT pids: $$PIDS"; echo "$$PIDS" | xargs -r kill || true; sleep 1; REMAIN="$$(fuser -n tcp $$PORT 2>/dev/null || true)"; if [ -n "$$REMAIN" ]; then echo "$$REMAIN" | xargs -r kill -9 || true; fi; fi'
+
+web-dev-status:
+	@bash -c 'set -e; PORT="$(WEB_PORT)"; PID_FILE="$(WEB_PID_FILE)"; if [ -f "$$PID_FILE" ]; then PID="$$(cat "$$PID_FILE")"; if kill -0 "$$PID" 2>/dev/null; then echo "[web-dev] running pid=$$PID port=$$PORT"; if command -v ss >/dev/null 2>&1; then ss -ltnp | grep ":$$PORT" || true; fi; exit 0; fi; echo "[web-dev] pid file exists but process not running: $$PID_FILE"; exit 1; fi; if command -v ss >/dev/null 2>&1 && ss -ltn "sport = :$$PORT" | grep -q LISTEN; then echo "[web-dev] running on port $$PORT but pid file missing"; ss -ltnp | grep ":$$PORT" || true; exit 0; fi; echo "[web-dev] not running"; exit 1'
 
 web-build:
 	@bash -c 'set -e; cd "$(CURDIR)/web"; if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" && nvm use 20; fi; npm run build'
