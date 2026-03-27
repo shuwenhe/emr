@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import mammoth from "mammoth";
+import { resolveApiBase } from "../lib/api-base";
 
 type Patient = {
   patient_id: string;
@@ -21,7 +22,7 @@ type ReportFile = {
   updated_at: number;
 };
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = resolveApiBase();
 
 export default function ArchivesPage() {
   const [archivedPatients, setArchivedPatients] = useState<Patient[]>([]);

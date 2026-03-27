@@ -20,6 +20,8 @@ from .llm_backend import (
     llm_generate as _shared_llm_generate,
     llm_multimodal_available as _shared_llm_multimodal_available,
     llm_multimodal_generate as _shared_llm_multimodal_generate,
+    llm_multimodal_model_name as _shared_llm_multimodal_model_name,
+    llm_multimodal_provider_name as _shared_llm_multimodal_provider_name,
     llm_model_name as _shared_llm_model_name,
     llm_provider_name as _shared_llm_provider_name,
 )
@@ -78,6 +80,8 @@ _SYSTEM_PROMPT = (
     "你是医疗热成像评估助手。你只能基于提供的资料回答。"
     "必须在结论中使用编号引用（如[1]），不得编造，不确定就明确说明无法确认。"
 )
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
+_DATA_DIR = _PROJECT_ROOT / "data"
 
 
 def _short_text(value: str, limit: int = 160) -> str:
@@ -283,6 +287,89 @@ def _ollama_multimodal_generate(
         temperature=temperature,
         max_tokens=max_tokens,
     )
+
+
+def _resolve_image_path(value: Any) -> Optional[str]:
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    path = Path(raw)
+    candidates = [path]
+    if not path.is_absolute():
+        candidates.append(_DATA_DIR / path)
+        candidates.append(_PROJECT_ROOT / path)
+    for candidate in candidates:
+        if candidate.exists() and candidate.is_file():
+            return str(candidate)
+    return None
+
+
+def _collect_report_image_paths(report: Dict[str, Any], emr: Dict[str, Any]) -> List[str]:
+    seen: Set[str] = set()
+    result: List[str] = []
+
+    def _add(value: Any) -> None:
+        resolved = _resolve_image_path(value)
+        if not resolved or resolved in seen:
+            return
+        seen.add(resolved)
+        result.append(resolved)
+
+    for container in (report, emr):
+        if not isinstance(container, dict):
+            continue
+        _add(container.get("thermal_marked_image"))
+        _add(container.get("thermal_roi_labeled_image"))
+        thermal_images = container.get("thermal_images")
+        if isinstance(thermal_images, list):
+            for item in thermal_images:
+                _add(item)
+        image_paths = container.get("image_paths")
+        if isinstance(image_paths, list):
+            for item in image_paths:
+                _add(item)
+    return result
+
+
+def _business_llm_available(image_paths: Optional[List[str]]) -> bool:
+    if image_paths:
+        return _shared_llm_multimodal_available()
+    return _shared_llm_available()
+
+
+def _business_llm_model_name(image_paths: Optional[List[str]]) -> str:
+    if image_paths:
+        model_name = _shared_llm_multimodal_model_name()
+        if model_name:
+            return model_name
+    return _shared_llm_model_name()
+
+
+def _business_llm_provider_name(image_paths: Optional[List[str]]) -> str:
+    if image_paths:
+        provider_name = _shared_llm_multimodal_provider_name()
+        if provider_name:
+            return provider_name
+    return _shared_llm_provider_name()
+
+
+def _business_llm_generate(
+    prompt: str,
+    *,
+    image_paths: Optional[List[str]] = None,
+    temperature: float = 0.2,
+    max_tokens: int = 512,
+) -> str:
+    if image_paths:
+        output = _ollama_multimodal_generate(
+            prompt,
+            image_paths=image_paths,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+        if output:
+            return output
+    return _ollama_generate(prompt, temperature=temperature, max_tokens=max_tokens)
 
 
 def _to_list_of_str(value: Any) -> List[str]:
@@ -1201,7 +1288,7 @@ def _handle_common_query(question: str) -> Optional[str]:
     return None
 
 
-def _generate_llm_diagnosis_and_opinion(context: str) -> Dict[str, Any]:
+def _generate_llm_diagnosis_and_opinion(context: str, *, image_paths: Optional[List[str]] = None) -> Dict[str, Any]:
     base_prompt = (
         _SYSTEM_PROMPT
         + "\n\n"
@@ -1212,7 +1299,7 @@ def _generate_llm_diagnosis_and_opinion(context: str) -> Dict[str, Any]:
         "其中 doctor_opinion 和 report_note 必须明确‘仅供参考’。"
         "evidence_item_ids 为字符串数组，可填写依据条目ID或引用编号（如 [\"KB-001\",\"[1]\"]）。"
     )
-    text = _ollama_generate(base_prompt, temperature=0.2, max_tokens=900)
+    text = _business_llm_generate(base_prompt, image_paths=image_paths, temperature=0.2, max_tokens=900)
     data = _extract_json_block(text) or {}
     result = {
         "diagnosis": str(data.get("diagnosis") or "").strip(),
@@ -1236,7 +1323,7 @@ def _generate_llm_diagnosis_and_opinion(context: str) -> Dict[str, Any]:
             "其中 doctor_opinion 和 report_note 必须包含‘仅供参考’。"
             "evidence_item_ids 为字符串数组，可填写依据条目ID或引用编号。"
         )
-        text = _ollama_generate(retry_prompt, temperature=0.2, max_tokens=1200)
+        text = _business_llm_generate(retry_prompt, image_paths=image_paths, temperature=0.2, max_tokens=1200)
         data = _extract_json_block(text) or {}
         result = {
             "diagnosis": str(data.get("diagnosis") or result["diagnosis"]).strip(),
@@ -1248,7 +1335,7 @@ def _generate_llm_diagnosis_and_opinion(context: str) -> Dict[str, Any]:
     return result
 
 
-def _generate_llm_field_text(section: str, context: str) -> Dict[str, Any]:
+def _generate_llm_field_text(section: str, context: str, *, image_paths: Optional[List[str]] = None) -> Dict[str, Any]:
     started_at = time.time()
     retried = False
     field_prompts = {
@@ -1279,7 +1366,7 @@ def _generate_llm_field_text(section: str, context: str) -> Dict[str, Any]:
     }
     output_field = section
     base_prompt = _SYSTEM_PROMPT + "\n\n" + context + field_prompts[section]
-    text = _ollama_generate(base_prompt, temperature=0.2, max_tokens=700)
+    text = _business_llm_generate(base_prompt, image_paths=image_paths, temperature=0.2, max_tokens=700)
     data = _extract_json_block(text) or {}
     value = _normalize_generated_text(data.get(output_field))
     result = {
@@ -1297,7 +1384,7 @@ def _generate_llm_field_text(section: str, context: str) -> Dict[str, Any]:
             + field_prompts[section]
             + f"请进一步展开，{output_field} 不少于 {max(min_len, 90 if section != 'report_note' else 70)} 字。"
         )
-        text = _ollama_generate(retry_prompt, temperature=0.2, max_tokens=900)
+        text = _business_llm_generate(retry_prompt, image_paths=image_paths, temperature=0.2, max_tokens=900)
         data = _extract_json_block(text) or {}
         result = {
             output_field: _normalize_generated_text(data.get(output_field) or value),
@@ -1313,7 +1400,7 @@ def _generate_llm_field_text(section: str, context: str) -> Dict[str, Any]:
     return result
 
 
-def _generate_llm_plan_text(context: str, plan: Dict[str, Any]) -> Dict[str, Any]:
+def _generate_llm_plan_text(context: str, plan: Dict[str, Any], *, image_paths: Optional[List[str]] = None) -> Dict[str, Any]:
     started_at = time.time()
     plan_summary = {
         "intensity_level": plan.get("intensity_level"),
@@ -1331,7 +1418,7 @@ def _generate_llm_plan_text(context: str, plan: Dict[str, Any]) -> Dict[str, Any
         "需涵盖频次/疗程/关键部位，并标注‘仅供参考’，且使用引用编号（如[1]）：\n"
         + json.dumps(plan_summary, ensure_ascii=False)
     )
-    text = _ollama_generate(prompt, temperature=0.3, max_tokens=700)
+    text = _business_llm_generate(prompt, image_paths=image_paths, temperature=0.3, max_tokens=700)
     data = _extract_json_block(text) or {}
     result = {
         "treatment_plan_text": str(data.get("treatment_plan_text") or text or "").strip(),
@@ -1350,8 +1437,9 @@ def _generate_llm_plan_text(context: str, plan: Dict[str, Any]) -> Dict[str, Any
 def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str, Any]:
     _log_rag_runtime_config_once()
     record_id = _extract_record_id(report, emr)
-    model_name = _shared_llm_model_name()
-    provider_name = _shared_llm_provider_name()
+    image_paths = _collect_report_image_paths(report, emr)
+    model_name = _business_llm_model_name(image_paths)
+    provider_name = _business_llm_provider_name(image_paths)
 
     if not is_llm_enabled():
         logging.info("[RAG] skipped record_id=%s: llm disabled provider=%s", record_id, provider_name)
@@ -1405,7 +1493,7 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
         retrieval_elapsed,
     )
 
-    if not _ollama_available():
+    if not _business_llm_available(image_paths):
         logging.warning("[RAG-LLM] skipped record_id=%s: provider_unavailable provider=%s", record_id, provider_name)
         return {
             "model": model_name,
@@ -1467,20 +1555,20 @@ def generate_report_ai(report: Dict[str, Any], emr: Dict[str, Any]) -> Dict[str,
     )
 
     def _run_diagnosis() -> Dict[str, Any]:
-        return _generate_llm_field_text("diagnosis", diagnosis_context)
+        return _generate_llm_field_text("diagnosis", diagnosis_context, image_paths=image_paths)
 
     def _run_opinion() -> Dict[str, Any]:
-        return _generate_llm_field_text("doctor_opinion", opinion_context)
+        return _generate_llm_field_text("doctor_opinion", opinion_context, image_paths=image_paths)
 
     def _run_note() -> Dict[str, Any]:
-        return _generate_llm_field_text("report_note", note_context)
+        return _generate_llm_field_text("report_note", note_context, image_paths=image_paths)
 
     def _run_health() -> Dict[str, Any]:
-        return _generate_llm_field_text("health_advice", health_context)
+        return _generate_llm_field_text("health_advice", health_context, image_paths=image_paths)
 
     def _run_plan() -> Dict[str, Any]:
         if isinstance(plan, dict):
-            return _generate_llm_plan_text(plan_context, plan)
+            return _generate_llm_plan_text(plan_context, plan, image_paths=image_paths)
         return {}
 
     _tasks = {

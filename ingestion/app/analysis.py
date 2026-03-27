@@ -24,6 +24,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 from .llm_backend import (
     is_llm_enabled as _shared_is_llm_enabled,
     llm_generate as _shared_llm_generate,
+    llm_multimodal_generate as _shared_llm_multimodal_generate,
     llm_model_name as _shared_llm_model_name,
 )
 from .config import DATA_DIR
@@ -134,6 +135,40 @@ def _ollama_generate(prompt: str, *, temperature: float = 0.2, max_tokens: int =
     return _shared_llm_generate(prompt, temperature=temperature, max_tokens=max_tokens)
 
 
+def _ollama_multimodal_generate(
+    prompt: str,
+    *,
+    image_paths: Optional[List[str]] = None,
+    temperature: float = 0.2,
+    max_tokens: int = 512,
+) -> str:
+    return _shared_llm_multimodal_generate(
+        prompt,
+        image_paths=image_paths,
+        temperature=temperature,
+        max_tokens=max_tokens,
+    )
+
+
+def _business_llm_generate(
+    prompt: str,
+    *,
+    image_paths: Optional[List[str]] = None,
+    temperature: float = 0.2,
+    max_tokens: int = 512,
+) -> str:
+    if image_paths:
+        output = _ollama_multimodal_generate(
+            prompt,
+            image_paths=image_paths,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+        if output:
+            return output
+    return _ollama_generate(prompt, temperature=temperature, max_tokens=max_tokens)
+
+
 def _build_llm_context(
     patient: Dict[str, Any],
     body_part: str,
@@ -185,14 +220,14 @@ def _build_llm_context(
     return context
 
 
-def _generate_llm_diagnosis_and_opinion(context: str) -> Dict[str, str]:
+def _generate_llm_diagnosis_and_opinion(context: str, *, image_paths: Optional[List[str]] = None) -> Dict[str, str]:
     prompt = (
         context
         + "请返回严格JSON，包含字段：diagnosis, doctor_opinion, report_note。"
         "其中 doctor_opinion 和 report_note 需明确‘仅供参考’。"
         "禁止输出任何绝对日期（如2023-10-15），复评只能使用相对时间（如7-14天内复评）。"
     )
-    text = _ollama_generate(prompt, temperature=0.2, max_tokens=400)
+    text = _business_llm_generate(prompt, image_paths=image_paths, temperature=0.2, max_tokens=400)
     data = _extract_json_block(text) or {}
 
     def _normalize_followup_date_text(value: str) -> str:
@@ -211,7 +246,7 @@ def _generate_llm_diagnosis_and_opinion(context: str) -> Dict[str, str]:
     }
 
 
-def _generate_llm_plan_text(context: str, plan: Dict[str, Any]) -> str:
+def _generate_llm_plan_text(context: str, plan: Dict[str, Any], *, image_paths: Optional[List[str]] = None) -> str:
     plan_summary = {
         "intensity_level": plan.get("intensity_level"),
         "sessions": plan.get("sessions"),
@@ -224,7 +259,7 @@ def _generate_llm_plan_text(context: str, plan: Dict[str, Any]) -> str:
         + "以下为规则引擎生成的治疗方案要点，请生成精简中文说明（3-6句），并标注‘仅供参考’：\n"
         + json.dumps(plan_summary, ensure_ascii=False)
     )
-    return _ollama_generate(prompt, temperature=0.3, max_tokens=300)
+    return _business_llm_generate(prompt, image_paths=image_paths, temperature=0.3, max_tokens=300)
 
 
 def _parse_iso_datetime(value: str) -> datetime:
@@ -1145,7 +1180,9 @@ def analyze_record(
     # Build relative paths (from DATA_DIR) for all found image files so the
     # frontend can construct URLs via /data/<relative_path>.
     image_paths: List[str] = []
+    llm_image_paths: List[str] = []
     for img_abs in _find_image_files(record_dir):
+        llm_image_paths.append(str(img_abs))
         try:
             image_paths.append(str(img_abs.relative_to(DATA_DIR)))
         except ValueError:
@@ -1203,6 +1240,7 @@ def analyze_record(
             )
             if marked_image_path:
                 base_marked_image_path = marked_image_path
+                llm_image_paths.append(str(Path(marked_image_path)))
                 relative_path = Path(marked_image_path).relative_to(DATA_DIR)
                 image_paths.append(str(relative_path))
                 temperature_labels = _extract_temperature_labels(marked_image_path)
@@ -1217,6 +1255,7 @@ def analyze_record(
                 draw_roi_labels=True,
             )
             if roi_labeled_image_path:
+                llm_image_paths.append(str(Path(roi_labeled_image_path)))
                 relative_roi_path = Path(roi_labeled_image_path).relative_to(DATA_DIR)
                 image_paths.append(str(relative_roi_path))
         else:
@@ -1257,7 +1296,7 @@ def analyze_record(
         abnormal_regions=abnormal_regions,
         roi_analysis=roi_analysis,
     )
-    llm_result = _generate_llm_diagnosis_and_opinion(llm_context) if (enable_llm and _shared_is_llm_enabled()) else {}
+    llm_result = _generate_llm_diagnosis_and_opinion(llm_context, image_paths=llm_image_paths) if (enable_llm and _shared_is_llm_enabled()) else {}
     ai_diagnosis = str(llm_result.get("diagnosis") or "").strip()
     ai_doctor_opinion = str(llm_result.get("doctor_opinion") or "").strip()
     ai_report_note = str(llm_result.get("report_note") or "").strip()
@@ -1342,7 +1381,7 @@ def analyze_record(
 
     ai_plan_text = ""
     if enable_llm and _shared_is_llm_enabled():
-        ai_plan_text = _generate_llm_plan_text(llm_context, plan).strip()
+        ai_plan_text = _generate_llm_plan_text(llm_context, plan, image_paths=llm_image_paths).strip()
         if ai_plan_text:
             plan["ai_recommendation"] = ai_plan_text
 

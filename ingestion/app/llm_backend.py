@@ -344,6 +344,10 @@ def llm_provider_name() -> str:
     return _resolve_provider() or "disabled"
 
 
+def llm_multimodal_provider_name() -> str:
+    return _resolve_vl_provider() or "disabled"
+
+
 def llm_model_name() -> str:
     provider = _resolve_provider()
     if provider == "runtime":

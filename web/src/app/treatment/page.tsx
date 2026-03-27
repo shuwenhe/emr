@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Document, HeadingLevel, Packer, Paragraph, TextRun } from "docx";
 import { flashSuccessButton } from "../lib/flash";
+import { resolveApiBase } from "../lib/api-base";
 
 type Patient = {
   patient_id: string;
@@ -50,7 +51,7 @@ type PatientFlowState = {
   };
 };
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = resolveApiBase();
 const TREATMENT_STATE_KEY = "patient_flow_state_treatment";
 
 export default function TreatmentPage() {

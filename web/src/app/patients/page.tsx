@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import mammoth from "mammoth";
 import { flashSuccessButton } from "../lib/flash";
+import { resolveApiBase } from "../lib/api-base";
 
 type Patient = {
   patient_id: string;
@@ -53,19 +54,6 @@ type NewPatient = {
   department: string;
   chief_complaint: string;
 };
-
-function resolveApiBase() {
-  const envBase = process.env.NEXT_PUBLIC_API_URL?.trim();
-  if (envBase) {
-    return envBase.replace(/\/$/, "");
-  }
-  if (typeof window !== "undefined") {
-    const { protocol, hostname } = window.location;
-    const backendHost = hostname === "127.0.0.1" ? "localhost" : hostname;
-    return `${protocol}//${backendHost}:8000`;
-  }
-  return "http://localhost:8000";
-}
 
 function normalizeWebBase(value: string): string {
   const trimmed = String(value || "").trim();

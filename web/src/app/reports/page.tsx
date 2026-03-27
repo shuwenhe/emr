@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import PDFViewer from "../components/PDFViewer";
+import { resolveApiBase } from "../lib/api-base";
 
 type ReportFile = {
   date: string;
@@ -11,7 +12,7 @@ type ReportFile = {
   updated_at: number;
 };
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = resolveApiBase();
 
 export default function ReportsPage() {
   const [reports, setReports] = useState<ReportFile[]>([]);

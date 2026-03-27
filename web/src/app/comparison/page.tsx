@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 import { Suspense, useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
+import { resolveApiBase } from "../lib/api-base";
 
 type Patient = {
   patient_id: string;
@@ -44,7 +45,7 @@ type ComparisonResult = {
   effectiveness: string;
 };
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = resolveApiBase();
 
 function ComparisonPageContent() {
   const searchParams = useSearchParams();

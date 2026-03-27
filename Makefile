@@ -57,7 +57,7 @@ TCM_WORKERS  ?= 4
 TCM_DOCX_DIR  ?= $(CURDIR)/rag/dataset/docx_corpus
 TCM_DOCX_RPF  ?= 500   # records per docx file
 
-.PHONY: help install service-setup service service-fg service-start service-stop service-status service-restart service-precheck runtime-selfcheck web web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-validate kb-export-json kb-export-jsonl kb-json-watch-start kb-json-watch-stop kb-json-watch-status kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-import-case kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build public-domain-up public-domain-down auto-commit-start auto-commit-stop auto-commit-status auto-deploy-install auto-deploy-start auto-deploy-stop auto-deploy-status logs logs-backend logs-frontend logs-auto-git-push logs-auto-deploy logs-all logs-file-backend logs-file-frontend clean
+.PHONY: help install service-setup service service-fg service-start service-stop service-status service-restart service-precheck service-build-watch service-build-watch-start service-build-watch-stop service-build-watch-status runtime-selfcheck web web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-validate kb-export-json kb-export-jsonl kb-json-watch-start kb-json-watch-stop kb-json-watch-status kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-import-case kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build public-domain-up public-domain-down auto-commit-start auto-commit-stop auto-commit-status auto-deploy-install auto-deploy-start auto-deploy-stop auto-deploy-status logs logs-backend logs-frontend logs-auto-git-push logs-auto-deploy logs-all logs-file-backend logs-file-frontend clean
 
 help:
 	@echo "Available targets:"
@@ -69,6 +69,10 @@ help:
 	@echo "  make service-stop     # stop backend service (PID-managed)"
 	@echo "  make service-status   # show backend service status"
 	@echo "  make service-restart  # restart backend service (PID-managed)"
+	@echo "  make service-build-watch # watch backend code and auto run go build ./..."
+	@echo "  make service-build-watch-start # start backend auto-build watcher in background"
+	@echo "  make service-build-watch-stop  # stop backend auto-build watcher"
+	@echo "  make service-build-watch-status # show backend auto-build watcher status"
 	@echo "  make runtime-selfcheck # auto-detect runtime python/model and run minimal inference check"
 	@echo "  make web              # run Next.js web app (dev, slow)"
 	@echo "  make web-build        # compile Next.js for production (run once)"
@@ -139,8 +143,8 @@ service-setup: install
 SERVICE_PORT ?= 8000
 SERVICE_PID_FILE ?= $(CURDIR)/.run/service.pid
 SERVICE_LOG_FILE ?= $(CURDIR)/.run/service.log
-LLM_PROVIDER ?= runtime
-LLM_VL_PROVIDER ?= auto
+LLM_PROVIDER ?= disabled
+LLM_VL_PROVIDER ?= local
 LLM_VL_MODEL_PATH ?= /app/Qwen
 LLM_VL_ENABLED ?= 1
 LLM_RUNTIME_MODEL_PATH ?= $(shell bash -c 'set -e; for p in "$${LLM_RUNTIME_MODEL_PATH}" "$${MODEL_PATH}" /home/test/models/Qwen /data/models/Qwen3-1.7B-Instruct /data/models/Qwen2.5-1.5B-Instruct /data/models/Qwen2.5-7B-Instruct /data/models/Qwen2.5-14B-Instruct; do if [ -n "$$p" ] && [ -f "$$p/config.json" ]; then printf "%s" "$$p"; exit 0; fi; done; for root in /data/models /home/test/models /home/huawei/models; do if [ -d "$$root" ]; then cfg="$$(find "$$root" -maxdepth 3 -type f -name config.json 2>/dev/null | grep -i qwen | head -n 1)"; if [ -n "$$cfg" ]; then printf "%s" "$${cfg%/config.json}"; exit 0; fi; fi; done; printf "%s" ""')
@@ -153,6 +157,22 @@ KB_JSON_WATCH_LOG_FILE ?= $(CURDIR)/.git/kb_json_watch.log
 KB_JSON_WATCH_INTERVAL ?= 2
 KB_JSON_WATCH_REBUILD_COMMAND ?= make kb-build-structured
 KB_JSON_WATCH_SCRIPT ?= $(CURDIR)/scripts/watch_kb_sync.py
+SERVICE_BUILD_WATCH_PID_FILE ?= $(CURDIR)/.run/service_build_watch.pid
+SERVICE_BUILD_WATCH_LOG_FILE ?= $(CURDIR)/.run/service_build_watch.log
+SERVICE_BUILD_WATCH_SCRIPT ?= $(CURDIR)/scripts/watch_backend_build.sh
+
+
+service-build-watch:
+	@bash "$(SERVICE_BUILD_WATCH_SCRIPT)"
+
+service-build-watch-start:
+	@bash -c 'set -e; PID_FILE="$(SERVICE_BUILD_WATCH_PID_FILE)"; LOG_FILE="$(SERVICE_BUILD_WATCH_LOG_FILE)"; mkdir -p "$$(dirname "$$PID_FILE")"; mkdir -p "$$(dirname "$$LOG_FILE")"; if [ -f "$$PID_FILE" ] && kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[service-build-watch] already running pid=$$(cat "$$PID_FILE")"; exit 0; fi; nohup bash "$(SERVICE_BUILD_WATCH_SCRIPT)" > "$$LOG_FILE" 2>&1 & echo $$! > "$$PID_FILE"; sleep 1; if kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[service-build-watch] started pid=$$(cat "$$PID_FILE") log=$$LOG_FILE"; else echo "[service-build-watch] failed to start"; tail -n 40 "$$LOG_FILE" || true; rm -f "$$PID_FILE"; exit 1; fi'
+
+service-build-watch-stop:
+	@bash -c 'set -e; PID_FILE="$(SERVICE_BUILD_WATCH_PID_FILE)"; if [ ! -f "$$PID_FILE" ]; then echo "[service-build-watch] not running"; exit 0; fi; PID="$$(cat "$$PID_FILE")"; if kill -0 "$$PID" 2>/dev/null; then echo "[service-build-watch] stopping pid=$$PID"; kill "$$PID" || true; sleep 1; if kill -0 "$$PID" 2>/dev/null; then kill -9 "$$PID" || true; fi; else echo "[service-build-watch] stale pid file removed"; fi; rm -f "$$PID_FILE"'
+
+service-build-watch-status:
+	@bash -c 'set -e; PID_FILE="$(SERVICE_BUILD_WATCH_PID_FILE)"; if [ -f "$$PID_FILE" ] && kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[service-build-watch] running pid=$$(cat "$$PID_FILE")"; else echo "[service-build-watch] not running"; exit 1; fi'
 
 
 service-fg: service-precheck

@@ -42,7 +42,7 @@ class EMRService:
         metadata: Optional[Dict[str, Any]] = None,
         *,
         enable_roi: bool = True,
-        enable_llm: bool = False,
+        enable_llm: bool = True,
         ensure_report_outputs: bool = True,
     ) -> Dict[str, Any]:
         """

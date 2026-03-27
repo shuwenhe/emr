@@ -40,7 +40,7 @@ class AnalysisService:
         record_id: str,
         *,
         enable_roi: bool = True,
-        enable_llm: bool = False,
+        enable_llm: bool = True,
     ) -> Dict[str, Any]:
         """
         Analyze a thermal imaging record.

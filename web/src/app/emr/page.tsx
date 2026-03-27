@@ -6,6 +6,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { useRouter, useSearchParams } from "next/navigation";
 import mammoth from "mammoth";
 import { flashSuccessButton } from "../lib/flash";
+import { resolveApiBase } from "../lib/api-base";
 
 type EmrResponse = Record<string, unknown> | Array<Record<string, unknown>>;
 type ReportPayload = Record<string, unknown> | null;
@@ -64,7 +65,7 @@ const THERMAL_PLOT_BOUNDS = {
 
 const HEAD_ROI_NAME_REGEX = /(额头|眼|脸颊|鼻子|鼻|下巴)/;
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = resolveApiBase();
 const EMR_STATE_KEY = "patient_flow_state_emr";
 const REPORTS_PAGE_SIZE = 10;
 
@@ -702,15 +703,85 @@ function EmrPageContent() {
     }
   }, [globalQuery]);
 
-  function extractReport(data: EmrResponse): ReportPayload {
-    if (Array.isArray(data)) {
-      return null;
+  function asObject(value: unknown): Record<string, unknown> | null {
+    if (value && typeof value === "object") {
+      return value as Record<string, unknown>;
     }
-    const emr = data as Record<string, unknown>;
-    if (emr.report && typeof emr.report === "object") {
-      return emr.report as Record<string, unknown>;
+    if (typeof value === "string") {
+      try {
+        const parsed = JSON.parse(value) as unknown;
+        return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : null;
+      } catch {
+        return null;
+      }
     }
     return null;
+  }
+
+  function buildReportFromEmr(emr: Record<string, unknown>): ReportPayload {
+    const nested = asObject(emr.report);
+    if (nested) {
+      return nested;
+    }
+
+    const hasReportLikeFields = [
+      "diagnosis",
+      "doctor_opinion",
+      "analysis",
+      "patient",
+      "thermal_images",
+      "thermal_marked_image",
+      "thermal_roi_labeled_image",
+      "record_id",
+    ].some((key) => emr[key] !== undefined && emr[key] !== null);
+
+    if (!hasReportLikeFields) {
+      return null;
+    }
+
+    const derived: Record<string, unknown> = {};
+    if (emr.record_id !== undefined) derived.record_id = emr.record_id;
+    if (emr.patient !== undefined) derived.patient = emr.patient;
+    if (emr.diagnosis !== undefined) derived.diagnosis = emr.diagnosis;
+    if (emr.doctor_opinion !== undefined) derived.doctor_opinion = emr.doctor_opinion;
+    if (emr.analysis !== undefined) derived.analysis = emr.analysis;
+    if (emr.thermal_images !== undefined) derived.thermal_images = emr.thermal_images;
+    if (emr.thermal_marked_image !== undefined) derived.thermal_marked_image = emr.thermal_marked_image;
+    if (emr.thermal_roi_labeled_image !== undefined) {
+      derived.thermal_roi_labeled_image = emr.thermal_roi_labeled_image;
+    }
+    if (emr.pdf_report_path !== undefined) derived.pdf_report_path = emr.pdf_report_path;
+    if (emr.docx_report_path !== undefined) derived.docx_report_path = emr.docx_report_path;
+
+    return Object.keys(derived).length > 0 ? derived : null;
+  }
+
+  function extractReport(data: EmrResponse): ReportPayload {
+    if (Array.isArray(data)) {
+      if (data.length === 0) {
+        return null;
+      }
+      const sorted = [...data].sort((a, b) => {
+        const aTime = Date.parse(String(a.created_at || ""));
+        const bTime = Date.parse(String(b.created_at || ""));
+        if (!Number.isNaN(aTime) && !Number.isNaN(bTime)) {
+          return bTime - aTime;
+        }
+        if (!Number.isNaN(aTime)) return -1;
+        if (!Number.isNaN(bTime)) return 1;
+        return 0;
+      });
+
+      for (const item of sorted) {
+        const built = buildReportFromEmr(item as Record<string, unknown>);
+        if (built) {
+          return built;
+        }
+      }
+      return null;
+    }
+
+    return buildReportFromEmr(data as Record<string, unknown>);
   }
 
   function persistContextFromEmr(data: EmrResponse): boolean {
@@ -2009,14 +2080,14 @@ function EmrPageContent() {
             <p className="mt-4 text-sm text-slate-500">暂无报告文件</p>
           ) : (
             <>
-              {!currentPatientName && (
+              {!showAllReports && !currentPatientName && !currentPatientIdForFilter && (
                 <p className="mt-3 text-sm text-amber-600">
-                  未识别患者姓名，已显示全部历史报告。
+                  未识别患者信息，已显示全部历史报告。
                 </p>
               )}
-              {currentPatientName && visibleReportFiles.length === 0 && (
+              {!showAllReports && (currentPatientName || currentPatientIdForFilter) && visibleReportFiles.length === 0 && (
                 <p className="mt-3 text-sm text-amber-600">
-                  未匹配到患者“{currentPatientName}”的报告文件，已显示全部历史报告。
+                  未匹配到当前患者的报告文件，已显示全部历史报告。
                 </p>
               )}
               <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
