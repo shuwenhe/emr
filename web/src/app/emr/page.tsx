@@ -789,11 +789,14 @@ function EmrPageContent() {
       return false;
     }
     const emr = data as Record<string, unknown>;
-    const report = emr.report as Record<string, unknown> | undefined;
-    const patient = report?.patient as Record<string, unknown> | undefined;
+    const report = asObject(emr.report);
+    const patient = asObject(report?.patient) ?? asObject(emr.patient);
     const resolvedEmrId = String(emr.emr_id ?? emrId ?? "");
     const resolvedPatientId = String(
-      patient?.patient_id ?? emr.patient_id ?? (emr as Record<string, unknown>).patientId ?? ""
+      patient?.patient_id
+        ?? emr.patient_id
+        ?? (emr as Record<string, unknown>).patientId
+        ?? ""
     );
     if (!resolvedEmrId) {
       return false;
