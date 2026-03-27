@@ -57,7 +57,7 @@ TCM_WORKERS  ?= 4
 TCM_DOCX_DIR  ?= $(CURDIR)/rag/dataset/docx_corpus
 TCM_DOCX_RPF  ?= 500   # records per docx file
 
-.PHONY: help install service-setup service service-fg service-start service-stop service-status service-restart service-precheck web web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-validate kb-export-json kb-export-jsonl kb-json-watch-start kb-json-watch-stop kb-json-watch-status kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-import-case kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build public-domain-up public-domain-down auto-commit-start auto-commit-stop auto-commit-status auto-deploy-install auto-deploy-start auto-deploy-stop auto-deploy-status logs logs-backend logs-frontend logs-auto-git-push logs-auto-deploy logs-all logs-file-backend logs-file-frontend clean
+.PHONY: help install service-setup service service-fg service-start service-stop service-status service-restart service-precheck runtime-selfcheck web web-build web-prod db-check report kb-build kb-build-markdown kb-build-structured kb-validate kb-export-json kb-export-jsonl kb-json-watch-start kb-json-watch-stop kb-json-watch-status kb-import-docs kb-import-docs-build kb-import-md kb-import-md-build kb-import-case kb-rebuild kb-clean kb-build-tcm tcm-stage1 tcm-pipeline tcm-docx roi-build roi-benchmark go-embedder-build simhash-build text-ops-build public-domain-up public-domain-down auto-commit-start auto-commit-stop auto-commit-status auto-deploy-install auto-deploy-start auto-deploy-stop auto-deploy-status logs logs-backend logs-frontend logs-auto-git-push logs-auto-deploy logs-all logs-file-backend logs-file-frontend clean
 
 help:
 	@echo "Available targets:"
@@ -69,6 +69,7 @@ help:
 	@echo "  make service-stop     # stop backend service (PID-managed)"
 	@echo "  make service-status   # show backend service status"
 	@echo "  make service-restart  # restart backend service (PID-managed)"
+	@echo "  make runtime-selfcheck # auto-detect runtime python/model and run minimal inference check"
 	@echo "  make web              # run Next.js web app (dev, slow)"
 	@echo "  make web-build        # compile Next.js for production (run once)"
 	@echo "  make web-prod         # start production Next.js server (fast, use after web-build)"
@@ -138,6 +139,15 @@ service-setup: install
 SERVICE_PORT ?= 8000
 SERVICE_PID_FILE ?= $(CURDIR)/.run/service.pid
 SERVICE_LOG_FILE ?= $(CURDIR)/.run/service.log
+LLM_PROVIDER ?= runtime
+LLM_VL_PROVIDER ?= auto
+LLM_VL_MODEL_PATH ?= /app/Qwen
+LLM_VL_ENABLED ?= 1
+LLM_RUNTIME_MODEL_PATH ?= $(shell bash -c 'set -e; for p in "$${LLM_RUNTIME_MODEL_PATH}" "$${MODEL_PATH}" /home/test/models/Qwen /data/models/Qwen3-1.7B-Instruct /data/models/Qwen2.5-1.5B-Instruct /data/models/Qwen2.5-7B-Instruct /data/models/Qwen2.5-14B-Instruct; do if [ -n "$$p" ] && [ -f "$$p/config.json" ]; then printf "%s" "$$p"; exit 0; fi; done; for root in /data/models /home/test/models /home/huawei/models; do if [ -d "$$root" ]; then cfg="$$(find "$$root" -maxdepth 3 -type f -name config.json 2>/dev/null | grep -i qwen | head -n 1)"; if [ -n "$$cfg" ]; then printf "%s" "$${cfg%/config.json}"; exit 0; fi; fi; done; printf "%s" ""')
+LLM_RUNTIME_BACKEND ?= auto
+LLM_RUNTIME_PYTHON ?= $(shell bash -c 'set -e; for py in "$${LLM_RUNTIME_PYTHON}" "$(VENV_PY)" /home/test/conda/envs/Qwen/bin/python "$${HOME}/venv/bin/python" "$${HOME}/.venv/bin/python" /home/huawei/venv/bin/python /home/huawei/.venv/bin/python python3; do if [ -n "$$py" ] && ( [ -x "$$py" ] || command -v "$$py" >/dev/null 2>&1 ); then if "$$py" -c "import importlib.util,sys; sys.exit(0 if (importlib.util.find_spec(\"torch\") and importlib.util.find_spec(\"torch_npu\")) else 1)" >/dev/null 2>&1; then if [ -x "$$py" ]; then printf "%s" "$$py"; else command -v "$$py"; fi; exit 0; fi; fi; done; printf "%s" "$(VENV_PY)"')
+RUNTIME_SELFCHECK_BACKEND ?= cann
+UVICORN_RELOAD_DIR_FLAGS ?= --reload-dir "$(CURDIR)/route" --reload-dir "$(CURDIR)/service" --reload-dir "$(CURDIR)/repository" --reload-dir "$(CURDIR)/core"
 KB_JSON_WATCH_PID_FILE ?= $(CURDIR)/.git/.kb_json_watch.pid
 KB_JSON_WATCH_LOG_FILE ?= $(CURDIR)/.git/kb_json_watch.log
 KB_JSON_WATCH_INTERVAL ?= 2
@@ -146,15 +156,15 @@ KB_JSON_WATCH_SCRIPT ?= $(CURDIR)/scripts/watch_kb_sync.py
 
 
 service-fg: service-precheck
-	@bash -c 'set -e; PORT="$(SERVICE_PORT)"; if command -v ss >/dev/null 2>&1 && ss -ltn "sport = :$$PORT" | grep -q LISTEN; then echo "[error] Port $$PORT is already in use."; echo "        Run: make service-stop   (or use: make SERVICE_PORT=8001 service)"; exit 1; fi; exec "$(VENV_PY)" -m uvicorn route.main:app --host 0.0.0.0 --port "$$PORT" --reload'
+	@bash -c 'set -e; PORT="$(SERVICE_PORT)"; if command -v ss >/dev/null 2>&1 && ss -ltn "sport = :$$PORT" | grep -q LISTEN; then echo "[error] Port $$PORT is already in use."; echo "        Run: make service-stop   (or use: make SERVICE_PORT=8001 service)"; exit 1; fi; LLM_PROVIDER="$(LLM_PROVIDER)" LLM_VL_PROVIDER="$(LLM_VL_PROVIDER)" LLM_VL_MODEL_PATH="$(LLM_VL_MODEL_PATH)" LLM_VL_ENABLED="$(LLM_VL_ENABLED)" LLM_RUNTIME_MODEL_PATH="$(LLM_RUNTIME_MODEL_PATH)" LLM_RUNTIME_PYTHON="$(LLM_RUNTIME_PYTHON)" LLM_RUNTIME_BACKEND="$(LLM_RUNTIME_BACKEND)" exec "$(VENV_PY)" -m uvicorn route.main:app --host 0.0.0.0 --port "$$PORT" --reload $(UVICORN_RELOAD_DIR_FLAGS)'
 
 service: service-fg
 
 service-start: service-precheck
-	@bash -c 'set -e; PORT="$(SERVICE_PORT)"; PID_FILE="$(SERVICE_PID_FILE)"; LOG_FILE="$(SERVICE_LOG_FILE)"; mkdir -p "$$(dirname "$$PID_FILE")"; mkdir -p "$$(dirname "$$LOG_FILE")"; if [ -f "$$PID_FILE" ] && kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[service] already running pid=$$(cat "$$PID_FILE")"; exit 0; fi; if command -v ss >/dev/null 2>&1 && ss -ltn "sport = :$$PORT" | grep -q LISTEN; then echo "[error] Port $$PORT is already in use."; echo "        Run: make service-stop   (or use: make SERVICE_PORT=8001 service-start)"; exit 1; fi; nohup "$(VENV_PY)" -m uvicorn route.main:app --host 0.0.0.0 --port "$$PORT" --reload > "$$LOG_FILE" 2>&1 & echo $$! > "$$PID_FILE"; sleep 1; if kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[service] started pid=$$(cat "$$PID_FILE") port=$$PORT log=$$LOG_FILE"; else echo "[service] failed to start; last log:"; tail -n 40 "$$LOG_FILE" || true; rm -f "$$PID_FILE"; exit 1; fi'
+	@bash -c 'set -e; PORT="$(SERVICE_PORT)"; PID_FILE="$(SERVICE_PID_FILE)"; LOG_FILE="$(SERVICE_LOG_FILE)"; mkdir -p "$$(dirname "$$PID_FILE")"; mkdir -p "$$(dirname "$$LOG_FILE")"; if [ -f "$$PID_FILE" ] && kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[service] already running pid=$$(cat "$$PID_FILE")"; exit 0; fi; if command -v ss >/dev/null 2>&1 && ss -ltn "sport = :$$PORT" | grep -q LISTEN; then echo "[error] Port $$PORT is already in use."; echo "        Run: make service-stop   (or use: make SERVICE_PORT=8001 service-start)"; exit 1; fi; nohup env LLM_PROVIDER="$(LLM_PROVIDER)" LLM_VL_PROVIDER="$(LLM_VL_PROVIDER)" LLM_VL_MODEL_PATH="$(LLM_VL_MODEL_PATH)" LLM_VL_ENABLED="$(LLM_VL_ENABLED)" LLM_RUNTIME_MODEL_PATH="$(LLM_RUNTIME_MODEL_PATH)" LLM_RUNTIME_PYTHON="$(LLM_RUNTIME_PYTHON)" LLM_RUNTIME_BACKEND="$(LLM_RUNTIME_BACKEND)" "$(VENV_PY)" -m uvicorn route.main:app --host 0.0.0.0 --port "$$PORT" > "$$LOG_FILE" 2>&1 & echo $$! > "$$PID_FILE"; sleep 1; if kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[service] started pid=$$(cat "$$PID_FILE") port=$$PORT log=$$LOG_FILE"; else echo "[service] failed to start; last log:"; tail -n 40 "$$LOG_FILE" || true; rm -f "$$PID_FILE"; exit 1; fi'
 
 service-dev: service-precheck
-	@bash -c 'set -e; PORT="$(SERVICE_PORT)"; if command -v ss >/dev/null 2>&1 && ss -ltn "sport = :$$PORT" | grep -q LISTEN; then echo "[error] Port $$PORT is already in use."; echo "        Run: make service-stop   (or use: make SERVICE_PORT=8001 service-dev)"; exit 1; fi; exec "$(VENV_PY)" -m uvicorn route.main:app --host 0.0.0.0 --port "$$PORT" --reload'
+	@bash -c 'set -e; PORT="$(SERVICE_PORT)"; if command -v ss >/dev/null 2>&1 && ss -ltn "sport = :$$PORT" | grep -q LISTEN; then echo "[error] Port $$PORT is already in use."; echo "        Run: make service-stop   (or use: make SERVICE_PORT=8001 service-dev)"; exit 1; fi; LLM_PROVIDER="$(LLM_PROVIDER)" LLM_VL_PROVIDER="$(LLM_VL_PROVIDER)" LLM_VL_MODEL_PATH="$(LLM_VL_MODEL_PATH)" LLM_VL_ENABLED="$(LLM_VL_ENABLED)" LLM_RUNTIME_MODEL_PATH="$(LLM_RUNTIME_MODEL_PATH)" LLM_RUNTIME_PYTHON="$(LLM_RUNTIME_PYTHON)" LLM_RUNTIME_BACKEND="$(LLM_RUNTIME_BACKEND)" exec "$(VENV_PY)" -m uvicorn route.main:app --host 0.0.0.0 --port "$$PORT" --reload $(UVICORN_RELOAD_DIR_FLAGS)'
 
 service-stop:
 	@bash -c 'set -e; PORT="$(SERVICE_PORT)"; PID_FILE="$(SERVICE_PID_FILE)"; if [ -f "$$PID_FILE" ]; then PID="$$(cat "$$PID_FILE")"; if kill -0 "$$PID" 2>/dev/null; then echo "[service] stopping pid=$$PID"; kill "$$PID" || true; sleep 1; if kill -0 "$$PID" 2>/dev/null; then echo "[service] force stopping pid=$$PID"; kill -9 "$$PID" || true; fi; else echo "[service] stale pid file removed"; fi; rm -f "$$PID_FILE"; fi; PIDS="$$(fuser -n tcp $$PORT 2>/dev/null || true)"; if [ -n "$$PIDS" ]; then echo "[service] cleanup by port $$PORT pids: $$PIDS"; echo "$$PIDS" | xargs -r kill || true; sleep 1; REMAIN="$$(fuser -n tcp $$PORT 2>/dev/null || true)"; if [ -n "$$REMAIN" ]; then echo "[service] force cleanup by port $$PORT pids: $$REMAIN"; echo "$$REMAIN" | xargs -r kill -9 || true; fi; fi; if command -v ss >/dev/null 2>&1; then ss -ltnp | grep ":$$PORT" || true; fi'
@@ -165,7 +175,38 @@ service-status:
 service-restart: service-stop service-start
 
 service-prod: service-precheck
-	@bash -c 'set -e; PORT="$(SERVICE_PORT)"; if command -v ss >/dev/null 2>&1 && ss -ltn "sport = :$$PORT" | grep -q LISTEN; then echo "[error] Port $$PORT is already in use."; echo "        Run: make service-stop   (or use: make SERVICE_PORT=8001 service-prod)"; exit 1; fi; exec "$(VENV_PY)" -m uvicorn route.main:app --host 0.0.0.0 --port "$$PORT"'
+	@bash -c 'set -e; PORT="$(SERVICE_PORT)"; if command -v ss >/dev/null 2>&1 && ss -ltn "sport = :$$PORT" | grep -q LISTEN; then echo "[error] Port $$PORT is already in use."; echo "        Run: make service-stop   (or use: make SERVICE_PORT=8001 service-prod)"; exit 1; fi; LLM_PROVIDER="$(LLM_PROVIDER)" LLM_VL_PROVIDER="$(LLM_VL_PROVIDER)" LLM_VL_MODEL_PATH="$(LLM_VL_MODEL_PATH)" LLM_VL_ENABLED="$(LLM_VL_ENABLED)" LLM_RUNTIME_MODEL_PATH="$(LLM_RUNTIME_MODEL_PATH)" LLM_RUNTIME_PYTHON="$(LLM_RUNTIME_PYTHON)" LLM_RUNTIME_BACKEND="$(LLM_RUNTIME_BACKEND)" exec "$(VENV_PY)" -m uvicorn route.main:app --host 0.0.0.0 --port "$$PORT"'
+
+runtime-selfcheck:
+	@set -e; \
+	mkdir -p "$(CURDIR)/.run"; \
+	IN_FILE="$(CURDIR)/.run/runtime_selfcheck_input.jsonl"; \
+	OUT_FILE="$(CURDIR)/.run/runtime_selfcheck_output.jsonl"; \
+	echo '{"id":"selfcheck-1","prompt":"Reply exactly: runtime-selfcheck-ok"}' > "$$IN_FILE"; \
+	echo "[runtime-selfcheck] model_path=$(LLM_RUNTIME_MODEL_PATH)"; \
+	echo "[runtime-selfcheck] runtime_python=$(LLM_RUNTIME_PYTHON)"; \
+	echo "[runtime-selfcheck] backend=$(RUNTIME_SELFCHECK_BACKEND)"; \
+	if [ -z "$(LLM_RUNTIME_MODEL_PATH)" ] || [ ! -f "$(LLM_RUNTIME_MODEL_PATH)/config.json" ]; then \
+		echo "[runtime-selfcheck][error] invalid model path: $(LLM_RUNTIME_MODEL_PATH)"; \
+		exit 1; \
+	fi; \
+	if ! ( [ -x "$(LLM_RUNTIME_PYTHON)" ] || command -v "$(LLM_RUNTIME_PYTHON)" >/dev/null 2>&1 ); then \
+		echo "[runtime-selfcheck][error] runtime python not found: $(LLM_RUNTIME_PYTHON)"; \
+		exit 1; \
+	fi; \
+	"$(LLM_RUNTIME_PYTHON)" "$(CURDIR)/runtime/infer_qwen_8card.py" \
+		--model-path "$(LLM_RUNTIME_MODEL_PATH)" \
+		--input-file "$$IN_FILE" \
+		--output-file "$$OUT_FILE" \
+		--runtime-backend "$(RUNTIME_SELFCHECK_BACKEND)" \
+		--batch-size 1 \
+		--max-new-tokens 8 \
+		--temperature 0 \
+		--top-p 0.9 \
+		--dtype float16 \
+		--trust-remote-code true; \
+	echo "[runtime-selfcheck] output:"; \
+	cat "$$OUT_FILE"
 
 web:
 	@bash -c 'set -e; WEB_DIR="$(CURDIR)/web"; LOCK_FILE="$$WEB_DIR/.next/dev/lock"; if [ -f "$$LOCK_FILE" ]; then echo "Removing stale lock: $$LOCK_FILE"; rm -f "$$LOCK_FILE"; fi; cd "$$WEB_DIR"; if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" && nvm use 20; fi; npm run dev'

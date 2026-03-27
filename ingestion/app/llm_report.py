@@ -18,6 +18,8 @@ from .llm_backend import (
     is_llm_enabled as _shared_is_llm_enabled,
     llm_available as _shared_llm_available,
     llm_generate as _shared_llm_generate,
+    llm_multimodal_available as _shared_llm_multimodal_available,
+    llm_multimodal_generate as _shared_llm_multimodal_generate,
     llm_model_name as _shared_llm_model_name,
     llm_provider_name as _shared_llm_provider_name,
 )
@@ -262,6 +264,25 @@ def _ollama_available() -> bool:
 
 def _ollama_generate(prompt: str, *, temperature: float = 0.2, max_tokens: int = 512) -> str:
     return _shared_llm_generate(prompt, temperature=temperature, max_tokens=max_tokens)
+
+
+def _ollama_multimodal_available() -> bool:
+    return _shared_llm_multimodal_available()
+
+
+def _ollama_multimodal_generate(
+    prompt: str,
+    *,
+    image_paths: Optional[List[str]] = None,
+    temperature: float = 0.2,
+    max_tokens: int = 512,
+) -> str:
+    return _shared_llm_multimodal_generate(
+        prompt,
+        image_paths=image_paths,
+        temperature=temperature,
+        max_tokens=max_tokens,
+    )
 
 
 def _to_list_of_str(value: Any) -> List[str]:
