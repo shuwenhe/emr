@@ -20,6 +20,7 @@ from .events import publish_ingest_progress
 
 router = APIRouter(tags=["ingest"])
 logger = logging.getLogger(__name__)
+backend_display_logger = logging.getLogger("uvicorn.error")
 
 _DETACHED_INGEST_TASKS: set[asyncio.Task[None]] = set()
 
@@ -37,6 +38,13 @@ def _strip_numeric_citations(text: str) -> str:
     # Remove inline numeric references like [2], [5] from display text.
     cleaned = re.sub(r"\[\d+\]", "", text)
     return re.sub(r"\s{2,}", " ", cleaned).strip()
+
+
+def _log_pipeline_step(level: int, message: str, *args, exc_info: bool = False) -> None:
+    """Write pipeline logs to both app logger and backend console logger."""
+    logger.log(level, message, *args, exc_info=exc_info)
+    if backend_display_logger is not logger:
+        backend_display_logger.log(level, message, *args, exc_info=exc_info)
 
 
 def _has_report_output(emr_result: dict) -> bool:
@@ -148,21 +156,21 @@ async def _generate_report_after_ingest(record_id: str, metadata: dict | None = 
     # ---- 步骤2：热成像分析 ----
     await publish_ingest_progress(record_id, 2, "正在分析热成像数据...", 15)
     try:
-        logger.info("[步骤2] 热成像分析 开始 record_id=%s", record_id)
+        _log_pipeline_step(logging.INFO, "[步骤2] 热成像分析 开始 record_id=%s", record_id)
         t0 = time.time()
         analysis_result = await asyncio.to_thread(analysis_service.analyze_record, record_id) or {}
         elapsed = time.time() - t0
         risk = (analysis_result.get("report") or {}).get("analysis", {}).get("risk_level", "unknown")
-        logger.info("[步骤2] 热成像分析 完成 record_id=%s risk_level=%s 耗时=%.2fs", record_id, risk, elapsed)
+        _log_pipeline_step(logging.INFO, "[步骤2] 热成像分析 完成 record_id=%s risk_level=%s 耗时=%.2fs", record_id, risk, elapsed)
         await publish_ingest_progress(record_id, 2, f"热成像分析完成（风险：{risk}）", 35, "done")
     except Exception as exc:
-        logger.exception("[步骤2] 热成像分析 失败 record_id=%s error=%s", record_id, exc)
+        _log_pipeline_step(logging.ERROR, "[步骤2] 热成像分析 失败 record_id=%s error=%s", record_id, exc, exc_info=True)
         await publish_ingest_progress(record_id, 2, "热成像分析失败", 35, "error")
 
     # ---- 步骤3：电子病历生成 ----
     await publish_ingest_progress(record_id, 3, "正在生成电子病历...", 40)
     try:
-        logger.info("[步骤3] 电子病历生成 开始 record_id=%s", record_id)
+        _log_pipeline_step(logging.INFO, "[步骤3] 电子病历生成 开始 record_id=%s", record_id)
         t0 = time.time()
         emr_result = await asyncio.to_thread(
             emr_service.create_emr,
@@ -171,21 +179,22 @@ async def _generate_report_after_ingest(record_id: str, metadata: dict | None = 
         ) or {}
         elapsed = time.time() - t0
         if emr_result:
-            logger.info(
+            _log_pipeline_step(
+                logging.INFO,
                 "[步骤3] 电子病历生成 完成 record_id=%s emr_id=%s 耗时=%.2fs",
                 record_id, emr_result.get("emr_id"), elapsed,
             )
         else:
-            logger.warning("[步骤3] 电子病历生成 返回空结果 record_id=%s", record_id)
+            _log_pipeline_step(logging.WARNING, "[步骤3] 电子病历生成 返回空结果 record_id=%s", record_id)
         await publish_ingest_progress(record_id, 3, "电子病历生成完成", 55, "done")
     except Exception as exc:
-        logger.exception("[步骤3] 电子病历生成 失败 record_id=%s error=%s", record_id, exc)
+        _log_pipeline_step(logging.ERROR, "[步骤3] 电子病历生成 失败 record_id=%s error=%s", record_id, exc, exc_info=True)
         await publish_ingest_progress(record_id, 3, "电子病历生成失败", 55, "error")
 
     # ---- 步骤4：AI报告生成 ----
     await publish_ingest_progress(record_id, 4, "正在生成AI诊断报告...", 60)
     try:
-        logger.info("[步骤4] AI报告生成 开始 record_id=%s", record_id)
+        _log_pipeline_step(logging.INFO, "[步骤4] AI报告生成 开始 record_id=%s", record_id)
         t0 = time.time()
         ai_result = await asyncio.to_thread(ai_service.generate_report_summary, analysis_result, emr_result) or {}
         if ai_result and emr_result:
@@ -200,15 +209,15 @@ async def _generate_report_after_ingest(record_id: str, metadata: dict | None = 
                     record_id,
                     ensure_report_outputs=True,
                 ) or emr_result
-                logger.info("[步骤4] AI后报告文件补齐 完成 record_id=%s", record_id)
+                _log_pipeline_step(logging.INFO, "[步骤4] AI后报告文件补齐 完成 record_id=%s", record_id)
             except Exception as backfill_exc:
-                logger.warning("[步骤4] AI后报告文件补齐失败 record_id=%s error=%s", record_id, backfill_exc)
+                _log_pipeline_step(logging.WARNING, "[步骤4] AI后报告文件补齐失败 record_id=%s error=%s", record_id, backfill_exc)
 
         elapsed = time.time() - t0
-        logger.info("[步骤4] AI报告生成 完成 record_id=%s keys=%s 耗时=%.2fs", record_id, list(ai_result.keys()), elapsed)
+        _log_pipeline_step(logging.INFO, "[步骤4] AI报告生成 完成 record_id=%s keys=%s 耗时=%.2fs", record_id, list(ai_result.keys()), elapsed)
         await publish_ingest_progress(record_id, 4, "AI诊断报告生成完成", 80, "done")
     except Exception as exc:
-        logger.exception("[步骤4] AI报告生成 失败 record_id=%s error=%s", record_id, exc)
+        _log_pipeline_step(logging.ERROR, "[步骤4] AI报告生成 失败 record_id=%s error=%s", record_id, exc, exc_info=True)
         try:
             emr_result = await asyncio.to_thread(
                 emr_service.create_emr,
@@ -216,21 +225,21 @@ async def _generate_report_after_ingest(record_id: str, metadata: dict | None = 
                 ensure_report_outputs=True,
             ) or emr_result
         except Exception as fallback_exc:
-            logger.warning("[步骤4] AI失败后补生成基础报告失败 record_id=%s error=%s", record_id, fallback_exc)
+            _log_pipeline_step(logging.WARNING, "[步骤4] AI失败后补生成基础报告失败 record_id=%s error=%s", record_id, fallback_exc)
         await publish_ingest_progress(record_id, 4, "AI报告生成失败", 80, "error")
 
     # ---- 步骤5：治疗方案 ----
     await publish_ingest_progress(record_id, 5, "正在制定治疗方案...", 85)
     try:
-        logger.info("[步骤5] 治疗方案生成 开始 record_id=%s", record_id)
+        _log_pipeline_step(logging.INFO, "[步骤5] 治疗方案生成 开始 record_id=%s", record_id)
         t0 = time.time()
         plan = await asyncio.to_thread(treatment_service.generate_treatment_plan, analysis_result, patient) or {}
         elapsed = time.time() - t0
         risk_out = plan.get("risk_level", "unknown")
-        logger.info("[步骤5] 治疗方案生成 完成 record_id=%s risk_level=%s 耗时=%.2fs", record_id, risk_out, elapsed)
+        _log_pipeline_step(logging.INFO, "[步骤5] 治疗方案生成 完成 record_id=%s risk_level=%s 耗时=%.2fs", record_id, risk_out, elapsed)
         await publish_ingest_progress(record_id, 5, "治疗方案生成完成", 95, "done")
     except Exception as exc:
-        logger.exception("[步骤5] 治疗方案生成 失败 record_id=%s error=%s", record_id, exc)
+        _log_pipeline_step(logging.ERROR, "[步骤5] 治疗方案生成 失败 record_id=%s error=%s", record_id, exc, exc_info=True)
         await publish_ingest_progress(record_id, 5, "治疗方案生成失败", 95, "error")
 
     # ---- 全部完成 ----
