@@ -93,6 +93,10 @@ def _guess_runtime_model_path() -> str:
     if env_model_path and Path(env_model_path).exists():
         return env_model_path
 
+    app_qwen = Path("/app/Qwen")
+    if app_qwen.exists() and _is_runtime_model_compatible(app_qwen):
+        return str(app_qwen)
+
     explicit_candidates = [
         "/data/models/Qwen3-1.7B-Instruct",
         "/data/models/Qwen2.5-1.5B-Instruct",

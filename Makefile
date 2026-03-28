@@ -154,7 +154,7 @@ LLM_PROVIDER ?= auto
 LLM_VL_PROVIDER ?= local
 LLM_VL_MODEL_PATH ?= /app/Qwen
 LLM_VL_ENABLED ?= 1
-LLM_RUNTIME_MODEL_PATH ?= $(shell bash -c 'set -e; for p in "$${LLM_RUNTIME_MODEL_PATH}" "$${MODEL_PATH}" /home/test/models/Qwen /data/models/Qwen3-1.7B-Instruct /data/models/Qwen2.5-1.5B-Instruct /data/models/Qwen2.5-7B-Instruct /data/models/Qwen2.5-14B-Instruct; do if [ -n "$$p" ] && [ -f "$$p/config.json" ]; then printf "%s" "$$p"; exit 0; fi; done; for root in /data/models /home/test/models /home/huawei/models; do if [ -d "$$root" ]; then cfg="$$(find "$$root" -maxdepth 3 -type f -name config.json 2>/dev/null | grep -i qwen | head -n 1)"; if [ -n "$$cfg" ]; then printf "%s" "$${cfg%/config.json}"; exit 0; fi; fi; done; printf "%s" ""')
+LLM_RUNTIME_MODEL_PATH ?= $(shell bash -c 'set -e; for p in "$${LLM_RUNTIME_MODEL_PATH}" "$${MODEL_PATH}" /app/Qwen /home/test/models/Qwen /data/models/Qwen3-1.7B-Instruct /data/models/Qwen2.5-1.5B-Instruct /data/models/Qwen2.5-7B-Instruct /data/models/Qwen2.5-14B-Instruct; do if [ -n "$$p" ] && [ -f "$$p/config.json" ]; then printf "%s" "$$p"; exit 0; fi; done; for root in /app /data/models /home/test/models /home/huawei/models; do if [ -d "$$root" ]; then cfg="$$(find "$$root" -maxdepth 3 -type f -name config.json 2>/dev/null | grep -i qwen | head -n 1)"; if [ -n "$$cfg" ]; then printf "%s" "$${cfg%/config.json}"; exit 0; fi; fi; done; printf "%s" ""')
 LLM_RUNTIME_BACKEND ?= auto
 LLM_RUNTIME_PYTHON ?= $(shell bash -c 'set -e; for py in "$${LLM_RUNTIME_PYTHON}" "$(VENV_PY)" /home/test/conda/envs/Qwen/bin/python "$${HOME}/venv/bin/python" "$${HOME}/.venv/bin/python" /home/huawei/venv/bin/python /home/huawei/.venv/bin/python python3; do if [ -n "$$py" ] && ( [ -x "$$py" ] || command -v "$$py" >/dev/null 2>&1 ); then if "$$py" -c "import importlib.util,sys; sys.exit(0 if (importlib.util.find_spec(\"torch\") and importlib.util.find_spec(\"torch_npu\")) else 1)" >/dev/null 2>&1; then if [ -x "$$py" ]; then printf "%s" "$$py"; else command -v "$$py"; fi; exit 0; fi; fi; done; printf "%s" "$(VENV_PY)"')
 RUNTIME_SELFCHECK_BACKEND ?= cann
@@ -209,6 +209,7 @@ runtime-selfcheck:
 	mkdir -p "$(CURDIR)/.run"; \
 	IN_FILE="$(CURDIR)/.run/runtime_selfcheck_input.jsonl"; \
 	OUT_FILE="$(CURDIR)/.run/runtime_selfcheck_output.jsonl"; \
+	SCRIPT_FILE="$(CURDIR)/runtime/infer_qwen_8card.py"; \
 	echo '{"id":"selfcheck-1","prompt":"Reply exactly: runtime-selfcheck-ok"}' > "$$IN_FILE"; \
 	echo "[runtime-selfcheck] model_path=$(LLM_RUNTIME_MODEL_PATH)"; \
 	echo "[runtime-selfcheck] runtime_python=$(LLM_RUNTIME_PYTHON)"; \
@@ -221,7 +222,11 @@ runtime-selfcheck:
 		echo "[runtime-selfcheck][error] runtime python not found: $(LLM_RUNTIME_PYTHON)"; \
 		exit 1; \
 	fi; \
-	"$(LLM_RUNTIME_PYTHON)" "$(CURDIR)/runtime/infer_qwen_8card.py" \
+	if grep -qi 'qwen2_5_vl\|"model_type"[[:space:]]*:[[:space:]]*".*vl' "$(LLM_RUNTIME_MODEL_PATH)/config.json"; then \
+		SCRIPT_FILE="$(CURDIR)/runtime/infer_qwen_vl_8card.py"; \
+	fi; \
+	echo "[runtime-selfcheck] script=$$SCRIPT_FILE"; \
+	"$(LLM_RUNTIME_PYTHON)" "$$SCRIPT_FILE" \
 		--model-path "$(LLM_RUNTIME_MODEL_PATH)" \
 		--input-file "$$IN_FILE" \
 		--output-file "$$OUT_FILE" \
