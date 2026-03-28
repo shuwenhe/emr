@@ -210,15 +210,25 @@ def _load_local_vl_model() -> bool:
     model_path = Path(LLM_VL_MODEL_PATH)
     try:
         import torch
-        from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
+        import transformers
+        from transformers import AutoProcessor
     except Exception as exc:
         logging.error("Local multimodal dependencies unavailable (torch/transformers): %s", exc)
+        return False
+
+    model_cls = getattr(transformers, "Qwen2_5_VLForConditionalGeneration", None)
+    if model_cls is None:
+        model_cls = getattr(transformers, "Qwen2VLForConditionalGeneration", None)
+    if model_cls is None:
+        model_cls = getattr(transformers, "AutoModelForVision2Seq", None)
+    if model_cls is None:
+        logging.error("No compatible multimodal model loader found in transformers for %s", model_path)
         return False
 
     try:
         device = "cuda" if torch.cuda.is_available() else "cpu"
         dtype = torch.float16 if device == "cuda" else torch.float32
-        model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+        model = model_cls.from_pretrained(
             str(model_path),
             torch_dtype=dtype,
             trust_remote_code=True,

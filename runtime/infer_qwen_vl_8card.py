@@ -16,7 +16,18 @@ from typing import Any, Dict, List
 
 import torch
 import torch.distributed as dist
-from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
+import transformers
+from transformers import AutoProcessor
+
+def resolve_model_cls():
+    model_cls = getattr(transformers, "Qwen2_5_VLForConditionalGeneration", None)
+    if model_cls is None:
+        model_cls = getattr(transformers, "Qwen2VLForConditionalGeneration", None)
+    if model_cls is None:
+        model_cls = getattr(transformers, "AutoModelForVision2Seq", None)
+    if model_cls is None:
+        raise RuntimeError("No compatible Qwen VL loader found in transformers")
+    return model_cls
 
 
 @dataclass
@@ -238,7 +249,8 @@ def main() -> int:
     trust_remote_code = _bool_from_str(args.trust_remote_code)
 
     processor = AutoProcessor.from_pretrained(args.model_path, trust_remote_code=trust_remote_code)
-    model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+    model_cls = resolve_model_cls()
+    model = model_cls.from_pretrained(
         args.model_path,
         torch_dtype=dtype,
         trust_remote_code=trust_remote_code,
