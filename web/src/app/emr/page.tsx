@@ -104,6 +104,7 @@ function EmrPageContent() {
   const [ingestStatus, setIngestStatus] = useState("");
   const [ingestRunning, setIngestRunning] = useState(false);
   const latestKnownEmrIdRef = useRef("");
+  const autoLoadKeyRef = useRef("");
 
   useEffect(() => {
     try {
@@ -1009,6 +1010,46 @@ function EmrPageContent() {
     setSearchMessage("已跳转到新生成病历");
     await fetchEmrById(targetEmrId);
   }
+
+  useEffect(() => {
+    if (report) {
+      return;
+    }
+
+    const targetEmrId = emrId.trim();
+    const targetPatientId = (currentSearchPatient?.patient_id || patientId).trim();
+    const autoLoadKey = targetEmrId
+      ? `emr:${targetEmrId}`
+      : targetPatientId
+        ? `patient:${targetPatientId}`
+        : "";
+
+    if (!autoLoadKey || autoLoadKeyRef.current === autoLoadKey) {
+      return;
+    }
+
+    autoLoadKeyRef.current = autoLoadKey;
+
+    const run = async () => {
+      try {
+        if (targetEmrId) {
+          await fetchEmrById(targetEmrId);
+          return;
+        }
+
+        if (targetPatientId) {
+          const ok = await fetchLatestEmrForPatient(targetPatientId);
+          if (!ok) {
+            setSearchMessage("未找到该患者的病历记录");
+          }
+        }
+      } catch {
+        // Keep the page interactive; manual query actions remain available.
+      }
+    };
+
+    void run();
+  }, [currentSearchPatient, emrId, patientId, report]);
 
   useEffect(() => {
     const targetPatientId = currentPatientIdForFilter.trim();
