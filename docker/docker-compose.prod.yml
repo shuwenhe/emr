@@ -38,6 +38,8 @@ services:
       - MYSQL_USER=${MYSQL_USER:-hospital}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD:-hospital}
       - UVICORN_WORKERS=${UVICORN_WORKERS:-4}
+      - OLLAMA_ENABLED=${OLLAMA_ENABLED:-true}
+      - LLM_PROVIDER=${LLM_PROVIDER:-auto}
     volumes:
       - ./config:/app/config:ro
       - ./data:/app/data
