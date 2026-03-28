@@ -61,8 +61,10 @@ services:
       - MYSQL_DB=${MYSQL_DB:-hospital}
       - MYSQL_USER=${MYSQL_USER:-hospital}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD:-hospital}
-      - ENABLE_GO_REPORT_PROXY=${ENABLE_GO_REPORT_PROXY:-false}
+      - ENABLE_GO_REPORT_PROXY=${ENABLE_GO_REPORT_PROXY:-true}
       - GO_REPORT_SERVICE_URL=${GO_REPORT_SERVICE_URL:-http://report-file-service:8088}
+      - OLLAMA_ENABLED=${OLLAMA_ENABLED:-true}
+      - LLM_PROVIDER=${LLM_PROVIDER:-auto}
     volumes:
       - ./config:/app/config:ro
       - ./data:/app/data
