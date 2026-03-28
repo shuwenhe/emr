@@ -39,7 +39,7 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 
 
 def _is_runtime_model_compatible(model_dir: Path) -> bool:
-    """Current runtime script supports text causal LM, not multimodal VL checkpoints."""
+    """Runtime supports causal LM and Qwen2.5-VL checkpoints via dedicated scripts."""
     cfg_path = model_dir / "config.json"
     if not cfg_path.exists():
         return False
@@ -50,15 +50,42 @@ def _is_runtime_model_compatible(model_dir: Path) -> bool:
 
     model_type = str(payload.get("model_type") or "").strip().lower()
     if "vl" in model_type:
-        return False
+        return True
 
     architectures = payload.get("architectures") or []
     if isinstance(architectures, str):
         architectures = [architectures]
     architecture_text = " ".join(str(item).lower() for item in architectures)
-    if "conditionalgeneration" in architecture_text and "causallm" not in architecture_text:
-        return False
-    return True
+    if "causallm" in architecture_text:
+        return True
+    if "vl" in architecture_text and "conditionalgeneration" in architecture_text:
+        return True
+    return False
+
+
+def _runtime_model_kind(model_path: str) -> str:
+    path = Path(model_path or "")
+    cfg_path = path / "config.json"
+    if not cfg_path.exists():
+        return "unknown"
+    try:
+        payload = json.loads(cfg_path.read_text(encoding="utf-8"))
+    except Exception:
+        return "unknown"
+
+    model_type = str(payload.get("model_type") or "").strip().lower()
+    if "vl" in model_type:
+        return "vl"
+
+    architectures = payload.get("architectures") or []
+    if isinstance(architectures, str):
+        architectures = [architectures]
+    architecture_text = " ".join(str(item).lower() for item in architectures)
+    if "causallm" in architecture_text:
+        return "causal"
+    if "vl" in architecture_text and "conditionalgeneration" in architecture_text:
+        return "vl"
+    return "unknown"
 
 
 def _guess_runtime_model_path() -> str:
@@ -110,6 +137,12 @@ LLM_RUNTIME_SCRIPT = Path(
     os.getenv(
         "LLM_RUNTIME_SCRIPT",
         str(BASE_DIR / "runtime" / "infer_qwen_8card.py"),
+    )
+).resolve()
+LLM_RUNTIME_VL_SCRIPT = Path(
+    os.getenv(
+        "LLM_RUNTIME_VL_SCRIPT",
+        str(BASE_DIR / "runtime" / "infer_qwen_vl_8card.py"),
     )
 ).resolve()
 LLM_RUNTIME_PYTHON = os.getenv("LLM_RUNTIME_PYTHON", sys.executable).strip() or sys.executable
@@ -281,7 +314,9 @@ def _runtime_available() -> bool:
     if not _is_runtime_model_compatible(model_path):
         logging.warning("Runtime model incompatible with infer_qwen_8card.py: %s", model_path)
         return False
-    if not LLM_RUNTIME_SCRIPT.exists():
+    model_kind = _runtime_model_kind(LLM_RUNTIME_MODEL_PATH)
+    runtime_script = LLM_RUNTIME_VL_SCRIPT if model_kind == "vl" else LLM_RUNTIME_SCRIPT
+    if not runtime_script.exists():
         return False
     if not Path(LLM_RUNTIME_PYTHON).exists() and shutil.which(LLM_RUNTIME_PYTHON) is None:
         return False
@@ -477,6 +512,9 @@ def _runtime_generate(prompt: str, *, temperature: float, max_tokens: int) -> st
         )
         return ""
 
+    model_kind = _runtime_model_kind(LLM_RUNTIME_MODEL_PATH)
+    runtime_script = LLM_RUNTIME_VL_SCRIPT if model_kind == "vl" else LLM_RUNTIME_SCRIPT
+
     with tempfile.TemporaryDirectory(prefix="emr-llm-runtime-") as tmpdir:
         tmp_path = Path(tmpdir)
         input_file = tmp_path / "input.jsonl"
@@ -488,7 +526,7 @@ def _runtime_generate(prompt: str, *, temperature: float, max_tokens: int) -> st
 
         command = [
             LLM_RUNTIME_PYTHON,
-            str(LLM_RUNTIME_SCRIPT),
+            str(runtime_script),
             "--model-path",
             LLM_RUNTIME_MODEL_PATH,
             "--input-file",
@@ -518,7 +556,7 @@ def _runtime_generate(prompt: str, *, temperature: float, max_tokens: int) -> st
         try:
             process = subprocess.Popen(
                 command,
-                cwd=str(LLM_RUNTIME_SCRIPT.parent),
+                cwd=str(runtime_script.parent),
                 env=env,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
