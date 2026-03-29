@@ -122,7 +122,7 @@ help:
 	@echo "  make auto-deploy-stop    # stop auto-deploy service"
 	@echo "  make auto-deploy-status  # show auto-deploy service status"
 	@echo "  make logs             # follow backend + frontend logs"
-	@echo "  make logs-backend     # follow backend logs (systemd journal)"
+	@echo "  make logs-backend     # follow backend service log file"
 	@echo "  make logs-frontend    # tail frontend log files"
 	@echo "  make logs-auto-git-push # follow auto git push logs (systemd journal)"
 	@echo "  make logs-auto-deploy # follow auto deploy logs (systemd journal)"
@@ -493,7 +493,7 @@ auto-deploy-status:
 logs: logs-backend
 
 logs-backend:
-	@bash -c 'mkdir -p "$(CURDIR)/logs" "$(CURDIR)/.run"; touch "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log" "$(CURDIR)/.run/service.log"; tail -f "$(CURDIR)/.run/service.log" "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log"'
+	@bash -c 'set -e; LOG_FILE="$(SERVICE_LOG_FILE)"; PID_FILE="$(SERVICE_PID_FILE)"; mkdir -p "$$(dirname "$$LOG_FILE")"; touch "$$LOG_FILE"; if [ -f "$$PID_FILE" ] && kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[logs-backend] following $$LOG_FILE"; else echo "[logs-backend] backend is not running; showing last log entries from $$LOG_FILE"; fi; tail -n 50 -f "$$LOG_FILE"'
 
 logs-frontend:
 	@bash -c 'tail -f "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"'
@@ -505,10 +505,10 @@ logs-auto-deploy:
 	@journalctl --user -u emr-auto-deploy -f
 
 logs-all:
-	@bash -c 'mkdir -p "$(CURDIR)/logs" "$(CURDIR)/.run"; touch "$(CURDIR)/.run/service.log" "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log" "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"; tail -f "$(CURDIR)/.run/service.log" "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log" "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"'
+	@bash -c 'mkdir -p "$(CURDIR)/logs" "$(CURDIR)/.run"; touch "$(SERVICE_LOG_FILE)" "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"; tail -f "$(SERVICE_LOG_FILE)" "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"'
 
 logs-file-backend:
-	@bash -c 'mkdir -p "$(CURDIR)/logs" "$(CURDIR)/.run"; touch "$(CURDIR)/.run/service.log" "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log"; tail -f "$(CURDIR)/.run/service.log" "$(CURDIR)/logs/emr-backend.out.log" "$(CURDIR)/logs/emr-backend.err.log"'
+	@bash -c 'LOG_FILE="$(SERVICE_LOG_FILE)"; mkdir -p "$$(dirname "$$LOG_FILE")"; touch "$$LOG_FILE"; tail -n 50 -f "$$LOG_FILE"'
 
 logs-file-frontend:
 	@bash -c 'tail -f "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"'
