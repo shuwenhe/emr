@@ -121,14 +121,7 @@ help:
 	@echo "  make auto-deploy-start   # start auto-deploy service"
 	@echo "  make auto-deploy-stop    # stop auto-deploy service"
 	@echo "  make auto-deploy-status  # show auto-deploy service status"
-	@echo "  make logs             # follow backend + frontend logs"
-	@echo "  make logs-backend     # follow backend service log file"
-	@echo "  make logs-frontend    # tail frontend log files"
-	@echo "  make logs-auto-git-push # follow auto git push logs (systemd journal)"
-	@echo "  make logs-auto-deploy # follow auto deploy logs (systemd journal)"
-	@echo "  make logs-all         # follow backend + frontend logs"
-	@echo "  make logs-file-backend  # tail backend log files"
-	@echo "  make logs-file-frontend # tail frontend log files"
+	@echo "  make logs             # follow all app logs (backend + frontend + auto-deploy)"
 	@echo "  make clean            # remove generated files"
 
 install:
@@ -490,28 +483,12 @@ auto-deploy-stop:
 auto-deploy-status:
 	@systemctl --user --no-pager --full status emr-auto-deploy | sed -n '1,30p'
 
-logs: logs-backend
+logs:
+	@bash -c 'mkdir -p "$(CURDIR)/logs" "$(CURDIR)/.run"; touch "$(SERVICE_LOG_FILE)" "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log" "$(CURDIR)/logs/emr-auto-deploy.out.log" "$(CURDIR)/logs/emr-auto-deploy.err.log"; echo "[logs] following backend + frontend + auto-deploy logs"; tail -n 50 -f "$(SERVICE_LOG_FILE)" "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log" "$(CURDIR)/logs/emr-auto-deploy.out.log" "$(CURDIR)/logs/emr-auto-deploy.err.log"'
 
-logs-backend:
-	@bash -c 'set -e; LOG_FILE="$(SERVICE_LOG_FILE)"; PID_FILE="$(SERVICE_PID_FILE)"; mkdir -p "$$(dirname "$$LOG_FILE")"; touch "$$LOG_FILE"; if [ -f "$$PID_FILE" ] && kill -0 "$$(cat "$$PID_FILE")" 2>/dev/null; then echo "[logs-backend] following $$LOG_FILE"; else echo "[logs-backend] backend is not running; showing last log entries from $$LOG_FILE"; fi; tail -n 50 -f "$$LOG_FILE"'
-
-logs-frontend:
-	@bash -c 'tail -f "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"'
-
-logs-auto-git-push:
-	@journalctl --user -u emr-auto-git-push -f
-
-logs-auto-deploy:
-	@bash -c 'OUT_LOG="$(CURDIR)/logs/emr-auto-deploy.out.log"; ERR_LOG="$(CURDIR)/logs/emr-auto-deploy.err.log"; mkdir -p "$(CURDIR)/logs"; touch "$$OUT_LOG" "$$ERR_LOG"; echo "[logs-auto-deploy] following $$OUT_LOG and $$ERR_LOG"; tail -n 50 -f "$$OUT_LOG" "$$ERR_LOG"'
-
-logs-all:
-	@bash -c 'mkdir -p "$(CURDIR)/logs" "$(CURDIR)/.run"; touch "$(SERVICE_LOG_FILE)" "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"; tail -f "$(SERVICE_LOG_FILE)" "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"'
-
-logs-file-backend:
-	@bash -c 'LOG_FILE="$(SERVICE_LOG_FILE)"; mkdir -p "$$(dirname "$$LOG_FILE")"; touch "$$LOG_FILE"; tail -n 50 -f "$$LOG_FILE"'
-
-logs-file-frontend:
-	@bash -c 'tail -f "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"'
+logs-backend logs-frontend logs-auto-git-push logs-auto-deploy logs-all logs-file-backend logs-file-frontend:
+	@echo "[deprecated] 该日志命令已取消，请使用: make logs"
+	@exit 1
 
 clean:
 	@rm -rf $(VENV_DIR)
