@@ -502,7 +502,7 @@ logs-auto-git-push:
 	@journalctl --user -u emr-auto-git-push -f
 
 logs-auto-deploy:
-	@journalctl --user -u emr-auto-deploy -f
+	@bash -c 'OUT_LOG="$(CURDIR)/logs/emr-auto-deploy.out.log"; ERR_LOG="$(CURDIR)/logs/emr-auto-deploy.err.log"; mkdir -p "$(CURDIR)/logs"; touch "$$OUT_LOG" "$$ERR_LOG"; echo "[logs-auto-deploy] following $$OUT_LOG and $$ERR_LOG"; tail -n 50 -f "$$OUT_LOG" "$$ERR_LOG"'
 
 logs-all:
 	@bash -c 'mkdir -p "$(CURDIR)/logs" "$(CURDIR)/.run"; touch "$(SERVICE_LOG_FILE)" "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"; tail -f "$(SERVICE_LOG_FILE)" "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log"'
