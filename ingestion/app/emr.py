@@ -423,6 +423,19 @@ def _refresh_roi_labeled_image(emr: Dict[str, Any]) -> bool:
     if existing_roi_image is not None and existing_roi_image.exists() and existing_roi_image.is_file():
         return False
 
+    thermal_images = report.get("thermal_images")
+    if isinstance(thermal_images, list):
+        for item in thermal_images:
+            item_text = str(item or "")
+            if "thermal_roi_labeled" not in item_text:
+                continue
+            candidate = _resolve_data_image_path(item)
+            if candidate is None:
+                continue
+            report["thermal_roi_labeled_image"] = item_text
+            emr["report"] = report
+            return True
+
     analysis = report.get("analysis")
     if not isinstance(analysis, dict):
         return False
