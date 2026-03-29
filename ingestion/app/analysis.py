@@ -784,11 +784,24 @@ def _generate_roi_labeled_image(
         ax.axis("off")
 
         h, w = image.shape[0], image.shape[1]
+        image_name = Path(str(base_image_path)).name.lower()
+        use_thermal_plot_bounds = "thermal_marked" in image_name
+
+        def _pct_to_pixel(x_pct: float, y_pct: float) -> tuple[float, float]:
+            # thermal_marked images include colorbar/margins; map ROI percentages
+            # into the thermal plot window to keep arrows anchored to body regions.
+            if use_thermal_plot_bounds:
+                left, right, top, bottom = 3.0, 72.0, 8.0, 97.0
+                mapped_x = left + (x_pct / 100.0) * (right - left)
+                mapped_y = top + (y_pct / 100.0) * (bottom - top)
+            else:
+                mapped_x = x_pct
+                mapped_y = y_pct
+            return (mapped_x / 100.0) * w, (mapped_y / 100.0) * h
+
         for point in points:
-            px = (point["x"] / 100.0) * w
-            py = (point["y"] / 100.0) * h
-            lpx = (point.get("label_x", point["x"]) / 100.0) * w
-            lpy = (point.get("label_y", point["y"]) / 100.0) * h
+            px, py = _pct_to_pixel(point["x"], point["y"])
+            lpx, lpy = _pct_to_pixel(point.get("label_x", point["x"]), point.get("label_y", point["y"]))
             text = f"{point['name']} {point['mean_c']:.1f}°C"
             ax.annotate(
                 text,
