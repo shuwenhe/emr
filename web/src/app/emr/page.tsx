@@ -2097,41 +2097,13 @@ function EmrPageContent() {
 
             {!thermalRoiLabeledImageUrl && thermalMarkedImageUrl && (
               <div className="mt-5">
-                <p className="mb-3 text-xs text-slate-500">已叠加人体部位温度标签（前端回退渲染）</p>
+                <p className="mb-3 text-xs text-slate-500">热成像主图（当前记录暂无后端标签图）</p>
                 <div className="relative w-full max-w-2xl">
                   <img
                     src={thermalMarkedImageUrl}
                     alt="Thermal Marked Image"
                     className="w-full max-w-2xl rounded-xl border border-slate-200"
                   />
-                  <svg className="pointer-events-none absolute inset-0 z-10 h-full w-full">
-                    {roiOverlayLayoutPoints.map((point, index) => {
-                      if (!point.showLeader) {
-                        return null;
-                      }
-                      const edgeX = point.labelX <= point.x ? point.labelX + 4.5 : point.labelX - 4.5;
-                      return (
-                        <line
-                          key={`line-${point.name}-${index}`}
-                          x1={`${point.x}%`}
-                          y1={`${point.y}%`}
-                          x2={`${edgeX}%`}
-                          y2={`${point.labelY}%`}
-                          stroke="rgba(15, 23, 42, 0.85)"
-                          strokeWidth="1"
-                        />
-                      );
-                    })}
-                  </svg>
-                  {roiOverlayLayoutPoints.map((point, index) => (
-                    <div
-                      key={`${point.name}-${index}`}
-                      className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-md border border-white/30 bg-slate-900/70 px-2 py-1 text-[11px] font-semibold text-white"
-                      style={{ left: `${point.labelX}%`, top: `${point.labelY}%` }}
-                    >
-                      {point.name} {point.meanC.toFixed(1)}°C
-                    </div>
-                  ))}
                 </div>
               </div>
             )}
