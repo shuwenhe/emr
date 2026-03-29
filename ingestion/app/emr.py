@@ -416,6 +416,13 @@ def _refresh_roi_labeled_image(emr: Dict[str, Any]) -> bool:
     if not isinstance(report, dict):
         return False
 
+    # Preserve already-generated ROI labeled image when it exists.
+    # Re-rendering from thermal_marked_image uses a legacy path that can
+    # introduce coordinate drift on some layouts.
+    existing_roi_image = _resolve_data_image_path(report.get("thermal_roi_labeled_image"))
+    if existing_roi_image is not None and existing_roi_image.exists() and existing_roi_image.is_file():
+        return False
+
     analysis = report.get("analysis")
     if not isinstance(analysis, dict):
         return False
