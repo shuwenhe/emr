@@ -12,12 +12,25 @@ ALLOW_DIRTY="${AUTO_DEPLOY_ALLOW_DIRTY:-0}"
 
 # Default command deploys backend+web in production compose mode.
 DEFAULT_DEPLOY_COMMAND='docker compose -f docker/docker-compose.prod.yml up -d --build web backend'
-DEPLOY_COMMAND="${AUTO_DEPLOY_COMMAND:-$DEFAULT_DEPLOY_COMMAND}"
+DEPLOY_COMMAND="${AUTO_DEPLOY_COMMAND:-}"
 PRE_DEPLOY_COMMAND="${AUTO_DEPLOY_PRE_COMMAND:-}"
-POST_DEPLOY_HEALTHCHECK_URL="${AUTO_DEPLOY_HEALTHCHECK_URL:-}"
+POST_DEPLOY_HEALTHCHECK_URL="${AUTO_DEPLOY_HEALTHCHECK_URL:-http://127.0.0.1:8000/healthz}"
 CHUNK_HEALTHCHECK_URLS="${AUTO_DEPLOY_CHUNK_HEALTHCHECK_URLS:-}"
 HEALTHCHECK_RETRIES="${AUTO_DEPLOY_HEALTHCHECK_RETRIES:-3}"
 HEALTHCHECK_RETRY_DELAY_SECONDS="${AUTO_DEPLOY_HEALTHCHECK_RETRY_DELAY_SECONDS:-5}"
+
+# Choose a safe default deploy command when AUTO_DEPLOY_COMMAND is not set:
+# 1) Use docker compose if available and compose file exists.
+# 2) Fallback to Makefile-managed backend restart for local dev/prod setups.
+if [[ -z "$DEPLOY_COMMAND" ]]; then
+  if command -v docker >/dev/null 2>&1 \
+    && docker compose version >/dev/null 2>&1 \
+    && [[ -f "docker/docker-compose.prod.yml" ]]; then
+    DEPLOY_COMMAND="$DEFAULT_DEPLOY_COMMAND"
+  else
+    DEPLOY_COMMAND='make service-restart'
+  fi
+fi
 
 log() {
   printf '[%s] [auto-deploy] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
@@ -72,6 +85,9 @@ log "watching ${REMOTE}/${BRANCH} every ${INTERVAL_SECONDS}s"
 log "deploy command: ${DEPLOY_COMMAND}"
 if [[ -n "$CHUNK_HEALTHCHECK_URLS" ]]; then
   log "chunk healthcheck urls: ${CHUNK_HEALTHCHECK_URLS}"
+fi
+if [[ -n "$POST_DEPLOY_HEALTHCHECK_URL" ]]; then
+  log "healthcheck url: ${POST_DEPLOY_HEALTHCHECK_URL}"
 fi
 
 while true; do
