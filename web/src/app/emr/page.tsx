@@ -537,8 +537,23 @@ function EmrPageContent() {
     return `${API_BASE}/data/${stripped}`;
   }, []);
 
-  // Primary marked image (with ROI overlay SVG rendered on top in browser)
-  const thermalImageUrl = useMemo(() => {
+  // Backend-rendered ROI labeled image (authoritative coordinates)
+  const thermalRoiLabeledImageUrl = useMemo(() => {
+    if (!report || typeof report !== "object") return "";
+    const direct = normalizeImagePath(report.thermal_roi_labeled_image);
+    if (direct) return direct;
+    if (Array.isArray(report.thermal_images)) {
+      for (const item of report.thermal_images) {
+        if (!String(item || "").includes("thermal_roi_labeled")) continue;
+        const candidate = normalizeImagePath(item);
+        if (candidate) return candidate;
+      }
+    }
+    return "";
+  }, [report, normalizeImagePath]);
+
+  // Fallback marked image (overlay SVG rendered in browser when ROI-labeled image is unavailable)
+  const thermalMarkedImageUrl = useMemo(() => {
     if (!report || typeof report !== "object") return "";
     const direct = normalizeImagePath(report.thermal_marked_image);
     if (direct) return direct;
@@ -2043,7 +2058,7 @@ function EmrPageContent() {
           )}
         </section>
 
-        {(thermalImageUrl || uploadedThermalImageUrls.length > 0) && (
+        {(thermalRoiLabeledImageUrl || thermalMarkedImageUrl || uploadedThermalImageUrls.length > 0) && (
           <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
             <h2 className="text-lg font-semibold text-slate-900">热成像图</h2>
 
@@ -2067,12 +2082,25 @@ function EmrPageContent() {
             )}
 
             {/* Generated heatmap with ROI overlay */}
-            {thermalImageUrl && (
+            {thermalRoiLabeledImageUrl && (
               <div className="mt-5">
-                <p className="mb-3 text-xs text-slate-500">已叠加人体部位温度标签（头部标签自动避让，基于 ROI 分析）</p>
+                <p className="mb-3 text-xs text-slate-500">人体部位温度标签（后端生成）</p>
                 <div className="relative w-full max-w-2xl">
                   <img
-                    src={thermalImageUrl}
+                    src={thermalRoiLabeledImageUrl}
+                    alt="Thermal ROI Labeled Image"
+                    className="w-full max-w-2xl rounded-xl border border-slate-200"
+                  />
+                </div>
+              </div>
+            )}
+
+            {!thermalRoiLabeledImageUrl && thermalMarkedImageUrl && (
+              <div className="mt-5">
+                <p className="mb-3 text-xs text-slate-500">已叠加人体部位温度标签（前端回退渲染）</p>
+                <div className="relative w-full max-w-2xl">
+                  <img
+                    src={thermalMarkedImageUrl}
                     alt="Thermal Marked Image"
                     className="w-full max-w-2xl rounded-xl border border-slate-200"
                   />
