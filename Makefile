@@ -484,7 +484,7 @@ auto-deploy-status:
 	@systemctl --user --no-pager --full status emr-auto-deploy | sed -n '1,30p'
 
 logs:
-	@bash -c 'mkdir -p "$(CURDIR)/logs" "$(CURDIR)/.run"; touch "$(SERVICE_LOG_FILE)" "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log" "$(CURDIR)/logs/emr-auto-deploy.out.log" "$(CURDIR)/logs/emr-auto-deploy.err.log"; echo "[logs] following backend + frontend + auto-deploy logs"; tail -n 50 -f "$(SERVICE_LOG_FILE)" "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log" "$(CURDIR)/logs/emr-auto-deploy.out.log" "$(CURDIR)/logs/emr-auto-deploy.err.log"'
+	@bash -c 'mkdir -p "$(CURDIR)/logs" "$(CURDIR)/.run" "$(CURDIR)/storage/logs"; touch "$(SERVICE_LOG_FILE)" "$(CURDIR)/storage/logs/app.log" "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log" "$(CURDIR)/logs/emr-auto-deploy.out.log" "$(CURDIR)/logs/emr-auto-deploy.err.log" "$(CURDIR)/logs/emr-ingestion.out.log" "$(CURDIR)/logs/emr-ingestion.err.log"; echo "[logs] following backend + ingestion + frontend + auto-deploy logs"; tail -n 50 -f "$(SERVICE_LOG_FILE)" "$(CURDIR)/storage/logs/app.log" "$(CURDIR)/logs/emr-ingestion.out.log" "$(CURDIR)/logs/emr-ingestion.err.log" "$(CURDIR)/logs/emr-frontend.out.log" "$(CURDIR)/logs/emr-frontend.err.log" "$(CURDIR)/logs/emr-auto-deploy.out.log" "$(CURDIR)/logs/emr-auto-deploy.err.log"'
 
 logs-backend logs-frontend logs-auto-git-push logs-auto-deploy logs-all logs-file-backend logs-file-frontend:
 	@echo "[deprecated] 该日志命令已取消，请使用: make logs"
