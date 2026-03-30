@@ -574,11 +574,12 @@ function UploadPageContent() {
       source.addEventListener("progress", (e: MessageEvent) => {
         try {
           const data = JSON.parse(e.data) as IngestProgressEvent;
-          setReportProgress(data.pct ?? 0);
+          const pct = Number(data.pct ?? 0);
+          setReportProgress(Number.isFinite(pct) ? pct : 0);
           setReportStatus(data.label ?? "");
           setCurrentStep(data.step ?? 0);
           applyProgressToTimeline(data);
-          if (data.pct >= 100 || data.status === "complete") {
+          if (pct >= 100 || data.status === "complete") {
             clearTimeout(timeoutId);
             source.close();
             setReportProgress(100);
