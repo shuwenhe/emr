@@ -634,17 +634,62 @@ function EmrPageContent() {
 
     let isClosed = false;
     let settleTimer: number | null = null;
+    let reconcileTimer: number | null = null;
     const source = new EventSource(`${API_BASE}/events/ingest-progress/${encodeURIComponent(rid)}`);
 
     setIngestRunning(true);
     setIngestStatus("等待后端分析进度...");
 
+    const applyProgressPayload = (payload: {
+      step?: number;
+      label?: string;
+      pct?: number;
+      status?: string;
+    }) => {
+      const pct = Number(payload.pct ?? 0);
+      setIngestProgress(Number.isFinite(pct) ? Math.max(0, Math.min(100, pct)) : 0);
+      setIngestStep(Number(payload.step ?? 0));
+      setIngestStatus(String(payload.label || "分析中..."));
+      return { pct, done: payload.status === "complete" || pct >= 100 };
+    };
+
+    const fetchLatestProgress = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/events/ingest-progress/${encodeURIComponent(rid)}/latest`);
+        if (!res.ok) return;
+        const payload = await res.json() as {
+          step?: number;
+          label?: string;
+          pct?: number;
+          status?: string;
+        };
+        const { done } = applyProgressPayload(payload);
+        if (done) {
+          setIngestProgress(100);
+          setIngestStatus("分析完成");
+          finishAndClose();
+        }
+      } catch {
+        // ignore transient reconciliation failures
+      }
+    };
+
     const finishAndClose = () => {
       if (isClosed) return;
       isClosed = true;
+      if (reconcileTimer) {
+        window.clearInterval(reconcileTimer);
+        reconcileTimer = null;
+      }
       source.close();
       setIngestRunning(false);
     };
+
+    // Immediate and periodic reconciliation to avoid stale progress display.
+    void fetchLatestProgress();
+    reconcileTimer = window.setInterval(() => {
+      void fetchLatestProgress();
+    }, 5000);
 
     source.addEventListener("progress", (event: MessageEvent) => {
       try {
@@ -655,12 +700,9 @@ function EmrPageContent() {
           status?: string;
         };
 
-        const pct = Number(payload.pct ?? 0);
-        setIngestProgress(Number.isFinite(pct) ? Math.max(0, Math.min(100, pct)) : 0);
-        setIngestStep(Number(payload.step ?? 0));
-        setIngestStatus(String(payload.label || "分析中..."));
+        const { pct, done } = applyProgressPayload(payload);
 
-        if (payload.status === "complete" || pct >= 100) {
+        if (done) {
           setIngestProgress(100);
           setIngestStatus("分析完成");
           if (settleTimer) {
@@ -711,6 +753,7 @@ function EmrPageContent() {
 
         if (Date.now() - startedAt > 90_000) {
           window.clearInterval(poll);
+          void fetchLatestProgress();
           finishAndClose();
         }
       }, 1500);
@@ -719,6 +762,9 @@ function EmrPageContent() {
     return () => {
       if (settleTimer) {
         window.clearTimeout(settleTimer);
+      }
+      if (reconcileTimer) {
+        window.clearInterval(reconcileTimer);
       }
       finishAndClose();
     };
