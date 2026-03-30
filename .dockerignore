@@ -17,6 +17,10 @@ data/
 reports/
 logs/
 *.log
+storage/
+web/node_modules/
+web/.next/
+.git/
 
 # IDE
 .vscode/
