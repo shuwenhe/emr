@@ -177,6 +177,8 @@ _ADVICE_NUM_RE = re.compile(r"^\s*(?:\d+[.、。)）]\s*)+")
 _ADVICE_REF_RE = re.compile(r"\[(?:\s*\d+\s*(?:,\s*\d+\s*)*)\]")
 _ADVICE_NOISE_RE = re.compile(r"\[\s*['\"]?\s*['\"]?(?:\s*,\s*['\"]?\s*['\"]?)*\s*\]")
 _LEADING_BULLET_RE = re.compile(r"^\s*[·•]\s*")
+_KB_SECTION_TITLE_RE = re.compile(r"异常解读")
+_KB_REGION_TITLES = {"头面部", "颈肩部", "脊柱背部", "胸腹部", "四肢部", "综合评估"}
 
 
 def _strip_advice_num(line: str) -> str:
@@ -198,9 +200,17 @@ def _format_pdf_list_line(line: str) -> str:
     text = _LEADING_BULLET_RE.sub("", str(line or "")).strip()
     if not text:
         return ""
-    if _ADVICE_NUM_RE.match(text):
-        return text
-    return f"· {text}"
+    return _strip_advice_num(text)
+
+
+def _is_kb_heading_line(line: str) -> bool:
+    text = str(line or "").strip()
+    if not text:
+        return False
+    normalized = text.rstrip("：:")
+    if normalized in _KB_REGION_TITLES:
+        return True
+    return bool(_KB_SECTION_TITLE_RE.search(normalized))
 
 
 def _expand_advice_value(value: Any) -> List[str]:
@@ -903,10 +913,15 @@ def generate_pdf_report(
         story.append(Spacer(1, 5 * mm))
         story.append(_paragraph("补充解读", styles["subsection"]))
         story.append(Spacer(1, 2 * mm))
+        kb_index = 1
         for line in kb_lines:
             formatted = _format_pdf_list_line(line)
             if formatted:
-                story.append(_paragraph(formatted, styles["small"]))
+                if _is_kb_heading_line(formatted):
+                    story.append(_paragraph(formatted, styles["body"]))
+                else:
+                    story.append(_paragraph(f"{kb_index}. {formatted}", styles["small"]))
+                    kb_index += 1
                 story.append(Spacer(1, 1 * mm))
     story.append(PageBreak())
 
