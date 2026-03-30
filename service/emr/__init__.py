@@ -41,6 +41,7 @@ class EMRService:
         patient_id: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
         *,
+        force: bool = False,
         enable_roi: bool = True,
         enable_llm: bool = True,
         ensure_report_outputs: bool = True,
@@ -57,9 +58,10 @@ class EMRService:
             Created EMR record
         """
         logger.info(
-            "[步骤3-EMR] 开始生成电子病历 record_id=%s patient_id=%s roi=%s llm=%s ensure_outputs=%s",
+            "[步骤3-EMR] 开始生成电子病历 record_id=%s patient_id=%s force=%s roi=%s llm=%s ensure_outputs=%s",
             record_id,
             patient_id,
+            force,
             enable_roi,
             enable_llm,
             ensure_report_outputs,
@@ -68,7 +70,7 @@ class EMRService:
             legacy_emr = self._legacy_emr
             result = legacy_emr.generate_emr(
                 record_id,
-                force=False,
+                force=force,
                 enable_roi=enable_roi,
                 enable_llm=enable_llm,
                 ensure_report_outputs=ensure_report_outputs,
