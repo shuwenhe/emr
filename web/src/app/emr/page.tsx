@@ -679,7 +679,41 @@ function EmrPageContent() {
       if (settleTimer) {
         window.clearTimeout(settleTimer);
       }
-      finishAndClose();
+      source.close();
+      const startedAt = Date.now();
+      const poll = window.setInterval(async () => {
+        try {
+          const res = await fetch(`${API_BASE}/events/ingest-progress/${encodeURIComponent(rid)}/latest`);
+          if (!res.ok) {
+            return;
+          }
+          const payload = await res.json() as {
+            step?: number;
+            label?: string;
+            pct?: number;
+            status?: string;
+          };
+          const pct = Number(payload.pct ?? 0);
+          setIngestProgress(Number.isFinite(pct) ? Math.max(0, Math.min(100, pct)) : 0);
+          setIngestStep(Number(payload.step ?? 0));
+          setIngestStatus(String(payload.label || "分析中..."));
+
+          if (payload.status === "complete" || pct >= 100) {
+            window.clearInterval(poll);
+            setIngestProgress(100);
+            setIngestStatus("分析完成");
+            setIngestRunning(false);
+            return;
+          }
+        } catch {
+          // ignore polling error and keep retrying in the short fallback window
+        }
+
+        if (Date.now() - startedAt > 90_000) {
+          window.clearInterval(poll);
+          finishAndClose();
+        }
+      }, 1500);
     };
 
     return () => {
