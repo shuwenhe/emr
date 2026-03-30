@@ -998,6 +998,7 @@ function EmrPageContent() {
   async function generateEmrByRecordId(nextRecordId: string) {
     const data = await postJson(`${API_BASE}/emr/generate`, {
       record_id: nextRecordId.trim(),
+      force: true,
     });
     setOutput(data as EmrResponse);
     syncEmrFields(data as EmrResponse);
