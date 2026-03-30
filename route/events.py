@@ -131,6 +131,11 @@ class _IngestProgressBroker:
             except asyncio.QueueFull:
                 continue
 
+    async def latest(self, record_id: str) -> dict[str, Any] | None:
+        async with self._lock:
+            cached = self._last_event.get(record_id)
+        return dict(cached) if isinstance(cached, dict) else None
+
 
 _ingest_broker = _IngestProgressBroker()
 
@@ -151,6 +156,21 @@ async def publish_ingest_progress(
         "ts": datetime.now(timezone.utc).isoformat(),
     }
     await _ingest_broker.publish(record_id, payload)
+
+
+@router.get("/events/ingest-progress/{record_id}/latest")
+async def ingest_progress_latest(record_id: str):
+    latest = await _ingest_broker.latest(record_id)
+    if latest:
+        return latest
+    return {
+        "record_id": record_id,
+        "step": 1,
+        "label": "等待后台分析进度...",
+        "pct": 0,
+        "status": "pending",
+        "ts": datetime.now(timezone.utc).isoformat(),
+    }
 
 
 @router.get("/events/ingest-progress/{record_id}")
