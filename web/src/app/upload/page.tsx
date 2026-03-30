@@ -13,9 +13,58 @@ type Patient = {
   age: number;
 };
 
+type IngestProgressEvent = {
+  step?: number;
+  label?: string;
+  pct?: number;
+  status?: string;
+  ts?: string;
+};
+
+type StepTimelineItem = {
+  step: number;
+  label: string;
+  startAt?: number;
+  endAt?: number;
+  startLabel?: string;
+  endLabel?: string;
+  lastStatus?: string;
+  lastPct?: number;
+};
+
 const API_PROXY_BASE = "/api";
 const API_BACKEND_BASE = API_PROXY_BASE;
 const UPLOAD_STATE_KEY = "patient_flow_state_upload";
+const STEP_LABELS: Record<number, string> = {
+  1: "数据入库",
+  2: "热成像分析",
+  3: "电子病历生成",
+  4: "AI诊断报告",
+  5: "治疗方案",
+};
+
+function parseIsoToMs(value?: string): number {
+  if (!value) return Date.now();
+  const ms = Date.parse(value);
+  return Number.isFinite(ms) ? ms : Date.now();
+}
+
+function formatClock(ms?: number): string {
+  if (!ms) return "-";
+  return new Date(ms).toLocaleTimeString("zh-CN", {
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+function formatElapsed(startAt?: number, endAt?: number): string {
+  if (!startAt) return "-";
+  const end = endAt ?? Date.now();
+  const delta = Math.max(0, end - startAt);
+  return `${(delta / 1000).toFixed(1)}s`;
+}
 
 function getCurrentDateTimeLocalValue() {
   const now = new Date();
@@ -72,6 +121,7 @@ function UploadPageContent() {
   const [reportProgress, setReportProgress] = useState(0);
   const [reportStatus, setReportStatus] = useState("");
   const [currentStep, setCurrentStep] = useState(0);
+  const [stepTimeline, setStepTimeline] = useState<Record<number, StepTimelineItem>>({});
   const autoSelectedFromUrlRef = useRef(false);
   const warmingRetryRef = useRef(0);
   const MAX_WARMING_RETRIES = 200; // 200 × 3 s ≈ 10 min max wait
@@ -92,6 +142,60 @@ function UploadPageContent() {
       return "患者列表加载失败，请检查网络连接后重试";
     }
     return message || "患者列表加载失败，请稍后重试";
+  }
+
+  function applyProgressToTimeline(event: IngestProgressEvent) {
+    const step = Number(event.step ?? 0);
+    if (!Number.isFinite(step) || step < 1 || step > 5) {
+      return;
+    }
+    const status = String(event.status || "running");
+    const label = String(event.label || "").trim();
+    const pct = Number(event.pct ?? 0);
+    const ts = parseIsoToMs(event.ts);
+    setStepTimeline((prev) => {
+      const existing = prev[step];
+      const nextItem: StepTimelineItem = {
+        step,
+        label: STEP_LABELS[step] || `步骤${step}`,
+        startAt: existing?.startAt ?? ts,
+        endAt: existing?.endAt,
+        startLabel: existing?.startLabel || label || STEP_LABELS[step],
+        endLabel: existing?.endLabel,
+        lastStatus: status,
+        lastPct: Number.isFinite(pct) ? pct : existing?.lastPct,
+      };
+      if ((status === "done" || status === "error" || status === "complete") && !nextItem.endAt) {
+        nextItem.endAt = ts;
+        nextItem.endLabel = label || existing?.endLabel || nextItem.startLabel;
+      }
+      return {
+        ...prev,
+        [step]: nextItem,
+      };
+    });
+  }
+
+  function markTimelineCompleted(finalLabel: string) {
+    const doneAt = Date.now();
+    setStepTimeline((prev) => {
+      const next: Record<number, StepTimelineItem> = { ...prev };
+      for (const key of Object.keys(next)) {
+        const step = Number(key);
+        const item = next[step];
+        if (!item) continue;
+        if (!item.endAt) {
+          next[step] = {
+            ...item,
+            endAt: doneAt,
+            endLabel: finalLabel,
+            lastStatus: "complete",
+            lastPct: 100,
+          };
+        }
+      }
+      return next;
+    });
   }
 
   function uploadFormDataWithProgress(url: string, formData: FormData): Promise<{ ok: boolean; status: number; data: any }> {
@@ -362,6 +466,7 @@ function UploadPageContent() {
     setReportProgress(0);
     setReportStatus("");
     setCurrentStep(0);
+    setStepTimeline({});
 
     const metadata = {
       device: {
@@ -445,6 +550,16 @@ function UploadPageContent() {
       setReportProgress(10);
       setCurrentStep(1);
       setReportStatus("数据上传完成，后台开始分析...");
+      setStepTimeline({
+        1: {
+          step: 1,
+          label: STEP_LABELS[1],
+          startAt: Date.now(),
+          startLabel: "数据上传完成，后台开始分析...",
+          lastStatus: "running",
+          lastPct: 10,
+        },
+      });
 
       const source = new EventSource(`${API_BACKEND_BASE}/events/ingest-progress/${recordId}`);
 
@@ -458,19 +573,16 @@ function UploadPageContent() {
 
       source.addEventListener("progress", (e: MessageEvent) => {
         try {
-          const data = JSON.parse(e.data) as {
-            step: number;
-            label: string;
-            pct: number;
-            status: string;
-          };
+          const data = JSON.parse(e.data) as IngestProgressEvent;
           setReportProgress(data.pct ?? 0);
           setReportStatus(data.label ?? "");
           setCurrentStep(data.step ?? 0);
+          applyProgressToTimeline(data);
           if (data.pct >= 100 || data.status === "complete") {
             clearTimeout(timeoutId);
             source.close();
             setReportProgress(100);
+            markTimelineCompleted("全部分析完成");
             setReportGenerating(false);
             resolve();
           }
@@ -487,12 +599,7 @@ function UploadPageContent() {
           try {
             const progressRes = await fetch(`${API_BACKEND_BASE}/events/ingest-progress/${recordId}/latest`);
             if (progressRes.ok) {
-              const progressData = await progressRes.json() as {
-                step?: number;
-                label?: string;
-                pct?: number;
-                status?: string;
-              };
+              const progressData = await progressRes.json() as IngestProgressEvent;
               const pct = Number(progressData.pct ?? 0);
               if (Number.isFinite(pct)) {
                 setReportProgress(Math.max(0, Math.min(100, pct)));
@@ -503,10 +610,12 @@ function UploadPageContent() {
               if (typeof progressData.step === "number") {
                 setCurrentStep(progressData.step);
               }
+              applyProgressToTimeline(progressData);
               if (progressData.status === "complete" || pct >= 100) {
                 clearInterval(poll);
                 setReportProgress(100);
                 setReportStatus("报告生成完成！");
+                markTimelineCompleted("报告生成完成");
                 setReportGenerating(false);
                 resolve();
                 return;
@@ -520,6 +629,7 @@ function UploadPageContent() {
                 clearInterval(poll);
                 setReportProgress(100);
                 setReportStatus("报告生成完成！");
+                markTimelineCompleted("报告生成完成");
                 setReportGenerating(false);
                 resolve();
                 return;
@@ -530,6 +640,7 @@ function UploadPageContent() {
             clearInterval(poll);
             setReportProgress(100);
             setReportStatus("分析已在后台进行，稍后可查看报告");
+            markTimelineCompleted("超时转后台继续");
             setReportGenerating(false);
             resolve();
           }
@@ -877,6 +988,33 @@ function UploadPageContent() {
                 })}
               </ol>
               <p className="mt-2 text-xs italic text-blue-700">{reportStatus}</p>
+
+              {Object.keys(stepTimeline).length > 0 && (
+                <div className="mt-3 rounded-lg border border-blue-200 bg-white/70 p-3">
+                  <p className="mb-2 text-xs font-semibold text-blue-900">步骤时间线日志</p>
+                  <div className="space-y-1.5 text-[11px] text-blue-900">
+                    {[1, 2, 3, 4, 5].map((step) => {
+                      const item = stepTimeline[step];
+                      if (!item) {
+                        return (
+                          <div key={step} className="grid grid-cols-[48px_1fr] gap-2 opacity-50">
+                            <span>步骤{step}</span>
+                            <span>{STEP_LABELS[step]}：未开始</span>
+                          </div>
+                        );
+                      }
+                      return (
+                        <div key={step} className="grid grid-cols-[48px_1fr] gap-2">
+                          <span>步骤{step}</span>
+                          <span>
+                            {item.label} | 开始 {formatClock(item.startAt)} | 完成 {formatClock(item.endAt)} | 耗时 {formatElapsed(item.startAt, item.endAt)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
