@@ -14,7 +14,7 @@ platform_service = PlatformService()
 @router.post("/emr/generate")
 def generate_emr_endpoint(request: EmrGenerateRequest):
     try:
-        return emr_service.create_emr(request.record_id)
+        return emr_service.create_emr(request.record_id, force=bool(request.force))
     except FileNotFoundError as exc:
         detail = exc.args[0] if exc.args else "record_not_found"
         raise HTTPException(status_code=404, detail=detail) from exc
