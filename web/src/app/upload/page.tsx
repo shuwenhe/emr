@@ -485,6 +485,34 @@ function UploadPageContent() {
         const start = Date.now();
         const poll = setInterval(async () => {
           try {
+            const progressRes = await fetch(`${API_BACKEND_BASE}/events/ingest-progress/${recordId}/latest`);
+            if (progressRes.ok) {
+              const progressData = await progressRes.json() as {
+                step?: number;
+                label?: string;
+                pct?: number;
+                status?: string;
+              };
+              const pct = Number(progressData.pct ?? 0);
+              if (Number.isFinite(pct)) {
+                setReportProgress(Math.max(0, Math.min(100, pct)));
+              }
+              if (typeof progressData.label === "string" && progressData.label.trim()) {
+                setReportStatus(progressData.label);
+              }
+              if (typeof progressData.step === "number") {
+                setCurrentStep(progressData.step);
+              }
+              if (progressData.status === "complete" || pct >= 100) {
+                clearInterval(poll);
+                setReportProgress(100);
+                setReportStatus("报告生成完成！");
+                setReportGenerating(false);
+                resolve();
+                return;
+              }
+            }
+
             const res = await fetch(`${API_BACKEND_BASE}/emr?record_id=${recordId}`);
             if (res.ok) {
               const d = await res.json() as { emr_id?: string };
