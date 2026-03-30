@@ -3,12 +3,39 @@ from __future__ import annotations
 import asyncio
 import json
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
 
 router = APIRouter(tags=["events"])
+
+_INGEST_PROGRESS_CACHE_DIR = Path("/tmp/emr_ingest_progress")
+_INGEST_PROGRESS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _progress_cache_path(record_id: str) -> Path:
+    safe = "".join(ch for ch in record_id if ch.isalnum() or ch in ("-", "_"))
+    return _INGEST_PROGRESS_CACHE_DIR / f"{safe}.json"
+
+
+def _write_progress_cache(record_id: str, payload: dict[str, Any]) -> None:
+    path = _progress_cache_path(record_id)
+    tmp_path = path.with_suffix(path.suffix + ".tmp")
+    tmp_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+    tmp_path.replace(path)
+
+
+def _read_progress_cache(record_id: str) -> dict[str, Any] | None:
+    path = _progress_cache_path(record_id)
+    if not path.exists() or not path.is_file():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    return payload if isinstance(payload, dict) else None
 
 
 class _PatientEventBroker:
@@ -103,6 +130,8 @@ class _IngestProgressBroker:
         async with self._lock:
             self._subscribers.setdefault(record_id, set()).add(queue)
             last = self._last_event.get(record_id)
+        if not isinstance(last, dict):
+            last = _read_progress_cache(record_id)
         # Replay the most recent event so the frontend never sees a blank bar
         if last:
             try:
@@ -125,6 +154,7 @@ class _IngestProgressBroker:
         async with self._lock:
             self._last_event[record_id] = payload  # cache for late subscribers
             queues = list(self._subscribers.get(record_id, set()))
+        _write_progress_cache(record_id, payload)
         for queue in queues:
             try:
                 queue.put_nowait(message)
@@ -134,7 +164,10 @@ class _IngestProgressBroker:
     async def latest(self, record_id: str) -> dict[str, Any] | None:
         async with self._lock:
             cached = self._last_event.get(record_id)
-        return dict(cached) if isinstance(cached, dict) else None
+        if isinstance(cached, dict):
+            return dict(cached)
+        disk_cached = _read_progress_cache(record_id)
+        return dict(disk_cached) if isinstance(disk_cached, dict) else None
 
 
 _ingest_broker = _IngestProgressBroker()
@@ -178,6 +211,11 @@ async def ingest_progress_events(record_id: str, request: Request):
     queue = await _ingest_broker.subscribe(record_id)
 
     async def event_generator():
+        last_sent_ts = ""
+
+        def _payload_ts(payload: dict[str, Any]) -> str:
+            return str(payload.get("ts") or "")
+
         try:
             ready_payload = json.dumps(
                 {"record_id": record_id, "status": "connected"}, separators=(",", ":")
@@ -188,10 +226,28 @@ async def ingest_progress_events(record_id: str, request: Request):
                     break
                 try:
                     message = await asyncio.wait_for(queue.get(), timeout=20)
+                    try:
+                        parts = str(message).split("data:", 1)
+                        if len(parts) == 2:
+                            payload = json.loads(parts[1].strip())
+                            if isinstance(payload, dict):
+                                ts = _payload_ts(payload)
+                                if ts:
+                                    last_sent_ts = ts
+                    except Exception:
+                        pass
                     yield message
                 except asyncio.TimeoutError:
                     if await request.is_disconnected():
                         break
+                    latest = await _ingest_broker.latest(record_id)
+                    if isinstance(latest, dict):
+                        ts = _payload_ts(latest)
+                        if ts and ts != last_sent_ts:
+                            last_sent_ts = ts
+                            replay = f"event: progress\ndata: {json.dumps(latest, separators=(',', ':'))}\n\n"
+                            yield replay
+                            continue
                     yield ": keepalive\n\n"
                 except asyncio.CancelledError:
                     break
