@@ -173,10 +173,10 @@ def _severity_from_value(value: Any) -> str:
     return "轻"
 
 
-_ADVICE_NUM_RE = re.compile(r"^\s*(?:\d+[.、。)）]\s*)+")
+_ADVICE_NUM_RE = re.compile(r"^\s*(?:(?:\d+|[０-９]+|[一二三四五六七八九十]+)[.、。)）]\s*)+")
 _ADVICE_REF_RE = re.compile(r"\[(?:\s*\d+\s*(?:,\s*\d+\s*)*)\]")
 _ADVICE_NOISE_RE = re.compile(r"\[\s*['\"]?\s*['\"]?(?:\s*,\s*['\"]?\s*['\"]?)*\s*\]")
-_LEADING_BULLET_RE = re.compile(r"^\s*[·•]\s*")
+_LEADING_BULLET_RE = re.compile(r"^\s*[·•●○・]\s*")
 _KB_SECTION_TITLE_RE = re.compile(r"异常解读")
 _KB_REGION_TITLES = {"头面部", "颈肩部", "脊柱背部", "胸腹部", "四肢部", "综合评估"}
 
@@ -920,7 +920,7 @@ def generate_pdf_report(
                 if _is_kb_heading_line(formatted):
                     story.append(_paragraph(formatted, styles["body"]))
                 else:
-                    story.append(_paragraph(f"{kb_index}. {formatted}", styles["small"]))
+                    story.append(_paragraph(f"{kb_index}、{formatted}", styles["small"]))
                     kb_index += 1
                 story.append(Spacer(1, 1 * mm))
     story.append(PageBreak())
