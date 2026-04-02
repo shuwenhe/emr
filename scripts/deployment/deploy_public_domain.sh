@@ -23,8 +23,8 @@ fi
 
 # Rewrite key vars idempotently.
 sed -i "s#^PUBLIC_DOMAIN=.*#PUBLIC_DOMAIN=${DOMAIN}#" "$ENV_FILE"
-sed -i "s#^NEXT_PUBLIC_SELF_REGISTER_BASE_URL=.*#NEXT_PUBLIC_SELF_REGISTER_BASE_URL=https://${DOMAIN}#" "$ENV_FILE"
-sed -i "s#^PUBLIC_WEB_BASE_URL=.*#PUBLIC_WEB_BASE_URL=https://${DOMAIN}#" "$ENV_FILE"
+sed -i "s#^NEXT_PUBLIC_SELF_REGISTER_BASE_URL=.*#NEXT_PUBLIC_SELF_REGISTER_BASE_URL=https://${DOMAIN}/emr#" "$ENV_FILE"
+sed -i "s#^PUBLIC_WEB_BASE_URL=.*#PUBLIC_WEB_BASE_URL=https://${DOMAIN}/emr#" "$ENV_FILE"
 
 if ! grep -q '^NEXT_PUBLIC_API_URL=' "$ENV_FILE"; then
   echo 'NEXT_PUBLIC_API_URL=/api' >> "$ENV_FILE"
@@ -35,11 +35,11 @@ if ! grep -q '^PUBLIC_DOMAIN=' "$ENV_FILE"; then
 fi
 
 if ! grep -q '^NEXT_PUBLIC_SELF_REGISTER_BASE_URL=' "$ENV_FILE"; then
-  echo "NEXT_PUBLIC_SELF_REGISTER_BASE_URL=https://${DOMAIN}" >> "$ENV_FILE"
+  echo "NEXT_PUBLIC_SELF_REGISTER_BASE_URL=https://${DOMAIN}/emr" >> "$ENV_FILE"
 fi
 
 if ! grep -q '^PUBLIC_WEB_BASE_URL=' "$ENV_FILE"; then
-  echo "PUBLIC_WEB_BASE_URL=https://${DOMAIN}" >> "$ENV_FILE"
+  echo "PUBLIC_WEB_BASE_URL=https://${DOMAIN}/emr" >> "$ENV_FILE"
 fi
 
 echo "[INFO] Using domain: $DOMAIN"
