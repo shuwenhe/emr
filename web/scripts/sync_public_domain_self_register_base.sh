@@ -10,7 +10,7 @@ PUBLIC_DOMAIN="${PUBLIC_DOMAIN:-}"
 
 if [[ -z "$PUBLIC_WEB_BASE_URL" ]]; then
   if [[ -n "$PUBLIC_DOMAIN" ]]; then
-    PUBLIC_WEB_BASE_URL="https://${PUBLIC_DOMAIN}"
+    PUBLIC_WEB_BASE_URL="https://${PUBLIC_DOMAIN}/emr"
   fi
 fi
 
