@@ -31,6 +31,12 @@ type StepTimelineItem = {
   lastStatus?: string;
   lastPct?: number;
 };
+type UploadResponse = {
+  ok: boolean;
+  status: number;
+  data: unknown;
+  rawText?: string;
+};
 
 const API_PROXY_BASE = "/api";
 const API_BACKEND_BASE = API_PROXY_BASE;
@@ -126,7 +132,8 @@ function UploadPageContent() {
   const warmingRetryRef = useRef(0);
   const MAX_WARMING_RETRIES = 200; // 200 × 3 s ≈ 10 min max wait
   const PATIENTS_FETCH_TIMEOUT_MS = 20000;
-  const PATIENTS_FETCH_RETRY_COUNT = 1;
+const PATIENTS_FETCH_RETRY_COUNT = 1;
+const TRANSIENT_UPLOAD_STATUSES = new Set([500, 502, 503, 504]);
 
   function normalizePatientsLoadError(error: unknown): string {
     const message = error instanceof Error ? error.message : String(error || "");
@@ -198,7 +205,7 @@ function UploadPageContent() {
     });
   }
 
-  function uploadFormDataWithProgress(url: string, formData: FormData): Promise<{ ok: boolean; status: number; data: any }> {
+  function uploadFormDataWithProgress(url: string, formData: FormData): Promise<UploadResponse> {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       let receivedNativeProgress = false;
@@ -238,17 +245,39 @@ function UploadPageContent() {
 
       xhr.onload = () => {
         clearFallbackTimer();
-        const raw = xhr.response;
-        const data = typeof raw === "string"
-          ? (() => {
-              try {
-                return JSON.parse(raw);
-              } catch {
-                return {};
-              }
-            })()
-          : (raw || {});
-        resolve({ ok: xhr.status >= 200 && xhr.status < 300, status: xhr.status, data });
+        const rawResponse = xhr.response;
+        let rawText = "";
+        try {
+          rawText = String(xhr.responseText || "").trim();
+        } catch {
+          rawText = "";
+        }
+        let data: unknown = rawResponse ?? {};
+
+        // Some proxies return text/html for 5xx, so keep best-effort parsing.
+        if (typeof rawResponse === "string") {
+          const textPayload = rawResponse.trim();
+          if (textPayload) {
+            try {
+              data = JSON.parse(textPayload);
+            } catch {
+              data = textPayload;
+            }
+          }
+        } else if (rawResponse == null && rawText) {
+          try {
+            data = JSON.parse(rawText);
+          } catch {
+            data = rawText;
+          }
+        }
+
+        resolve({
+          ok: xhr.status >= 200 && xhr.status < 300,
+          status: xhr.status,
+          data,
+          rawText,
+        });
       };
 
       xhr.onerror = () => {
@@ -265,6 +294,92 @@ function UploadPageContent() {
       };
       xhr.send(formData);
     });
+  }
+
+  function extractUploadErrorDetail(data: unknown): string {
+    if (typeof data === "string") return data;
+    if (!data || typeof data !== "object") return "";
+    const record = data as Record<string, unknown>;
+    if (typeof record.detail === "string") return record.detail;
+    if (record.detail !== undefined) {
+      try {
+        return JSON.stringify(record.detail);
+      } catch {
+        // ignore stringify errors
+      }
+    }
+    if (typeof record.error === "string") return record.error;
+    if (record.error !== undefined) {
+      try {
+        return JSON.stringify(record.error);
+      } catch {
+        // ignore stringify errors
+      }
+    }
+    return "";
+  }
+
+  function isBackendUnavailableMessage(message: string): boolean {
+    return /backend_unreachable|econnrefused|fetch failed|proxy_failed|network/i.test(message);
+  }
+
+  function normalizeUploadFailure(
+    status: number,
+    data: unknown,
+    isBatch: boolean,
+    rawText?: string
+  ): string {
+    const detail = extractUploadErrorDetail(data).trim();
+    const raw = String(rawText || "").trim();
+    if (isBackendUnavailableMessage(detail)) {
+      return "上传服务暂不可用，请确认后端服务已启动（默认端口 8000）后重试";
+    }
+    if (status === 413) {
+      return "上传文件过大，请减少单次上传文件大小后重试";
+    }
+    if (detail) {
+      return detail;
+    }
+    if (raw) {
+      return `${isBatch ? "批量上传失败" : "上传失败"}（HTTP ${status}）: ${raw.slice(0, 240)}`;
+    }
+    return `${isBatch ? "批量上传失败" : "上传失败"}（HTTP ${status}）`;
+  }
+
+  async function uploadWithRetry(
+    url: string,
+    formData: FormData,
+    isBatch: boolean
+  ): Promise<UploadResponse> {
+    const maxRetries = 1;
+    let lastError: unknown;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+      try {
+        const response = await uploadFormDataWithProgress(url, formData);
+        if (response.ok) {
+          return response;
+        }
+        if (!TRANSIENT_UPLOAD_STATUSES.has(response.status) || attempt >= maxRetries) {
+          return response;
+        }
+      } catch (error) {
+        lastError = error;
+        if (attempt >= maxRetries) {
+          throw error;
+        }
+      }
+
+      setUploadStatus(
+        `${isBatch ? "批量" : ""}上传连接中断，正在自动重试... (${attempt + 1}/${maxRetries + 1})`
+      );
+      await new Promise((resolve) => window.setTimeout(resolve, 800));
+    }
+
+    if (lastError) {
+      throw lastError;
+    }
+    throw new Error("上传失败");
   }
 
   useEffect(() => {
@@ -499,13 +614,14 @@ function UploadPageContent() {
         formData.append("metadata", JSON.stringify(metadata));
 
         // Use same-origin API proxy so browser side does not depend on localhost:8000.
-        const response = await uploadFormDataWithProgress(`${API_BACKEND_BASE}/ingest`, formData);
+        const response = await uploadWithRetry(`${API_BACKEND_BASE}/ingest`, formData, false);
         if (!response.ok) {
-          setResult({ error: response.data?.detail || `上传失败（HTTP ${response.status}）` });
+          setResult({ error: normalizeUploadFailure(response.status, response.data, false, response.rawText) });
           setUploading(false);
           return;
         }
-        record_id = response.data.record_id;
+        const payload = response.data as Record<string, unknown>;
+        record_id = String(payload.record_id || "").trim();
       } else {
         // Multiple files — use /ingest/batch, one record + one report for all files
         const formData = new FormData();
@@ -515,13 +631,20 @@ function UploadPageContent() {
         formData.append("metadata", JSON.stringify(metadata));
 
         // Use same-origin API proxy so browser side does not depend on localhost:8000.
-        const response = await uploadFormDataWithProgress(`${API_BACKEND_BASE}/ingest/batch`, formData);
+        const response = await uploadWithRetry(`${API_BACKEND_BASE}/ingest/batch`, formData, true);
         if (!response.ok) {
-          setResult({ error: response.data?.detail || `批量上传失败（HTTP ${response.status}）` });
+          setResult({ error: normalizeUploadFailure(response.status, response.data, true, response.rawText) });
           setUploading(false);
           return;
         }
-        record_id = response.data.record_id;
+        const payload = response.data as Record<string, unknown>;
+        record_id = String(payload.record_id || "").trim();
+      }
+
+      if (!record_id) {
+        setResult({ error: "上传成功但未返回 record_id，请稍后重试" });
+        setUploading(false);
+        return;
       }
 
       setUploadProgress(100);
@@ -539,7 +662,12 @@ function UploadPageContent() {
       setResult({ record_id });
       flashSuccessButton();
     } catch (error) {
-      setResult({ error: `上传失败: ${String(error)}` });
+      const message = String(error ?? "");
+      setResult({
+        error: isBackendUnavailableMessage(message)
+          ? "上传服务暂不可用，请确认后端服务已启动（默认端口 8000）后重试"
+          : `上传失败: ${message}`,
+      });
       setUploadStatus("上传失败");
       setUploading(false);
     }
@@ -547,6 +675,7 @@ function UploadPageContent() {
 
   function checkReportGeneration(recordId: string): Promise<void> {
     return new Promise((resolve) => {
+      let settled = false;
       setReportProgress(10);
       setCurrentStep(1);
       setReportStatus("数据上传完成，后台开始分析...");
@@ -562,30 +691,81 @@ function UploadPageContent() {
       });
 
       const source = new EventSource(`${API_BACKEND_BASE}/events/ingest-progress/${recordId}`);
+      let reconcileTimer: number | null = null;
 
-      const timeoutId = window.setTimeout(() => {
+      const finish = (finalStatus?: string, finalProgress?: number) => {
+        if (settled) return;
+        settled = true;
         source.close();
-        setReportProgress(100);
-        setReportStatus("分析已在后台进行，稍后可查看报告");
+        if (reconcileTimer) {
+          clearInterval(reconcileTimer);
+          reconcileTimer = null;
+        }
+        if (typeof finalProgress === "number") {
+          setReportProgress(Math.max(0, Math.min(100, finalProgress)));
+        }
+        if (finalStatus) {
+          setReportStatus(finalStatus);
+        }
         setReportGenerating(false);
         resolve();
+      };
+
+      const applyProgressPayload = (data: IngestProgressEvent) => {
+        const pct = Number(data.pct ?? 0);
+        if (Number.isFinite(pct)) {
+          setReportProgress(Math.max(0, Math.min(100, pct)));
+        }
+        if (typeof data.label === "string" && data.label.trim()) {
+          setReportStatus(data.label);
+        }
+        setCurrentStep(Number(data.step ?? 0));
+        applyProgressToTimeline(data);
+        return { pct, done: data.status === "complete" || pct >= 100 };
+      };
+
+      const fetchLatestProgress = async () => {
+        try {
+          const progressRes = await fetch(`${API_BACKEND_BASE}/events/ingest-progress/${recordId}/latest`);
+          if (!progressRes.ok) return false;
+          const progressData = await progressRes.json() as IngestProgressEvent;
+          const { done } = applyProgressPayload(progressData);
+          if (done) {
+            setReportProgress(100);
+            markTimelineCompleted("报告生成完成");
+            finish("报告生成完成！", 100);
+            return true;
+          }
+        } catch {
+          // ignore transient reconciliation failures
+        }
+        return false;
+      };
+
+      // Reconcile periodically even when SSE stays connected but misses progress events.
+      void fetchLatestProgress();
+      reconcileTimer = window.setInterval(() => {
+        void fetchLatestProgress();
+      }, 5000);
+
+      const timeoutId = window.setTimeout(() => {
+        void (async () => {
+          const done = await fetchLatestProgress();
+          if (!done) {
+            finish("分析仍在后台进行，当前页面已停止同步，可稍后在病历页查看最新状态");
+          }
+        })();
       }, 90_000);
 
       source.addEventListener("progress", (e: MessageEvent) => {
         try {
           const data = JSON.parse(e.data) as IngestProgressEvent;
-          const pct = Number(data.pct ?? 0);
-          setReportProgress(Number.isFinite(pct) ? pct : 0);
-          setReportStatus(data.label ?? "");
-          setCurrentStep(data.step ?? 0);
-          applyProgressToTimeline(data);
-          if (pct >= 100 || data.status === "complete") {
+          const { done } = applyProgressPayload(data);
+          if (done) {
             clearTimeout(timeoutId);
-            source.close();
             setReportProgress(100);
             markTimelineCompleted("全部分析完成");
-            setReportGenerating(false);
-            resolve();
+            finish(undefined, 100);
           }
         } catch {
           // ignore parse errors
@@ -608,42 +788,22 @@ function UploadPageContent() {
               if (typeof progressData.label === "string" && progressData.label.trim()) {
                 setReportStatus(progressData.label);
               }
-              if (typeof progressData.step === "number") {
-                setCurrentStep(progressData.step);
-              }
+              setCurrentStep(Number(progressData.step ?? 0));
               applyProgressToTimeline(progressData);
               if (progressData.status === "complete" || pct >= 100) {
                 clearInterval(poll);
                 setReportProgress(100);
                 setReportStatus("报告生成完成！");
                 markTimelineCompleted("报告生成完成");
-                setReportGenerating(false);
-                resolve();
+                finish(undefined, 100);
                 return;
               }
             }
 
-            const res = await fetch(`${API_BACKEND_BASE}/emr?record_id=${recordId}`);
-            if (res.ok) {
-              const d = await res.json() as { emr_id?: string };
-              if (d?.emr_id) {
-                clearInterval(poll);
-                setReportProgress(100);
-                setReportStatus("报告生成完成！");
-                markTimelineCompleted("报告生成完成");
-                setReportGenerating(false);
-                resolve();
-                return;
-              }
-            }
           } catch { /* ignore */ }
           if (Date.now() - start > 90_000) {
             clearInterval(poll);
-            setReportProgress(100);
-            setReportStatus("分析已在后台进行，稍后可查看报告");
-            markTimelineCompleted("超时转后台继续");
-            setReportGenerating(false);
-            resolve();
+            finish("分析仍在后台进行，当前页面已停止同步，可稍后在病历页查看最新状态");
           }
         }, 2000);
       };

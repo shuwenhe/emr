@@ -3,6 +3,7 @@ import logging
 import os
 import time
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -10,10 +11,13 @@ from typing import Any, Dict, List, Optional
 from .data_platform import get_emr_by_record_id, save_emr, save_report
 from .config import DATA_DIR, EMR_DIR
 from reports.python import generate_docx_report, generate_pdf_report, generate_template_report
+from reports.python.thermal_label_renderer import render_labeled_thermal_image
 
 
 REPORT_PRIMARY_FORMAT = os.getenv("EMR_REPORT_PRIMARY_FORMAT", "pdf").strip().lower()
 EMR_ENABLE_OPTIONAL_DOCX = os.getenv("EMR_ENABLE_OPTIONAL_DOCX", "1").strip().lower() in {"1", "true", "yes", "on"}
+EMR_REPORT_PARALLEL_ENABLED = os.getenv("EMR_REPORT_PARALLEL_ENABLED", "1").strip().lower() in {"1", "true", "yes", "on"}
+EMR_REPORT_PARALLEL_WORKERS = max(1, int(os.getenv("EMR_REPORT_PARALLEL_WORKERS", "8")))
 
 
 class EmrNotFoundError(FileNotFoundError):
@@ -87,17 +91,42 @@ def _generate_report_outputs(
     primary_format = REPORT_PRIMARY_FORMAT if REPORT_PRIMARY_FORMAT in {"pdf", "docx"} else "pdf"
     generated_at = datetime.now()
 
+    def _run_pdf() -> Optional[Path]:
+        started_at = time.perf_counter()
+        path = generate_pdf_report(report, emr, generated_at=generated_at)
+        logging.info(
+            "[EMR-TIMING] record_id=%s stage=generate_pdf_report elapsed=%.3fs success=%s",
+            emr.get("record_id"),
+            time.perf_counter() - started_at,
+            bool(path),
+        )
+        return path
+
+    def _run_docx() -> Optional[Path]:
+        started_at = time.perf_counter()
+        path = generate_docx_report(report, emr, generated_at=generated_at)
+        logging.info(
+            "[EMR-TIMING] record_id=%s stage=generate_docx_report elapsed=%.3fs success=%s",
+            emr.get("record_id"),
+            time.perf_counter() - started_at,
+            bool(path),
+        )
+        return path
+
     if primary_format == "pdf":
-        if not _has_valid_report_file(emr, "pdf_report_path"):
-            pdf_started_at = time.perf_counter()
+        need_pdf = not _has_valid_report_file(emr, "pdf_report_path")
+        need_docx = EMR_ENABLE_OPTIONAL_DOCX and not _has_valid_report_file(emr, "docx_report_path")
+
+        # Generate PDF and DOCX in parallel when both are missing.
+        if need_pdf and need_docx and EMR_REPORT_PARALLEL_ENABLED:
             try:
-                pdf_path = generate_pdf_report(report, emr, generated_at=generated_at)
-                logging.info(
-                    "[EMR-TIMING] record_id=%s stage=generate_pdf_report elapsed=%.3fs success=%s",
-                    emr.get("record_id"),
-                    time.perf_counter() - pdf_started_at,
-                    bool(pdf_path),
-                )
+                with ThreadPoolExecutor(max_workers=min(2, EMR_REPORT_PARALLEL_WORKERS), thread_name_prefix="emr-report") as pool:
+                    pdf_future = pool.submit(_run_pdf)
+                    docx_future = pool.submit(_run_docx)
+
+                    pdf_path = pdf_future.result()
+                    docx_path = docx_future.result()
+
                 if pdf_path:
                     emr["pdf_report_path"] = str(pdf_path)
                     report["pdf_report_path"] = str(pdf_path)
@@ -105,22 +134,7 @@ def _generate_report_outputs(
                 elif require_primary:
                     emr.setdefault("warnings", []).append("report_pdf_generate_failed")
                     return False
-            except Exception as exc:
-                logging.exception("PDF report generation failed for emr %s: %s", emr.get("emr_id"), exc)
-                emr.setdefault("warnings", []).append("report_pdf_generate_failed")
-                if require_primary:
-                    return False
 
-        if EMR_ENABLE_OPTIONAL_DOCX and not _has_valid_report_file(emr, "docx_report_path"):
-            docx_started_at = time.perf_counter()
-            try:
-                docx_path = generate_docx_report(report, emr, generated_at=generated_at)
-                logging.info(
-                    "[EMR-TIMING] record_id=%s stage=generate_docx_report elapsed=%.3fs success=%s",
-                    emr.get("record_id"),
-                    time.perf_counter() - docx_started_at,
-                    bool(docx_path),
-                )
                 if docx_path:
                     emr["docx_report_path"] = str(docx_path)
                     report["docx_report_path"] = str(docx_path)
@@ -128,19 +142,44 @@ def _generate_report_outputs(
                 else:
                     emr.setdefault("warnings", []).append("report_docx_generate_failed")
             except Exception as exc:
-                logging.exception("DOCX report generation failed for emr %s: %s", emr.get("emr_id"), exc)
+                logging.exception("Parallel report generation failed for emr %s: %s", emr.get("emr_id"), exc)
+                emr.setdefault("warnings", []).append("report_pdf_generate_failed")
                 emr.setdefault("warnings", []).append("report_docx_generate_failed")
+                if require_primary:
+                    return False
+        else:
+            if need_pdf:
+                try:
+                    pdf_path = _run_pdf()
+                    if pdf_path:
+                        emr["pdf_report_path"] = str(pdf_path)
+                        report["pdf_report_path"] = str(pdf_path)
+                        generated_any = True
+                    elif require_primary:
+                        emr.setdefault("warnings", []).append("report_pdf_generate_failed")
+                        return False
+                except Exception as exc:
+                    logging.exception("PDF report generation failed for emr %s: %s", emr.get("emr_id"), exc)
+                    emr.setdefault("warnings", []).append("report_pdf_generate_failed")
+                    if require_primary:
+                        return False
+
+            if need_docx:
+                try:
+                    docx_path = _run_docx()
+                    if docx_path:
+                        emr["docx_report_path"] = str(docx_path)
+                        report["docx_report_path"] = str(docx_path)
+                        generated_any = True
+                    else:
+                        emr.setdefault("warnings", []).append("report_docx_generate_failed")
+                except Exception as exc:
+                    logging.exception("DOCX report generation failed for emr %s: %s", emr.get("emr_id"), exc)
+                    emr.setdefault("warnings", []).append("report_docx_generate_failed")
     else:
         if not _has_valid_report_file(emr, "docx_report_path"):
-            docx_started_at = time.perf_counter()
             try:
-                docx_path = generate_docx_report(report, emr, generated_at=generated_at)
-                logging.info(
-                    "[EMR-TIMING] record_id=%s stage=generate_docx_report elapsed=%.3fs success=%s",
-                    emr.get("record_id"),
-                    time.perf_counter() - docx_started_at,
-                    bool(docx_path),
-                )
+                docx_path = _run_docx()
                 if docx_path:
                     emr["docx_report_path"] = str(docx_path)
                     report["docx_report_path"] = str(docx_path)
@@ -416,12 +455,7 @@ def _refresh_roi_labeled_image(emr: Dict[str, Any]) -> bool:
     if not isinstance(report, dict):
         return False
 
-    # Preserve already-generated ROI labeled image when it exists.
-    # Re-rendering from thermal_marked_image uses a legacy path that can
-    # introduce coordinate drift on some layouts.
     existing_roi_image = _resolve_data_image_path(report.get("thermal_roi_labeled_image"))
-    if existing_roi_image is not None and existing_roi_image.exists() and existing_roi_image.is_file():
-        return False
 
     thermal_images = report.get("thermal_images")
     if isinstance(thermal_images, list):
@@ -433,6 +467,10 @@ def _refresh_roi_labeled_image(emr: Dict[str, Any]) -> bool:
             if candidate is None:
                 continue
             report["thermal_roi_labeled_image"] = item_text
+            try:
+                report["thermal_roi_labeled_rev"] = str(candidate.stat().st_mtime_ns)
+            except Exception:
+                pass
             emr["report"] = report
             return True
 
@@ -460,21 +498,37 @@ def _refresh_roi_labeled_image(emr: Dict[str, Any]) -> bool:
                 if marked is not None:
                     break
     if marked is None:
-        return False
-
-    try:
-        from .analysis import _generate_roi_labeled_image
-    except Exception:
+        if existing_roi_image is not None and existing_roi_image.exists() and existing_roi_image.is_file():
+            try:
+                report["thermal_roi_labeled_rev"] = str(existing_roi_image.stat().st_mtime_ns)
+            except Exception:
+                pass
+            emr["report"] = report
         return False
 
     out_path = DATA_DIR / record_id / "thermal_roi_labeled.png"
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    generated = _generate_roi_labeled_image(str(marked), roi_analysis, out_path)
-    if not generated:
+    generated = render_labeled_thermal_image(
+        marked,
+        {"analysis": {"roi_analysis": roi_analysis}},
+        "roi_labeled",
+        out_path=out_path,
+    )
+    if generated is None:
+        if existing_roi_image is not None and existing_roi_image.exists() and existing_roi_image.is_file():
+            try:
+                report["thermal_roi_labeled_rev"] = str(existing_roi_image.stat().st_mtime_ns)
+            except Exception:
+                pass
+            emr["report"] = report
         return False
 
     relative = str(Path(generated).relative_to(DATA_DIR))
     report["thermal_roi_labeled_image"] = relative
+    try:
+        report["thermal_roi_labeled_rev"] = str(Path(generated).stat().st_mtime_ns)
+    except Exception:
+        pass
 
     thermal_images = report.get("thermal_images")
     if isinstance(thermal_images, list) and relative not in thermal_images:

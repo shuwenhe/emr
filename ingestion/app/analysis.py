@@ -31,6 +31,7 @@ from .config import DATA_DIR
 from .data_platform import get_patient_history, save_plan, save_report
 from .emr import upsert_emr_from_analysis
 from .clickhouse_store import insert_thermal_csv
+from reports.python.thermal_label_renderer import render_labeled_thermal_image
 
 FACIAL_LABEL_OFFSETS = {
     "右眼": (18.0, -12.0),     # 右眼向右上方偏移
@@ -770,70 +771,21 @@ def _generate_roi_labeled_image(
     if not base_image_path:
         logging.info("ROI labeled image: no base_image_path provided")
         return None
-    points = _roi_label_points(roi_analysis)
-    if not points:
+    if not isinstance(roi_analysis, dict) or not isinstance(roi_analysis.get("roi_list"), list):
         logging.info("ROI labeled image: no label points extracted from roi_analysis")
         return None
 
     try:
-        logging.info(f"Generating ROI labeled image with {len(points)} points to {output_path}")
-        cjk_font = _get_cjk_font_prop()
-        image = plt.imread(str(base_image_path))
-        fig, ax = plt.subplots(figsize=(6, 4), dpi=180)
-        ax.imshow(image)
-        ax.axis("off")
-
-        h, w = image.shape[0], image.shape[1]
-        image_name = Path(str(base_image_path)).name.lower()
-        use_thermal_plot_bounds = "thermal_marked" in image_name
-
-        def _pct_to_pixel(x_pct: float, y_pct: float) -> tuple[float, float]:
-            # thermal_marked images include colorbar/margins; map ROI percentages
-            # into the thermal plot window to keep arrows anchored to body regions.
-            if use_thermal_plot_bounds:
-                left, right, top, bottom = 3.0, 72.0, 8.0, 97.0
-                mapped_x = left + (x_pct / 100.0) * (right - left)
-                mapped_y = top + (y_pct / 100.0) * (bottom - top)
-            else:
-                mapped_x = x_pct
-                mapped_y = y_pct
-            return (mapped_x / 100.0) * w, (mapped_y / 100.0) * h
-
-        for point in points:
-            px, py = _pct_to_pixel(point["x"], point["y"])
-            lpx, lpy = _pct_to_pixel(point.get("label_x", point["x"]), point.get("label_y", point["y"]))
-            text = f"{point['name']} {point['mean_c']:.1f}°C"
-            ax.annotate(
-                text,
-                xy=(px, py),
-                xytext=(lpx, lpy),
-                textcoords="data",
-                fontsize=7.5,  # 增大字号便于阅读
-                fontproperties=cjk_font,
-                color="white",
-                ha="center",
-                va="center",
-                arrowprops={
-                    "arrowstyle": "->",  # 使用箭头样式更明确
-                    "color": "#ffffff",
-                    "lw": 1.0,  # 增加线条粗细
-                    "alpha": 0.7,
-                },
-                bbox={
-                    "boxstyle": "round,pad=0.35",  # 增加内边距
-                    "facecolor": "#1e293b",  # 深色背景
-                    "alpha": 0.85,  # 提高不透明度
-                    "edgecolor": "#ffffff",
-                    "linewidth": 0.8,
-                },
-            )
-
-        fig.savefig(str(output_path), bbox_inches="tight", pad_inches=0)
-        plt.close(fig)
-        if output_path.exists() and output_path.is_file():
-            logging.info(f"ROI labeled image generated successfully: {output_path}")
-            return str(output_path)
-        logging.warning(f"ROI labeled image file not found after saving: {output_path}")
+        generated = render_labeled_thermal_image(
+            Path(base_image_path),
+            {"analysis": {"roi_analysis": roi_analysis}},
+            "roi_labeled",
+            out_path=output_path,
+        )
+        if generated and Path(generated).exists():
+            logging.info("ROI labeled image generated successfully: %s", generated)
+            return str(generated)
+        logging.warning("ROI labeled image file not found after rendering: %s", output_path)
         return None
     except Exception as exc:
         logging.error(f"generate ROI labeled image failed: {exc}", exc_info=True)
@@ -1032,7 +984,10 @@ def _fallback_roi_analysis(matrix: np.ndarray) -> Dict[str, Any]:
     
     return {
         "roi_list": roi_list,
+        "total_rois": len(roi_list),
+        "hottest_region": roi_list[0]["name"] if roi_list else None,
         "hottest_temp": roi_list[0]["mean_c"] if roi_list else None,
+        "coolest_region": roi_list[-1]["name"] if roi_list else None,
         "coolest_temp": roi_list[-1]["mean_c"] if roi_list else None,
     }
 
@@ -1240,6 +1195,12 @@ def analyze_record(
         if enable_roi:
             roi_analysis = _analyze_roi_regions(payload_path, csv_is_matrix=True)
             logging.info(f"ROI analysis result: {'success' if roi_analysis else 'failed or None'}, has {len(roi_analysis.get('roi_list', [])) if roi_analysis else 0} ROIs")
+            if roi_analysis is None and grid is not None:
+                roi_analysis = _fallback_roi_analysis(grid)
+                logging.info(
+                    "ROI analysis fallback enabled: generated %d fixed ROIs",
+                    len(roi_analysis.get("roi_list", [])) if isinstance(roi_analysis, dict) else 0,
+                )
         else:
             roi_analysis = None
             logging.info("ROI analysis disabled by enable_roi flag")
@@ -1258,22 +1219,23 @@ def analyze_record(
                 image_paths.append(str(relative_path))
                 temperature_labels = _extract_temperature_labels(marked_image_path)
 
-        # 如果有ROI分析结果，直接基于温度矩阵绘制带标签热图，避免在已加边距图片上二次贴标导致偏移
-        if grid is not None and roi_analysis:
-            logging.info("Generating ROI labeled image directly from thermal grid")
-            roi_labeled_image_path = _generate_marked_image(
-                grid,
-                record_dir / "thermal_roi_labeled.png",
-                roi_analysis=roi_analysis,
-                draw_roi_labels=True,
+        # Web 图和 PDF 图统一使用同一套标签渲染逻辑，减少坐标与样式差异。
+        if base_marked_image_path and roi_analysis:
+            logging.info("Generating ROI labeled image with shared renderer")
+            labeled = render_labeled_thermal_image(
+                Path(base_marked_image_path),
+                {"analysis": {"roi_analysis": roi_analysis}},
+                "roi_labeled",
+                out_path=record_dir / "thermal_roi_labeled.png",
             )
+            roi_labeled_image_path = str(labeled) if labeled else None
             if roi_labeled_image_path:
                 llm_image_paths.append(str(Path(roi_labeled_image_path)))
                 relative_roi_path = Path(roi_labeled_image_path).relative_to(DATA_DIR)
                 image_paths.append(str(relative_roi_path))
         else:
             logging.info(
-                f"Skipping ROI labeled image: grid={bool(grid is not None)}, roi_analysis={bool(roi_analysis)}"
+                f"Skipping ROI labeled image: marked={bool(base_marked_image_path)}, roi_analysis={bool(roi_analysis)}"
             )
 
     capture_time = (metadata.get("capture") or {}).get("capture_time") or datetime.now().isoformat()

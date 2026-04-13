@@ -7,7 +7,7 @@ import sys
 # MySQL 连接配置
 MYSQL_CONFIG = {
     "host": "127.0.0.1",
-    "port": 3306,
+    "port": 33061,
     "user": "hospital",
     "password": "hospital",
     "database": "hospital",

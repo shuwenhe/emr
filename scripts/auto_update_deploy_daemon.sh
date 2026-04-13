@@ -9,6 +9,7 @@ CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo main)"
 BRANCH="${AUTO_DEPLOY_BRANCH:-$CURRENT_BRANCH}"
 INTERVAL_SECONDS="${AUTO_DEPLOY_INTERVAL_SECONDS:-20}"
 ALLOW_DIRTY="${AUTO_DEPLOY_ALLOW_DIRTY:-0}"
+LOCAL_CHANGES_MODE="${AUTO_DEPLOY_LOCAL_CHANGES:-0}"
 
 # Default command deploys backend+web in production compose mode.
 DEFAULT_DEPLOY_COMMAND='docker compose -f docker/docker-compose.prod.yml up -d --build web backend'
@@ -34,6 +35,51 @@ fi
 
 log() {
   printf '[%s] [auto-deploy] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
+}
+
+run_deploy_once() {
+  if [[ -n "$PRE_DEPLOY_COMMAND" ]]; then
+    log "running pre-deploy command"
+    if ! bash -lc "$PRE_DEPLOY_COMMAND"; then
+      log "pre-deploy command failed"
+      return 1
+    fi
+  fi
+
+  log "running deploy command"
+  if ! bash -lc "$DEPLOY_COMMAND"; then
+    log "deploy command failed"
+    return 1
+  fi
+
+  if [[ -n "$CHUNK_HEALTHCHECK_URLS" ]]; then
+    if ! check_chunk_health "$CHUNK_HEALTHCHECK_URLS"; then
+      log "chunk healthcheck failed after deploy, retry deploy command once"
+      if ! bash -lc "$DEPLOY_COMMAND"; then
+        log "retry deploy command failed"
+        return 1
+      fi
+      if ! check_chunk_health "$CHUNK_HEALTHCHECK_URLS"; then
+        log "chunk healthcheck still failing after retry deploy"
+        return 1
+      fi
+    fi
+  fi
+
+  if [[ -n "$POST_DEPLOY_HEALTHCHECK_URL" ]]; then
+    if command -v curl >/dev/null 2>&1; then
+      if curl -fsS "$POST_DEPLOY_HEALTHCHECK_URL" >/dev/null 2>&1; then
+        log "healthcheck ok: ${POST_DEPLOY_HEALTHCHECK_URL}"
+      else
+        log "healthcheck failed: ${POST_DEPLOY_HEALTHCHECK_URL}"
+      fi
+    else
+      log "curl not found, skip healthcheck"
+    fi
+  fi
+
+  log "deploy finished"
+  return 0
 }
 
 check_url_200() {
@@ -83,6 +129,7 @@ check_chunk_health() {
 
 log "watching ${REMOTE}/${BRANCH} every ${INTERVAL_SECONDS}s"
 log "deploy command: ${DEPLOY_COMMAND}"
+log "local changes mode: ${LOCAL_CHANGES_MODE}"
 if [[ -n "$CHUNK_HEALTHCHECK_URLS" ]]; then
   log "chunk healthcheck urls: ${CHUNK_HEALTHCHECK_URLS}"
 fi
@@ -90,7 +137,21 @@ if [[ -n "$POST_DEPLOY_HEALTHCHECK_URL" ]]; then
   log "healthcheck url: ${POST_DEPLOY_HEALTHCHECK_URL}"
 fi
 
+last_local_snapshot="$(git status --porcelain || true)"
+
 while true; do
+  if [[ "$LOCAL_CHANGES_MODE" == "1" ]]; then
+    current_snapshot="$(git status --porcelain || true)"
+    if [[ "$current_snapshot" != "$last_local_snapshot" ]]; then
+      log "local code change detected, starting deploy"
+      if run_deploy_once; then
+        last_local_snapshot="$current_snapshot"
+      fi
+    fi
+    sleep "$INTERVAL_SECONDS"
+    continue
+  fi
+
   # Protect local modifications from being overwritten by default.
   if [[ "$ALLOW_DIRTY" != "1" ]] && [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
     log "tracked local changes detected, skip this cycle (set AUTO_DEPLOY_ALLOW_DIRTY=1 to override)"
@@ -126,50 +187,6 @@ while true; do
     continue
   fi
 
-  if [[ -n "$PRE_DEPLOY_COMMAND" ]]; then
-    log "running pre-deploy command"
-    if ! bash -lc "$PRE_DEPLOY_COMMAND"; then
-      log "pre-deploy command failed"
-      sleep "$INTERVAL_SECONDS"
-      continue
-    fi
-  fi
-
-  log "running deploy command"
-  if ! bash -lc "$DEPLOY_COMMAND"; then
-    log "deploy command failed"
-    sleep "$INTERVAL_SECONDS"
-    continue
-  fi
-
-  if [[ -n "$CHUNK_HEALTHCHECK_URLS" ]]; then
-    if ! check_chunk_health "$CHUNK_HEALTHCHECK_URLS"; then
-      log "chunk healthcheck failed after deploy, retry deploy command once"
-      if ! bash -lc "$DEPLOY_COMMAND"; then
-        log "retry deploy command failed"
-        sleep "$INTERVAL_SECONDS"
-        continue
-      fi
-      if ! check_chunk_health "$CHUNK_HEALTHCHECK_URLS"; then
-        log "chunk healthcheck still failing after retry deploy"
-        sleep "$INTERVAL_SECONDS"
-        continue
-      fi
-    fi
-  fi
-
-  if [[ -n "$POST_DEPLOY_HEALTHCHECK_URL" ]]; then
-    if command -v curl >/dev/null 2>&1; then
-      if curl -fsS "$POST_DEPLOY_HEALTHCHECK_URL" >/dev/null 2>&1; then
-        log "healthcheck ok: ${POST_DEPLOY_HEALTHCHECK_URL}"
-      else
-        log "healthcheck failed: ${POST_DEPLOY_HEALTHCHECK_URL}"
-      fi
-    else
-      log "curl not found, skip healthcheck"
-    fi
-  fi
-
-  log "deploy finished"
+  run_deploy_once || true
   sleep "$INTERVAL_SECONDS"
 done

@@ -174,6 +174,7 @@ def render_labeled_thermal_image(
     base_image: Path,
     report: Dict[str, Any],
     suffix: str,
+    out_path: Optional[Path] = None,
 ) -> Optional[Path]:
     points = build_roi_label_points(report)
     if not points:
@@ -219,11 +220,11 @@ def render_labeled_thermal_image(
                 },
             )
 
-        out_path = base_image.with_name(f"{base_image.stem}_{suffix}{base_image.suffix}")
-        fig.savefig(str(out_path), bbox_inches="tight", pad_inches=0)
+        target_path = out_path or base_image.with_name(f"{base_image.stem}_{suffix}{base_image.suffix}")
+        fig.savefig(str(target_path), bbox_inches="tight", pad_inches=0)
         plt.close(fig)
-        if out_path.exists() and out_path.is_file():
-            return out_path
+        if target_path.exists() and target_path.is_file():
+            return target_path
         return base_image
     except Exception as exc:
         logging.debug("render labeled thermal image failed: %s", exc)

@@ -3,14 +3,18 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import re
 import time
+from concurrent.futures import ThreadPoolExecutor
+from functools import partial
 from pathlib import Path
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from typing import List
 
 from models.schemas.api import AnalyzeRequest, DeviceIngestRequest, DispatchRequest, IngestMetadata
+from core.exceptions import ValidationError as CoreValidationError
 from service.ai import AIService
 from service.analysis import AnalysisService
 from service.emr import EMRService
@@ -23,6 +27,8 @@ logger = logging.getLogger(__name__)
 backend_display_logger = logging.getLogger("uvicorn.error")
 
 _DETACHED_INGEST_TASKS: set[asyncio.Task[None]] = set()
+_PIPELINE_WORKERS = max(1, int(os.getenv("EMR_PIPELINE_WORKERS", "8")))
+_PIPELINE_EXECUTOR = ThreadPoolExecutor(max_workers=_PIPELINE_WORKERS, thread_name_prefix="emr-pipeline")
 
 ALLOWED_EXTENSIONS = {".csv", ".dat"}
 ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif"}
@@ -32,6 +38,14 @@ analysis_service = AnalysisService()
 ingestion_service = IngestionService()
 emr_service = EMRService()
 treatment_service = TreatmentService()
+
+
+async def _run_pipeline_task(func, *args, **kwargs):
+    """Run heavy sync tasks on a dedicated pool to leverage multi-core hosts."""
+    loop = asyncio.get_running_loop()
+    if kwargs:
+        return await loop.run_in_executor(_PIPELINE_EXECUTOR, partial(func, *args, **kwargs))
+    return await loop.run_in_executor(_PIPELINE_EXECUTOR, func, *args)
 
 
 def _strip_numeric_citations(text: str) -> str:
@@ -76,6 +90,22 @@ def _validate_size(file_bytes: bytes) -> None:
     max_bytes = MAX_FILE_MB * 1024 * 1024
     if len(file_bytes) > max_bytes:
         raise HTTPException(status_code=400, detail="file_too_large")
+
+async def _read_upload_with_limit(upload: UploadFile, *, max_bytes: int) -> bytes:
+    """Read upload content with a hard size cap to avoid OOM on large batches."""
+    chunk_size = 1024 * 1024  # 1MB
+    buffer = bytearray()
+    while True:
+        chunk = await upload.read(chunk_size)
+        if not chunk:
+            break
+        buffer.extend(chunk)
+        if len(buffer) > max_bytes:
+            raise HTTPException(
+                status_code=413,
+                detail=f"file_too_large: {upload.filename}",
+            )
+    return bytes(buffer)
 
 
 def _persist_ai_result(record_id: str, analysis_result: dict, emr_result: dict, ai_result: dict) -> dict:
@@ -158,7 +188,7 @@ async def _generate_report_after_ingest(record_id: str, metadata: dict | None = 
     try:
         _log_pipeline_step(logging.INFO, "[步骤2] 热成像分析 开始 record_id=%s", record_id)
         t0 = time.time()
-        analysis_result = await asyncio.to_thread(analysis_service.analyze_record, record_id) or {}
+        analysis_result = await _run_pipeline_task(analysis_service.analyze_record, record_id) or {}
         elapsed = time.time() - t0
         risk = (analysis_result.get("report") or {}).get("analysis", {}).get("risk_level", "unknown")
         _log_pipeline_step(logging.INFO, "[步骤2] 热成像分析 完成 record_id=%s risk_level=%s 耗时=%.2fs", record_id, risk, elapsed)
@@ -172,7 +202,7 @@ async def _generate_report_after_ingest(record_id: str, metadata: dict | None = 
     try:
         _log_pipeline_step(logging.INFO, "[步骤3] 电子病历生成 开始 record_id=%s", record_id)
         t0 = time.time()
-        emr_result = await asyncio.to_thread(
+        emr_result = await _run_pipeline_task(
             emr_service.create_emr,
             record_id,
             ensure_report_outputs=False,
@@ -196,15 +226,15 @@ async def _generate_report_after_ingest(record_id: str, metadata: dict | None = 
     try:
         _log_pipeline_step(logging.INFO, "[步骤4] AI报告生成 开始 record_id=%s", record_id)
         t0 = time.time()
-        ai_result = await asyncio.to_thread(ai_service.generate_report_summary, analysis_result, emr_result) or {}
+        ai_result = await _run_pipeline_task(ai_service.generate_report_summary, analysis_result, emr_result) or {}
         if ai_result and emr_result:
-            emr_result = await asyncio.to_thread(_persist_ai_result, record_id, analysis_result, emr_result, ai_result)
+            emr_result = await _run_pipeline_task(_persist_ai_result, record_id, analysis_result, emr_result, ai_result)
 
         # Even when AI is disabled or returns empty content, we still need
         # report files for history list and preview pages.
         if emr_result and not _has_report_output(emr_result):
             try:
-                emr_result = await asyncio.to_thread(
+                emr_result = await _run_pipeline_task(
                     emr_service.create_emr,
                     record_id,
                     ensure_report_outputs=True,
@@ -219,7 +249,7 @@ async def _generate_report_after_ingest(record_id: str, metadata: dict | None = 
     except Exception as exc:
         _log_pipeline_step(logging.ERROR, "[步骤4] AI报告生成 失败 record_id=%s error=%s", record_id, exc, exc_info=True)
         try:
-            emr_result = await asyncio.to_thread(
+            emr_result = await _run_pipeline_task(
                 emr_service.create_emr,
                 record_id,
                 ensure_report_outputs=True,
@@ -233,7 +263,7 @@ async def _generate_report_after_ingest(record_id: str, metadata: dict | None = 
     try:
         _log_pipeline_step(logging.INFO, "[步骤5] 治疗方案生成 开始 record_id=%s", record_id)
         t0 = time.time()
-        plan = await asyncio.to_thread(treatment_service.generate_treatment_plan, analysis_result, patient) or {}
+        plan = await _run_pipeline_task(treatment_service.generate_treatment_plan, analysis_result, patient) or {}
         elapsed = time.time() - t0
         risk_out = plan.get("risk_level", "unknown")
         _log_pipeline_step(logging.INFO, "[步骤5] 治疗方案生成 完成 record_id=%s risk_level=%s 耗时=%.2fs", record_id, risk_out, elapsed)
@@ -276,19 +306,24 @@ async def ingest(
         logger.warning("[步骤1] 数据采集 元数据解析失败 filename=%s error=%s", file.filename, exc)
         raise HTTPException(status_code=400, detail="invalid_metadata") from exc
 
-    file_bytes = await file.read()
+    file_bytes = await _read_upload_with_limit(file, max_bytes=MAX_FILE_MB * 1024 * 1024)
     file_size_kb = len(file_bytes) / 1024
     logger.info("[步骤1] 数据采集 文件大小=%.1fKB patient=%s", file_size_kb, parsed.name if hasattr(parsed, 'name') else '未知')
-    _validate_size(file_bytes)
 
     tmp_file = Path("/tmp") / file.filename
     tmp_file.write_bytes(file_bytes)
-    record_id = await asyncio.to_thread(
-        ingestion_service.ingest_data,
-        tmp_file,
-        parsed.model_dump(),
-        validate=True,
-    )
+    try:
+        record_id = await _run_pipeline_task(
+            ingestion_service.ingest_data,
+            tmp_file,
+            parsed.model_dump(),
+            validate=True,
+        )
+    except CoreValidationError as exc:
+        detail = exc.message or (exc.args[0] if exc.args else "ingest_failed")
+        if exc.details:
+            logger.warning("[步骤1] 校验失败 details=%s", exc.details)
+        raise HTTPException(status_code=422, detail=detail) from exc
     result = {"record_id": record_id, "storage_path": None, "matrix_csv_path": None}
 
     # Seed the progress cache (step 1, 5%) so the frontend receives an immediate
@@ -344,29 +379,22 @@ async def ingest_batch(
     if not data_files:
         raise HTTPException(status_code=400, detail="no_supported_data_file_in_batch")
 
-    # Check sizes
-    for f in files:
-        content = await f.read()
-        await f.seek(0)
-        if len(content) > MAX_FILE_MB * 1024 * 1024:
-            raise HTTPException(status_code=400, detail=f"file_too_large: {f.filename}")
-
     # Read primary data file
     primary_upload = data_files[0]
-    primary_bytes = await primary_upload.read()
+    primary_bytes = await _read_upload_with_limit(primary_upload, max_bytes=MAX_FILE_MB * 1024 * 1024)
     tmp_primary = Path("/tmp") / primary_upload.filename
     tmp_primary.write_bytes(primary_bytes)
 
     # Read extra data files
     extra_data: list[tuple] = []
     for extra_upload in data_files[1:]:
-        extra_bytes = await extra_upload.read()
+        extra_bytes = await _read_upload_with_limit(extra_upload, max_bytes=MAX_FILE_MB * 1024 * 1024)
         extra_data.append((extra_upload.filename, extra_bytes))
 
     # Read image files
     image_data: list[tuple] = []
     for img_upload in image_files_upload:
-        img_bytes = await img_upload.read()
+        img_bytes = await _read_upload_with_limit(img_upload, max_bytes=MAX_FILE_MB * 1024 * 1024)
         image_data.append((img_upload.filename, img_bytes))
 
     logger.info(
@@ -376,7 +404,7 @@ async def ingest_batch(
     t0 = time.time()
 
     try:
-        record_id = await asyncio.to_thread(
+        record_id = await _run_pipeline_task(
             ingestion_service.ingest_batch,
             tmp_primary,
             parsed.model_dump(),
@@ -384,9 +412,16 @@ async def ingest_batch(
             image_files=image_data or None,
             validate=True,
         )
+    except CoreValidationError as exc:
+        detail = exc.message or (exc.args[0] if exc.args else "ingest_batch_failed")
+        if exc.details:
+            logger.warning("[步骤1-批量] 校验失败 details=%s", exc.details)
+        raise HTTPException(status_code=422, detail=detail) from exc
+    except HTTPException:
+        raise
     except Exception as exc:
         detail = exc.args[0] if exc.args else "ingest_batch_failed"
-        raise HTTPException(status_code=422, detail=detail) from exc
+        raise HTTPException(status_code=500, detail=detail) from exc
 
     _start_detached_ingest_pipeline(record_id, parsed.model_dump())
 

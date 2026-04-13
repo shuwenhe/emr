@@ -5,13 +5,32 @@ import requests
 import json
 from typing import Optional
 import sys
+from pathlib import Path
+import yaml
 
-# ClickHouse 配置
+# Load ClickHouse config from repo config/clickhouse.yaml when available
 CLICKHOUSE_HOST = "127.0.0.1"
 CLICKHOUSE_PORT = 8123  # HTTP 接口端口
 CLICKHOUSE_USER = "hospital"
 CLICKHOUSE_PASSWORD = "hospital"
 CLICKHOUSE_DB = "hospital"
+
+cfg_path = Path(__file__).resolve().parents[1] / "config" / "clickhouse.yaml"
+if cfg_path.exists():
+    try:
+        cfg = yaml.safe_load(cfg_path.read_text(encoding="utf-8")) or {}
+        ck = cfg.get("clickhouse", {})
+        CLICKHOUSE_HOST = ck.get("host", CLICKHOUSE_HOST)
+        # HTTP port is usually 8123; if config port equals tcp port (9000), keep 8123 for HTTP
+        configured_port = ck.get("port")
+        if configured_port and int(configured_port) != 9000:
+            # If user explicitly set an HTTP port, use it; otherwise keep default 8123
+            CLICKHOUSE_PORT = int(configured_port)
+        CLICKHOUSE_USER = ck.get("user", CLICKHOUSE_USER)
+        CLICKHOUSE_PASSWORD = ck.get("password", CLICKHOUSE_PASSWORD)
+        CLICKHOUSE_DB = ck.get("database", CLICKHOUSE_DB)
+    except Exception:
+        pass
 
 def execute_sql(sql: str, database: Optional[str] = None) -> bool:
     """使用 HTTP 接口执行 SQL"""

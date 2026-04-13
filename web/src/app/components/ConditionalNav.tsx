@@ -21,10 +21,10 @@ export function ConditionalNav() {
   if (pathname.startsWith("/self-register")) return null;
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white">
+    <nav className="sticky top-0 z-50 border-b border-slate-300 bg-slate-100/85 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <Link href="/" className="text-lg font-semibold text-slate-900 hover:text-blue-600">
-          红外热成像诊断平台
+          张氏疼痛外治中心 红外热成像诊断平台
         </Link>
         <div className="flex gap-6">
           {NAV_LINKS.map(({ href, label }) => (

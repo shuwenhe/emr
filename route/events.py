@@ -38,6 +38,48 @@ def _read_progress_cache(record_id: str) -> dict[str, Any] | None:
     return payload if isinstance(payload, dict) else None
 
 
+def _parse_progress_ts(payload: dict[str, Any] | None) -> datetime | None:
+    if not isinstance(payload, dict):
+        return None
+    raw = str(payload.get("ts") or "").strip()
+    if not raw:
+        return None
+    try:
+        if raw.endswith("Z"):
+            raw = raw[:-1] + "+00:00"
+        return datetime.fromisoformat(raw)
+    except Exception:
+        return None
+
+
+def _pick_newer_progress(
+    memory_payload: dict[str, Any] | None,
+    disk_payload: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not isinstance(memory_payload, dict):
+        return dict(disk_payload) if isinstance(disk_payload, dict) else None
+    if not isinstance(disk_payload, dict):
+        return dict(memory_payload)
+
+    memory_ts = _parse_progress_ts(memory_payload)
+    disk_ts = _parse_progress_ts(disk_payload)
+    if memory_ts and disk_ts:
+        return dict(disk_payload if disk_ts > memory_ts else memory_payload)
+    if disk_ts and not memory_ts:
+        return dict(disk_payload)
+    if memory_ts and not disk_ts:
+        return dict(memory_payload)
+
+    # If timestamps are missing/corrupt, prefer the payload with higher step/pct.
+    memory_step = int(memory_payload.get("step") or 0)
+    disk_step = int(disk_payload.get("step") or 0)
+    if disk_step != memory_step:
+        return dict(disk_payload if disk_step > memory_step else memory_payload)
+    memory_pct = int(memory_payload.get("pct") or 0)
+    disk_pct = int(disk_payload.get("pct") or 0)
+    return dict(disk_payload if disk_pct > memory_pct else memory_payload)
+
+
 class _PatientEventBroker:
     def __init__(self) -> None:
         self._subscribers: set[asyncio.Queue[str]] = set()
@@ -129,9 +171,18 @@ class _IngestProgressBroker:
         queue: asyncio.Queue[str] = asyncio.Queue(maxsize=50)
         async with self._lock:
             self._subscribers.setdefault(record_id, set()).add(queue)
-            last = self._last_event.get(record_id)
-        if not isinstance(last, dict):
-            last = _read_progress_cache(record_id)
+            memory_last = self._last_event.get(record_id)
+
+        disk_last = _read_progress_cache(record_id)
+        last = _pick_newer_progress(memory_last, disk_last)
+
+        if isinstance(last, dict):
+            async with self._lock:
+                current = self._last_event.get(record_id)
+                merged = _pick_newer_progress(current, last)
+                if isinstance(merged, dict):
+                    self._last_event[record_id] = merged
+
         # Replay the most recent event so the frontend never sees a blank bar
         if last:
             try:
@@ -163,11 +214,14 @@ class _IngestProgressBroker:
 
     async def latest(self, record_id: str) -> dict[str, Any] | None:
         async with self._lock:
-            cached = self._last_event.get(record_id)
-        if isinstance(cached, dict):
-            return dict(cached)
+            memory_cached = self._last_event.get(record_id)
+
         disk_cached = _read_progress_cache(record_id)
-        return dict(disk_cached) if isinstance(disk_cached, dict) else None
+        latest = _pick_newer_progress(memory_cached, disk_cached)
+        if isinstance(latest, dict):
+            async with self._lock:
+                self._last_event[record_id] = latest
+        return latest
 
 
 _ingest_broker = _IngestProgressBroker()

@@ -1,4 +1,4 @@
-PYTHON ?= python3.12
+PYTHON ?= python3
 VENV_DIR := .venv
 VENV_PY := $(VENV_DIR)/bin/python
 KB_PY := $(if $(wildcard $(VENV_PY)),$(VENV_PY),$(PYTHON))
@@ -118,6 +118,7 @@ help:
 	@echo "  make auto-commit-stop   # stop background auto-commit watcher"
 	@echo "  make auto-commit-status # show watcher status"
 	@echo "  make auto-deploy-install # install+enable user service: emr-auto-deploy"
+	@echo "    默认开启本地代码变更自动部署（AUTO_DEPLOY_LOCAL_CHANGES=1）"
 	@echo "  make auto-deploy-start   # start auto-deploy service"
 	@echo "  make auto-deploy-stop    # stop auto-deploy service"
 	@echo "  make auto-deploy-status  # show auto-deploy service status"
@@ -128,7 +129,7 @@ install:
 	$(PYTHON) -m venv $(VENV_DIR)
 	$(VENV_PY) -m pip install -U pip
 	$(VENV_PY) -m pip install -r requirements/base.txt
-	@bash -c 'cd "$(CURDIR)/web"; if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" && nvm install 20 && nvm use 20; fi; npm install'
+	@bash -c 'cd "$(CURDIR)/web"; if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" && nvm install 20 && nvm use 20; fi; if command -v npm >/dev/null 2>&1; then npm install; else echo "[warn] npm not found, skipping frontend install. Install Node.js/npm to enable frontend build."; fi'
 
 
 service-precheck:
@@ -397,6 +398,25 @@ kb-import-case:
 	@$(MAKE) kb-validate
 
 kb-rebuild: kb-build
+
+
+# Docker-managed MySQL helpers
+.PHONY: docker-mysql-start docker-mysql-stop docker-mysql-status docker-mysql-logs docker-mysql-init
+
+docker-mysql-start:
+	@bash -c 'set -e; echo "Starting docker mysql (compose) ..."; cd "$(CURDIR)/docker"; docker compose -f docker-compose.mysql.yml --env-file .env.mysql up -d'
+
+docker-mysql-stop:
+	@bash -c 'set -e; echo "Stopping docker mysql ..."; cd "$(CURDIR)/docker"; docker compose -f docker-compose.mysql.yml down'
+
+docker-mysql-status:
+	@bash -c 'docker ps --filter name=emr-mysql --format "table {{.ID}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}" || echo "no container"'
+
+docker-mysql-logs:
+	@bash -c 'docker logs -f --tail 200 emr-mysql 2>/dev/null || echo "no logs (container may not exist)"'
+
+docker-mysql-init:
+	@bash -c 'ENV_FILE="$(CURDIR)/docker/.env.mysql"; if [ -f "$${ENV_FILE}" ]; then ROOT_PW="$$(grep -E "^MYSQL_ROOT_PASSWORD=" "$$ENV_FILE" | head -n1 | cut -d= -f2-)"; else ROOT_PW=""; fi; if docker ps -a --filter name=emr-mysql --format "{{.Names}}" | grep -q emr-mysql; then echo "Copying init SQL and executing..."; docker cp "$(CURDIR)/database/init_mysql.sql" emr-mysql:/init_mysql.sql; docker exec -i emr-mysql bash -lc "mysql -u root -p'$$ROOT_PW' < /init_mysql.sql" || echo "init SQL returned non-zero"; else echo "emr-mysql container not found; run 'make docker-mysql-start' first"; fi'
 
 kb-clean:
 	@rm -rf "$(KB_OUT_DIR)/current" "$(KB_OUT_DIR)/versions"

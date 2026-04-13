@@ -176,7 +176,10 @@ def _detect_landmarks_sync(rgb: np.ndarray, model_complexity: int) -> dict[str, 
     try:
         import mediapipe as mp
     except ImportError as exc:
-        raise RuntimeError("未安装 mediapipe，请先执行: pip install mediapipe") from exc
+        raise RuntimeError(
+            f"MediaPipe 导入失败: {exc}. "
+            "若提示 libGL.so.1 缺失，请先安装系统图形依赖后再重试。"
+        ) from exc
 
     h, w, _ = rgb.shape
 

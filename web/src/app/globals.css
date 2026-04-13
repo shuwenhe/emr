@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #d7dbe0;
+  --foreground: #1f2937;
 }
 
 @theme inline {
@@ -12,17 +12,52 @@
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(255, 255, 255, 0.38), transparent 36%),
+    radial-gradient(circle at 88% 0%, rgba(148, 163, 184, 0.22), transparent 42%),
+    linear-gradient(180deg, #e5e7eb 0%, var(--background) 52%, #ced4db 100%);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.min-h-screen.bg-slate-50 {
+  background-color: transparent !important;
+}
+
+/* Global card theme: remap white utility backgrounds to light gray cards. */
+.bg-white {
+  background-color: #edf1f4 !important;
+}
+
+.bg-white\/95 {
+  background-color: rgba(237, 241, 244, 0.95) !important;
+}
+
+.bg-white\/90 {
+  background-color: rgba(237, 241, 244, 0.9) !important;
+}
+
+.bg-white\/85 {
+  background-color: rgba(237, 241, 244, 0.85) !important;
+}
+
+.bg-white\/80 {
+  background-color: rgba(237, 241, 244, 0.8) !important;
+}
+
+.bg-white\/70 {
+  background-color: rgba(237, 241, 244, 0.7) !important;
+}
+
+.hover\:bg-white:hover {
+  background-color: #f0f3f6 !important;
+}
+
+.focus\:bg-white:focus {
+  background-color: #f0f3f6 !important;
 }
 
 .btn-success-flash {

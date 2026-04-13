@@ -3,7 +3,7 @@ import { ConditionalNav } from "./components/ConditionalNav";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "红外热成像诊断平台",
+  title: "张氏疼痛外治中心 红外热成像诊断平台",
   description: "红外热成像诊断与电子病历管理系统",
 };
 

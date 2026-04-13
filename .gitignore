@@ -1,6 +1,11 @@
 **/.venv/
 **/venv/
 .venv-ascend/
+/mp_env/
+
+# ==================== IDE / Editor ====================
+.vscode/
+.idea/
 
 # ==================== Storage (Runtime Data) ====================
 # New unified storage directory
@@ -27,6 +32,7 @@
 # Do NOT ignore source-code directory /reports/.
 /logs/
 /batch_results/
+/.run/
 
 # ==================== Web ====================
 **/node_modules/
