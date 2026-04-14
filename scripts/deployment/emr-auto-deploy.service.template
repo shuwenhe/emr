@@ -8,11 +8,13 @@ Type=simple
 WorkingDirectory=__PROJECT_ROOT__
 Environment=PYTHONUNBUFFERED=1
 Environment=AUTO_DEPLOY_INTERVAL_SECONDS=20
-Environment=AUTO_DEPLOY_LOCAL_CHANGES=1
+Environment=AUTO_DEPLOY_LOCAL_CHANGES=0
 Environment="AUTO_DEPLOY_COMMAND=make service-restart"
 Environment=AUTO_DEPLOY_HEALTHCHECK_RETRIES=3
 Environment=AUTO_DEPLOY_HEALTHCHECK_RETRY_DELAY_SECONDS=5
-Environment=AUTO_DEPLOY_CHUNK_HEALTHCHECK_URLS=http://127.0.0.1:3000/_next/static/chunks/5cac23c690cd48fc.js,http://127.0.0.1:3000/_next/static/chunks/231cf6c1042bcb75.js
+# 关闭前端 chunk 探活，避免前端未启动时触发后端反复重启
+Environment=AUTO_DEPLOY_CHUNK_DISCOVERY_URL=
+Environment=AUTO_DEPLOY_CHUNK_DISCOVERY_LIMIT=0
 ExecStart=/usr/bin/env bash __PROJECT_ROOT__/scripts/auto_update_deploy_daemon.sh
 Restart=always
 RestartSec=5

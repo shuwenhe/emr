@@ -17,6 +17,8 @@ DEPLOY_COMMAND="${AUTO_DEPLOY_COMMAND:-}"
 PRE_DEPLOY_COMMAND="${AUTO_DEPLOY_PRE_COMMAND:-}"
 POST_DEPLOY_HEALTHCHECK_URL="${AUTO_DEPLOY_HEALTHCHECK_URL:-http://127.0.0.1:8000/healthz}"
 CHUNK_HEALTHCHECK_URLS="${AUTO_DEPLOY_CHUNK_HEALTHCHECK_URLS:-}"
+CHUNK_DISCOVERY_URL="${AUTO_DEPLOY_CHUNK_DISCOVERY_URL:-}"
+CHUNK_DISCOVERY_LIMIT="${AUTO_DEPLOY_CHUNK_DISCOVERY_LIMIT:-8}"
 HEALTHCHECK_RETRIES="${AUTO_DEPLOY_HEALTHCHECK_RETRIES:-3}"
 HEALTHCHECK_RETRY_DELAY_SECONDS="${AUTO_DEPLOY_HEALTHCHECK_RETRY_DELAY_SECONDS:-5}"
 
@@ -38,6 +40,8 @@ log() {
 }
 
 run_deploy_once() {
+  local chunk_urls_to_check="$CHUNK_HEALTHCHECK_URLS"
+
   if [[ -n "$PRE_DEPLOY_COMMAND" ]]; then
     log "running pre-deploy command"
     if ! bash -lc "$PRE_DEPLOY_COMMAND"; then
@@ -52,14 +56,24 @@ run_deploy_once() {
     return 1
   fi
 
-  if [[ -n "$CHUNK_HEALTHCHECK_URLS" ]]; then
-    if ! check_chunk_health "$CHUNK_HEALTHCHECK_URLS"; then
+  if [[ -z "$chunk_urls_to_check" && -n "$CHUNK_DISCOVERY_URL" ]]; then
+    chunk_urls_to_check="$(discover_chunk_healthcheck_urls "$CHUNK_DISCOVERY_URL" "$CHUNK_DISCOVERY_LIMIT")"
+    if [[ -n "$chunk_urls_to_check" ]]; then
+      log "chunk healthcheck urls discovered from ${CHUNK_DISCOVERY_URL}"
+    fi
+  fi
+
+  if [[ -n "$chunk_urls_to_check" ]]; then
+    if ! check_chunk_health "$chunk_urls_to_check"; then
       log "chunk healthcheck failed after deploy, retry deploy command once"
       if ! bash -lc "$DEPLOY_COMMAND"; then
         log "retry deploy command failed"
         return 1
       fi
-      if ! check_chunk_health "$CHUNK_HEALTHCHECK_URLS"; then
+      if [[ -z "$CHUNK_HEALTHCHECK_URLS" && -n "$CHUNK_DISCOVERY_URL" ]]; then
+        chunk_urls_to_check="$(discover_chunk_healthcheck_urls "$CHUNK_DISCOVERY_URL" "$CHUNK_DISCOVERY_LIMIT")"
+      fi
+      if ! check_chunk_health "$chunk_urls_to_check"; then
         log "chunk healthcheck still failing after retry deploy"
         return 1
       fi
@@ -87,6 +101,40 @@ check_url_200() {
   local code
   code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 12 "$url" || true)"
   [[ "$code" == "200" ]]
+}
+
+discover_chunk_healthcheck_urls() {
+  local discovery_url="$1"
+  local limit="$2"
+  local origin html chunk_paths
+
+  if [[ -z "$discovery_url" ]]; then
+    return 0
+  fi
+
+  if ! command -v curl >/dev/null 2>&1; then
+    log "curl not found, skip dynamic chunk discovery"
+    return 0
+  fi
+
+  origin="$(printf '%s' "$discovery_url" | sed -E 's#^(https?://[^/]+).*$#\1#')"
+  html="$(curl -fsSL --max-time 12 "$discovery_url" 2>/dev/null || true)"
+  if [[ -z "$html" ]]; then
+    log "chunk discovery failed: unable to fetch ${discovery_url}"
+    return 0
+  fi
+
+  chunk_paths="$(printf '%s' "$html" \
+    | grep -oE '/_next/static/chunks/[^"[:space:]]+\.js' \
+    | sort -u \
+    | head -n "$limit" || true)"
+
+  if [[ -z "$chunk_paths" ]]; then
+    log "chunk discovery found no chunk URLs on ${discovery_url}"
+    return 0
+  fi
+
+  printf '%s\n' "$chunk_paths" | sed "s#^#${origin}#"
 }
 
 check_chunk_health() {
@@ -132,6 +180,8 @@ log "deploy command: ${DEPLOY_COMMAND}"
 log "local changes mode: ${LOCAL_CHANGES_MODE}"
 if [[ -n "$CHUNK_HEALTHCHECK_URLS" ]]; then
   log "chunk healthcheck urls: ${CHUNK_HEALTHCHECK_URLS}"
+elif [[ -n "$CHUNK_DISCOVERY_URL" ]]; then
+  log "chunk healthcheck discovery url: ${CHUNK_DISCOVERY_URL}"
 fi
 if [[ -n "$POST_DEPLOY_HEALTHCHECK_URL" ]]; then
   log "healthcheck url: ${POST_DEPLOY_HEALTHCHECK_URL}"

@@ -2,6 +2,7 @@ services:
   mysql:
     image: mysql:8
     container_name: hospital-mysql
+    profiles: ["mysql"]
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hospital}
       MYSQL_DATABASE: ${MYSQL_DB:-hospital}
@@ -49,13 +50,11 @@ services:
     ports:
       - "${API_PORT:-8000}:8000"
     depends_on:
-      mysql:
-        condition: service_healthy
       report-file-service:
         condition: service_started
     environment:
-      - MYSQL_HOST=mysql
-      - MYSQL_PORT=3306
+      - MYSQL_HOST=${MYSQL_HOST:-host.docker.internal}
+      - MYSQL_PORT=${MYSQL_PORT:-3306}
       - MYSQL_DB=${MYSQL_DB:-hospital}
       - MYSQL_USER=${MYSQL_USER:-hospital}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD:-hospital}
@@ -75,6 +74,8 @@ services:
       retries: 3
     networks:
       - hospital-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
 
   report-file-service:

@@ -74,6 +74,43 @@ SERVICE_NAME=emr-api APP_PORT=8010 APP_MODULE=route.main:app ./scripts/deploymen
 SERVER_NAME=example.com BACKEND_UPSTREAM=127.0.0.1:8000 FRONTEND_UPSTREAM=127.0.0.1:3000 ./scripts/deployment/install_nginx_proxy.sh
 ```
 
+### 502 Bad Gateway 快速排查
+若外网访问首页出现 `502 Bad Gateway (nginx/1.18.0)`，通常是 Nginx 上游进程未启动（尤其是前端 `:3000`）。
+
+1. 检查 Nginx 与后端探针
+
+```bash
+curl -i http://127.0.0.1/nginx-healthz
+curl -i http://127.0.0.1/healthz
+curl -i http://127.0.0.1/readyz
+```
+
+2. 检查端口监听
+
+```bash
+ss -ltnp | grep -E ':80|:8000|:3000'
+```
+
+3. 检查并重启服务（systemd user）
+
+```bash
+systemctl --user status emr-backend emr-frontend --no-pager
+systemctl --user restart emr-backend emr-frontend
+journalctl --user -u emr-frontend -f
+```
+
+4. 重装并重载 Nginx 代理配置
+
+```bash
+cd /home/shuwen/emr
+./scripts/deployment/install_nginx_proxy.sh
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+说明：
+- `/healthz`、`/readyz` 正常但首页 502 时，优先排查 `emr-frontend`。
+- 新版 Nginx 模板会在前端不可用时返回 `503 frontend_unavailable`，便于快速定位。
+
 ## API
 - POST /ingest
   - 表单字段：
