@@ -1,0 +1,14 @@
+[Unit]
+Description=EMR Service (uvicorn)
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/app/ai/emr/ingestion
+ExecStart=/app/ai/emr/ingestion/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 4
+Restart=on-failure
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
